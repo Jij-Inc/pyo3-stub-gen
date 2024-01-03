@@ -15,4 +15,7 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 insta.workspace = true
 inventory.workspace = true
 prettyplease.workspace = true
-pyo3.workspace = true
+pyo3 = { workspace = true, features = ["experimental-inspect"] }
+
+[dev-dependencies.pyo3-stub-gen]
+path = "../pyo3-stub-gen"

@@ -5,7 +5,7 @@ use proc_macro::TokenStream;
 /// Embed metadata for Python stub file generation for `#[pyclass]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen::*;
+/// # use pyo3_stub_gen_derive::*;
 /// # use pyo3::*;
 /// #[gen_stub_pyclass]
 /// #[pyclass(mapping, module = "my_module", name = "Placeholder")]
@@ -30,7 +30,7 @@ pub fn gen_stub_pyclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Embed metadata for Python stub file generation for `#[pyclass]` macro with enum
 ///
 /// ```
-/// # use pyo3_stub_gen::*;
+/// # use pyo3_stub_gen_derive::*;
 /// # use pyo3::*;
 /// #[gen_stub_pyclass_enum]
 /// #[pyclass(module = "my_module", name = "DataType")]
@@ -52,7 +52,7 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
 /// Embed metadata for Python stub file generation for `#[pymethods]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen::*;
+/// # use pyo3_stub_gen_derive::*;
 /// # use pyo3::*;
 /// # #[gen_stub_pyclass]
 /// # #[pyclass]
@@ -78,7 +78,7 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
 /// Embed metadata for Python stub file generation for `#[pyfunction]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen::*;
+/// # use pyo3_stub_gen_derive::*;
 /// # use pyo3::*;
 /// # #[pyclass]
 /// # #[derive(Clone)]
@@ -95,7 +95,7 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
 /// If you want to append this function to another module, add `module` attribute.
 ///
 /// ```
-/// # use pyo3_stub_gen::*;
+/// # use pyo3_stub_gen_derive::*;
 /// # use pyo3::*;
 /// # #[pyclass]
 /// # #[derive(Clone)]

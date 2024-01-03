@@ -4,7 +4,7 @@
 //!
 //! ```rust
 //! # use pyo3::*;
-//! # use my_module::stub::*;
+//! # use pyo3_stub_gen::type_info::*;
 //! # struct PyPlaceholder;
 //! inventory::submit!{
 //!     PyClassInfo {
