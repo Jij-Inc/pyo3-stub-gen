@@ -1,0 +1,10 @@
+[package]
+name = "pyo3-stub-gen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow.workspace = true
+itertools.workspace = true
+inventory.workspace = true
+pyo3 = { workspace = true, features = ["experimental-inspect"]}
