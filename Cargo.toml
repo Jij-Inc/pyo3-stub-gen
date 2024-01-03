@@ -3,6 +3,9 @@ members = ["pyo3-stub-gen", "pyo3-stub-gen-derive"]
 resolver = "2"
 
 [workspace.dependencies]
+pyo3-stub-gen = { version = "0.1.0", path = "pyo3-stub-gen" }
+pyo3-stub-gen-derive = { version = "0.1.0", path = "pyo3-stub-gen-derive" }
+
 anyhow = "1.0.79"
 insta = "1.31.0"
 inventory = "0.3.8"

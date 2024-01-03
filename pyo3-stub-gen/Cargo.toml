@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+pyo3-stub-gen-derive.workspace = true
+
 anyhow.workspace = true
 itertools.workspace = true
 inventory.workspace = true

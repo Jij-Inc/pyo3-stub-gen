@@ -12,10 +12,9 @@ quote.workspace = true
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
+pyo3-stub-gen.workspace = true
+
 insta.workspace = true
 inventory.workspace = true
 prettyplease.workspace = true
 pyo3 = { workspace = true, features = ["experimental-inspect"] }
-
-[dev-dependencies.pyo3-stub-gen]
-path = "../pyo3-stub-gen"
