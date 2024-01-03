@@ -17,4 +17,4 @@ pyo3-stub-gen.workspace = true
 insta.workspace = true
 inventory.workspace = true
 prettyplease.workspace = true
-pyo3 = { workspace = true, features = ["experimental-inspect"] }
+pyo3.workspace = true

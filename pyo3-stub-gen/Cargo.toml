@@ -9,4 +9,4 @@ pyo3-stub-gen-derive.workspace = true
 anyhow.workspace = true
 itertools.workspace = true
 inventory.workspace = true
-pyo3 = { workspace = true, features = ["experimental-inspect"]}
+pyo3.workspace = true
