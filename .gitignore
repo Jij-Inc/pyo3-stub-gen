@@ -15,3 +15,7 @@ Cargo.lock
 
 # PyO3 development
 .venv*/
+__pycache__/
+*.so
+*.pyc
+dist/

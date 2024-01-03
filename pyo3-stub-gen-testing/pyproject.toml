@@ -5,3 +5,7 @@ build-backend = "maturin"
 [project]
 name = "pyo3_stub_gen_testing"
 requires-python = ">=3.9"
+
+[project.optional-dependencies]
+test = ["pytest", "pyright"]
+publish = ["twine"]

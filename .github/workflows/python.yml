@@ -1,0 +1,42 @@
+name: Python
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+
+      - name: Build and install
+        run: |
+          pip install -v ./pyo3-stub-gen-testing[test,publish]
+
+      - name: Python Test
+        run: pytest
+
+      - name: Check wheel
+        run: |
+          pip wheel -w dist ./pyo3-stub-gen-testing
+          twine check --strict dist/pyo3_stub_gen_testing-*.whl
