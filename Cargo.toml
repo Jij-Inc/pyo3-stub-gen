@@ -1,0 +1,12 @@
+[workspace]
+members = ["pyo3-stub-gen-derive"]
+resolver = "2"
+
+[workspace.dependencies]
+insta = "1.31.0"
+inventory = "0.3.8"
+prettyplease = "0.2.12"
+proc-macro2 = "1.0.56"
+pyo3 = "0.20.0"
+quote = "1.0.26"
+syn = "2.0.15"
