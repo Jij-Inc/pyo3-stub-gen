@@ -1,0 +1,68 @@
+name: Publish Docs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Generate rustdoc
+        run: cargo doc --all --no-deps
+
+      - name: Upload html
+        uses: actions/upload-artifact@v3
+        with:
+          name: rustdoc
+          path: ./target/doc
+          retention-days: 30
+
+  # See https://github.com/actions/deploy-pages#usage
+  deploy:
+    needs: [rust]
+    environment:
+      name: "Document"
+      url: ${{ steps.deployment.outputs.page_url }}/
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download rustdoc
+        uses: actions/download-artifact@v3
+        with:
+          name: rustdoc
+          path: .
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
