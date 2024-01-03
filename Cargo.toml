@@ -7,11 +7,11 @@ pyo3-stub-gen = { version = "0.1.0", path = "pyo3-stub-gen" }
 pyo3-stub-gen-derive = { version = "0.1.0", path = "pyo3-stub-gen-derive" }
 
 anyhow = "1.0.79"
-insta = "1.31.0"
-inventory = "0.3.8"
+insta = "1.34.0"
+inventory = "0.3.14"
 itertools = "0.12.0"
-prettyplease = "0.2.12"
-proc-macro2 = "1.0.56"
-pyo3 = "0.20.0"
-quote = "1.0.26"
-syn = "2.0.15"
+prettyplease = "0.2.16"
+proc-macro2 = "1.0.74"
+pyo3 = "0.20.1"
+quote = "1.0.35"
+syn = "2.0.46"
