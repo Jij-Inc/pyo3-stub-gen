@@ -1,5 +1,9 @@
 [workspace]
-members = ["pyo3-stub-gen", "pyo3-stub-gen-derive"]
+members = [
+    "pyo3-stub-gen",
+    "pyo3-stub-gen-derive",
+    "pyo3-stub-gen-testing"
+]
 resolver = "2"
 
 [workspace.dependencies]
