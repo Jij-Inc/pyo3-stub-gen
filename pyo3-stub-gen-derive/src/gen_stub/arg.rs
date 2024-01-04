@@ -65,7 +65,7 @@ fn type_to_token(ty: &Type) -> TokenStream2 {
                 // PyO3 reference: https://docs.rs/pyo3/latest/pyo3/pyclass/enum.CompareOp.html
                 // PEP: https://peps.python.org/pep-0207/
                 if last_seg.ident == "CompareOp" {
-                    quote! { crate::stub::compare_op_type_input }
+                    quote! { ::pyo3_stub_gen::type_info::compare_op_type_input }
                 } else {
                     quote! { <#ty as FromPyObject>::type_input }
                 }
@@ -105,7 +105,7 @@ impl ToTokens for ArgInfo {
         let Self { name, r#type: ty } = self;
         let type_tt = type_to_token(ty);
         tokens.append_all(quote! {
-            crate::stub::ArgInfo { name: #name, r#type: #type_tt }
+            ::pyo3_stub_gen::type_info::ArgInfo { name: #name, r#type: #type_tt }
         });
     }
 }

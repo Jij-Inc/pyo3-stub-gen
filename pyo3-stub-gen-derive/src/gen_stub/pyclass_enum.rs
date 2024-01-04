@@ -67,7 +67,7 @@ impl ToTokens for PyEnumInfo {
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
-            crate::stub::PyEnumInfo {
+            ::pyo3_stub_gen::type_info::PyEnumInfo {
                 pyclass_name: #pyclass_name,
                 enum_id: std::any::TypeId::of::<#enum_type>,
                 variants: &[ #(#variants),* ],

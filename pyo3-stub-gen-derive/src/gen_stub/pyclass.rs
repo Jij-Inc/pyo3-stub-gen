@@ -64,7 +64,7 @@ impl ToTokens for PyClassInfo {
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
-            crate::stub::PyClassInfo {
+            ::pyo3_stub_gen::type_info::PyClassInfo {
                 pyclass_name: #pyclass_name,
                 struct_id: std::any::TypeId::of::<#struct_type>,
                 members: &[ #( #members),* ],
@@ -101,19 +101,19 @@ mod test {
         )?;
         let out = PyClassInfo::try_from(input)?.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
-        crate::stub::PyClassInfo {
+        ::pyo3_stub_gen::type_info::PyClassInfo {
             pyclass_name: "Placeholder",
             struct_id: std::any::TypeId::of::<PyPlaceholder>,
             members: &[
-                crate::stub::MemberInfo {
+                ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as IntoPy<PyObject>>::type_output,
                 },
-                crate::stub::MemberInfo {
+                ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as IntoPy<PyObject>>::type_output,
                 },
-                crate::stub::MemberInfo {
+                ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as IntoPy<PyObject>>::type_output,
                 },

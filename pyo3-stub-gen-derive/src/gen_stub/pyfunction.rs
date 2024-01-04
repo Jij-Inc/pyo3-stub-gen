@@ -86,12 +86,12 @@ impl ToTokens for PyFunctionInfo {
         let ret_tt = if let Some(ret) = ret {
             quote! { <#ret as IntoPy<::pyo3::PyObject>>::type_output }
         } else {
-            quote! { crate::stub::no_return_type_output }
+            quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
         let sig_tt = quote_option(sig);
         let module_tt = quote_option(module);
         tokens.append_all(quote! {
-            crate::stub::PyFunctionInfo {
+            ::pyo3_stub_gen::type_info::PyFunctionInfo {
                 name: #name,
                 args: &[ #(#args),* ],
                 r#return: #ret_tt,

@@ -66,7 +66,7 @@ impl ToTokens for MemberInfo {
         let Self { name, r#type: ty } = self;
         let name = name.strip_prefix("get_").unwrap_or(name);
         tokens.append_all(quote! {
-            crate::stub::MemberInfo {
+            ::pyo3_stub_gen::type_info::MemberInfo {
                 name: #name,
                 r#type: <#ty as IntoPy<PyObject>>::type_output
             }

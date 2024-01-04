@@ -1,0 +1,20 @@
+[package]
+name = "pyo3-stub-gen-testing"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+inventory.workspace = true
+pyo3-stub-gen = { workspace = true, optional = true }
+pyo3.workspace = true
+
+[features]
+stub_gen = ["pyo3-stub-gen"]
+
+[[bin]]
+name = "stub_gen"
+path = "src/bin/stub_gen.rs"
+required-features = ["stub_gen"]

@@ -102,10 +102,10 @@ impl ToTokens for MethodInfo {
         let ret_tt = if let Some(ret) = ret {
             quote! { <#ret as IntoPy<::pyo3::PyObject>>::type_output }
         } else {
-            quote! { crate::stub::no_return_type_output }
+            quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
         tokens.append_all(quote! {
-            crate::stub::MethodInfo {
+            ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
                 args: &[ #(#args),* ],
                 r#return: #ret_tt,
