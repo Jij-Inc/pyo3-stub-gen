@@ -51,7 +51,7 @@ impl ToTokens for PyMethodsInfo {
         } = self;
         let new_tt = quote_option(new);
         tokens.append_all(quote! {
-            crate::stub::PyMethodsInfo {
+            ::pyo3_stub_gen::type_info::PyMethodsInfo {
                 struct_id: std::any::TypeId::of::<#struct_id>,
                 new: #new_tt,
                 getters: &[ #(#getters),* ],

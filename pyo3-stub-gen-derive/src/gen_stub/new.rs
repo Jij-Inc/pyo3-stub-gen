@@ -41,7 +41,7 @@ impl ToTokens for NewInfo {
         let Self { args, sig } = self;
         let sig_tt = quote_option(sig);
         tokens.append_all(quote! {
-            crate::stub::NewInfo {
+            ::pyo3_stub_gen::type_info::NewInfo {
                 args: &[ #(#args),* ],
                 signature: #sig_tt,
             }

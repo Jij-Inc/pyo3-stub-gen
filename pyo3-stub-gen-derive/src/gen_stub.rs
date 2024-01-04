@@ -91,7 +91,6 @@ pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyClassInfo::try_from(parse2::<ItemStruct>(item.clone())?)?;
     Ok(quote! {
         #item
-        #[cfg(feature = "gen_stub")]
         inventory::submit! {
             #inner
         }
@@ -102,7 +101,6 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
     Ok(quote! {
         #item
-        #[cfg(feature = "gen_stub")]
         inventory::submit! {
             #inner
         }
@@ -113,7 +111,6 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyMethodsInfo::try_from(parse2::<ItemImpl>(item.clone())?)?;
     Ok(quote! {
         #item
-        #[cfg(feature = "gen_stub")]
         inventory::submit! {
             #inner
         }
@@ -125,7 +122,6 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
     inner.parse_attr(attr)?;
     Ok(quote! {
         #item
-        #[cfg(feature = "gen_stub")]
         inventory::submit! {
             #inner
         }
