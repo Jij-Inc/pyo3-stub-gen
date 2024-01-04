@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use pyo3::prelude::*;
 
 #[cfg(feature = "stub_gen")]
@@ -20,6 +22,11 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
+}
+
+#[cfg(feature = "stub_gen")]
+pub fn stub_info() -> anyhow::Result<BTreeMap<String, pyo3_stub_gen::generate::Module>> {
+    pyo3_stub_gen::generate::gather()
 }
 
 #[cfg(test)]
