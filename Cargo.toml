@@ -14,6 +14,7 @@ anyhow = "1.0.79"
 insta = "1.34.0"
 inventory = "0.3.14"
 itertools = "0.12.0"
+linkme = "0.3.21"
 prettyplease = "0.2.16"
 proc-macro2 = "1.0.74"
 pyo3 = { version = "0.20.1", features = ["experimental-inspect"] }
