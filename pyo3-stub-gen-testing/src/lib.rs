@@ -1,7 +1,6 @@
+use linkme::distributed_slice;
 use pyo3::prelude::*;
-
-#[cfg(feature = "stub_gen")]
-use pyo3_stub_gen::derive::*;
+use pyo3_stub_gen::type_info::*;
 
 /// Returns the sum of two numbers as a string.
 ///
@@ -10,11 +9,20 @@ use pyo3_stub_gen::derive::*;
 /// ```rust
 /// assert_eq!(2 + 2, 4);
 /// ```
-#[cfg_attr(feature = "stub_gen", gen_stub_pyfunction)]
 #[pyfunction]
 fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
     Ok((a + b).to_string())
 }
+
+#[distributed_slice(PYFUNCTIONS)]
+static PYFUNCTION_SUM_AS_STRING: PyFunctionInfo = PyFunctionInfo {
+    name: "sum_as_string",
+    r#return: no_return_type_output,
+    args: &[/* dummy */],
+    doc: "",
+    signature: None,
+    module: None,
+};
 
 #[pymodule]
 fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {

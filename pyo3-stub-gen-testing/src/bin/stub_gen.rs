@@ -1,6 +1,8 @@
 use pyo3_stub_gen::*;
 
 fn main() {
-    let modules = generate::gather().unwrap();
-    dbg!(modules);
+    dbg!(type_info::PYFUNCTIONS.len());
+    for info in type_info::PYFUNCTIONS {
+        dbg!(info);
+    }
 }

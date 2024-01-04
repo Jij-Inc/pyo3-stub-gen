@@ -10,9 +10,11 @@ crate-type = ["cdylib", "rlib"]
 inventory.workspace = true
 pyo3-stub-gen = { workspace = true, optional = true }
 pyo3.workspace = true
+linkme = { workspace = true, optional = true }
 
 [features]
-stub_gen = ["pyo3-stub-gen"]
+default = ["stub_gen"]
+stub_gen = ["pyo3-stub-gen", "linkme"]
 
 [[bin]]
 name = "stub_gen"

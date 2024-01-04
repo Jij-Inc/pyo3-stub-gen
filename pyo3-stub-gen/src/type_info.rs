@@ -21,6 +21,7 @@
 //! This process is done at runtime in [gen_stub](../../gen_stub) executable.
 //!
 
+use linkme::distributed_slice;
 use pyo3::inspect::types::TypeInfo;
 use std::any::TypeId;
 
@@ -127,6 +128,9 @@ pub struct PyFunctionInfo {
     pub signature: Option<&'static str>,
     pub module: Option<&'static str>,
 }
+
+#[distributed_slice]
+pub static PYFUNCTIONS: [PyFunctionInfo];
 
 inventory::collect!(PyFunctionInfo);
 
