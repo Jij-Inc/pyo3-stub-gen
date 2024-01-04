@@ -15,7 +15,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 }
 
 #[distributed_slice(PYFUNCTIONS)]
-static PYFUNCTION_SUM_AS_STRING: PyFunctionInfo = PyFunctionInfo {
+pub static PYFUNCTION_SUM_AS_STRING: PyFunctionInfo = PyFunctionInfo {
     name: "sum_as_string",
     r#return: no_return_type_output,
     args: &[/* dummy */],
@@ -23,6 +23,13 @@ static PYFUNCTION_SUM_AS_STRING: PyFunctionInfo = PyFunctionInfo {
     signature: None,
     module: None,
 };
+
+pub fn dbg() {
+    dbg!(PYFUNCTIONS.len());
+    for info in PYFUNCTIONS {
+        dbg!(info);
+    }
+}
 
 #[pymodule]
 fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
