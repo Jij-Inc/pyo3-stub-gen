@@ -35,3 +35,6 @@ jobs:
 
       - name: Python Test
         run: pytest
+
+      - name: Type check
+        run: pyright
