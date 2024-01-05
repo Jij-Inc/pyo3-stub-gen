@@ -1,6 +1,7 @@
-use pyo3_stub_gen::*;
+use pyo3_stub_gen::Result;
 
-fn main() {
-    let modules = generate::gather().unwrap();
-    dbg!(modules);
+fn main() -> Result<()> {
+    let stub = pyo3_stub_gen_testing::stub_info()?;
+    stub.generate_single_stub_file(env!("CARGO_MANIFEST_DIR"))?;
+    Ok(())
 }

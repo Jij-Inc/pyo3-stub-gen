@@ -7,6 +7,8 @@ edition = "2021"
 pyo3-stub-gen-derive.workspace = true
 
 anyhow.workspace = true
-itertools.workspace = true
 inventory.workspace = true
+itertools.workspace = true
 pyo3.workspace = true
+serde.workspace = true
+toml.workspace = true
