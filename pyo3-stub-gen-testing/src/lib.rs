@@ -1,3 +1,6 @@
+#[doc = include_str!("../../README.md")]
+mod readme {}
+
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
 use std::{env, path::*};
