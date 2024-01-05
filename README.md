@@ -4,6 +4,82 @@
 
 Python stub file (`*.pyi`) generator for PyO3 based projects.
 
+# Usage
+
+This crate provides a procedural macro `#[gen_stub_pyfunction]` and others to generate a Python stub file.
+It is used with PyO3's `#[pyfunction]` macro. Let's consider a simple example PyO3 project:
+
+```rust:no_run
+use pyo3::prelude::*;
+
+#[pyfunction]
+fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
+    Ok((a + b).to_string())
+}
+
+#[pymodule]
+fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+    Ok(())
+}
+```
+
+To generate a stub file for this project, please modify it as follows:
+
+```rust:no_run
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
+use std::{env, path::*};
+
+#[gen_stub_pyfunction]  // Proc-macro attribute to register a function to stub file generator.
+#[pyfunction]
+fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
+    Ok((a + b).to_string())
+}
+
+#[pymodule]
+fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+    Ok(())
+}
+
+/// Create stub file generator `StubInfo` for this project
+pub fn stub_info() -> pyo3_stub_gen::Result<StubInfo> {
+    let manifest_dir: &Path = env!("CARGO_MANIFEST_DIR").as_ref();
+    // Get Python project name from pyproject.toml
+    StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
+}
+```
+
+And then, create an executable target in `src/bin/stub_gen.rs`:
+
+```rust:no_run
+use pyo3_stub_gen::Result;
+
+fn main() -> Result<()> {
+    let stub = pyo3_stub_gen_testing::stub_info()?;
+    stub.generate_single_stub_file(env!("CARGO_MANIFEST_DIR"))?;
+    Ok(())
+}
+```
+
+and add `rlib` in addition to `cdylib` in `[lib]` section of `Cargo.toml`:
+
+```toml
+[lib]
+crate-type = ["cdylib", "rlib"]
+```
+
+This target generates a stub file `${CARGO_MANIFEST_DIR}/pyo3_stub_gen_testing.pyi` when executed.
+
+```shell
+cargo run --bin stub_gen
+```
+
+The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
+
+There is a working example at [pyo3-stub-gen-testing](./pyo3-stub-gen-testing/) directory with generated stub file [pyo3_stub_gen_testing.pyi](./pyo3-stub-gen-testing/pyo3_stub_gen_testing.pyi).
+
 # License
 
 © 2024 Jij Inc.

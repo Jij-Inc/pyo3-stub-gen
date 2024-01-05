@@ -113,7 +113,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: --bin stub_gen --features stub_gen
+          args: --bin stub_gen
 
       - name: Check if stub file is up to date
         run: git diff --exit-code
