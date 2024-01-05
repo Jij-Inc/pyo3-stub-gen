@@ -9,7 +9,7 @@ Python stub file (`*.pyi`) generator for PyO3 based projects.
 This crate provides a procedural macro `#[gen_stub_pyfunction]` and others to generate a Python stub file.
 It is used with PyO3's `#[pyfunction]` macro. Let's consider a simple example PyO3 project:
 
-```rust
+```rust:no_run
 use pyo3::prelude::*;
 
 #[pyfunction]
@@ -26,7 +26,7 @@ fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
 
 To generate a stub file for this project, please modify it as follows:
 
-```rust
+```rust:no_run
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
 use std::{env, path::*};
@@ -53,7 +53,7 @@ pub fn stub_info() -> pyo3_stub_gen::Result<StubInfo> {
 
 And then, create an executable target in `src/bin/stub_gen.rs`:
 
-```rust
+```rust:no_run
 use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
