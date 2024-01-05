@@ -78,7 +78,7 @@ cargo run --bin stub_gen
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
 
-There is a working example at [pyo3-stub-gen-testing](./pyo3-stub-gen-testing/) directory with generated stub file [pyo3_stub_gen_testing.pyi](./pyo3-stub-gen-testing/pyo3_stub_gen_testing.pyi).
+There is a working example at [pyo3-stub-gen-testing-pure](./pyo3-stub-gen-testing-pure/) directory with [generated stub file](./pyo3-stub-gen-testing-pure/pyo3_stub_gen_testing_pure.pyi).
 
 # License
 
