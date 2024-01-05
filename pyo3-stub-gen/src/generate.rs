@@ -370,6 +370,11 @@ impl StubInfo {
             .ok_or_else(|| anyhow!("Missing default module: {}", self.default_module_name))
     }
 
+    pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
+        let pyproject = crate::pyproject::parse_toml(path)?;
+        Ok(Self::gather(&pyproject.project.name))
+    }
+
     pub fn gather(default_module_name: &str) -> Self {
         let mut modules: BTreeMap<String, Module> = BTreeMap::new();
 

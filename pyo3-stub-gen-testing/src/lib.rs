@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 
 #[cfg(feature = "stub_gen")]
-use pyo3_stub_gen::{derive::*, generate::StubInfo};
+use pyo3_stub_gen::derive::*;
 
 /// Returns the sum of two numbers as a string.
 ///
@@ -23,9 +23,10 @@ fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
 }
 
 #[cfg(feature = "stub_gen")]
-pub fn stub_info() -> StubInfo {
-    use std::env;
-    StubInfo::gather(env!("CARGO_PKG_NAME"))
+pub fn stub_info() -> pyo3_stub_gen::Result<pyo3_stub_gen::StubInfo> {
+    use std::{env, path::*};
+    let manifest_dir: &Path = env!("CARGO_MANIFEST_DIR").as_ref();
+    pyo3_stub_gen::StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
 }
 
 #[cfg(test)]
