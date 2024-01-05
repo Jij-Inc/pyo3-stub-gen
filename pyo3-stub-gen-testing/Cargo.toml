@@ -7,8 +7,6 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-inventory.workspace = true
-anyhow.workspace = true
 pyo3-stub-gen = { workspace = true, optional = true }
 pyo3.workspace = true
 
