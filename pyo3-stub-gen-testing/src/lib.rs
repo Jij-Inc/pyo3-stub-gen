@@ -1,4 +1,4 @@
-#[doc = include_str!("../../README.md")]
+#[cfg_attr(target_os = "macos", doc = include_str!("../../README.md"))]
 mod readme {}
 
 use pyo3::prelude::*;
