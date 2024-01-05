@@ -63,6 +63,13 @@ fn main() -> Result<()> {
 }
 ```
 
+and add `rlib` in addition to `cdylib` in `[lib]` section of `Cargo.toml`:
+
+```toml
+[lib]
+crate-type = ["cdylib", "rlib"]
+```
+
 This target generates a stub file `${CARGO_MANIFEST_DIR}/pyo3_stub_gen_testing.pyi` when executed.
 
 ```shell
@@ -70,6 +77,8 @@ cargo run --bin stub_gen
 ```
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
+
+There is a working example at [pyo3-stub-gen-testing](./pyo3-stub-gen-testing/) directory with generated stub file [pyo3_stub_gen_testing.pyi](./pyo3-stub-gen-testing/pyo3_stub_gen_testing.pyi).
 
 # License
 
