@@ -69,6 +69,20 @@ struct MethodDef {
     is_class: bool,
 }
 
+impl MethodDef {
+    fn from_info(info: &MethodInfo) -> Self {
+        Self {
+            name: info.name,
+            args: info.args.iter().map(Arg::from_info).collect(),
+            signature: info.signature,
+            r#return: (info.r#return)().into(),
+            doc: info.doc,
+            is_static: info.is_static,
+            is_class: info.is_class,
+        }
+    }
+}
+
 impl fmt::Display for MethodDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
@@ -118,6 +132,15 @@ impl fmt::Display for MethodDef {
 struct MemberDef {
     name: &'static str,
     r#type: TypeInfo,
+}
+
+impl MemberDef {
+    fn from_info(info: &MemberInfo) -> Self {
+        Self {
+            name: info.name,
+            r#type: (info.r#type)(),
+        }
+    }
 }
 
 impl fmt::Display for MemberDef {
@@ -171,6 +194,18 @@ struct ClassDef {
     methods: Vec<MethodDef>,
 }
 
+impl ClassDef {
+    fn from_info(info: &PyClassInfo) -> Self {
+        Self {
+            name: info.pyclass_name,
+            new: None,
+            doc: info.doc,
+            members: info.members.iter().map(MemberDef::from_info).collect(),
+            methods: Vec::new(),
+        }
+    }
+}
+
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "@final")?;
@@ -208,6 +243,16 @@ struct EnumDef {
     variants: &'static [&'static str],
 }
 
+impl EnumDef {
+    fn from_info(info: &PyEnumInfo) -> Self {
+        Self {
+            name: info.pyclass_name,
+            doc: info.doc,
+            variants: info.variants,
+        }
+    }
+}
+
 impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "@final")?;
@@ -236,6 +281,18 @@ struct FunctionDef {
     r#return: ReturnTypeInfo,
     signature: Option<&'static str>,
     doc: &'static str,
+}
+
+impl FunctionDef {
+    fn from_info(info: &PyFunctionInfo) -> Self {
+        Self {
+            name: info.name,
+            args: info.args.iter().map(Arg::from_info).collect(),
+            r#return: (info.r#return)().into(),
+            doc: info.doc,
+            signature: info.signature,
+        }
+    }
 }
 
 impl fmt::Display for FunctionDef {
@@ -298,49 +355,30 @@ impl fmt::Display for Module {
 pub struct StubInfo(BTreeMap<String, Module>);
 
 impl StubInfo {
-    pub fn gather(pkg_name: &str) -> Self {
+    pub fn gather(default_module_name: &str) -> Self {
         let mut modules: BTreeMap<String, Module> = BTreeMap::new();
 
         for info in inventory::iter::<PyClassInfo> {
             let module_name = info
                 .module
                 .map(str::to_owned)
-                .unwrap_or(pkg_name.to_string());
+                .unwrap_or(default_module_name.to_string());
             let module = modules.entry(module_name).or_default();
 
-            module.class.insert(
-                (info.struct_id)(),
-                ClassDef {
-                    name: info.pyclass_name,
-                    new: None,
-                    doc: info.doc,
-                    methods: Vec::new(),
-                    members: info
-                        .members
-                        .iter()
-                        .map(|info| MemberDef {
-                            name: info.name,
-                            r#type: (info.r#type)(),
-                        })
-                        .collect(),
-                },
-            );
+            module
+                .class
+                .insert((info.struct_id)(), ClassDef::from_info(info));
         }
 
         for info in inventory::iter::<PyEnumInfo> {
             let module_name = info
                 .module
                 .map(str::to_owned)
-                .unwrap_or(pkg_name.to_string());
+                .unwrap_or(default_module_name.to_string());
             let module = modules.entry(module_name).or_default();
-            module.enum_.insert(
-                (info.enum_id)(),
-                EnumDef {
-                    name: info.pyclass_name,
-                    doc: info.doc,
-                    variants: info.variants,
-                },
-            );
+            module
+                .enum_
+                .insert((info.enum_id)(), EnumDef::from_info(info));
         }
 
         'methods_info: for info in inventory::iter::<PyMethodsInfo> {
@@ -354,15 +392,7 @@ impl StubInfo {
                         });
                     }
                     for method in info.methods {
-                        entry.methods.push(MethodDef {
-                            name: method.name,
-                            args: method.args.iter().map(Arg::from_info).collect(),
-                            signature: method.signature,
-                            r#return: (method.r#return)().into(),
-                            doc: method.doc,
-                            is_class: method.is_class,
-                            is_static: method.is_static,
-                        })
+                        entry.methods.push(MethodDef::from_info(method))
                     }
                     if let Some(new) = &info.new {
                         entry.new = Some(NewDef::from_info(new));
@@ -378,22 +408,15 @@ impl StubInfo {
                 .entry(
                     info.module
                         .map(str::to_string)
-                        .unwrap_or(pkg_name.to_string()),
+                        .unwrap_or(default_module_name.to_string()),
                 )
                 .or_default();
-            module.function.insert(
-                info.name,
-                FunctionDef {
-                    name: info.name,
-                    args: info.args.iter().map(Arg::from_info).collect(),
-                    r#return: (info.r#return)().into(),
-                    doc: info.doc,
-                    signature: info.signature,
-                },
-            );
+            module
+                .function
+                .insert(info.name, FunctionDef::from_info(info));
         }
 
-        let default = modules.entry(pkg_name.to_string()).or_default();
+        let default = modules.entry(default_module_name.to_string()).or_default();
         for info in inventory::iter::<PyErrorInfo> {
             default.error.insert(info.name);
         }
