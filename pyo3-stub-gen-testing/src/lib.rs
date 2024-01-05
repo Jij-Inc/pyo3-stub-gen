@@ -1,9 +1,7 @@
-use std::collections::BTreeMap;
-
 use pyo3::prelude::*;
 
 #[cfg(feature = "stub_gen")]
-use pyo3_stub_gen::derive::*;
+use pyo3_stub_gen::{derive::*, generate::StubInfo};
 
 /// Returns the sum of two numbers as a string.
 ///
@@ -25,8 +23,9 @@ fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
 }
 
 #[cfg(feature = "stub_gen")]
-pub fn stub_info() -> anyhow::Result<BTreeMap<String, pyo3_stub_gen::generate::Module>> {
-    pyo3_stub_gen::generate::gather()
+pub fn stub_info() -> StubInfo {
+    use std::env;
+    StubInfo::gather(env!("CARGO_PKG_NAME"))
 }
 
 #[cfg(test)]
