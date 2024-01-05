@@ -7,13 +7,5 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-pyo3-stub-gen = { workspace = true, optional = true }
+pyo3-stub-gen.workspace = true
 pyo3.workspace = true
-
-[features]
-stub_gen = ["pyo3-stub-gen"]
-
-[[bin]]
-name = "stub_gen"
-path = "src/bin/stub_gen.rs"
-required-features = ["stub_gen"]
