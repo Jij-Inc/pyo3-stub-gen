@@ -2,7 +2,8 @@
 members = [
     "pyo3-stub-gen",
     "pyo3-stub-gen-derive",
-    "pyo3-stub-gen-testing-pure"
+    "pyo3-stub-gen-testing-pure",
+    "pyo3-stub-gen-testing-mixed",
 ]
 resolver = "2"
 

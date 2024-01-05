@@ -95,6 +95,12 @@ jobs:
 
   stub-gen:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - pyo3-stub-gen-testing-pure
+          - pyo3-stub-gen-testing-mixed
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -113,7 +119,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: --bin stub_gen
+          args: --bin stub_gen -p ${{ matrix.crate }}
 
       - name: Check if stub file is up to date
         run: git diff --exit-code
