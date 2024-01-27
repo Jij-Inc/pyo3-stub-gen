@@ -459,14 +459,15 @@ impl StubInfo {
         Ok(())
     }
 
-    pub fn generate_stub_files(&self, python_root: impl AsRef<Path>) -> Result<()> {
-        let python_root = python_root.as_ref();
+    pub fn generate(&self) -> Result<()> {
+        let python_source = self.pyproject.python_source().unwrap();
         for (name, module) in self.modules.iter() {
             let path: Vec<&str> = name.split('.').collect();
+            dbg!(&path);
             let dest = if path.len() > 1 {
-                python_root.join(format!("{}.pyi", path[1..].join("/")))
+                python_source.join(format!("{}.pyi", path.join("/")))
             } else {
-                python_root.join("__init__.pyi")
+                python_source.join("__init__.pyi")
             };
 
             if let Some(dir) = dest.parent() {
