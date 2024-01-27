@@ -34,7 +34,7 @@ impl Arg {
 
 impl fmt::Display for Arg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
+        write!(f, "{}:{}", self.name, self.r#type)
     }
 }
 
@@ -463,7 +463,6 @@ impl StubInfo {
         let python_source = self.pyproject.python_source().unwrap();
         for (name, module) in self.modules.iter() {
             let path: Vec<&str> = name.split('.').collect();
-            dbg!(&path);
             let dest = if path.len() > 1 {
                 python_source.join(format!("{}.pyi", path.join("/")))
             } else {
