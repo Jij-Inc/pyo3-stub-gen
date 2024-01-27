@@ -446,33 +446,31 @@ impl StubInfo {
         Self { modules, pyproject }
     }
 
-    pub fn generate_single_stub_file(&self, out_dir: impl AsRef<Path>) -> Result<()> {
-        let out_dir = out_dir.as_ref();
-        if !out_dir.is_dir() {
-            bail!("{} is not a directory", out_dir.display());
-        }
-
-        let mut f =
-            fs::File::create(out_dir.join(format!("{}.pyi", self.pyproject.module_name())))?;
-        let module = self.default_module()?;
-        write!(f, "{}", module)?;
-        Ok(())
-    }
-
     pub fn generate(&self) -> Result<()> {
-        let python_source = self.pyproject.python_source().unwrap();
-        for (name, module) in self.modules.iter() {
-            let path: Vec<&str> = name.split('.').collect();
-            let dest = if path.len() > 1 {
-                python_source.join(format!("{}.pyi", path.join("/")))
-            } else {
-                python_source.join("__init__.pyi")
-            };
+        if let Some(python_source) = self.pyproject.python_source() {
+            for (name, module) in self.modules.iter() {
+                let path: Vec<&str> = name.split('.').collect();
+                let dest = if path.len() > 1 {
+                    python_source.join(format!("{}.pyi", path.join("/")))
+                } else {
+                    python_source.join("__init__.pyi")
+                };
 
-            if let Some(dir) = dest.parent() {
-                fs::create_dir_all(dir)?;
+                if let Some(dir) = dest.parent() {
+                    fs::create_dir_all(dir)?;
+                }
+                let mut f = fs::File::create(dest)?;
+                write!(f, "{}", module)?;
             }
-            let mut f = fs::File::create(dest)?;
+        } else {
+            let out_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
+            if !out_dir.is_dir() {
+                bail!("{} is not a directory", out_dir.display());
+            }
+
+            let mut f =
+                fs::File::create(out_dir.join(format!("{}.pyi", self.pyproject.module_name())))?;
+            let module = self.default_module()?;
             write!(f, "{}", module)?;
         }
         Ok(())
