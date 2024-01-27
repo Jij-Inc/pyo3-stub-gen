@@ -8,8 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  pytest:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - pyo3-stub-gen-testing-pure
+          - pyo3-stub-gen-testing-mixed
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,11 +36,13 @@ jobs:
           profile: minimal
 
       - name: Build and install
-        run: |
-          pip install -v ./pyo3-stub-gen-testing[test]
+        run: pip install -v "./${{ matrix.crate }}[test]"
 
       - name: Python Test
         run: pytest
+        working-directory: ./${{ matrix.crate }}
 
       - name: Type check
-        run: pyright
+        run: |
+          pyright
+        working-directory: ./${{ matrix.crate }}

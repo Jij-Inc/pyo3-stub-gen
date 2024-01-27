@@ -1,5 +1,5 @@
 [package]
-name = "pyo3-stub-gen-testing"
+name = "pyo3-stub-gen-testing-mixed"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,3 +9,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 pyo3-stub-gen.workspace = true
 pyo3.workspace = true
+
+[[bin]]
+name = "stub_gen"
+doc = false

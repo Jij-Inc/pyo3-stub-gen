@@ -3,8 +3,13 @@ requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "pyo3_stub_gen_testing"
+name = "pyo3_stub_gen_testing_mixed"
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
 test = ["pytest", "pyright"]
+
+[tool.maturin]
+python-source = "python"
+module-name = "pyo3_stub_gen_testing_mixed.my_rust_pkg"
+features = ["pyo3/extension-module"]

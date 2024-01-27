@@ -3,7 +3,7 @@
 from typing import final, Any, List, Dict
 from enum import Enum, auto
 
-def sum_as_string(a,b) -> str:
+def sum_as_string(a:int,b:int) -> str:
     r"""
     Returns the sum of two numbers as a string.
     """

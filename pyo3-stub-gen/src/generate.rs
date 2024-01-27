@@ -1,6 +1,6 @@
 //! Generate Python typing stub file a.k.a. `*.pyi` file.
 
-use crate::type_info::*;
+use crate::{pyproject::PyProject, type_info::*};
 
 use anyhow::{anyhow, bail, Result};
 use itertools::Itertools;
@@ -34,7 +34,7 @@ impl Arg {
 
 impl fmt::Display for Arg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
+        write!(f, "{}:{}", self.name, self.r#type)
     }
 }
 
@@ -360,22 +360,24 @@ impl fmt::Display for Module {
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
     modules: BTreeMap<String, Module>,
-    default_module_name: String,
+    pyproject: PyProject,
 }
 
 impl StubInfo {
-    pub fn default_module(&self) -> Result<&Module> {
-        self.modules
-            .get(&self.default_module_name)
-            .ok_or_else(|| anyhow!("Missing default module: {}", self.default_module_name))
-    }
-
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
-        let pyproject = crate::pyproject::parse_toml(path)?;
-        Ok(Self::gather(&pyproject.project.name))
+        let pyproject = PyProject::parse_toml(path)?;
+        Ok(Self::gather(pyproject))
     }
 
-    pub fn gather(default_module_name: &str) -> Self {
+    fn default_module(&self) -> Result<&Module> {
+        let default_module_name = self.pyproject.module_name();
+        self.modules
+            .get(default_module_name)
+            .ok_or_else(|| anyhow!("Missing default module: {}", default_module_name))
+    }
+
+    fn gather(pyproject: PyProject) -> Self {
+        let default_module_name = pyproject.module_name();
         let mut modules: BTreeMap<String, Module> = BTreeMap::new();
 
         for info in inventory::iter::<PyClassInfo> {
@@ -441,10 +443,7 @@ impl StubInfo {
             default.error.insert(info.name);
         }
 
-        Self {
-            modules,
-            default_module_name: default_module_name.to_string(),
-        }
+        Self { modules, pyproject }
     }
 
     pub fn generate_single_stub_file(&self, out_dir: impl AsRef<Path>) -> Result<()> {
@@ -453,20 +452,21 @@ impl StubInfo {
             bail!("{} is not a directory", out_dir.display());
         }
 
-        let mut f = fs::File::create(out_dir.join(format!("{}.pyi", self.default_module_name)))?;
+        let mut f =
+            fs::File::create(out_dir.join(format!("{}.pyi", self.pyproject.module_name())))?;
         let module = self.default_module()?;
         write!(f, "{}", module)?;
         Ok(())
     }
 
-    pub fn generate_stub_files(&self, python_root: impl AsRef<Path>) -> Result<()> {
-        let python_root = python_root.as_ref();
+    pub fn generate(&self) -> Result<()> {
+        let python_source = self.pyproject.python_source().unwrap();
         for (name, module) in self.modules.iter() {
             let path: Vec<&str> = name.split('.').collect();
             let dest = if path.len() > 1 {
-                python_root.join(format!("{}.pyi", path[1..].join("/")))
+                python_source.join(format!("{}.pyi", path.join("/")))
             } else {
-                python_root.join("__init__.pyi")
+                python_source.join("__init__.pyi")
             };
 
             if let Some(dir) = dest.parent() {
