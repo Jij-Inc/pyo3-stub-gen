@@ -13,7 +13,3 @@ test = ["pytest", "pyright"]
 python-source = "python"
 module-name = "pyo3_stub_gen_testing_mixed.my_rust_pkg"
 features = ["pyo3/extension-module"]
-
-[tool.pyright]
-# This is a test directory to confirm that pyright raises error
-exclude = ["invalids"]

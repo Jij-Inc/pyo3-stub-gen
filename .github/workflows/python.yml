@@ -39,7 +39,11 @@ jobs:
         run: pip install -v "./${{ matrix.crate }}[test]"
 
       - name: Python Test
-        run: pytest ./${{ matrix.crate }}
+        run: pytest
+        working-directory: ./${{ matrix.crate }}
 
       - name: Type check
-        run: pyright ./${{ matrix.crate }}
+        run: |
+          pyright
+          ! pyright invalids/
+        working-directory: ./${{ matrix.crate }}

@@ -1,0 +1,7 @@
+{
+    "include": [
+        "pyo3-stub-gen-testing-mixed/python",
+        "pyo3-stub-gen-testing-mixed/tests",
+        "pyo3-stub-gen-testing-pure/tests"
+    ]
+}
