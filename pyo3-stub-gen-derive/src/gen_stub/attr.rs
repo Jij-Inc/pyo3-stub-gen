@@ -38,9 +38,9 @@ pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
 ///
 /// As the reference of PyO3 says:
 ///
+/// https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html
 /// > All of these parameters can either be passed directly on the `#[pyclass(...)]` annotation,
 /// > or as one or more accompanying `#[pyo3(...)]` annotations,
-/// <https://docs.rs/pyo3/latest/pyo3/attr.pyclass.html>
 ///
 /// `#[pyclass(name = "MyClass", module = "MyModule")]` will be decomposed into
 /// `#[pyclass]` + `#[pyo3(name = "MyClass")]` + `#[pyo3(module = "MyModule")]`,
