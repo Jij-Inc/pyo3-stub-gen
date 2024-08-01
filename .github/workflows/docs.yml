@@ -34,7 +34,7 @@ jobs:
         run: cargo doc --all --no-deps --document-private-items
 
       - name: Upload html
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rustdoc
           path: ./target/doc
