@@ -28,7 +28,8 @@ To generate a stub file for this project, please modify it as follows:
 
 ```rust
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
+use pyo3_stub_gen::StubInfo;
+use pyo3_stub_gen_derive::gen_stub_pyfunction;
 use std::{env, path::*};
 
 #[gen_stub_pyfunction]  // Proc-macro attribute to register a function to stub file generator.

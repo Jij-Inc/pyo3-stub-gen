@@ -1,7 +1,12 @@
 [package]
 name = "pyo3-stub-gen-derive"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+
+description.workspace = true
+repository.workspace = true
+keywords.workspace = true
+license.workspace = true
 
 [lib]
 proc-macro = true
