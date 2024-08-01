@@ -1,6 +1,6 @@
 # pyo3-stub-gen
 
-[![Badge for document of main branch](https://img.shields.io/badge/document-main-blue?logo=github)](https://fictional-adventure-worw3j1.pages.github.io//pyo3_stub_gen/index.html)
+[![Document](https://img.shields.io/badge/document-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen//pyo3_stub_gen/index.html)
 
 Python stub file (`*.pyi`) generator for PyO3 based projects.
 
