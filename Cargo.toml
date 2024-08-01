@@ -15,6 +15,7 @@ description = "Stub file (*.pyi) generator for PyO3"
 repository  = "https://github.com/Jij-Inc/pyo3-stub-gen"
 keywords    = ["pyo3"]
 license     = "MIT OR Apache-2.0"
+readme      = "README.md"
 
 [workspace.dependencies]
 pyo3-stub-gen = { version = "0.1.0", path = "pyo3-stub-gen" }
