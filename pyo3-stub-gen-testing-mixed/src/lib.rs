@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
+use pyo3_stub_gen::StubInfo;
+use pyo3_stub_gen_derive::gen_stub_pyfunction;
 use std::{env, path::*};
 
 /// Gather information to generate stub files
