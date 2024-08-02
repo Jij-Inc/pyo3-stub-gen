@@ -279,6 +279,7 @@ dependencies = [
  "inventory",
  "itertools",
  "pyo3",
+ "pyo3-stub-gen-derive",
  "serde",
  "toml",
 ]
@@ -303,7 +304,6 @@ version = "0.1.0"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
- "pyo3-stub-gen-derive",
 ]
 
 [[package]]
@@ -312,7 +312,6 @@ version = "0.1.0"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
- "pyo3-stub-gen-derive",
 ]
 
 [[package]]
