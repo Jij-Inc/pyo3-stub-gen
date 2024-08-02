@@ -16,7 +16,10 @@ pyo3.workspace = true
 serde.workspace = true
 toml.workspace = true
 
-pyo3-stub-gen-derive = { workspace = true, optional = true }
+[dependencies.pyo3-stub-gen-derive]
+version = "0.1.0"
+path = "../pyo3-stub-gen-derive"
+optional = true
 
 [features]
 default = ["derive"]

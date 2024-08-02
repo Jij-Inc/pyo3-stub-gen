@@ -18,9 +18,6 @@ license     = "MIT OR Apache-2.0"
 readme      = "README.md"
 
 [workspace.dependencies]
-pyo3-stub-gen = { version = "0.1.0", path = "pyo3-stub-gen" }
-pyo3-stub-gen-derive = { version = "0.1.0", path = "pyo3-stub-gen-derive" }
-
 anyhow = "1.0.86"
 insta = "1.39.0"
 inventory = "0.3.15"

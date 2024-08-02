@@ -1,3 +1,4 @@
+///
 #[cfg(feature = "derive")]
 pub use pyo3_stub_gen_derive as derive;
 
