@@ -273,19 +273,20 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "inventory",
  "itertools",
  "pyo3",
+ "pyo3-stub-gen-derive",
  "serde",
  "toml",
 ]
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "inventory",
@@ -299,20 +300,18 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-testing-mixed"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
- "pyo3-stub-gen-derive",
 ]
 
 [[package]]
 name = "pyo3-stub-gen-testing-pure"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
- "pyo3-stub-gen-derive",
 ]
 
 [[package]]

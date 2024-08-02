@@ -1,4 +1,5 @@
-pub use inventory; // re-export to use in generated code
+pub use inventory;
+pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 
 mod generate;
 mod pyproject;
