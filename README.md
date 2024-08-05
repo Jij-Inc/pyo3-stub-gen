@@ -18,7 +18,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 }
 
 #[pymodule]
-fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
+fn pyo3_stub_gen_testing(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
@@ -38,7 +38,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 }
 
 #[pymodule]
-fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
+fn pyo3_stub_gen_testing(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }

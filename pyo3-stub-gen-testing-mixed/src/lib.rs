@@ -17,7 +17,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 
 /// Initializes the Python module
 #[pymodule]
-fn my_rust_pkg(_py: Python, m: &PyModule) -> PyResult<()> {
+fn my_rust_pkg(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
