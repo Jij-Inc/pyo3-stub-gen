@@ -1,3 +1,5 @@
+//! `pyproject.toml` parser for reading `maturin` configuration.
+
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::*};
