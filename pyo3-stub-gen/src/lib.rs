@@ -67,7 +67,7 @@
 //!
 //! ```
 //! use pyo3::*;
-//! use pyo3_stub_gen::{type_info::*, derive::gen_stub_class};
+//! use pyo3_stub_gen::{type_info::*, derive::gen_stub_pyclass};
 //!
 //! // Usual PyO3 class definition
 //! #[gen_stub_pyclass]
