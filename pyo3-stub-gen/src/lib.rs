@@ -2,13 +2,10 @@
 //!
 //! Define type information in Rust code (or by proc-macro)
 //! ---------------------------------------------------------
-//! There are several types for storing information about Python classes and methods. For example,
+//! The first step is to define Python type information in Rust code. [type_info] module provides several structs, for example:
 //!
-//! - [type_info::PyClassInfo] stores information for creating Python's class definition in stub file
-//! - [type_info::PyMethodsInfo] stores information for creating Python's method definition in stub file
-//! - and others in [type_info] module.
-//!
-//! ### Manual definition
+//! - [type_info::PyFunctionInfo] stores information of Python function, i.e. the name of the function, arguments and its types, return type, etc.
+//! - [type_info::PyClassInfo] stores information for Python class definition, i.e. the name of the class, members and its types, methods, etc.
 //!
 //! For better understanding of what happens in the background, let's define these information manually:
 //!
@@ -25,7 +22,7 @@
 //!     description: Option<String>,
 //! }
 //!
-//! // Submit type information for stub file generation to inventory manually
+//! // Submit type information for stub file generation to inventory
 //! inventory::submit!{
 //!     // Send information about Python class
 //!     PyClassInfo {
@@ -54,9 +51,78 @@
 //! }
 //! ```
 //!
+//! Roughly speaking, the above corresponds a following stub file `my_module.pyi`:
+//!
+//! ```python
+//! class MyClass:
+//!     """
+//!     Docstring used in Python
+//!     """
+//!     name: str
+//!     description: Optional[str]
+//! ```
+//!
+//! We want to generate this [type_info::PyClassInfo] section automatically from `MyClass` Rust struct definition.
+//! This is done by using `#[gen_stub_pyclass]` proc-macro:
+//!
+//! ```
+//! use pyo3::*;
+//! use pyo3_stub_gen::{type_info::*, derive::gen_stub_class};
+//!
+//! // Usual PyO3 class definition
+//! #[gen_stub_pyclass]
+//! #[pyclass(module = "my_module", name = "MyClass")]
+//! struct MyClass {
+//!     #[pyo3(get)]
+//!     name: String,
+//!     #[pyo3(get)]
+//!     description: Option<String>,
+//! }
+//! ```
+//!
+//! Since proc-macro is a converter from Rust code to Rust code, the output must be a Rust code.
+//! However, we need to gather these [type_info::PyClassInfo] definitions to generate stub files,
+//! and the above [inventory::submit] is for it.
+//!
 //! Gathering type information and generating stub file
 //! ----------------------------------------------------
-//! To be written
+//! [inventory::iter] makes it possible to gather distributed [type_info::PyClassInfo] in the crate into a single place.
+//!
+//! [generate] module provides structs implementing [std::fmt::Display] to generate corresponding parts of stub file.
+//! For example, [generate::MethodDef] generates Python class method definition as follows:
+//!
+//! ```rust
+//! use pyo3::inspect::types::TypeInfo;
+//! use pyo3_stub_gen::generate::*;
+//!
+//! let method = MethodDef {
+//!     name: "foo",
+//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
+//!     signature: None,
+//!     r#return: ReturnTypeInfo { r#type: TypeInfo::builtin("int") },
+//!     doc: "This is a foo method.",
+//!     is_static: false,
+//!     is_class: false,
+//! };
+//!
+//! assert_eq!(
+//!     method.to_string().trim(),
+//!     r#"
+//!     def foo(self, x:int) -> int:
+//!         r"""
+//!         This is a foo method.
+//!         """
+//!         ...
+//!     "#.trim()
+//! );
+//! ```
+//!
+//! [generate::ClassDef] generates Python class definition using [generate::MethodDef] and others, and other `*Def` structs works as well.
+//!
+//! [generate::Module] consists of `*Def` structs and yields an entire stub file `*.pyi` for a single Python (sub-)module, i.e. a shared library build by PyO3.
+//! [generate::Module]s are created as a part of [StubInfo], which merges [type_info::PyClassInfo]s and others submitted to [inventory] separately.
+//! [StubInfo] is instantiated with [pyproject::PyProject] to get where to generate the stub file,
+//! and [StubInfo::generate] generates the stub files for every modules.
 //!
 
 pub use inventory;

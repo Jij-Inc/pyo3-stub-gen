@@ -1,41 +1,4 @@
 //! Generate Python typing stub file a.k.a. `*.pyi` file.
-//!
-//! This module provides structs implementing [fmt::Display] to generate corresponding parts of stub file.
-//! For example, [MethodDef] generates Python class method definition as follows:
-//!
-//! ```rust
-//! use pyo3::inspect::types::TypeInfo;
-//! use pyo3_stub_gen::generate::*;
-//!
-//! let method = MethodDef {
-//!     name: "foo",
-//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
-//!     signature: None,
-//!     r#return: ReturnTypeInfo { r#type: TypeInfo::builtin("int") },
-//!     doc: "This is a foo method.",
-//!     is_static: false,
-//!     is_class: false,
-//! };
-//!
-//! assert_eq!(
-//!     method.to_string().trim(),
-//!     r#"
-//!     def foo(self, x:int) -> int:
-//!         r"""
-//!         This is a foo method.
-//!         """
-//!         ...
-//!     "#.trim()
-//! );
-//! ```
-//!
-//! [ClassDef] generates Python class definition using [MethodDef] and others, and other `*Def` structs works as well.
-//!
-//! [Module] consists of `*Def` structs and yields an entire stub file `*.pyi` for a single Python (sub-)module, i.e. a shared library build by PyO3.
-//! [Module]s are created as a part of [StubInfo], which merges [PyClassInfo]s and others submitted to [inventory] separately.
-//! [StubInfo] is instantiated with [PyProject] to get where to generate the stub file,
-//! and [StubInfo::generate] generates the stub files for every modules.
-//!
 
 use crate::{pyproject::PyProject, type_info::*};
 
