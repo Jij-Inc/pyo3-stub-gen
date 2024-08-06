@@ -23,8 +23,8 @@ struct Arg {
     r#type: TypeInfo,
 }
 
-impl Arg {
-    fn from_info(info: &ArgInfo) -> Self {
+impl From<&ArgInfo> for Arg {
+    fn from(info: &ArgInfo) -> Self {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
@@ -69,11 +69,11 @@ struct MethodDef {
     is_class: bool,
 }
 
-impl MethodDef {
-    fn from_info(info: &MethodInfo) -> Self {
+impl From<&MethodInfo> for MethodDef {
+    fn from(info: &MethodInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
             r#return: (info.r#return)().into(),
             doc: info.doc,
@@ -134,8 +134,8 @@ struct MemberDef {
     r#type: TypeInfo,
 }
 
-impl MemberDef {
-    fn from_info(info: &MemberInfo) -> Self {
+impl From<&MemberInfo> for MemberDef {
+    fn from(info: &MemberInfo) -> Self {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
@@ -156,10 +156,10 @@ struct NewDef {
     signature: Option<&'static str>,
 }
 
-impl NewDef {
-    fn from_info(info: &NewInfo) -> Self {
+impl From<&NewInfo> for NewDef {
+    fn from(info: &NewInfo) -> Self {
         Self {
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
         }
     }
@@ -194,13 +194,13 @@ struct ClassDef {
     methods: Vec<MethodDef>,
 }
 
-impl ClassDef {
-    fn from_info(info: &PyClassInfo) -> Self {
+impl From<&PyClassInfo> for ClassDef {
+    fn from(info: &PyClassInfo) -> Self {
         Self {
             name: info.pyclass_name,
             new: None,
             doc: info.doc,
-            members: info.members.iter().map(MemberDef::from_info).collect(),
+            members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
         }
     }
@@ -243,8 +243,8 @@ struct EnumDef {
     variants: &'static [&'static str],
 }
 
-impl EnumDef {
-    fn from_info(info: &PyEnumInfo) -> Self {
+impl From<&PyEnumInfo> for EnumDef {
+    fn from(info: &PyEnumInfo) -> Self {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
@@ -283,11 +283,11 @@ struct FunctionDef {
     doc: &'static str,
 }
 
-impl FunctionDef {
-    fn from_info(info: &PyFunctionInfo) -> Self {
+impl From<&PyFunctionInfo> for FunctionDef {
+    fn from(info: &PyFunctionInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             r#return: (info.r#return)().into(),
             doc: info.doc,
             signature: info.signature,
@@ -389,7 +389,7 @@ impl StubInfo {
 
             module
                 .class
-                .insert((info.struct_id)(), ClassDef::from_info(info));
+                .insert((info.struct_id)(), ClassDef::from(info));
         }
 
         for info in inventory::iter::<PyEnumInfo> {
@@ -398,9 +398,7 @@ impl StubInfo {
                 .map(str::to_owned)
                 .unwrap_or(default_module_name.to_string());
             let module = modules.entry(module_name).or_default();
-            module
-                .enum_
-                .insert((info.enum_id)(), EnumDef::from_info(info));
+            module.enum_.insert((info.enum_id)(), EnumDef::from(info));
         }
 
         'methods_info: for info in inventory::iter::<PyMethodsInfo> {
@@ -414,10 +412,10 @@ impl StubInfo {
                         });
                     }
                     for method in info.methods {
-                        entry.methods.push(MethodDef::from_info(method))
+                        entry.methods.push(MethodDef::from(method))
                     }
                     if let Some(new) = &info.new {
-                        entry.new = Some(NewDef::from_info(new));
+                        entry.new = Some(NewDef::from(new));
                     }
                     continue 'methods_info;
                 }
@@ -433,9 +431,7 @@ impl StubInfo {
                         .unwrap_or(default_module_name.to_string()),
                 )
                 .or_default();
-            module
-                .function
-                .insert(info.name, FunctionDef::from_info(info));
+            module.function.insert(info.name, FunctionDef::from(info));
         }
 
         let default = modules.entry(default_module_name.to_string()).or_default();
