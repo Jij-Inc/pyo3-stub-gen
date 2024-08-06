@@ -1,4 +1,14 @@
-//! `pyproject.toml` parser for reading `maturin` configuration.
+//! `pyproject.toml` parser for reading `[tool.maturin]` configuration.
+//!
+//! ```
+//! use pyo3_stub_gen::pyproject::PyProject;
+//! use std::path::Path;
+//!
+//! let root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+//! let pyproject = PyProject::parse_toml(
+//!     root.join("pyo3-stub-gen-testing-mixed/pyproject.toml")
+//! ).unwrap();
+//! ```
 
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
