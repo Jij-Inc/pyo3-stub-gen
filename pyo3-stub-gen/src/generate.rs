@@ -1,4 +1,41 @@
 //! Generate Python typing stub file a.k.a. `*.pyi` file.
+//!
+//! This module provides structs implementing [fmt::Display] to generate corresponding parts of stub file.
+//! For example, [MethodDef] generates Python class method definition as follows:
+//!
+//! ```rust
+//! use pyo3::inspect::types::TypeInfo;
+//! use pyo3_stub_gen::generate::*;
+//!
+//! let method = MethodDef {
+//!     name: "foo",
+//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
+//!     signature: None,
+//!     r#return: ReturnTypeInfo { r#type: TypeInfo::builtin("int") },
+//!     doc: "This is a foo method.",
+//!     is_static: false,
+//!     is_class: false,
+//! };
+//!
+//! assert_eq!(
+//!     method.to_string().trim(),
+//!     r#"
+//!     def foo(self, x:int) -> int:
+//!         r"""
+//!         This is a foo method.
+//!         """
+//!         ...
+//!     "#.trim()
+//! );
+//! ```
+//!
+//! [ClassDef] generates Python class definition using [MethodDef] and others, and other `*Def` structs works as well.
+//!
+//! [Module] consists of `*Def` structs and yields an entire stub file `*.pyi` for a single Python (sub-)module, i.e. a shared library build by PyO3.
+//! [Module]s are created as a part of [StubInfo], which merges [PyClassInfo]s and others submitted to [inventory] separately.
+//! [StubInfo] is instantiated with [PyProject] to get where to generate the stub file,
+//! and [StubInfo::generate] generates the stub files for every modules.
+//!
 
 use crate::{pyproject::PyProject, type_info::*};
 
@@ -18,9 +55,9 @@ fn indent() -> &'static str {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Arg {
-    name: &'static str,
-    r#type: TypeInfo,
+pub struct Arg {
+    pub name: &'static str,
+    pub r#type: TypeInfo,
 }
 
 impl From<&ArgInfo> for Arg {
@@ -38,9 +75,10 @@ impl fmt::Display for Arg {
     }
 }
 
+/// Wrapper of [TypeInfo] to implement [fmt::Display] which insert `->` before return type for non-`NoReturn` type.
 #[derive(Debug, Clone, PartialEq)]
-struct ReturnTypeInfo {
-    r#type: TypeInfo,
+pub struct ReturnTypeInfo {
+    pub r#type: TypeInfo,
 }
 
 impl fmt::Display for ReturnTypeInfo {
@@ -58,15 +96,16 @@ impl From<TypeInfo> for ReturnTypeInfo {
     }
 }
 
+/// Definition of a class method.
 #[derive(Debug, Clone, PartialEq)]
-struct MethodDef {
-    name: &'static str,
-    args: Vec<Arg>,
-    signature: Option<&'static str>,
-    r#return: ReturnTypeInfo,
-    doc: &'static str,
-    is_static: bool,
-    is_class: bool,
+pub struct MethodDef {
+    pub name: &'static str,
+    pub args: Vec<Arg>,
+    pub signature: Option<&'static str>,
+    pub r#return: ReturnTypeInfo,
+    pub doc: &'static str,
+    pub is_static: bool,
+    pub is_class: bool,
 }
 
 impl From<&MethodInfo> for MethodDef {
@@ -128,10 +167,11 @@ impl fmt::Display for MethodDef {
     }
 }
 
+/// Definition of a class member.
 #[derive(Debug, Clone, PartialEq)]
-struct MemberDef {
-    name: &'static str,
-    r#type: TypeInfo,
+pub struct MemberDef {
+    pub name: &'static str,
+    pub r#type: TypeInfo,
 }
 
 impl From<&MemberInfo> for MemberDef {
@@ -150,10 +190,11 @@ impl fmt::Display for MemberDef {
     }
 }
 
+/// Definition of `__new__` method.
 #[derive(Debug, Clone, PartialEq)]
-struct NewDef {
-    args: Vec<Arg>,
-    signature: Option<&'static str>,
+pub struct NewDef {
+    pub args: Vec<Arg>,
+    pub signature: Option<&'static str>,
 }
 
 impl From<&NewInfo> for NewDef {
@@ -185,17 +226,20 @@ impl fmt::Display for NewDef {
     }
 }
 
+/// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
-struct ClassDef {
-    name: &'static str,
-    doc: &'static str,
-    new: Option<NewDef>,
-    members: Vec<MemberDef>,
-    methods: Vec<MethodDef>,
+pub struct ClassDef {
+    pub name: &'static str,
+    pub doc: &'static str,
+    pub new: Option<NewDef>,
+    pub members: Vec<MemberDef>,
+    pub methods: Vec<MethodDef>,
 }
 
 impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
+        // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
+        // This is only an initializer. See `StubInfo::gather` for the actual merging.
         Self {
             name: info.pyclass_name,
             new: None,
@@ -236,11 +280,12 @@ impl fmt::Display for ClassDef {
     }
 }
 
+/// Definition of a Python enum.
 #[derive(Debug, Clone, PartialEq)]
-struct EnumDef {
-    name: &'static str,
-    doc: &'static str,
-    variants: &'static [&'static str],
+pub struct EnumDef {
+    pub name: &'static str,
+    pub doc: &'static str,
+    pub variants: &'static [&'static str],
 }
 
 impl From<&PyEnumInfo> for EnumDef {
@@ -274,13 +319,14 @@ impl fmt::Display for EnumDef {
     }
 }
 
+/// Definition of a Python function.
 #[derive(Debug, Clone, PartialEq)]
-struct FunctionDef {
-    name: &'static str,
-    args: Vec<Arg>,
-    r#return: ReturnTypeInfo,
-    signature: Option<&'static str>,
-    doc: &'static str,
+pub struct FunctionDef {
+    pub name: &'static str,
+    pub args: Vec<Arg>,
+    pub r#return: ReturnTypeInfo,
+    pub signature: Option<&'static str>,
+    pub doc: &'static str,
 }
 
 impl From<&PyFunctionInfo> for FunctionDef {
@@ -325,12 +371,13 @@ impl fmt::Display for FunctionDef {
     }
 }
 
+/// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Module {
-    class: BTreeMap<TypeId, ClassDef>,
-    enum_: BTreeMap<TypeId, EnumDef>,
-    function: BTreeMap<&'static str, FunctionDef>,
-    error: BTreeSet<&'static str>,
+    pub class: BTreeMap<TypeId, ClassDef>,
+    pub enum_: BTreeMap<TypeId, EnumDef>,
+    pub function: BTreeMap<&'static str, FunctionDef>,
+    pub error: BTreeSet<&'static str>,
 }
 
 impl fmt::Display for Module {
@@ -359,8 +406,8 @@ impl fmt::Display for Module {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
-    modules: BTreeMap<String, Module>,
-    pyproject: PyProject,
+    pub modules: BTreeMap<String, Module>,
+    pub pyproject: PyProject,
 }
 
 impl StubInfo {
