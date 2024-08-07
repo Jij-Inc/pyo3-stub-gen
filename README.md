@@ -28,8 +28,7 @@ To generate a stub file for this project, please modify it as follows:
 
 ```rust
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
-use std::{env, path::*};
+use pyo3_stub_gen::{derive::gen_stub_pyfunction, define_stub_info_gatherer};
 
 #[gen_stub_pyfunction]  // Proc-macro attribute to register a function to stub file generator.
 #[pyfunction]
@@ -43,12 +42,8 @@ fn pyo3_stub_gen_testing(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-/// Create stub file generator `StubInfo` for this project
-pub fn stub_info() -> pyo3_stub_gen::Result<StubInfo> {
-    let manifest_dir: &Path = env!("CARGO_MANIFEST_DIR").as_ref();
-    // Get Python project name from pyproject.toml
-    StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
-}
+// Define a function to gather stub information.
+define_stub_info_gatherer!(stub_info);
 ```
 
 And then, create an executable target in `src/bin/stub_gen.rs`:
@@ -57,6 +52,7 @@ And then, create an executable target in `src/bin/stub_gen.rs`:
 use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
+    // `stub_info` is a function defined by `define_stub_info_gatherer!` macro.
     let stub = pyo3_stub_gen_testing_pure::stub_info()?;
     stub.generate()?;
     Ok(())

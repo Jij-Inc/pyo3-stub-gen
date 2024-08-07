@@ -1,4 +1,4 @@
-//! This crate creates stub files in following two steps using [inventory] crate:
+//! This crate creates stub files in following three steps using [inventory] crate:
 //!
 //! Define type information in Rust code (or by proc-macro)
 //! ---------------------------------------------------------
@@ -84,9 +84,30 @@
 //! However, we need to gather these [type_info::PyClassInfo] definitions to generate stub files,
 //! and the above [inventory::submit] is for it.
 //!
-//! Gathering type information and generating stub file
-//! ----------------------------------------------------
-//! [inventory::iter] makes it possible to gather distributed [type_info::PyClassInfo] in the crate into a single place.
+//! Gather type information into [StubInfo]
+//! ----------------------------------------
+//! [inventory] crate provides a mechanism to gather [inventory::submit]ted information when the library is loaded.
+//! To access these information through [inventory::iter], we need to define a gather function in the crate.
+//! Typically, this is done by following:
+//!
+//! ```rust
+//! use pyo3_stub_gen::{StubInfo, Result};
+//!
+//! pub fn stub_info() -> Result<StubInfo> {
+//!     let manifest_dir: &::std::path::Path = env!("CARGO_MANIFEST_DIR").as_ref();
+//!     StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
+//! }
+//! ```
+//!
+//! There is a helper macro to define it easily:
+//!
+//! ```rust
+//! pyo3_stub_gen::define_stub_info_gatherer!(sub_info);
+//! ```
+//!
+//! Generate stub file from [StubInfo]
+//! -----------------------------------
+//! [StubInfo] translates [type_info::PyClassInfo] and other information into a form helpful for generating stub files while gathering.
 //!
 //! [generate] module provides structs implementing [std::fmt::Display] to generate corresponding parts of stub file.
 //! For example, [generate::MethodDef] generates Python class method definition as follows:
@@ -134,3 +155,20 @@ pub mod type_info;
 
 pub type Result<T> = anyhow::Result<T>;
 pub use generate::StubInfo;
+
+/// Create a function to initialize [StubInfo] from `pyproject.toml` in `CARGO_MANIFEST_DIR`.
+///
+/// If `pyproject.toml` is in another place, you need to create a function to call [StubInfo::from_pyproject_toml] manually.
+/// This must be placed in your PyO3 library crate, i.e. same crate where [inventory::submit]ted,
+/// not in `gen_stub` executables due to [inventory] mechanism.
+///
+#[macro_export]
+macro_rules! define_stub_info_gatherer {
+    ($function_name:ident) => {
+        /// Auto-generated function to gather information to generate stub files
+        pub fn $function_name() -> $crate::Result<$crate::StubInfo> {
+            let manifest_dir: &::std::path::Path = env!("CARGO_MANIFEST_DIR").as_ref();
+            $crate::StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
+        }
+    };
+}
