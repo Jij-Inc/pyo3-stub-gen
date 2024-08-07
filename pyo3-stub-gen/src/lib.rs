@@ -134,3 +134,14 @@ pub mod type_info;
 
 pub type Result<T> = anyhow::Result<T>;
 pub use generate::StubInfo;
+
+#[macro_export]
+macro_rules! define_stub_info_gatherer {
+    ($function_name:ident) => {
+        /// Auto-generated function to gather information to generate stub files
+        pub fn $function_name() -> $crate::Result<$crate::StubInfo> {
+            let manifest_dir: &::std::path::Path = env!("CARGO_MANIFEST_DIR").as_ref();
+            $crate::StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
+        }
+    };
+}
