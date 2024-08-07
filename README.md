@@ -4,8 +4,26 @@ Python stub file (`*.pyi`) generator for PyO3 based projects.
 
 | crate name | crates.io | docs.rs | doc (main) |
 | --- | --- | --- | --- |
-| [pyo3-stub-gen](./pyo3-stub-gen/) | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen.svg)](https://crates.io/crates/pyo3-stub-gen)  | [![docs.rs](https://docs.rs/pyo3-stub-gen/badge.svg)](https://docs.rs/pyo3-stub-gen) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen/index.html) |
-| [pyo3-stub-gen-derive](./pyo3-stub-gen-derive/) | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen-derive.svg)](https://crates.io/crates/pyo3-stub-gen-derive)  | [![docs.rs](https://docs.rs/pyo3-stub-gen-derive/badge.svg)](https://docs.rs/pyo3-stub-gen-derive) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen_derive/index.html) |
+| [pyo3-stub-gen] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen.svg)](https://crates.io/crates/pyo3-stub-gen)  | [![docs.rs](https://docs.rs/pyo3-stub-gen/badge.svg)](https://docs.rs/pyo3-stub-gen) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen/index.html) |
+| [pyo3-stub-gen-derive] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen-derive.svg)](https://crates.io/crates/pyo3-stub-gen-derive)  | [![docs.rs](https://docs.rs/pyo3-stub-gen-derive/badge.svg)](https://docs.rs/pyo3-stub-gen-derive) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen_derive/index.html) |
+
+[pyo3-stub-gen]: ./pyo3-stub-gen/
+[pyo3-stub-gen-derive]: ./pyo3-stub-gen-derive/
+
+# Design
+Our goal is to create a stub file `*.pyi` from Rust code, however,
+automated complete translation is impossible due to the difference between Rust and Python type systems and the limitation of proc-macro.
+We take semi-automated approach:
+
+- Provide a default translator which will work **most** cases, not **all** cases
+- Also provide a manual way to specify the translation.
+
+If the default translator does not work, users can specify the translation manually,
+and these manual translations can be integrated with what the default translator generates.
+So the users can use the default translator as much as possible and only specify the translation for the edge cases.
+
+[pyo3-stub-gen] crate provides the manual way to specify the translation,
+and [pyo3-stub-gen-derive] crate provides the default translator as proc-macro based on the mechanism of [pyo3-stub-gen].
 
 # Usage
 
