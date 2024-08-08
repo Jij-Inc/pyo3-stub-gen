@@ -454,6 +454,8 @@ impl StubInfo {
 
     pub fn generate(&self) -> Result<()> {
         if let Some(python_source) = self.pyproject.python_source() {
+            log::trace!("`tool.maturin.python_source` exists in pyproject.toml. Regarded as Rust/Python mixed project.");
+
             for (name, module) in self.modules.iter() {
                 let path: Vec<&str> = name.split('.').collect();
                 let dest = if path.len() > 1 {
@@ -465,19 +467,32 @@ impl StubInfo {
                 if let Some(dir) = dest.parent() {
                     fs::create_dir_all(dir)?;
                 }
-                let mut f = fs::File::create(dest)?;
+                let mut f = fs::File::create(&dest)?;
                 write!(f, "{}", module)?;
+                log::info!(
+                    "Generate stub file of a module `{name}` at {dest}",
+                    dest = dest.display()
+                );
             }
         } else {
+            log::trace!("`tool.maturin.python_source` is not in pyproject.toml. Regarded as pure Rust project.");
+
             let out_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
             if !out_dir.is_dir() {
                 bail!("{} is not a directory", out_dir.display());
             }
 
-            let mut f =
-                fs::File::create(out_dir.join(format!("{}.pyi", self.pyproject.module_name())))?;
+            let name = self.pyproject.module_name();
+            let dest = out_dir.join(format!("{}.pyi", name));
+
+            let mut f = fs::File::create(&dest)?;
             let module = self.default_module()?;
             write!(f, "{}", module)?;
+
+            log::info!(
+                "Generate stub file of a module `{name}` at {dest}",
+                dest = dest.display()
+            );
         }
         Ok(())
     }
