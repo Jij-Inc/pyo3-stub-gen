@@ -45,7 +45,7 @@ jobs:
     needs: [rust]
     environment:
       name: "Document"
-      url: ${{ steps.deployment.outputs.page_url }}/pyo3_stub_gen/index.html
+      url: ${{ steps.deployment.outputs.page_url }}pyo3_stub_gen/index.html
     runs-on: ubuntu-latest
     steps:
       - name: Download rustdoc

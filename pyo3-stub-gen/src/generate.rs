@@ -18,13 +18,13 @@ fn indent() -> &'static str {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct Arg {
-    name: &'static str,
-    r#type: TypeInfo,
+pub struct Arg {
+    pub name: &'static str,
+    pub r#type: TypeInfo,
 }
 
-impl Arg {
-    fn from_info(info: &ArgInfo) -> Self {
+impl From<&ArgInfo> for Arg {
+    fn from(info: &ArgInfo) -> Self {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
@@ -38,9 +38,10 @@ impl fmt::Display for Arg {
     }
 }
 
+/// Wrapper of [TypeInfo] to implement [fmt::Display] which insert `->` before return type for non-`NoReturn` type.
 #[derive(Debug, Clone, PartialEq)]
-struct ReturnTypeInfo {
-    r#type: TypeInfo,
+pub struct ReturnTypeInfo {
+    pub r#type: TypeInfo,
 }
 
 impl fmt::Display for ReturnTypeInfo {
@@ -58,22 +59,23 @@ impl From<TypeInfo> for ReturnTypeInfo {
     }
 }
 
+/// Definition of a class method.
 #[derive(Debug, Clone, PartialEq)]
-struct MethodDef {
-    name: &'static str,
-    args: Vec<Arg>,
-    signature: Option<&'static str>,
-    r#return: ReturnTypeInfo,
-    doc: &'static str,
-    is_static: bool,
-    is_class: bool,
+pub struct MethodDef {
+    pub name: &'static str,
+    pub args: Vec<Arg>,
+    pub signature: Option<&'static str>,
+    pub r#return: ReturnTypeInfo,
+    pub doc: &'static str,
+    pub is_static: bool,
+    pub is_class: bool,
 }
 
-impl MethodDef {
-    fn from_info(info: &MethodInfo) -> Self {
+impl From<&MethodInfo> for MethodDef {
+    fn from(info: &MethodInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
             r#return: (info.r#return)().into(),
             doc: info.doc,
@@ -128,14 +130,15 @@ impl fmt::Display for MethodDef {
     }
 }
 
+/// Definition of a class member.
 #[derive(Debug, Clone, PartialEq)]
-struct MemberDef {
-    name: &'static str,
-    r#type: TypeInfo,
+pub struct MemberDef {
+    pub name: &'static str,
+    pub r#type: TypeInfo,
 }
 
-impl MemberDef {
-    fn from_info(info: &MemberInfo) -> Self {
+impl From<&MemberInfo> for MemberDef {
+    fn from(info: &MemberInfo) -> Self {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
@@ -150,16 +153,17 @@ impl fmt::Display for MemberDef {
     }
 }
 
+/// Definition of `__new__` method.
 #[derive(Debug, Clone, PartialEq)]
-struct NewDef {
-    args: Vec<Arg>,
-    signature: Option<&'static str>,
+pub struct NewDef {
+    pub args: Vec<Arg>,
+    pub signature: Option<&'static str>,
 }
 
-impl NewDef {
-    fn from_info(info: &NewInfo) -> Self {
+impl From<&NewInfo> for NewDef {
+    fn from(info: &NewInfo) -> Self {
         Self {
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
         }
     }
@@ -185,22 +189,25 @@ impl fmt::Display for NewDef {
     }
 }
 
+/// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
-struct ClassDef {
-    name: &'static str,
-    doc: &'static str,
-    new: Option<NewDef>,
-    members: Vec<MemberDef>,
-    methods: Vec<MethodDef>,
+pub struct ClassDef {
+    pub name: &'static str,
+    pub doc: &'static str,
+    pub new: Option<NewDef>,
+    pub members: Vec<MemberDef>,
+    pub methods: Vec<MethodDef>,
 }
 
-impl ClassDef {
-    fn from_info(info: &PyClassInfo) -> Self {
+impl From<&PyClassInfo> for ClassDef {
+    fn from(info: &PyClassInfo) -> Self {
+        // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
+        // This is only an initializer. See `StubInfo::gather` for the actual merging.
         Self {
             name: info.pyclass_name,
             new: None,
             doc: info.doc,
-            members: info.members.iter().map(MemberDef::from_info).collect(),
+            members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
         }
     }
@@ -236,15 +243,16 @@ impl fmt::Display for ClassDef {
     }
 }
 
+/// Definition of a Python enum.
 #[derive(Debug, Clone, PartialEq)]
-struct EnumDef {
-    name: &'static str,
-    doc: &'static str,
-    variants: &'static [&'static str],
+pub struct EnumDef {
+    pub name: &'static str,
+    pub doc: &'static str,
+    pub variants: &'static [&'static str],
 }
 
-impl EnumDef {
-    fn from_info(info: &PyEnumInfo) -> Self {
+impl From<&PyEnumInfo> for EnumDef {
+    fn from(info: &PyEnumInfo) -> Self {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
@@ -274,20 +282,21 @@ impl fmt::Display for EnumDef {
     }
 }
 
+/// Definition of a Python function.
 #[derive(Debug, Clone, PartialEq)]
-struct FunctionDef {
-    name: &'static str,
-    args: Vec<Arg>,
-    r#return: ReturnTypeInfo,
-    signature: Option<&'static str>,
-    doc: &'static str,
+pub struct FunctionDef {
+    pub name: &'static str,
+    pub args: Vec<Arg>,
+    pub r#return: ReturnTypeInfo,
+    pub signature: Option<&'static str>,
+    pub doc: &'static str,
 }
 
-impl FunctionDef {
-    fn from_info(info: &PyFunctionInfo) -> Self {
+impl From<&PyFunctionInfo> for FunctionDef {
+    fn from(info: &PyFunctionInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from_info).collect(),
+            args: info.args.iter().map(Arg::from).collect(),
             r#return: (info.r#return)().into(),
             doc: info.doc,
             signature: info.signature,
@@ -325,12 +334,13 @@ impl fmt::Display for FunctionDef {
     }
 }
 
+/// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Module {
-    class: BTreeMap<TypeId, ClassDef>,
-    enum_: BTreeMap<TypeId, EnumDef>,
-    function: BTreeMap<&'static str, FunctionDef>,
-    error: BTreeSet<&'static str>,
+    pub class: BTreeMap<TypeId, ClassDef>,
+    pub enum_: BTreeMap<TypeId, EnumDef>,
+    pub function: BTreeMap<&'static str, FunctionDef>,
+    pub error: BTreeSet<&'static str>,
 }
 
 impl fmt::Display for Module {
@@ -359,8 +369,8 @@ impl fmt::Display for Module {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
-    modules: BTreeMap<String, Module>,
-    pyproject: PyProject,
+    pub modules: BTreeMap<String, Module>,
+    pub pyproject: PyProject,
 }
 
 impl StubInfo {
@@ -389,7 +399,7 @@ impl StubInfo {
 
             module
                 .class
-                .insert((info.struct_id)(), ClassDef::from_info(info));
+                .insert((info.struct_id)(), ClassDef::from(info));
         }
 
         for info in inventory::iter::<PyEnumInfo> {
@@ -398,9 +408,7 @@ impl StubInfo {
                 .map(str::to_owned)
                 .unwrap_or(default_module_name.to_string());
             let module = modules.entry(module_name).or_default();
-            module
-                .enum_
-                .insert((info.enum_id)(), EnumDef::from_info(info));
+            module.enum_.insert((info.enum_id)(), EnumDef::from(info));
         }
 
         'methods_info: for info in inventory::iter::<PyMethodsInfo> {
@@ -414,10 +422,10 @@ impl StubInfo {
                         });
                     }
                     for method in info.methods {
-                        entry.methods.push(MethodDef::from_info(method))
+                        entry.methods.push(MethodDef::from(method))
                     }
                     if let Some(new) = &info.new {
-                        entry.new = Some(NewDef::from_info(new));
+                        entry.new = Some(NewDef::from(new));
                     }
                     continue 'methods_info;
                 }
@@ -433,9 +441,7 @@ impl StubInfo {
                         .unwrap_or(default_module_name.to_string()),
                 )
                 .or_default();
-            module
-                .function
-                .insert(info.name, FunctionDef::from_info(info));
+            module.function.insert(info.name, FunctionDef::from(info));
         }
 
         let default = modules.entry(default_module_name.to_string()).or_default();

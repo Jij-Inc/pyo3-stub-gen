@@ -2,14 +2,7 @@
 mod readme {}
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
-use std::{env, path::*};
-
-/// Gather information to generate stub files
-pub fn stub_info() -> pyo3_stub_gen::Result<StubInfo> {
-    let manifest_dir: &Path = env!("CARGO_MANIFEST_DIR").as_ref();
-    StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
-}
+use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
 
 /// Returns the sum of two numbers as a string.
 #[gen_stub_pyfunction]
@@ -24,6 +17,8 @@ fn pyo3_stub_gen_testing_pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
+
+define_stub_info_gatherer!(stub_info);
 
 /// Test of unit test for testing link problem
 #[cfg(test)]

@@ -1,8 +1,29 @@
 # pyo3-stub-gen
 
-[![Document](https://img.shields.io/badge/document-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen//pyo3_stub_gen/index.html)
-
 Python stub file (`*.pyi`) generator for PyO3 based projects.
+
+| crate name | crates.io | docs.rs | doc (main) |
+| --- | --- | --- | --- |
+| [pyo3-stub-gen] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen.svg)](https://crates.io/crates/pyo3-stub-gen)  | [![docs.rs](https://docs.rs/pyo3-stub-gen/badge.svg)](https://docs.rs/pyo3-stub-gen) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen/index.html) |
+| [pyo3-stub-gen-derive] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen-derive.svg)](https://crates.io/crates/pyo3-stub-gen-derive)  | [![docs.rs](https://docs.rs/pyo3-stub-gen-derive/badge.svg)](https://docs.rs/pyo3-stub-gen-derive) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen_derive/index.html) |
+
+[pyo3-stub-gen]: ./pyo3-stub-gen/
+[pyo3-stub-gen-derive]: ./pyo3-stub-gen-derive/
+
+# Design
+Our goal is to create a stub file `*.pyi` from Rust code, however,
+automated complete translation is impossible due to the difference between Rust and Python type systems and the limitation of proc-macro.
+We take semi-automated approach:
+
+- Provide a default translator which will work **most** cases, not **all** cases
+- Also provide a manual way to specify the translation.
+
+If the default translator does not work, users can specify the translation manually,
+and these manual translations can be integrated with what the default translator generates.
+So the users can use the default translator as much as possible and only specify the translation for the edge cases.
+
+[pyo3-stub-gen] crate provides the manual way to specify the translation,
+and [pyo3-stub-gen-derive] crate provides the default translator as proc-macro based on the mechanism of [pyo3-stub-gen].
 
 # Usage
 
@@ -28,8 +49,7 @@ To generate a stub file for this project, please modify it as follows:
 
 ```rust
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction, StubInfo};
-use std::{env, path::*};
+use pyo3_stub_gen::{derive::gen_stub_pyfunction, define_stub_info_gatherer};
 
 #[gen_stub_pyfunction]  // Proc-macro attribute to register a function to stub file generator.
 #[pyfunction]
@@ -43,12 +63,8 @@ fn pyo3_stub_gen_testing(m: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-/// Create stub file generator `StubInfo` for this project
-pub fn stub_info() -> pyo3_stub_gen::Result<StubInfo> {
-    let manifest_dir: &Path = env!("CARGO_MANIFEST_DIR").as_ref();
-    // Get Python project name from pyproject.toml
-    StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
-}
+// Define a function to gather stub information.
+define_stub_info_gatherer!(stub_info);
 ```
 
 And then, create an executable target in `src/bin/stub_gen.rs`:
@@ -57,6 +73,7 @@ And then, create an executable target in `src/bin/stub_gen.rs`:
 use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
+    // `stub_info` is a function defined by `define_stub_info_gatherer!` macro.
     let stub = pyo3_stub_gen_testing_pure::stub_info()?;
     stub.generate()?;
     Ok(())
