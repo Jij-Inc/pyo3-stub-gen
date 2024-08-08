@@ -12,6 +12,7 @@ readme.workspace = true
 anyhow.workspace = true
 inventory.workspace = true
 itertools.workspace = true
+log = "0.4.22"
 pyo3.workspace = true
 serde.workspace = true
 toml.workspace = true
