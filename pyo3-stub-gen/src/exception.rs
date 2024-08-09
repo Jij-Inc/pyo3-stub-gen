@@ -1,5 +1,23 @@
 use pyo3::exceptions::*;
 
+#[macro_export]
+macro_rules! create_exception {
+    ($module: expr, $name: ident, $base: ty) => {
+        $crate::create_exception!($module, $name, $base, "");
+    };
+    ($module: expr, $name: ident, $base: ty, $doc: expr) => {
+        ::pyo3::create_exception!($module, $name, $base, $doc);
+
+        $crate::inventory::submit! {
+            $crate::type_info::PyErrorInfo {
+                name: stringify!($name),
+                module: stringify!($module),
+                base: <$base as $crate::exception::NativeException>::type_name,
+            }
+        }
+    };
+}
+
 /// Native exceptions in Python
 pub trait NativeException {
     /// Type name in Python side
