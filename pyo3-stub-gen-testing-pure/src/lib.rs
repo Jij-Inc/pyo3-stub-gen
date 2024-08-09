@@ -1,7 +1,7 @@
 #[cfg_attr(target_os = "macos", doc = include_str!("../../README.md"))]
 mod readme {}
 
-use pyo3::{exceptions::PyException, prelude::*};
+use pyo3::{exceptions::PyRuntimeError, prelude::*};
 use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::gen_stub_pyfunction};
 
 /// Returns the sum of two numbers as a string.
@@ -11,7 +11,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
     Ok((a + b).to_string())
 }
 
-create_exception!(pyo3_stub_gen_testing_pure, MyError, PyException);
+create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
 
 /// Initializes the Python module
 #[pymodule]

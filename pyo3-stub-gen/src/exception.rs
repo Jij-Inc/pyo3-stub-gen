@@ -10,6 +10,7 @@ macro_rules! create_exception {
 
         $crate::inventory::submit! {
             $crate::type_info::PyErrorInfo {
+                error_id: ::std::any::TypeId::of::<$name>,
                 name: stringify!($name),
                 module: stringify!($module),
                 base: <$base as $crate::exception::NativeException>::type_name,
