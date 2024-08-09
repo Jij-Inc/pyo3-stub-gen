@@ -7,4 +7,4 @@ name = "pyo3_stub_gen_testing_pure"
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
-test = ["pytest", "pyright"]
+test = ["pytest", "pyright", "ruff"]
