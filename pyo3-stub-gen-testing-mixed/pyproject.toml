@@ -7,7 +7,7 @@ name = "pyo3_stub_gen_testing_mixed"
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
-test = ["pytest", "pyright"]
+test = ["pytest", "pyright", "ruff"]
 
 [tool.maturin]
 python-source = "python"

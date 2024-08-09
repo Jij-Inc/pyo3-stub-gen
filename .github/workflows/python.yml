@@ -43,6 +43,9 @@ jobs:
         working-directory: ./${{ matrix.crate }}
 
       - name: Type check
-        run: |
-          pyright
+        run: pyright
+        working-directory: ./${{ matrix.crate }}
+
+      - name: Lint
+        run: ruff check
         working-directory: ./${{ matrix.crate }}
