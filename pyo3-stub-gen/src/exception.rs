@@ -31,7 +31,9 @@ impl_native_exception!(PyConnectionRefusedError, "ConnectionRefusedError");
 impl_native_exception!(PyConnectionResetError, "ConnectionResetError");
 impl_native_exception!(PyDeprecationWarning, "DeprecationWarning");
 impl_native_exception!(PyEOFError, "EOFError");
-impl_native_exception!(PyEncodingWarning, "EncodingWarning");
+// FIXME: This only exists in Python 3.10+.
+//        We need to find a way to conditionally compile this.
+// impl_native_exception!(PyEncodingWarning, "EncodingWarning");
 impl_native_exception!(PyEnvironmentError, "EnvironmentError");
 impl_native_exception!(PyException, "Exception");
 impl_native_exception!(PyFileExistsError, "FileExistsError");
