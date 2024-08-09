@@ -123,3 +123,14 @@ jobs:
 
       - name: Check if stub file is up to date
         run: git diff --exit-code
+
+  semver-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: pyo3-stub-gen, pyo3-stub-gen-derive
