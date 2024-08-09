@@ -5,13 +5,7 @@ use crate::{pyproject::PyProject, type_info::*};
 use anyhow::{anyhow, bail, ensure, Result};
 use itertools::Itertools;
 use pyo3::inspect::types::TypeInfo;
-use std::{
-    any::TypeId,
-    collections::{BTreeMap, BTreeSet},
-    fmt, fs,
-    io::Write,
-    path::*,
-};
+use std::{any::TypeId, collections::BTreeMap, fmt, fs, io::Write, path::*};
 
 fn indent() -> &'static str {
     "    "
@@ -334,13 +328,35 @@ impl fmt::Display for FunctionDef {
     }
 }
 
+/// Definition of a Python execption.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ErrorDef {
+    pub name: &'static str,
+    pub base: &'static str,
+}
+
+impl From<&PyErrorInfo> for ErrorDef {
+    fn from(info: &PyErrorInfo) -> Self {
+        Self {
+            name: info.name,
+            base: (info.base)(),
+        }
+    }
+}
+
+impl fmt::Display for ErrorDef {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "class {}({}): ...", self.name, self.base)
+    }
+}
+
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Module {
     pub class: BTreeMap<TypeId, ClassDef>,
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, FunctionDef>,
-    pub error: BTreeSet<&'static str>,
+    pub error: BTreeMap<TypeId, ErrorDef>,
 }
 
 impl fmt::Display for Module {
@@ -364,8 +380,8 @@ impl fmt::Display for Module {
         for function in self.function.values() {
             write!(f, "{}", function)?;
         }
-        for error in self.error.iter() {
-            writeln!(f, "class {}(Exception): ...", error)?;
+        for error in self.error.values() {
+            writeln!(f, "{}", error)?;
         }
         Ok(())
     }
@@ -448,9 +464,9 @@ impl StubInfo {
             module.function.insert(info.name, FunctionDef::from(info));
         }
 
-        let default = modules.entry(default_module_name.to_string()).or_default();
         for info in inventory::iter::<PyErrorInfo> {
-            default.error.insert(info.name);
+            let module = modules.entry(info.module.to_string()).or_default();
+            module.error.insert((info.error_id)(), ErrorDef::from(info));
         }
 
         Self { modules, pyproject }
