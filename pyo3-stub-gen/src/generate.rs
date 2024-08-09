@@ -2,7 +2,7 @@
 
 use crate::{pyproject::PyProject, type_info::*};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use itertools::Itertools;
 use pyo3::inspect::types::TypeInfo;
 use std::{
@@ -462,10 +462,11 @@ impl StubInfo {
 
             for (name, module) in self.modules.iter() {
                 let path: Vec<&str> = name.split('.').collect();
+                ensure!(!path.is_empty(), "Empty module name");
                 let dest = if path.len() > 1 {
                     python_source.join(format!("{}.pyi", path.join("/")))
                 } else {
-                    python_source.join("__init__.pyi")
+                    python_source.join(path[0]).join("__init__.pyi")
                 };
 
                 if let Some(dir) = dest.parent() {
