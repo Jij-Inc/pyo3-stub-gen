@@ -18,6 +18,9 @@ use std::{fs, path::*};
 pub struct PyProject {
     pub project: Project,
     pub tool: Option<Tool>,
+
+    #[serde(skip)]
+    toml_path: PathBuf,
 }
 
 impl PyProject {
@@ -26,7 +29,8 @@ impl PyProject {
         if path.file_name() != Some("pyproject.toml".as_ref()) {
             bail!("{} is not a pyproject.toml", path.display())
         }
-        let out = toml::de::from_str(&fs::read_to_string(path)?)?;
+        let mut out: PyProject = toml::de::from_str(&fs::read_to_string(path)?)?;
+        out.toml_path = path.to_path_buf();
         Ok(out)
     }
 
@@ -42,11 +46,15 @@ impl PyProject {
     }
 
     /// Return `tool.maturin.python_source` if it exists, which means the project is a mixed Rust/Python project.
-    pub fn python_source(&self) -> Option<&Path> {
+    pub fn python_source(&self) -> Option<PathBuf> {
         if let Some(tool) = &self.tool {
             if let Some(maturin) = &tool.maturin {
                 if let Some(python_source) = &maturin.python_source {
-                    return Some(Path::new(python_source));
+                    if let Some(base) = self.toml_path.parent() {
+                        return Some(base.join(python_source));
+                    } else {
+                        return Some(PathBuf::from(python_source));
+                    }
                 }
             }
         }
