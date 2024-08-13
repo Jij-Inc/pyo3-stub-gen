@@ -156,7 +156,7 @@ mod stub_type;
 pub mod type_info;
 
 pub use generate::StubInfo;
-pub use stub_type::PyStubType;
+pub use stub_type::{PyStubType, TypeInfo};
 
 pub type Result<T> = anyhow::Result<T>;
 

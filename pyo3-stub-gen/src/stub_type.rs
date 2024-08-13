@@ -4,6 +4,7 @@ mod pyo3;
 
 use std::collections::HashSet;
 
+/// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
     /// The Python type name.
@@ -16,6 +17,7 @@ pub struct TypeInfo {
     pub import: HashSet<String>,
 }
 
+/// Annotate Rust types with Python type information.
 pub trait PyStubType {
     /// The type to be used in the output signature, i.e. return type of the Python function or methods.
     fn type_output() -> TypeInfo;
@@ -23,6 +25,7 @@ pub trait PyStubType {
     /// The type to be used in the input signature, i.e. the arguments of the Python function or methods.
     ///
     /// This defaults to the output type, but can be overridden for types that are not valid input types.
+    /// For example, `Vec::<T>::type_output` returns `list[T]` while `Vec::<T>::type_input` returns `typing.Sequence[T]`.
     fn type_input() -> TypeInfo {
         Self::type_output()
     }
