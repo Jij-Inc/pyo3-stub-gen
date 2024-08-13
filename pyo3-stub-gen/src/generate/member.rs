@@ -1,5 +1,4 @@
-use crate::{generate::*, type_info::*};
-use crate::TypeInfo;
+use crate::{generate::*, type_info::*, TypeInfo};
 use std::fmt;
 
 /// Definition of a class member.
