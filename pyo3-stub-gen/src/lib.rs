@@ -39,11 +39,11 @@
 //!         members: &[
 //!             MemberInfo {
 //!                 name: "name",
-//!                 r#type: <String as IntoPy<PyObject>>::type_output,
+//!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
-//!                 r#type: <Option<String> as IntoPy<PyObject>>::type_output,
+//!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!             },
 //!         ],
 //!         doc: "Docstring used in Python",
@@ -113,8 +113,7 @@
 //! For example, [generate::MethodDef] generates Python class method definition as follows:
 //!
 //! ```rust
-//! use crate::TypeInfo;
-//! use pyo3_stub_gen::generate::*;
+//! use pyo3_stub_gen::{TypeInfo, generate::*};
 //!
 //! let method = MethodDef {
 //!     name: "foo",

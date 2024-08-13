@@ -84,7 +84,7 @@ impl ToTokens for PyFunctionInfo {
             module,
         } = self;
         let ret_tt = if let Some(ret) = ret {
-            quote! { <#ret as IntoPy<::pyo3::PyObject>>::type_output }
+            quote! { <#ret as pyo3_stub_gen::PyStubType>::type_output }
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };

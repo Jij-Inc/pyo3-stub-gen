@@ -68,7 +68,7 @@ impl ToTokens for MemberInfo {
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MemberInfo {
                 name: #name,
-                r#type: <#ty as IntoPy<PyObject>>::type_output
+                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output
             }
         })
     }

@@ -30,6 +30,13 @@ impl TypeInfo {
             import: HashSet::new(),
         }
     }
+
+    pub fn builtin(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            import: HashSet::new(),
+        }
+    }
 }
 
 /// Annotate Rust types with Python type information.

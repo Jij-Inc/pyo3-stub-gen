@@ -107,15 +107,15 @@ mod test {
             members: &[
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
-                    r#type: <String as IntoPy<PyObject>>::type_output,
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
-                    r#type: <usize as IntoPy<PyObject>>::type_output,
+                    r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
-                    r#type: <Option<String> as IntoPy<PyObject>>::type_output,
+                    r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
                 },
             ],
             module: Some("my_module"),
