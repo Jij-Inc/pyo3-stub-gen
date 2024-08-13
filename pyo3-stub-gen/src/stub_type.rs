@@ -1,5 +1,6 @@
 mod builtins;
 mod collections;
+mod pyo3;
 
 use std::collections::HashSet;
 

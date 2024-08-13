@@ -1,6 +1,25 @@
 use crate::stub_type::*;
 use std::collections::{BTreeMap, HashMap};
 
+impl<T: PyStubType> PyStubType for Option<T> {
+    fn type_input() -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_input();
+        import.insert("typing".to_string());
+        TypeInfo {
+            name: format!("typing.Optional[{}]", name),
+            import,
+        }
+    }
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_output();
+        import.insert("typing".to_string());
+        TypeInfo {
+            name: format!("typing.Optional[{}]", name),
+            import,
+        }
+    }
+}
+
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
