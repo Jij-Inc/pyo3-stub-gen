@@ -132,7 +132,6 @@ inventory::collect!(PyFunctionInfo);
 
 #[derive(Debug)]
 pub struct PyErrorInfo {
-    pub error_id: fn() -> TypeId,
     pub name: &'static str,
     pub module: &'static str,
     pub base: fn() -> &'static str,

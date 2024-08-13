@@ -356,7 +356,7 @@ pub struct Module {
     pub class: BTreeMap<TypeId, ClassDef>,
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, FunctionDef>,
-    pub error: BTreeMap<TypeId, ErrorDef>,
+    pub error: BTreeMap<&'static str, ErrorDef>,
 }
 
 impl fmt::Display for Module {
@@ -466,7 +466,7 @@ impl StubInfo {
 
         for info in inventory::iter::<PyErrorInfo> {
             let module = modules.entry(info.module.to_string()).or_default();
-            module.error.insert((info.error_id)(), ErrorDef::from(info));
+            module.error.insert(info.name, ErrorDef::from(info));
         }
 
         Self { modules, pyproject }
