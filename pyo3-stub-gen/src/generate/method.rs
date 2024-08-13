@@ -1,4 +1,5 @@
 use crate::{generate::*, type_info::*};
+use pyo3::inspect::types::TypeInfo;
 use std::fmt;
 
 /// Definition of a class method.
@@ -7,7 +8,7 @@ pub struct MethodDef {
     pub name: &'static str,
     pub args: Vec<Arg>,
     pub signature: Option<&'static str>,
-    pub r#return: ReturnTypeInfo,
+    pub r#return: TypeInfo,
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
@@ -56,7 +57,7 @@ impl fmt::Display for MethodDef {
                 needs_comma = true;
             }
         }
-        writeln!(f, "){}:", self.r#return)?;
+        writeln!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         if !doc.is_empty() {

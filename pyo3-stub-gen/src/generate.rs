@@ -9,7 +9,6 @@ mod member;
 mod method;
 mod module;
 mod new;
-mod return_type_info;
 mod stub_info;
 
 pub use arg::*;
@@ -21,7 +20,6 @@ pub use member::*;
 pub use method::*;
 pub use module::*;
 pub use new::*;
-pub use return_type_info::*;
 pub use stub_info::*;
 
 fn indent() -> &'static str {

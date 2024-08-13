@@ -120,7 +120,7 @@
 //!     name: "foo",
 //!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
 //!     signature: None,
-//!     r#return: ReturnTypeInfo { r#type: TypeInfo::builtin("int") },
+//!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     is_static: false,
 //!     is_class: false,
