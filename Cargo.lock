@@ -345,7 +345,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "inventory",
@@ -360,7 +360,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "insta",
  "inventory",
@@ -374,7 +374,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-testing-mixed"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -383,7 +383,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-testing-pure"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "env_logger",
  "pyo3",
