@@ -20,3 +20,6 @@ toml.workspace = true
 [dependencies.pyo3-stub-gen-derive]
 version = "0.4.1"
 path = "../pyo3-stub-gen-derive"
+
+[dev-dependencies]
+maplit = "1.0.2"

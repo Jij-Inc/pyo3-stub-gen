@@ -152,10 +152,13 @@ pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 pub mod exception;
 pub mod generate;
 pub mod pyproject;
+mod stub_type;
 pub mod type_info;
 
-pub type Result<T> = anyhow::Result<T>;
 pub use generate::StubInfo;
+pub use stub_type::PyStubType;
+
+pub type Result<T> = anyhow::Result<T>;
 
 /// Create a function to initialize [StubInfo] from `pyproject.toml` in `CARGO_MANIFEST_DIR`.
 ///
