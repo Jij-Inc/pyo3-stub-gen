@@ -1,4 +1,7 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
+mod builtins;
+mod collections;
+
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
@@ -24,99 +27,11 @@ pub trait PyStubType {
     }
 }
 
-macro_rules! impl_builtin {
-    ($ty:ty, $pytype:expr) => {
-        impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
-                TypeInfo {
-                    name: $pytype.to_string(),
-                    import: HashSet::new(),
-                }
-            }
-        }
-    };
-}
-
-impl_builtin!(bool, "bool");
-impl_builtin!(u8, "int");
-impl_builtin!(u16, "int");
-impl_builtin!(u32, "int");
-impl_builtin!(u64, "int");
-impl_builtin!(u128, "int");
-impl_builtin!(i8, "int");
-impl_builtin!(i16, "int");
-impl_builtin!(i32, "int");
-impl_builtin!(i64, "int");
-impl_builtin!(i128, "int");
-impl_builtin!(f32, "float");
-impl_builtin!(f64, "float");
-
-impl_builtin!(&str, "str");
-impl_builtin!(String, "str");
-
-impl<T: PyStubType> PyStubType for Vec<T> {
-    fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
-        import.insert("typing".to_string());
-        TypeInfo {
-            name: format!("typing.Sequence[{}]", name),
-            import,
-        }
-    }
-    fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("list[{}]", name),
-            import,
-        }
-    }
-}
-
-macro_rules! impl_map {
-    ($map:ident) => {
-        impl<Key: PyStubType, Value: PyStubType> PyStubType for $map<Key, Value> {
-            fn type_input() -> TypeInfo {
-                let TypeInfo {
-                    name: key_name,
-                    mut import,
-                } = Key::type_input();
-                let TypeInfo {
-                    name: value_name,
-                    import: value_import,
-                } = Value::type_input();
-                import.extend(value_import);
-                import.insert("typing".to_string());
-                TypeInfo {
-                    name: format!("typing.Mapping[{}, {}]", key_name, value_name),
-                    import,
-                }
-            }
-            fn type_output() -> TypeInfo {
-                let TypeInfo {
-                    name: key_name,
-                    mut import,
-                } = Key::type_output();
-                let TypeInfo {
-                    name: value_name,
-                    import: value_import,
-                } = Value::type_output();
-                import.extend(value_import);
-                TypeInfo {
-                    name: format!("dict[{}, {}]", key_name, value_name),
-                    import,
-                }
-            }
-        }
-    };
-}
-
-impl_map!(HashMap);
-impl_map!(BTreeMap);
-
 #[cfg(test)]
 mod test {
     use super::*;
     use maplit::hashset;
+    use std::collections::HashMap;
 
     #[test]
     fn test() {
