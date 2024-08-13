@@ -1,4 +1,5 @@
 use crate::{generate::*, type_info::*};
+use pyo3::inspect::types::TypeInfo;
 use std::fmt;
 
 /// Definition of a Python function.
@@ -9,7 +10,7 @@ pub struct FunctionDef {
     #[getset(get = "pub")]
     args: Vec<Arg>,
     #[getset(get = "pub")]
-    r#return: ReturnTypeInfo,
+    r#return: TypeInfo,
     #[getset(get = "pub")]
     signature: Option<&'static str>,
     #[getset(get = "pub")]
@@ -41,7 +42,7 @@ impl fmt::Display for FunctionDef {
                 }
             }
         }
-        writeln!(f, "){}:", self.r#return)?;
+        writeln!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         let indent = indent();
