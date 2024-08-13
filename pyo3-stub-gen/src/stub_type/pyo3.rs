@@ -10,3 +10,21 @@ impl PyStubType for PyAny {
         }
     }
 }
+
+impl PyStubType for PyList {
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "list".to_string(),
+            import: HashSet::new(),
+        }
+    }
+}
+
+impl PyStubType for PyDict {
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "dict".to_string(),
+            import: HashSet::new(),
+        }
+    }
+}
