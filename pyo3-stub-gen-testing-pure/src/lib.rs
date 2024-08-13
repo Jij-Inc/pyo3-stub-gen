@@ -7,8 +7,8 @@ use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::gen_stu
 /// Returns the sum of two numbers as a string.
 #[gen_stub_pyfunction]
 #[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
+fn sum(v: Vec<u32>) -> u32 {
+    v.iter().sum()
 }
 
 create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
@@ -17,7 +17,7 @@ create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
 #[pymodule]
 fn pyo3_stub_gen_testing_pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type_bound::<MyError>())?;
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+    m.add_function(wrap_pyfunction!(sum, m)?)?;
     Ok(())
 }
 
