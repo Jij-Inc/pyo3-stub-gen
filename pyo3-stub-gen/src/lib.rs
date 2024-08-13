@@ -113,7 +113,7 @@
 //! For example, [generate::MethodDef] generates Python class method definition as follows:
 //!
 //! ```rust
-//! use pyo3::inspect::types::TypeInfo;
+//! use crate::TypeInfo;
 //! use pyo3_stub_gen::generate::*;
 //!
 //! let method = MethodDef {

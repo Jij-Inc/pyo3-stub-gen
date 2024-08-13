@@ -1,5 +1,5 @@
+use crate::TypeInfo;
 use crate::{generate::*, type_info::*};
-use pyo3::inspect::types::TypeInfo;
 use std::fmt;
 
 /// Definition of a class method.

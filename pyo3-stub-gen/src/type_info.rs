@@ -21,18 +21,17 @@
 //! This process is done at runtime in [gen_stub](../../gen_stub) executable.
 //!
 
-use pyo3::inspect::types::TypeInfo;
+use crate::{PyStubType, TypeInfo};
 use std::any::TypeId;
 
 /// Work around for `CompareOp` for `__richcmp__` argument,
 /// which does not implements `FromPyObject`
 pub fn compare_op_type_input() -> TypeInfo {
-    use pyo3::FromPyObject;
-    isize::type_input()
+    <isize as PyStubType>::type_input()
 }
 
 pub fn no_return_type_output() -> TypeInfo {
-    TypeInfo::NoReturn
+    TypeInfo::none()
 }
 
 /// Info of method argument appears in `#[pymethods]`

@@ -1,4 +1,4 @@
-use pyo3::inspect::types::TypeInfo;
+use crate::TypeInfo;
 use std::fmt;
 
 /// Wrapper of [TypeInfo] to implement [fmt::Display] which insert `->` before return type for non-`NoReturn` type.

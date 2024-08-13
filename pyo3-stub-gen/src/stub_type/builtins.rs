@@ -19,11 +19,13 @@ impl_builtin!(u16, "int");
 impl_builtin!(u32, "int");
 impl_builtin!(u64, "int");
 impl_builtin!(u128, "int");
+impl_builtin!(usize, "int");
 impl_builtin!(i8, "int");
 impl_builtin!(i16, "int");
 impl_builtin!(i32, "int");
 impl_builtin!(i64, "int");
 impl_builtin!(i128, "int");
+impl_builtin!(isize, "int");
 impl_builtin!(f32, "float");
 impl_builtin!(f64, "float");
 

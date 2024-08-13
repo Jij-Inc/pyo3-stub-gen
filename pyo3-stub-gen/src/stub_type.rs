@@ -23,6 +23,15 @@ impl fmt::Display for TypeInfo {
     }
 }
 
+impl TypeInfo {
+    pub fn none() -> Self {
+        Self {
+            name: "None".to_string(),
+            import: HashSet::new(),
+        }
+    }
+}
+
 /// Annotate Rust types with Python type information.
 pub trait PyStubType {
     /// The type to be used in the output signature, i.e. return type of the Python function or methods.

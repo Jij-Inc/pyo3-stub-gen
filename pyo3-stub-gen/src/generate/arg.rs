@@ -1,5 +1,5 @@
 use crate::type_info::*;
-use pyo3::inspect::types::TypeInfo;
+use crate::TypeInfo;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
