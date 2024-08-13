@@ -2,7 +2,7 @@ mod builtins;
 mod collections;
 mod pyo3;
 
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt};
 
 /// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15,6 +15,12 @@ pub struct TypeInfo {
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
     pub import: HashSet<String>,
+}
+
+impl fmt::Display for TypeInfo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
 }
 
 /// Annotate Rust types with Python type information.
