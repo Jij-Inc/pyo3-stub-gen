@@ -17,7 +17,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
         Self {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
-            r#return: (info.r#return)().into(),
+            r#return: (info.r#return)(),
             doc: info.doc,
             signature: info.signature,
         }

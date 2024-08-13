@@ -20,7 +20,7 @@ impl From<&MethodInfo> for MethodDef {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
-            r#return: (info.r#return)().into(),
+            r#return: (info.r#return)(),
             doc: info.doc,
             is_static: info.is_static,
             is_class: info.is_class,
