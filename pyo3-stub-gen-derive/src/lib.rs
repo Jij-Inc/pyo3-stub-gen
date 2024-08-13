@@ -5,10 +5,8 @@ use proc_macro::TokenStream;
 /// Embed metadata for Python stub file generation for `#[pyclass]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen_derive::*;
-/// # use pyo3::*;
-/// #[gen_stub_pyclass]
-/// #[pyclass(mapping, module = "my_module", name = "Placeholder")]
+/// #[pyo3_stub_gen_derive::gen_stub_pyclass]
+/// #[pyo3::pyclass(mapping, module = "my_module", name = "Placeholder")]
 /// #[derive(Debug, Clone)]
 /// pub struct PyPlaceholder {
 ///     #[pyo3(get)]
@@ -30,10 +28,8 @@ pub fn gen_stub_pyclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Embed metadata for Python stub file generation for `#[pyclass]` macro with enum
 ///
 /// ```
-/// # use pyo3_stub_gen_derive::*;
-/// # use pyo3::*;
-/// #[gen_stub_pyclass_enum]
-/// #[pyclass(module = "my_module", name = "DataType")]
+/// #[pyo3_stub_gen_derive::gen_stub_pyclass_enum]
+/// #[pyo3::pyclass(module = "my_module", name = "DataType")]
 /// #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// pub enum PyDataType {
 ///     #[pyo3(name = "FLOAT")]
@@ -52,18 +48,15 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
 /// Embed metadata for Python stub file generation for `#[pymethods]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen_derive::*;
-/// # use pyo3::*;
-/// # #[gen_stub_pyclass]
-/// # #[pyclass]
-/// # struct PyAddOp {}
-/// # #[pyclass]
-/// # struct Expression {}
-/// #[gen_stub_pymethods]
-/// #[pymethods]
-/// impl PyAddOp {
+/// #[pyo3_stub_gen_derive::gen_stub_pyclass]
+/// #[pyo3::pyclass]
+/// struct A {}
+///
+/// #[pyo3_stub_gen_derive::gen_stub_pymethods]
+/// #[pyo3::pymethods]
+/// impl A {
 ///     #[getter]
-///     fn get_terms(&self) -> Vec<Expression> {
+///     fn f(&self) -> Vec<u32> {
 ///        todo!()
 ///     }
 /// }
@@ -78,15 +71,10 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
 /// Embed metadata for Python stub file generation for `#[pyfunction]` macro
 ///
 /// ```
-/// # use pyo3_stub_gen_derive::*;
-/// # use pyo3::*;
-/// # #[pyclass]
-/// # #[derive(Clone)]
-/// # pub struct Expression {}
-/// #[gen_stub_pyfunction]
-/// #[pyfunction]
-/// #[pyo3(name = "is_linear")]
-/// pub fn py_is_linear(expr: Expression) -> bool {
+/// #[pyo3_stub_gen_derive::gen_stub_pyfunction]
+/// #[pyo3::pyfunction]
+/// #[pyo3(name = "is_odd")]
+/// pub fn is_odd(x: u32) -> bool {
 ///     todo!()
 /// }
 /// ```
@@ -95,15 +83,10 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
 /// If you want to append this function to another module, add `module` attribute.
 ///
 /// ```
-/// # use pyo3_stub_gen_derive::*;
-/// # use pyo3::*;
-/// # #[pyclass]
-/// # #[derive(Clone)]
-/// # pub struct Expression {}
-/// #[gen_stub_pyfunction(module = "my_module.experimental")]
-/// #[pyfunction]
-/// #[pyo3(name = "is_linear")]
-/// pub fn py_is_linear(expr: Expression) -> bool {
+/// #[pyo3_stub_gen_derive::gen_stub_pyfunction(module = "my_module.experimental")]
+/// #[pyo3::pyfunction]
+/// #[pyo3(name = "is_odd")]
+/// pub fn is_odd(x: u32) -> bool {
 ///     todo!()
 /// }
 /// ```
