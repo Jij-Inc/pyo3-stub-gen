@@ -84,15 +84,12 @@ impl StubInfoBuilder {
     }
 
     fn get_module(&mut self, name: Option<&str>) -> &mut Module {
-        if let Some(name) = name {
-            let module = self.modules.entry(name.to_string()).or_default();
-            module.default_module_name = Some(self.default_module_name.clone());
-            return module;
-        } else {
-            self.modules
-                .entry(self.default_module_name.clone())
-                .or_default()
-        }
+        let module = self
+            .modules
+            .entry(name.unwrap_or(&self.default_module_name).to_string())
+            .or_default();
+        module.default_module_name = self.default_module_name.clone();
+        return module;
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {

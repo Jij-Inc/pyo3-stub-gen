@@ -9,7 +9,8 @@ pub struct Module {
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, FunctionDef>,
     pub error: BTreeMap<&'static str, ErrorDef>,
-    pub default_module_name: Option<String>,
+    pub name: String,
+    pub default_module_name: String,
 }
 
 impl Import for Module {
@@ -31,13 +32,9 @@ impl fmt::Display for Module {
         writeln!(f, "# ruff: noqa: E501, F401")?;
         writeln!(f)?;
         for import in self.import().into_iter().sorted() {
-            match import {
-                ModuleRef::Named(name) => writeln!(f, "import {}", name)?,
-                ModuleRef::Default => {
-                    if let Some(name) = &self.default_module_name {
-                        writeln!(f, "import {}", name)?;
-                    }
-                }
+            let name = import.get().unwrap_or(&self.default_module_name);
+            if name != self.name {
+                writeln!(f, "import {}", name)?;
             }
         }
         if !self.enum_.is_empty() {

@@ -20,6 +20,15 @@ pub enum ModuleRef {
     Default,
 }
 
+impl ModuleRef {
+    pub fn get(&self) -> Option<&str> {
+        match self {
+            Self::Named(name) => Some(name),
+            Self::Default => None,
+        }
+    }
+}
+
 impl From<&str> for ModuleRef {
     fn from(s: &str) -> Self {
         Self::Named(s.to_string())
