@@ -3,6 +3,16 @@
 
 import typing
 
+class A:
+    x: int
+    def __new__(cls,x:int): ...
+    def show_x(self) -> None:
+        ...
+
+
+def create_a(x:int) -> A:
+    ...
+
 def create_dict(n:int) -> dict[int, list[int]]:
     ...
 
