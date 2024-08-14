@@ -3,6 +3,12 @@
 
 import typing
 
+def create_dict(n:int) -> dict[int, list[int]]:
+    ...
+
+def read_dict(dict:typing.Mapping[int, typing.Mapping[int, int]]) -> None:
+    ...
+
 def sum(v:typing.Sequence[int]) -> int:
     r"""
     Returns the sum of two numbers as a string.
