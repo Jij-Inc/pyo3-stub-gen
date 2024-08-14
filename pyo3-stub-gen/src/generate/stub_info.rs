@@ -33,7 +33,7 @@ impl StubInfo {
             let module = modules.entry(module_name).or_default();
 
             module
-                .class
+                .class_mut()
                 .insert((info.struct_id)(), ClassDef::from(info));
         }
 
@@ -43,24 +43,25 @@ impl StubInfo {
                 .map(str::to_owned)
                 .unwrap_or(default_module_name.to_string());
             let module = modules.entry(module_name).or_default();
-            module.enum_.insert((info.enum_id)(), EnumDef::from(info));
+            module
+                .enum__mut()
+                .insert((info.enum_id)(), EnumDef::from(info));
         }
 
         'methods_info: for info in inventory::iter::<PyMethodsInfo> {
             let struct_id = (info.struct_id)();
             for module in modules.values_mut() {
-                if let Some(entry) = module.class.get_mut(&struct_id) {
+                if let Some(entry) = module.class_mut().get_mut(&struct_id) {
                     for getter in info.getters {
-                        entry.members.push(MemberDef {
-                            name: getter.name,
-                            r#type: (getter.r#type)(),
-                        });
+                        entry
+                            .members_mut()
+                            .push(MemberDef::new(getter.name, (getter.r#type)()));
                     }
                     for method in info.methods {
-                        entry.methods.push(MethodDef::from(method))
+                        entry.methods_mut().push(MethodDef::from(method))
                     }
                     if let Some(new) = &info.new {
-                        entry.new = Some(NewDef::from(new));
+                        *entry.new_mut() = Some(NewDef::from(new));
                     }
                     continue 'methods_info;
                 }
@@ -76,12 +77,14 @@ impl StubInfo {
                         .unwrap_or(default_module_name.to_string()),
                 )
                 .or_default();
-            module.function.insert(info.name, FunctionDef::from(info));
+            module
+                .function_mut()
+                .insert(info.name, FunctionDef::from(info));
         }
 
         for info in inventory::iter::<PyErrorInfo> {
             let module = modules.entry(info.module.to_string()).or_default();
-            module.error.insert(info.name, ErrorDef::from(info));
+            module.error_mut().insert(info.name, ErrorDef::from(info));
         }
 
         Self { modules, pyproject }

@@ -3,15 +3,15 @@ use itertools::Itertools;
 use std::{any::TypeId, collections::BTreeMap, fmt};
 
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
-#[derive(Debug, Clone, PartialEq, Default, getset::Getters)]
+#[derive(Debug, Clone, PartialEq, Default, getset::Getters, getset::MutGetters)]
 pub struct Module {
-    #[getset(get = "pub")]
+    #[getset(get = "pub", get_mut = "pub")]
     class: BTreeMap<TypeId, ClassDef>,
-    #[getset(get = "pub")]
+    #[getset(get = "pub", get_mut = "pub")]
     enum_: BTreeMap<TypeId, EnumDef>,
-    #[getset(get = "pub")]
+    #[getset(get = "pub", get_mut = "pub")]
     function: BTreeMap<&'static str, FunctionDef>,
-    #[getset(get = "pub")]
+    #[getset(get = "pub", get_mut = "pub")]
     error: BTreeMap<&'static str, ErrorDef>,
 }
 

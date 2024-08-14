@@ -114,17 +114,17 @@
 //!
 //! ```rust
 //! use pyo3::inspect::types::TypeInfo;
-//! use pyo3_stub_gen::generate::*;
+//! use pyo3_stub_gen::{generate::MethodDef, type_info::{MethodInfo, ArgInfo}};
 //!
-//! let method = MethodDef {
+//! let method = MethodDef::from(&MethodInfo {
 //!     name: "foo",
-//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
+//!     args: &[ArgInfo { name: "x", r#type: || TypeInfo::builtin("int") }],
 //!     signature: None,
-//!     r#return: TypeInfo::builtin("int"),
+//!     r#return: || TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     is_static: false,
 //!     is_class: false,
-//! };
+//! });
 //!
 //! assert_eq!(
 //!     method.to_string().trim(),

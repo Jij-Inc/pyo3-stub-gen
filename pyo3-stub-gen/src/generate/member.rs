@@ -11,6 +11,12 @@ pub struct MemberDef {
     r#type: TypeInfo,
 }
 
+impl MemberDef {
+    pub fn new(name: &'static str, r#type: TypeInfo) -> Self {
+        Self { name, r#type }
+    }
+}
+
 impl From<&MemberInfo> for MemberDef {
     fn from(info: &MemberInfo) -> Self {
         Self {
