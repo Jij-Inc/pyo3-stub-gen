@@ -259,6 +259,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mixed_sub"
+version = "0.5.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
