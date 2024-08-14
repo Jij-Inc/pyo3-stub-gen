@@ -11,6 +11,9 @@ class A:
         ...
 
 
+def create_a(x:int) -> A:
+    ...
+
 def create_dict(n:int) -> dict[int, list[int]]:
     ...
 

@@ -2,7 +2,7 @@
 mod readme {}
 
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
-use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
+use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*, PyStubType};
 use std::collections::HashMap;
 
 /// Returns the sum of two numbers as a string.
@@ -53,6 +53,21 @@ impl A {
     }
 }
 
+impl PyStubType for A {
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        pyo3_stub_gen::TypeInfo {
+            name: "A".to_string(),
+            import: Default::default(),
+        }
+    }
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn create_a(x: usize) -> A {
+    A { x }
+}
+
 create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
 
 /// Initializes the Python module
@@ -63,6 +78,7 @@ fn pyo3_stub_gen_testing_pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
+    m.add_function(wrap_pyfunction!(create_a, m)?)?;
     Ok(())
 }
 
