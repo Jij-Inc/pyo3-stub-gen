@@ -2,7 +2,7 @@
 mod readme {}
 
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
-use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*, PyStubType};
+use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
 use std::collections::HashMap;
 
 /// Returns the sum of two numbers as a string.
@@ -34,7 +34,7 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 
 #[gen_stub_pyclass]
 #[pyclass]
-#[derive(Debug)]
+#[derive(Debug, PyStubType)]
 struct A {
     #[pyo3(get, set)]
     x: usize,
@@ -50,15 +50,6 @@ impl A {
 
     fn show_x(&self) {
         println!("x = {}", self.x);
-    }
-}
-
-impl PyStubType for A {
-    fn type_output() -> pyo3_stub_gen::TypeInfo {
-        pyo3_stub_gen::TypeInfo {
-            name: "A".to_string(),
-            import: Default::default(),
-        }
     }
 }
 
