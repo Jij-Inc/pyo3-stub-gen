@@ -1,6 +1,5 @@
-use crate::TypeInfo;
-use crate::{generate::*, type_info::*};
-use std::fmt;
+use crate::{generate::*, type_info::*, TypeInfo};
+use std::{collections::HashSet, fmt};
 
 /// Definition of a class method.
 #[derive(Debug, Clone, PartialEq)]
@@ -12,6 +11,16 @@ pub struct MethodDef {
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+}
+
+impl Import for MethodDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = self.r#return.import.clone();
+        for arg in &self.args {
+            import.extend(arg.import().into_iter());
+        }
+        import
+    }
 }
 
 impl From<&MethodInfo> for MethodDef {

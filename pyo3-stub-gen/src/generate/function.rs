@@ -11,6 +11,16 @@ pub struct FunctionDef {
     pub doc: &'static str,
 }
 
+impl Import for FunctionDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = self.r#return.import.clone();
+        for arg in &self.args {
+            import.extend(arg.import().into_iter());
+        }
+        import
+    }
+}
+
 impl From<&PyFunctionInfo> for FunctionDef {
     fn from(info: &PyFunctionInfo) -> Self {
         Self {

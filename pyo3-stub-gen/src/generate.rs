@@ -11,6 +11,8 @@ mod module;
 mod new;
 mod stub_info;
 
+use std::collections::HashSet;
+
 pub use arg::*;
 pub use class::*;
 pub use enum_::*;
@@ -24,4 +26,8 @@ pub use stub_info::*;
 
 fn indent() -> &'static str {
     "    "
+}
+
+trait Import {
+    fn import(&self) -> HashSet<String>;
 }
