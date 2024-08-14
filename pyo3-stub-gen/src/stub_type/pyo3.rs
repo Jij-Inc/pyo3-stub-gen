@@ -11,20 +11,21 @@ impl PyStubType for PyAny {
     }
 }
 
-impl PyStubType for PyList {
-    fn type_output() -> TypeInfo {
-        TypeInfo {
-            name: "list".to_string(),
-            import: HashSet::new(),
+macro_rules! impl_builtin {
+    ($ty:ty, $pytype:expr) => {
+        impl PyStubType for $ty {
+            fn type_output() -> TypeInfo {
+                TypeInfo {
+                    name: $pytype.to_string(),
+                    import: HashSet::new(),
+                }
+            }
         }
-    }
+    };
 }
 
-impl PyStubType for PyDict {
-    fn type_output() -> TypeInfo {
-        TypeInfo {
-            name: "dict".to_string(),
-            import: HashSet::new(),
-        }
-    }
-}
+impl_builtin!(PyList, "list");
+impl_builtin!(PyDict, "dict");
+impl_builtin!(PyString, "str");
+impl_builtin!(PyByteArray, "bytearray");
+impl_builtin!(PyBytes, "bytes");
