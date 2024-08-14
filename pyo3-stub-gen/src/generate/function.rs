@@ -12,7 +12,7 @@ pub struct FunctionDef {
 }
 
 impl Import for FunctionDef {
-    fn import(&self) -> HashSet<String> {
+    fn import(&self) -> HashSet<ModuleRef> {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());

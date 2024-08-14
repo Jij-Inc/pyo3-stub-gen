@@ -11,7 +11,7 @@ pub struct StubInfo {
 impl StubInfo {
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        Ok(Self::gather(pyproject))
+        Ok(StubInfoBuilder::new(pyproject).build())
     }
 
     fn default_module(&self) -> Result<&Module> {
@@ -19,72 +19,6 @@ impl StubInfo {
         self.modules
             .get(default_module_name)
             .ok_or_else(|| anyhow!("Missing default module: {}", default_module_name))
-    }
-
-    fn gather(pyproject: PyProject) -> Self {
-        let default_module_name = pyproject.module_name();
-        let mut modules: BTreeMap<String, Module> = BTreeMap::new();
-
-        for info in inventory::iter::<PyClassInfo> {
-            let module_name = info
-                .module
-                .map(str::to_owned)
-                .unwrap_or(default_module_name.to_string());
-            let module = modules.entry(module_name).or_default();
-
-            module
-                .class
-                .insert((info.struct_id)(), ClassDef::from(info));
-        }
-
-        for info in inventory::iter::<PyEnumInfo> {
-            let module_name = info
-                .module
-                .map(str::to_owned)
-                .unwrap_or(default_module_name.to_string());
-            let module = modules.entry(module_name).or_default();
-            module.enum_.insert((info.enum_id)(), EnumDef::from(info));
-        }
-
-        'methods_info: for info in inventory::iter::<PyMethodsInfo> {
-            let struct_id = (info.struct_id)();
-            for module in modules.values_mut() {
-                if let Some(entry) = module.class.get_mut(&struct_id) {
-                    for getter in info.getters {
-                        entry.members.push(MemberDef {
-                            name: getter.name,
-                            r#type: (getter.r#type)(),
-                        });
-                    }
-                    for method in info.methods {
-                        entry.methods.push(MethodDef::from(method))
-                    }
-                    if let Some(new) = &info.new {
-                        entry.new = Some(NewDef::from(new));
-                    }
-                    continue 'methods_info;
-                }
-            }
-            unreachable!("Missing struct_id = {:?}", struct_id);
-        }
-
-        for info in inventory::iter::<PyFunctionInfo> {
-            let module = modules
-                .entry(
-                    info.module
-                        .map(str::to_string)
-                        .unwrap_or(default_module_name.to_string()),
-                )
-                .or_default();
-            module.function.insert(info.name, FunctionDef::from(info));
-        }
-
-        for info in inventory::iter::<PyErrorInfo> {
-            let module = modules.entry(info.module.to_string()).or_default();
-            module.error.insert(info.name, ErrorDef::from(info));
-        }
-
-        Self { modules, pyproject }
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -131,5 +65,101 @@ impl StubInfo {
             );
         }
         Ok(())
+    }
+}
+
+struct StubInfoBuilder {
+    modules: BTreeMap<String, Module>,
+    default_module_name: String,
+    pyproject: PyProject,
+}
+
+impl StubInfoBuilder {
+    fn new(pyproject: PyProject) -> Self {
+        Self {
+            modules: BTreeMap::new(),
+            default_module_name: pyproject.module_name().to_string(),
+            pyproject,
+        }
+    }
+
+    fn get_module(&mut self, name: Option<&str>) -> &mut Module {
+        if let Some(name) = name {
+            let module = self.modules.entry(name.to_string()).or_default();
+            module.default_module_name = Some(self.default_module_name.clone());
+            return module;
+        } else {
+            self.modules
+                .entry(self.default_module_name.clone())
+                .or_default()
+        }
+    }
+
+    fn add_class(&mut self, info: &PyClassInfo) {
+        self.get_module(info.module)
+            .class
+            .insert((info.struct_id)(), ClassDef::from(info));
+    }
+
+    fn add_enum(&mut self, info: &PyEnumInfo) {
+        self.get_module(info.module)
+            .enum_
+            .insert((info.enum_id)(), EnumDef::from(info));
+    }
+
+    fn add_function(&mut self, info: &PyFunctionInfo) {
+        self.get_module(info.module)
+            .function
+            .insert(info.name, FunctionDef::from(info));
+    }
+
+    fn add_error(&mut self, info: &PyErrorInfo) {
+        self.get_module(Some(info.module))
+            .error
+            .insert(info.name, ErrorDef::from(info));
+    }
+
+    fn add_methods(&mut self, info: &PyMethodsInfo) {
+        let struct_id = (info.struct_id)();
+        for module in self.modules.values_mut() {
+            if let Some(entry) = module.class.get_mut(&struct_id) {
+                for getter in info.getters {
+                    entry.members.push(MemberDef {
+                        name: getter.name,
+                        r#type: (getter.r#type)(),
+                    });
+                }
+                for method in info.methods {
+                    entry.methods.push(MethodDef::from(method))
+                }
+                if let Some(new) = &info.new {
+                    entry.new = Some(NewDef::from(new));
+                }
+                return;
+            }
+        }
+        unreachable!("Missing struct_id = {:?}", struct_id);
+    }
+
+    fn build(mut self) -> StubInfo {
+        for info in inventory::iter::<PyClassInfo> {
+            self.add_class(info);
+        }
+        for info in inventory::iter::<PyEnumInfo> {
+            self.add_enum(info);
+        }
+        for info in inventory::iter::<PyFunctionInfo> {
+            self.add_function(info);
+        }
+        for info in inventory::iter::<PyErrorInfo> {
+            self.add_error(info);
+        }
+        for info in inventory::iter::<PyMethodsInfo> {
+            self.add_methods(info);
+        }
+        StubInfo {
+            modules: self.modules,
+            pyproject: self.pyproject,
+        }
     }
 }

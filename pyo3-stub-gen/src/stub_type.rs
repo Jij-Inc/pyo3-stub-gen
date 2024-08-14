@@ -4,6 +4,28 @@ mod pyo3;
 
 use std::{collections::HashSet, fmt};
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
+pub enum ModuleRef {
+    Named(String),
+
+    /// Default module that PyO3 creates.
+    ///
+    /// - For pure Rust project, the default module name is the crate name specified in `Cargo.toml`
+    ///   or `project.name` specified in `pyproject.toml`
+    /// - For mixed Rust/Python project, the default module name is `tool.maturin.module-name` specified in `pyproject.toml`
+    ///
+    /// Because the default module name cannot be known at compile time, it will be resolved at the time of the stub file generation.
+    /// This is a placeholder for the default module name.
+    #[default]
+    Default,
+}
+
+impl From<&str> for ModuleRef {
+    fn from(s: &str) -> Self {
+        Self::Named(s.to_string())
+    }
+}
+
 /// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
@@ -14,7 +36,7 @@ pub struct TypeInfo {
     ///
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
-    pub import: HashSet<String>,
+    pub import: HashSet<ModuleRef>,
 }
 
 impl fmt::Display for TypeInfo {
@@ -70,7 +92,7 @@ mod test {
         assert_eq!(Vec::<u32>::type_input().name, "typing.Sequence[int]");
         assert_eq!(
             Vec::<u32>::type_input().import,
-            hashset! { "typing".to_string() }
+            hashset! { "typing".into() }
         );
 
         assert_eq!(Vec::<u32>::type_output().name, "list[int]");
@@ -82,7 +104,7 @@ mod test {
         );
         assert_eq!(
             HashMap::<u32, String>::type_input().import,
-            hashset! { "typing".to_string() }
+            hashset! { "typing".into() }
         );
 
         assert_eq!(HashMap::<u32, String>::type_output().name, "dict[int, str]");
@@ -94,7 +116,7 @@ mod test {
         );
         assert_eq!(
             HashMap::<u32, Vec<u32>>::type_input().import,
-            hashset! { "typing".to_string() }
+            hashset! { "typing".into() }
         );
 
         assert_eq!(

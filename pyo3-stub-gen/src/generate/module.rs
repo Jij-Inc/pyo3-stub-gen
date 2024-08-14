@@ -9,10 +9,11 @@ pub struct Module {
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, FunctionDef>,
     pub error: BTreeMap<&'static str, ErrorDef>,
+    pub default_module_name: Option<String>,
 }
 
 impl Import for Module {
-    fn import(&self) -> HashSet<String> {
+    fn import(&self) -> HashSet<ModuleRef> {
         let mut imports = HashSet::new();
         for class in self.class.values() {
             imports.extend(class.import());
@@ -30,7 +31,14 @@ impl fmt::Display for Module {
         writeln!(f, "# ruff: noqa: E501, F401")?;
         writeln!(f)?;
         for import in self.import().into_iter().sorted() {
-            writeln!(f, "import {}", import)?;
+            match import {
+                ModuleRef::Named(name) => writeln!(f, "import {}", name)?,
+                ModuleRef::Default => {
+                    if let Some(name) = &self.default_module_name {
+                        writeln!(f, "import {}", name)?;
+                    }
+                }
+            }
         }
         if !self.enum_.is_empty() {
             writeln!(f, "from enum import Enum, auto")?;

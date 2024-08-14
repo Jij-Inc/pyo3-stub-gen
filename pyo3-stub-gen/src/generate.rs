@@ -11,8 +11,6 @@ mod module;
 mod new;
 mod stub_info;
 
-use std::collections::HashSet;
-
 pub use arg::*;
 pub use class::*;
 pub use enum_::*;
@@ -24,10 +22,13 @@ pub use module::*;
 pub use new::*;
 pub use stub_info::*;
 
+use crate::stub_type::ModuleRef;
+use std::collections::HashSet;
+
 fn indent() -> &'static str {
     "    "
 }
 
 pub trait Import {
-    fn import(&self) -> HashSet<String>;
+    fn import(&self) -> HashSet<ModuleRef>;
 }
