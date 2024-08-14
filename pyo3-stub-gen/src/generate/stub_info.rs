@@ -89,7 +89,7 @@ impl StubInfoBuilder {
             .entry(name.unwrap_or(&self.default_module_name).to_string())
             .or_default();
         module.default_module_name = self.default_module_name.clone();
-        return module;
+        module
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
