@@ -43,7 +43,6 @@ impl From<&PyClassInfo> for ClassDef {
 
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "@final")?;
         writeln!(f, "class {}:", self.name)?;
         let indent = indent();
         let doc = self.doc.trim();

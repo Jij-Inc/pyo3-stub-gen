@@ -3,7 +3,6 @@
 
 import typing
 
-@final
 class A:
     x: int
     def __new__(cls,x:int): ...
