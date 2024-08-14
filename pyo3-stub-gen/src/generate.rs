@@ -28,6 +28,6 @@ fn indent() -> &'static str {
     "    "
 }
 
-trait Import {
+pub trait Import {
     fn import(&self) -> HashSet<String>;
 }

@@ -14,6 +14,9 @@ pub struct ClassDef {
 impl Import for ClassDef {
     fn import(&self) -> HashSet<String> {
         let mut import = HashSet::new();
+        if let Some(new) = &self.new {
+            import.extend(new.import().into_iter());
+        }
         for member in &self.members {
             import.extend(member.import().into_iter());
         }
