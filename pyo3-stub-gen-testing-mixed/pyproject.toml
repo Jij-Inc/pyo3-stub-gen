@@ -11,5 +11,5 @@ test = ["pytest", "pyright", "ruff"]
 
 [tool.maturin]
 python-source = "python"
-module-name = "pyo3_stub_gen_testing_mixed.my_rust_pkg"
+module-name = "pyo3_stub_gen_testing_mixed.main_mod"
 features = ["pyo3/extension-module"]

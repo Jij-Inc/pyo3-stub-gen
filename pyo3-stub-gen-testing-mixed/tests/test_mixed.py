@@ -1,5 +1,9 @@
-import pyo3_stub_gen_testing_mixed.my_rust_pkg
+from pyo3_stub_gen_testing_mixed import main_mod
 
 
-def test_sum_as_string():
-    assert pyo3_stub_gen_testing_mixed.my_rust_pkg.sum_as_string(1, 2) == "3"
+def test_main_mod():
+    a = main_mod.create_a(1)
+    a.show_x()
+
+    b = main_mod.create_b(1)
+    b.show_x()
