@@ -7,6 +7,14 @@ class A:
         ...
 
 
+class B:
+    def show_x(self) -> None:
+        ...
+
+
 def create_a(x:int) -> A:
+    ...
+
+def create_b(x:int) -> B:
     ...
 
