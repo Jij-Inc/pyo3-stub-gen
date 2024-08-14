@@ -2,15 +2,22 @@ use crate::{generate::*, type_info::*};
 use std::fmt;
 
 /// Definition of a class method.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct MethodDef {
-    pub name: &'static str,
-    pub args: Vec<Arg>,
-    pub signature: Option<&'static str>,
-    pub r#return: ReturnTypeInfo,
-    pub doc: &'static str,
-    pub is_static: bool,
-    pub is_class: bool,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    args: Vec<Arg>,
+    #[getset(get = "pub")]
+    signature: Option<&'static str>,
+    #[getset(get = "pub")]
+    r#return: ReturnTypeInfo,
+    #[getset(get = "pub")]
+    doc: &'static str,
+    #[getset(get = "pub")]
+    is_static: bool,
+    #[getset(get = "pub")]
+    is_class: bool,
 }
 
 impl From<&MethodInfo> for MethodDef {

@@ -2,10 +2,12 @@ use crate::type_info::*;
 use pyo3::inspect::types::TypeInfo;
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct Arg {
-    pub name: &'static str,
-    pub r#type: TypeInfo,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    r#type: TypeInfo,
 }
 
 impl From<&ArgInfo> for Arg {

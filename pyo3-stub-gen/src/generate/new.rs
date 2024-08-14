@@ -2,10 +2,12 @@ use crate::{generate::*, type_info::*};
 use std::fmt;
 
 /// Definition of `__new__` method.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct NewDef {
-    pub args: Vec<Arg>,
-    pub signature: Option<&'static str>,
+    #[getset(get = "pub")]
+    args: Vec<Arg>,
+    #[getset(get = "pub")]
+    signature: Option<&'static str>,
 }
 
 impl From<&NewInfo> for NewDef {

@@ -3,10 +3,12 @@ use pyo3::inspect::types::TypeInfo;
 use std::fmt;
 
 /// Definition of a class member.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct MemberDef {
-    pub name: &'static str,
-    pub r#type: TypeInfo,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    r#type: TypeInfo,
 }
 
 impl From<&MemberInfo> for MemberDef {

@@ -10,6 +10,7 @@ readme.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+getset = "0.1.2"
 inventory.workspace = true
 itertools.workspace = true
 log.workspace = true

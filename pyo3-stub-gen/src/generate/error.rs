@@ -1,11 +1,13 @@
 use crate::type_info::*;
 use std::fmt;
 
-/// Definition of a Python execption.
-#[derive(Debug, Clone, PartialEq)]
+/// Definition of a Python exception.
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct ErrorDef {
-    pub name: &'static str,
-    pub base: &'static str,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    base: &'static str,
 }
 
 impl From<&PyErrorInfo> for ErrorDef {

@@ -2,13 +2,18 @@ use crate::{generate::*, type_info::*};
 use std::fmt;
 
 /// Definition of a Python function.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct FunctionDef {
-    pub name: &'static str,
-    pub args: Vec<Arg>,
-    pub r#return: ReturnTypeInfo,
-    pub signature: Option<&'static str>,
-    pub doc: &'static str,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    args: Vec<Arg>,
+    #[getset(get = "pub")]
+    r#return: ReturnTypeInfo,
+    #[getset(get = "pub")]
+    signature: Option<&'static str>,
+    #[getset(get = "pub")]
+    doc: &'static str,
 }
 
 impl From<&PyFunctionInfo> for FunctionDef {

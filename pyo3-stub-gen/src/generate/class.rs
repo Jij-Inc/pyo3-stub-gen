@@ -2,13 +2,18 @@ use crate::{generate::*, type_info::*};
 use std::fmt;
 
 /// Definition of a Python class.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct ClassDef {
-    pub name: &'static str,
-    pub doc: &'static str,
-    pub new: Option<NewDef>,
-    pub members: Vec<MemberDef>,
-    pub methods: Vec<MethodDef>,
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    doc: &'static str,
+    #[getset(get = "pub")]
+    new: Option<NewDef>,
+    #[getset(get = "pub")]
+    members: Vec<MemberDef>,
+    #[getset(get = "pub")]
+    methods: Vec<MethodDef>,
 }
 
 impl From<&PyClassInfo> for ClassDef {

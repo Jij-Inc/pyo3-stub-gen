@@ -2,11 +2,14 @@ use crate::{generate::*, type_info::*};
 use std::fmt;
 
 /// Definition of a Python enum.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, getset::Getters)]
 pub struct EnumDef {
-    pub name: &'static str,
-    pub doc: &'static str,
-    pub variants: &'static [&'static str],
+    #[getset(get = "pub")]
+    name: &'static str,
+    #[getset(get = "pub")]
+    doc: &'static str,
+    #[getset(get = "pub")]
+    variants: &'static [&'static str],
 }
 
 impl From<&PyEnumInfo> for EnumDef {
