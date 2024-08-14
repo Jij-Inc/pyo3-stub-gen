@@ -9,8 +9,9 @@ mod member;
 mod method;
 mod module;
 mod new;
-mod return_type_info;
 mod stub_info;
+
+use std::collections::HashSet;
 
 pub use arg::*;
 pub use class::*;
@@ -21,9 +22,12 @@ pub use member::*;
 pub use method::*;
 pub use module::*;
 pub use new::*;
-pub use return_type_info::*;
 pub use stub_info::*;
 
 fn indent() -> &'static str {
     "    "
+}
+
+pub trait Import {
+    fn import(&self) -> HashSet<String>;
 }

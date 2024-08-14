@@ -1,12 +1,17 @@
-use crate::{generate::*, type_info::*};
-use pyo3::inspect::types::TypeInfo;
-use std::fmt;
+use crate::{generate::*, type_info::*, TypeInfo};
+use std::{collections::HashSet, fmt};
 
 /// Definition of a class member.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MemberDef {
     pub name: &'static str,
     pub r#type: TypeInfo,
+}
+
+impl Import for MemberDef {
+    fn import(&self) -> HashSet<String> {
+        self.r#type.import.clone()
+    }
 }
 
 impl From<&MemberInfo> for MemberDef {

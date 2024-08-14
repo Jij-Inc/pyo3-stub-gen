@@ -1,11 +1,16 @@
-use crate::type_info::*;
-use pyo3::inspect::types::TypeInfo;
-use std::fmt;
+use crate::{generate::Import, type_info::*, TypeInfo};
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Arg {
     pub name: &'static str,
     pub r#type: TypeInfo,
+}
+
+impl Import for Arg {
+    fn import(&self) -> HashSet<String> {
+        self.r#type.import.clone()
+    }
 }
 
 impl From<&ArgInfo> for Arg {

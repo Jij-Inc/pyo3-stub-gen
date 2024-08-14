@@ -1,4 +1,4 @@
-use crate::{generate::*, type_info::*};
+use crate::{generate::*, type_info::*, TypeInfo};
 use std::fmt;
 
 /// Definition of a Python function.
@@ -6,9 +6,19 @@ use std::fmt;
 pub struct FunctionDef {
     pub name: &'static str,
     pub args: Vec<Arg>,
-    pub r#return: ReturnTypeInfo,
+    pub r#return: TypeInfo,
     pub signature: Option<&'static str>,
     pub doc: &'static str,
+}
+
+impl Import for FunctionDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = self.r#return.import.clone();
+        for arg in &self.args {
+            import.extend(arg.import().into_iter());
+        }
+        import
+    }
 }
 
 impl From<&PyFunctionInfo> for FunctionDef {
@@ -16,7 +26,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
         Self {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
-            r#return: (info.r#return)().into(),
+            r#return: (info.r#return)(),
             doc: info.doc,
             signature: info.signature,
         }
@@ -36,7 +46,7 @@ impl fmt::Display for FunctionDef {
                 }
             }
         }
-        writeln!(f, "){}:", self.r#return)?;
+        writeln!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         let indent = indent();

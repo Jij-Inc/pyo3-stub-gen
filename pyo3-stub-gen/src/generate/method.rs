@@ -1,5 +1,5 @@
-use crate::{generate::*, type_info::*};
-use std::fmt;
+use crate::{generate::*, type_info::*, TypeInfo};
+use std::{collections::HashSet, fmt};
 
 /// Definition of a class method.
 #[derive(Debug, Clone, PartialEq)]
@@ -7,10 +7,20 @@ pub struct MethodDef {
     pub name: &'static str,
     pub args: Vec<Arg>,
     pub signature: Option<&'static str>,
-    pub r#return: ReturnTypeInfo,
+    pub r#return: TypeInfo,
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+}
+
+impl Import for MethodDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = self.r#return.import.clone();
+        for arg in &self.args {
+            import.extend(arg.import().into_iter());
+        }
+        import
+    }
 }
 
 impl From<&MethodInfo> for MethodDef {
@@ -19,7 +29,7 @@ impl From<&MethodInfo> for MethodDef {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
             signature: info.signature,
-            r#return: (info.r#return)().into(),
+            r#return: (info.r#return)(),
             doc: info.doc,
             is_static: info.is_static,
             is_class: info.is_class,
@@ -56,7 +66,7 @@ impl fmt::Display for MethodDef {
                 needs_comma = true;
             }
         }
-        writeln!(f, "){}:", self.r#return)?;
+        writeln!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         if !doc.is_empty() {

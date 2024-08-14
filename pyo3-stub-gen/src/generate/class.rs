@@ -11,6 +11,22 @@ pub struct ClassDef {
     pub methods: Vec<MethodDef>,
 }
 
+impl Import for ClassDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = HashSet::new();
+        if let Some(new) = &self.new {
+            import.extend(new.import());
+        }
+        for member in &self.members {
+            import.extend(member.import());
+        }
+        for method in &self.methods {
+            import.extend(method.import());
+        }
+        import
+    }
+}
+
 impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.

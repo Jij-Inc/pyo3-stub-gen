@@ -39,11 +39,11 @@
 //!         members: &[
 //!             MemberInfo {
 //!                 name: "name",
-//!                 r#type: <String as IntoPy<PyObject>>::type_output,
+//!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
-//!                 r#type: <Option<String> as IntoPy<PyObject>>::type_output,
+//!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!             },
 //!         ],
 //!         doc: "Docstring used in Python",
@@ -113,14 +113,13 @@
 //! For example, [generate::MethodDef] generates Python class method definition as follows:
 //!
 //! ```rust
-//! use pyo3::inspect::types::TypeInfo;
-//! use pyo3_stub_gen::generate::*;
+//! use pyo3_stub_gen::{TypeInfo, generate::*};
 //!
 //! let method = MethodDef {
 //!     name: "foo",
 //!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
 //!     signature: None,
-//!     r#return: ReturnTypeInfo { r#type: TypeInfo::builtin("int") },
+//!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     is_static: false,
 //!     is_class: false,
@@ -152,10 +151,13 @@ pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 pub mod exception;
 pub mod generate;
 pub mod pyproject;
+mod stub_type;
 pub mod type_info;
 
-pub type Result<T> = anyhow::Result<T>;
 pub use generate::StubInfo;
+pub use stub_type::{PyStubType, TypeInfo};
+
+pub type Result<T> = anyhow::Result<T>;
 
 /// Create a function to initialize [StubInfo] from `pyproject.toml` in `CARGO_MANIFEST_DIR`.
 ///

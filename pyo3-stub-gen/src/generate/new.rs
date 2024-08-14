@@ -8,6 +8,16 @@ pub struct NewDef {
     pub signature: Option<&'static str>,
 }
 
+impl Import for NewDef {
+    fn import(&self) -> HashSet<String> {
+        let mut import = HashSet::new();
+        for arg in &self.args {
+            import.extend(arg.import().into_iter());
+        }
+        import
+    }
+}
+
 impl From<&NewInfo> for NewDef {
     fn from(info: &NewInfo) -> Self {
         Self {

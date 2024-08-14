@@ -67,7 +67,7 @@ fn type_to_token(ty: &Type) -> TokenStream2 {
                 if last_seg.ident == "CompareOp" {
                     quote! { ::pyo3_stub_gen::type_info::compare_op_type_input }
                 } else {
-                    quote! { <#ty as FromPyObject>::type_input }
+                    quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input }
                 }
             } else {
                 unreachable!("Empty path segment: {:?}", path);
@@ -78,24 +78,24 @@ fn type_to_token(ty: &Type) -> TokenStream2 {
                 Type::Path(TypePath { path, .. }) => {
                     if let Some(last) = path.segments.last() {
                         match last.ident.to_string().as_str() {
-                            // Types where `&T: FromPyObject` instead of `T: FromPyObject`
+                            // Types where `&T: ::pyo3_stub_gen::PyStubType` instead of `T: ::pyo3_stub_gen::PyStubType`
                             // i.e. `&str` and most of `Py*` types defined in PyO3.
                             "str" | "PyAny" | "PyString" | "PyDict" => {
-                                return quote! { <#ty as FromPyObject>::type_input };
+                                return quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input };
                             }
                             _ => {}
                         }
                     }
                 }
                 Type::Slice(_) => {
-                    return quote! { <#ty as FromPyObject>::type_input };
+                    return quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input };
                 }
                 _ => {}
             }
             type_to_token(elem)
         }
         _ => {
-            quote! { <#ty as FromPyObject>::type_input }
+            quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input }
         }
     }
 }
