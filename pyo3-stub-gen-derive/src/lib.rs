@@ -98,7 +98,7 @@ pub fn gen_stub_pyfunction(attr: TokenStream, item: TokenStream) -> TokenStream 
 }
 
 #[proc_macro_derive(PyStubType)]
-pub fn derive_self_name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn derive_stub_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let item = syn::parse_macro_input!(input as syn::ItemStruct);
     let struct_name = item.ident;
     let gen = quote::quote! {

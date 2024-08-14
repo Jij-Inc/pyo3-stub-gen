@@ -1,17 +1,31 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::gen_stub_pyfunction};
+use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
-/// Returns the sum of two numbers as a string.
-#[gen_stub_pyfunction]
-#[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
+#[gen_stub_pyclass]
+#[pyclass(module = "pyo3_stub_gen_testing_mixed.main_mod")]
+#[derive(Debug, PyStubType)]
+struct A {
+    x: usize,
 }
 
-/// Initializes the Python module
+#[gen_stub_pymethods]
+#[pymethods]
+impl A {
+    fn show_x(&self) {
+        println!("x = {}", self.x);
+    }
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn create_a(x: usize) -> A {
+    A { x }
+}
+
 #[pymodule]
-fn my_rust_pkg(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
+    m.add_class::<A>()?;
+    m.add_function(wrap_pyfunction!(create_a, m)?)?;
     Ok(())
 }
 
