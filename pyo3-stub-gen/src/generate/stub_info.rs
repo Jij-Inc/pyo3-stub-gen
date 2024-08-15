@@ -60,10 +60,9 @@ impl StubInfoBuilder {
     }
 
     fn get_module(&mut self, name: Option<&str>) -> &mut Module {
-        let module = self
-            .modules
-            .entry(name.unwrap_or(&self.default_module_name).to_string())
-            .or_default();
+        let name = name.unwrap_or(&self.default_module_name).to_string();
+        let module = self.modules.entry(name.clone()).or_default();
+        module.name = name;
         module.default_module_name = self.default_module_name.clone();
         module
     }

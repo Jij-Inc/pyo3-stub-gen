@@ -69,6 +69,7 @@ mod pyclass_enum;
 mod pyfunction;
 mod pymethods;
 mod signature;
+mod stub_type;
 mod util;
 
 use arg::*;
@@ -81,6 +82,7 @@ use pyclass_enum::*;
 use pyfunction::*;
 use pymethods::*;
 use signature::*;
+use stub_type::*;
 use util::*;
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -89,9 +91,10 @@ use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyClassInfo::try_from(parse2::<ItemStruct>(item.clone())?)?;
+    let derive_stub_type = StubType::from(&inner);
     Ok(quote! {
         #item
-        #[automatically_derived]
+        #derive_stub_type
         pyo3_stub_gen::inventory::submit! {
             #inner
         }

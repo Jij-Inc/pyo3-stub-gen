@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
 
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr};
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
 
 pub struct PyEnumInfo {
     pyclass_name: String,
@@ -10,6 +10,22 @@ pub struct PyEnumInfo {
     module: Option<String>,
     variants: Vec<String>,
     doc: String,
+}
+
+impl From<&PyEnumInfo> for StubType {
+    fn from(info: &PyEnumInfo) -> Self {
+        let PyEnumInfo {
+            pyclass_name,
+            module,
+            enum_type,
+            ..
+        } = info;
+        Self {
+            ty: enum_type.clone(),
+            name: pyclass_name.clone(),
+            module: module.clone(),
+        }
+    }
 }
 
 impl TryFrom<ItemEnum> for PyEnumInfo {

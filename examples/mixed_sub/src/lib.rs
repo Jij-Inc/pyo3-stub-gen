@@ -4,7 +4,7 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 // Specify the module name explicitly
 #[gen_stub_pyclass]
 #[pyclass(module = "mixed_sub.main_mod")]
-#[derive(Debug, PyStubType)]
+#[derive(Debug)]
 struct A {
     x: usize,
 }
@@ -27,7 +27,7 @@ fn create_a(x: usize) -> A {
 // This will be placed in the main module
 #[gen_stub_pyclass]
 #[pyclass]
-#[derive(Debug, PyStubType)]
+#[derive(Debug)]
 struct B {
     x: usize,
 }
@@ -49,7 +49,7 @@ fn create_b(x: usize) -> B {
 // Class in submodule
 #[gen_stub_pyclass]
 #[pyclass(module = "mixed_sub.main_mod.sub_mod")]
-#[derive(Debug, PyStubType)]
+#[derive(Debug)]
 struct C {
     x: usize,
 }

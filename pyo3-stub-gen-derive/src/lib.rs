@@ -96,21 +96,3 @@ pub fn gen_stub_pyfunction(attr: TokenStream, item: TokenStream) -> TokenStream 
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
-
-#[proc_macro_derive(PyStubType)]
-pub fn derive_stub_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let item = syn::parse_macro_input!(input as syn::ItemStruct);
-    let struct_name = item.ident;
-    let gen = quote::quote! {
-        #[automatically_derived]
-        impl ::pyo3_stub_gen::PyStubType for #struct_name {
-            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
-                pyo3_stub_gen::TypeInfo {
-                    name: stringify!(#struct_name).to_string(),
-                    import: Default::default(),
-                }
-            }
-        }
-    };
-    gen.into()
-}
