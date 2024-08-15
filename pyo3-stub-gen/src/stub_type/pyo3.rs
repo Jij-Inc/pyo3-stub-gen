@@ -1,5 +1,8 @@
 use crate::stub_type::*;
-use ::pyo3::types::*;
+use ::pyo3::{
+    pybacked::{PyBackedBytes, PyBackedStr},
+    types::*,
+};
 use maplit::hashset;
 
 impl PyStubType for PyAny {
@@ -24,8 +27,13 @@ macro_rules! impl_builtin {
     };
 }
 
+impl_builtin!(PyInt, "int");
+impl_builtin!(PyFloat, "float");
 impl_builtin!(PyList, "list");
+impl_builtin!(PyTuple, "tuple");
 impl_builtin!(PyDict, "dict");
 impl_builtin!(PyString, "str");
+impl_builtin!(PyBackedStr, "str");
 impl_builtin!(PyByteArray, "bytearray");
 impl_builtin!(PyBytes, "bytes");
+impl_builtin!(PyBackedBytes, "bytes");
