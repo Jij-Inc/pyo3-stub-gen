@@ -6,7 +6,7 @@ impl PyStubType for PyAny {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "typing.Any".to_string(),
-            import: hashset! { "typing".to_string() },
+            import: hashset! { "typing".into() },
         }
     }
 }

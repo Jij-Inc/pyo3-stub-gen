@@ -9,7 +9,7 @@ pub struct NewDef {
 }
 
 impl Import for NewDef {
-    fn import(&self) -> HashSet<String> {
+    fn import(&self) -> HashSet<ModuleRef> {
         let mut import = HashSet::new();
         for arg in &self.args {
             import.extend(arg.import().into_iter());

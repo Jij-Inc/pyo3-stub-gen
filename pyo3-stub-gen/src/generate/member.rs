@@ -9,7 +9,7 @@ pub struct MemberDef {
 }
 
 impl Import for MemberDef {
-    fn import(&self) -> HashSet<String> {
+    fn import(&self) -> HashSet<ModuleRef> {
         self.r#type.import.clone()
     }
 }

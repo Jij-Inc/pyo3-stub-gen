@@ -12,7 +12,7 @@ pub struct ClassDef {
 }
 
 impl Import for ClassDef {
-    fn import(&self) -> HashSet<String> {
+    fn import(&self) -> HashSet<ModuleRef> {
         let mut import = HashSet::new();
         if let Some(new) = &self.new {
             import.extend(new.import());
