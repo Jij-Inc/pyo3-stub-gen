@@ -1,6 +1,9 @@
 # pyo3-stub-gen
 
-Python stub file (`*.pyi`) generator for PyO3 based projects.
+Python stub file (`*.pyi`) generator for [PyO3] with [maturin] projects.
+
+[PyO3]: https://github.com/PyO3/pyo3
+[maturin]: https://github.com/PyO3/maturin
 
 | crate name | crates.io | docs.rs | doc (main) |
 | --- | --- | --- | --- |
@@ -111,6 +114,9 @@ cargo run --bin stub_gen
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
 
+# Contribution
+To be written.
+
 # License
 
 © 2024 Jij Inc.
@@ -121,3 +127,8 @@ This project is licensed under either of
 - MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
 
 at your option.
+
+# Links
+
+- [pybind11-stubgen](https://github.com/sizmailov/pybind11-stubgen)
+  - Stub file generator for [pybind11](https://github.com/pybind/pybind11) based C++ projects.
