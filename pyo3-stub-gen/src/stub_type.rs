@@ -68,6 +68,15 @@ impl TypeInfo {
             import: HashSet::new(),
         }
     }
+
+    pub fn with_module(name: &str, module: ModuleRef) -> Self {
+        let mut import = HashSet::new();
+        import.insert(module);
+        Self {
+            name: name.to_string(),
+            import,
+        }
+    }
 }
 
 /// Annotate Rust types with Python type information.

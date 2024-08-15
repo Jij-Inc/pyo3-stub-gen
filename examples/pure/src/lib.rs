@@ -34,7 +34,7 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 
 #[gen_stub_pyclass]
 #[pyclass]
-#[derive(Debug, PyStubType)]
+#[derive(Debug)]
 struct A {
     #[pyo3(get, set)]
     x: usize,
