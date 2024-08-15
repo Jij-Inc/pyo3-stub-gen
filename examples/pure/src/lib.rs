@@ -1,4 +1,4 @@
-#[cfg_attr(target_os = "macos", doc = include_str!("../../README.md"))]
+#[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
@@ -59,11 +59,11 @@ fn create_a(x: usize) -> A {
     A { x }
 }
 
-create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
+create_exception!(pure, MyError, PyRuntimeError);
 
 /// Initializes the Python module
 #[pymodule]
-fn pyo3_stub_gen_testing_pure(m: &Bound<PyModule>) -> PyResult<()> {
+fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type_bound::<MyError>())?;
     m.add_class::<A>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;

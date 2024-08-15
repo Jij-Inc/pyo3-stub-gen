@@ -3,7 +3,7 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
 // Specify the module name explicitly
 #[gen_stub_pyclass]
-#[pyclass(module = "pyo3_stub_gen_testing_mixed.main_mod")]
+#[pyclass(module = "mixed.main_mod")]
 #[derive(Debug, PyStubType)]
 struct A {
     x: usize,
@@ -17,7 +17,7 @@ impl A {
     }
 }
 
-#[gen_stub_pyfunction(module = "pyo3_stub_gen_testing_mixed.main_mod")]
+#[gen_stub_pyfunction(module = "mixed.main_mod")]
 #[pyfunction]
 fn create_a(x: usize) -> A {
     A { x }

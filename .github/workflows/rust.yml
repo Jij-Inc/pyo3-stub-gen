@@ -99,8 +99,8 @@ jobs:
       fail-fast: false
       matrix:
         crate:
-          - pyo3-stub-gen-testing-pure
-          - pyo3-stub-gen-testing-mixed
+          - pure
+          - mixed
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -6,7 +6,7 @@
 //!
 //! let root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
 //! let pyproject = PyProject::parse_toml(
-//!     root.join("pyo3-stub-gen-testing-mixed/pyproject.toml")
+//!     root.join("examples/mixed/pyproject.toml")
 //! ).unwrap();
 //! ```
 
