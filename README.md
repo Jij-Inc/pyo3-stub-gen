@@ -29,10 +29,10 @@ and [pyo3-stub-gen-derive] crate provides the default translator as proc-macro b
 
 If you are looking for a working example, please see the [examples](./examples/) directory.
 
-| Example          | Description                                   |
-| ---------------- | --------------------------------------------- |
-| [examples/pure]  | Example for Pure Rust maturin project         |
-| [examples/mixed] | Example for Mixed Rust/Python maturin project |
+| Example          | Description |
+|:-----------------|:------------|
+| [examples/pure]  | Example for [Pure Rust maturin project](https://www.maturin.rs/project_layout#pure-rust-project) |
+| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) |
 
 [examples/pure]: ./examples/pure/
 [examples/mixed]: ./examples/mixed/
