@@ -2,6 +2,7 @@ use crate::stub_type::*;
 use ::pyo3::{
     pybacked::{PyBackedBytes, PyBackedStr},
     types::*,
+    Bound, Py,
 };
 use maplit::hashset;
 
@@ -11,6 +12,24 @@ impl PyStubType for PyAny {
             name: "typing.Any".to_string(),
             import: hashset! { "typing".into() },
         }
+    }
+}
+
+impl<T: PyStubType> PyStubType for Py<T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType> PyStubType for Bound<'_, T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
     }
 }
 

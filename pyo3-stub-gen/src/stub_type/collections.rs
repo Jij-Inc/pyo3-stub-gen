@@ -20,6 +20,24 @@ impl<T: PyStubType> PyStubType for Option<T> {
     }
 }
 
+impl<T: PyStubType> PyStubType for Box<T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType, E> PyStubType for Result<T, E> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
