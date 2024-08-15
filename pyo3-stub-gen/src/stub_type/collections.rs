@@ -78,3 +78,45 @@ macro_rules! impl_map {
 
 impl_map!(HashMap);
 impl_map!(BTreeMap);
+
+macro_rules! impl_tuple {
+    ($($T:ident),*) => {
+        impl<$($T: PyStubType),*> PyStubType for ($($T),*) {
+            fn type_output() -> TypeInfo {
+                let mut merged = HashSet::new();
+                let mut names = Vec::new();
+                $(
+                let TypeInfo { name, import } = $T::type_output();
+                names.push(name);
+                merged.extend(import);
+                )*
+                TypeInfo {
+                    name: format!("tuple[{}]", names.join(", ")),
+                    import: merged,
+                }
+            }
+            fn type_input() -> TypeInfo {
+                let mut merged = HashSet::new();
+                let mut names = Vec::new();
+                $(
+                let TypeInfo { name, import } = $T::type_input();
+                names.push(name);
+                merged.extend(import);
+                )*
+                TypeInfo {
+                    name: format!("tuple[{}]", names.join(", ")),
+                    import: merged,
+                }
+            }
+        }
+    };
+}
+
+impl_tuple!(T1, T2);
+impl_tuple!(T1, T2, T3);
+impl_tuple!(T1, T2, T3, T4);
+impl_tuple!(T1, T2, T3, T4, T5);
+impl_tuple!(T1, T2, T3, T4, T5, T6);
+impl_tuple!(T1, T2, T3, T4, T5, T6, T7);
+impl_tuple!(T1, T2, T3, T4, T5, T6, T7, T8);
+impl_tuple!(T1, T2, T3, T4, T5, T6, T7, T8, T9);
