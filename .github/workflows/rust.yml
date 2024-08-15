@@ -101,6 +101,7 @@ jobs:
         crate:
           - pure
           - mixed
+          - mixed_sub
     steps:
       - name: Checkout
         uses: actions/checkout@v4

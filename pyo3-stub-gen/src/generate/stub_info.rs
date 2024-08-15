@@ -1,5 +1,5 @@
 use crate::{generate::*, pyproject::PyProject, type_info::*};
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{Context, Result};
 use std::{collections::BTreeMap, fs, io::Write, path::*};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -14,51 +14,27 @@ impl StubInfo {
         Ok(StubInfoBuilder::new(pyproject).build())
     }
 
-    fn default_module(&self) -> Result<&Module> {
-        let default_module_name = self.pyproject.module_name();
-        self.modules
-            .get(default_module_name)
-            .ok_or_else(|| anyhow!("Missing default module: {}", default_module_name))
-    }
-
     pub fn generate(&self) -> Result<()> {
-        if let Some(python_source) = self.pyproject.python_source() {
-            log::trace!("`tool.maturin.python_source` exists in pyproject.toml. Regarded as Rust/Python mixed project.");
+        let python_root = self
+            .pyproject
+            .python_source()
+            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
 
-            for (name, module) in self.modules.iter() {
-                let path: Vec<&str> = name.split('.').collect();
-                ensure!(!path.is_empty(), "Empty module name");
-                let dest = if path.len() > 1 {
-                    python_source.join(format!("{}.pyi", path.join("/")))
-                } else {
-                    python_source.join(path[0]).join("__init__.pyi")
-                };
+        for (name, module) in self.modules.iter() {
+            let path = name.replace(".", "/");
+            let dest = if module.submodules.is_empty() {
+                python_root.join(format!("{path}.pyi"))
+            } else {
+                python_root.join(path).join("__init__.pyi")
+            };
 
-                if let Some(dir) = dest.parent() {
-                    fs::create_dir_all(dir)?;
-                }
-                let mut f = fs::File::create(&dest)?;
-                write!(f, "{}", module)?;
-                log::info!(
-                    "Generate stub file of a module `{name}` at {dest}",
-                    dest = dest.display()
-                );
+            let dir = dest.parent().context("Cannot get parent directory")?;
+            if !dir.exists() {
+                fs::create_dir_all(dir)?;
             }
-        } else {
-            log::trace!("`tool.maturin.python_source` is not in pyproject.toml. Regarded as pure Rust project.");
-
-            let out_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
-            if !out_dir.is_dir() {
-                bail!("{} is not a directory", out_dir.display());
-            }
-
-            let name = self.pyproject.module_name();
-            let dest = out_dir.join(format!("{}.pyi", name));
 
             let mut f = fs::File::create(&dest)?;
-            let module = self.default_module()?;
             write!(f, "{}", module)?;
-
             log::info!(
                 "Generate stub file of a module `{name}` at {dest}",
                 dest = dest.display()
@@ -90,6 +66,23 @@ impl StubInfoBuilder {
             .or_default();
         module.default_module_name = self.default_module_name.clone();
         module
+    }
+
+    fn register_submodules(&mut self) {
+        let mut map = BTreeMap::new();
+        for module in self.modules.keys() {
+            let path = module.split('.').collect::<Vec<_>>();
+            let n = path.len();
+            if n <= 1 {
+                continue;
+            }
+            map.insert(path[..n - 1].join("."), path[n - 1].to_string());
+        }
+        for (parent, child) in map {
+            if let Some(module) = self.modules.get_mut(&parent) {
+                module.submodules.insert(child);
+            }
+        }
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
@@ -154,6 +147,7 @@ impl StubInfoBuilder {
         for info in inventory::iter::<PyMethodsInfo> {
             self.add_methods(info);
         }
+        self.register_submodules();
         StubInfo {
             modules: self.modules,
             pyproject: self.pyproject,
