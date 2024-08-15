@@ -59,7 +59,7 @@ fn create_a(x: usize) -> A {
     A { x }
 }
 
-create_exception!(pyo3_stub_gen_testing_pure, MyError, PyRuntimeError);
+create_exception!(pure, MyError, PyRuntimeError);
 
 /// Initializes the Python module
 #[pymodule]

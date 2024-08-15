@@ -1,4 +1,4 @@
-from pyo3_stub_gen_testing_pure import sum, create_dict, read_dict
+from pure import sum, create_dict, read_dict
 import pytest
 
 

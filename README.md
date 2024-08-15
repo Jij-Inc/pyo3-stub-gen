@@ -39,7 +39,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 }
 
 #[pymodule]
-fn pyo3_stub_gen_testing(m: &Bound<PyModule>) -> PyResult<()> {
+fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
@@ -58,7 +58,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 }
 
 #[pymodule]
-fn pyo3_stub_gen_testing(m: &Bound<PyModule>) -> PyResult<()> {
+fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     Ok(())
 }
@@ -74,7 +74,7 @@ use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
     // `stub_info` is a function defined by `define_stub_info_gatherer!` macro.
-    let stub = pyo3_stub_gen_testing_pure::stub_info()?;
+    let stub = pure::stub_info()?;
     stub.generate()?;
     Ok(())
 }

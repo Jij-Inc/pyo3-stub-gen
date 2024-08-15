@@ -1,4 +1,4 @@
-from pyo3_stub_gen_testing_mixed import main_mod
+from mixed import main_mod
 
 
 def test_main_mod():
