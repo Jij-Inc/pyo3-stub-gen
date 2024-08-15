@@ -27,6 +27,20 @@ and [pyo3-stub-gen-derive] crate provides the default translator as proc-macro b
 
 # Usage
 
+If you are looking for a working example, please see the [examples](./examples/) directory.
+
+| Example          | Description                                   |
+| ---------------- | --------------------------------------------- |
+| [examples/pure]  | Example for Pure Rust maturin project         |
+| [examples/mixed] | Example for Mixed Rust/Python maturin project |
+
+[examples/pure]: ./examples/pure/
+[examples/mixed]: ./examples/mixed/
+
+Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure] example.
+
+## Annotate Rust code with proc-macro
+
 This crate provides a procedural macro `#[gen_stub_pyfunction]` and others to generate a Python stub file.
 It is used with PyO3's `#[pyfunction]` macro. Let's consider a simple example PyO3 project:
 
@@ -67,7 +81,9 @@ fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
 define_stub_info_gatherer!(stub_info);
 ```
 
-And then, create an executable target in `src/bin/stub_gen.rs`:
+## Generate a stub file
+
+And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
 
 ```rust
 use pyo3_stub_gen::Result;
@@ -87,15 +103,13 @@ and add `rlib` in addition to `cdylib` in `[lib]` section of `Cargo.toml`:
 crate-type = ["cdylib", "rlib"]
 ```
 
-This target generates a stub file `${CARGO_MANIFEST_DIR}/pyo3_stub_gen_testing.pyi` when executed.
+This target generates a stub file [`pure.pyi`](./examples/pure/pure.pyi) when executed.
 
 ```shell
 cargo run --bin stub_gen
 ```
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
-
-There is a working example at [pyo3-stub-gen-testing-pure](./pyo3-stub-gen-testing-pure/) directory with [generated stub file](./pyo3-stub-gen-testing-pure/pyo3_stub_gen_testing_pure.pyi).
 
 # License
 
