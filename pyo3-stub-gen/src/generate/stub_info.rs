@@ -92,6 +92,21 @@ impl StubInfoBuilder {
         module
     }
 
+    fn register_submodules(&mut self) {
+        let mut map = BTreeMap::new();
+        for module in self.modules.keys() {
+            let path = module.split('.').collect::<Vec<_>>();
+            let n = path.len();
+            if n <= 1 {
+                continue;
+            }
+            map.insert(path[..n - 1].join("."), path[n - 1].to_string());
+        }
+        for (parent, child) in map {
+            self.get_module(Some(&parent)).submodules.insert(child);
+        }
+    }
+
     fn add_class(&mut self, info: &PyClassInfo) {
         self.get_module(info.module)
             .class
@@ -154,6 +169,7 @@ impl StubInfoBuilder {
         for info in inventory::iter::<PyMethodsInfo> {
             self.add_methods(info);
         }
+        self.register_submodules();
         StubInfo {
             modules: self.modules,
             pyproject: self.pyproject,

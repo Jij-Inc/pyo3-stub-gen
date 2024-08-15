@@ -1,6 +1,10 @@
 use crate::generate::*;
 use itertools::Itertools;
-use std::{any::TypeId, collections::BTreeMap, fmt};
+use std::{
+    any::TypeId,
+    collections::{BTreeMap, BTreeSet},
+    fmt,
+};
 
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -11,6 +15,8 @@ pub struct Module {
     pub error: BTreeMap<&'static str, ErrorDef>,
     pub name: String,
     pub default_module_name: String,
+    /// Direct submodules of this module.
+    pub submodules: BTreeSet<String>,
 }
 
 impl Import for Module {
@@ -36,6 +42,9 @@ impl fmt::Display for Module {
             if name != self.name {
                 writeln!(f, "import {}", name)?;
             }
+        }
+        for submod in &self.submodules {
+            writeln!(f, "from . import {}", submod)?;
         }
         if !self.enum_.is_empty() {
             writeln!(f, "from enum import Enum, auto")?;
