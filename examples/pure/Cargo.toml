@@ -1,5 +1,5 @@
 [package]
-name = "pyo3-stub-gen-testing-pure"
+name = "pure"
 version.workspace = true
 edition.workspace = true
 
@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 env_logger.workspace = true
-pyo3-stub-gen = { path = "../pyo3-stub-gen" }
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
 pyo3.workspace = true
 
 [[bin]]

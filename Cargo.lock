@@ -250,6 +250,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mixed"
+version = "0.5.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,6 +287,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "pure"
+version = "0.5.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
 ]
 
 [[package]]
@@ -370,24 +388,6 @@ dependencies = [
  "pyo3-stub-gen",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "pyo3-stub-gen-testing-mixed"
-version = "0.5.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
-]
-
-[[package]]
-name = "pyo3-stub-gen-testing-pure"
-version = "0.5.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
 ]
 
 [[package]]
