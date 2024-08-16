@@ -2,6 +2,9 @@ mod builtins;
 mod collections;
 mod pyo3;
 
+#[cfg(feature = "numpy")]
+mod numpy;
+
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 
