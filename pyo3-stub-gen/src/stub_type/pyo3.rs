@@ -1,8 +1,9 @@
 use crate::stub_type::*;
 use ::pyo3::{
     pybacked::{PyBackedBytes, PyBackedStr},
+    pyclass::boolean_struct::False,
     types::*,
-    Bound, Py,
+    Bound, Py, PyClass, PyRef, PyRefMut,
 };
 use maplit::hashset;
 
@@ -16,6 +17,24 @@ impl PyStubType for PyAny {
 }
 
 impl<T: PyStubType> PyStubType for Py<T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType + PyClass> PyStubType for PyRef<'_, T> {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
+impl<T: PyStubType + PyClass<Frozen = False>> PyStubType for PyRefMut<'_, T> {
     fn type_input() -> TypeInfo {
         T::type_input()
     }
