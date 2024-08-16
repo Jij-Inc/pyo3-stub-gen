@@ -14,6 +14,7 @@ inventory.workspace = true
 itertools.workspace = true
 log.workspace = true
 maplit.workspace = true
+num-complex = "0.4.6"
 numpy = { workspace = true, optional = true }
 pyo3.workspace = true
 serde.workspace = true

@@ -29,6 +29,8 @@ impl_builtin!(i128, "int");
 impl_builtin!(isize, "int");
 impl_builtin!(f32, "float");
 impl_builtin!(f64, "float");
+impl_builtin!(num_complex::Complex32, "complex");
+impl_builtin!(num_complex::Complex64, "complex");
 
 impl_builtin!(&str, "str");
 impl_builtin!(String, "str");
