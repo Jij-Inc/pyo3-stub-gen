@@ -13,6 +13,7 @@ macro_rules! impl_builtin {
     };
 }
 
+impl_builtin!((), "None");
 impl_builtin!(bool, "bool");
 impl_builtin!(u8, "int");
 impl_builtin!(u16, "int");
