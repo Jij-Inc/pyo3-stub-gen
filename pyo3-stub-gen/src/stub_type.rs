@@ -2,6 +2,7 @@ mod builtins;
 mod collections;
 mod pyo3;
 
+use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
