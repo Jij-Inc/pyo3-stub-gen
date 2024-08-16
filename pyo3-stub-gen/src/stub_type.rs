@@ -62,6 +62,13 @@ impl TypeInfo {
         }
     }
 
+    pub fn any() -> Self {
+        Self {
+            name: "typing.Any".to_string(),
+            import: hashset! { "typing".into() },
+        }
+    }
+
     pub fn builtin(name: &str) -> Self {
         Self {
             name: name.to_string(),
