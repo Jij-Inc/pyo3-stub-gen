@@ -21,7 +21,6 @@ impl From<&PyEnumInfo> for EnumDef {
 
 impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "@final")?;
         writeln!(f, "class {}(Enum):", self.name)?;
         let indent = indent();
         let doc = self.doc.trim();

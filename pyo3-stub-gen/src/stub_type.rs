@@ -2,7 +2,11 @@ mod builtins;
 mod collections;
 mod pyo3;
 
-use std::{collections::HashSet, fmt};
+#[cfg(feature = "numpy")]
+mod numpy;
+
+use maplit::hashset;
+use std::{collections::HashSet, fmt, ops};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub enum ModuleRef {
@@ -62,6 +66,13 @@ impl TypeInfo {
         }
     }
 
+    pub fn any() -> Self {
+        Self {
+            name: "typing.Any".to_string(),
+            import: hashset! { "typing".into() },
+        }
+    }
+
     pub fn builtin(name: &str) -> Self {
         Self {
             name: name.to_string(),
@@ -75,6 +86,18 @@ impl TypeInfo {
         Self {
             name: name.to_string(),
             import,
+        }
+    }
+}
+
+impl ops::BitOr for TypeInfo {
+    type Output = Self;
+
+    fn bitor(mut self, rhs: Self) -> Self {
+        self.import.extend(rhs.import);
+        Self {
+            name: format!("{} | {}", self.name, rhs.name),
+            import: self.import,
         }
     }
 }
