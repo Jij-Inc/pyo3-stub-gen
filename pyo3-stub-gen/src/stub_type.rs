@@ -2,7 +2,7 @@ mod builtins;
 mod collections;
 mod pyo3;
 
-use std::{collections::HashSet, fmt};
+use std::{collections::HashSet, fmt, ops};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub enum ModuleRef {
@@ -75,6 +75,18 @@ impl TypeInfo {
         Self {
             name: name.to_string(),
             import,
+        }
+    }
+}
+
+impl ops::BitOr for TypeInfo {
+    type Output = Self;
+
+    fn bitor(mut self, rhs: Self) -> Self {
+        self.import.extend(rhs.import);
+        Self {
+            name: format!("{} | {}", self.name, rhs.name),
+            import: self.import,
         }
     }
 }
