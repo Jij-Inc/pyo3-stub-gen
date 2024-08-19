@@ -102,6 +102,40 @@ impl ops::BitOr for TypeInfo {
     }
 }
 
+/// Implement [PyStubType] for enum cases
+///
+/// ```rust
+/// use pyo3::*;
+/// use pyo3_stub_gen::{impl_stub_type, derive::*};
+///
+/// #[gen_stub_pyclass]
+/// #[pyclass]
+/// struct A;
+///
+/// #[gen_stub_pyclass]
+/// #[pyclass]
+/// struct B;
+///
+/// enum E {
+///     A(A),
+///     B(B),
+/// }
+/// impl_stub_type!(E = A | B);
+/// ```
+#[macro_export]
+macro_rules! impl_stub_type {
+    ($ty: ty = $($base:ty)|+) => {
+        impl ::pyo3_stub_gen::PyStubType for $ty {
+            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
+                $(<$base>::type_output()) | *
+            }
+            fn type_input() -> ::pyo3_stub_gen::TypeInfo {
+                $(<$base>::type_input()) | *
+            }
+        }
+    };
+}
+
 /// Annotate Rust types with Python type information.
 pub trait PyStubType {
     /// The type to be used in the output signature, i.e. return type of the Python function or methods.
