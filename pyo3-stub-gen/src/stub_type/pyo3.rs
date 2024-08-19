@@ -75,3 +75,4 @@ impl_builtin!(PyBackedStr, "str");
 impl_builtin!(PyByteArray, "bytearray");
 impl_builtin!(PyBytes, "bytes");
 impl_builtin!(PyBackedBytes, "bytes");
+impl_builtin!(PyType, "type");
