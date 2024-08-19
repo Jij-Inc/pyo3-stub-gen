@@ -277,7 +277,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -286,7 +286,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -404,7 +404,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -476,7 +476,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "inventory",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "insta",
  "inventory",
