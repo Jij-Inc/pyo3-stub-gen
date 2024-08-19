@@ -61,6 +61,13 @@ fn create_a(x: usize) -> A {
 
 create_exception!(pure, MyError, PyRuntimeError);
 
+/// Returns the length of the string.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn str_len(x: &str) -> PyResult<usize> {
+    Ok(x.len())
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -70,6 +77,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
+    m.add_function(wrap_pyfunction!(str_len, m)?)?;
     Ok(())
 }
 
