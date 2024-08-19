@@ -69,6 +69,7 @@ impl_builtin!(PyInt, "int");
 impl_builtin!(PyFloat, "float");
 impl_builtin!(PyList, "list");
 impl_builtin!(PyTuple, "tuple");
+impl_builtin!(PySlice, "slice");
 impl_builtin!(PyDict, "dict");
 impl_builtin!(PyString, "str");
 impl_builtin!(PyBackedStr, "str");
