@@ -102,7 +102,7 @@ impl ops::BitOr for TypeInfo {
     }
 }
 
-/// Implement [PyStubType] for enum cases
+/// Implement [PyStubType]
 ///
 /// ```rust
 /// use pyo3::*;
@@ -121,6 +121,15 @@ impl ops::BitOr for TypeInfo {
 ///     B(B),
 /// }
 /// impl_stub_type!(E = A | B);
+///
+/// struct X(A);
+/// impl_stub_type!(X = A);
+///
+/// struct Y {
+///    a: A,
+///    b: B,
+/// }
+/// impl_stub_type!(Y = (A, B));
 /// ```
 #[macro_export]
 macro_rules! impl_stub_type {
@@ -131,6 +140,16 @@ macro_rules! impl_stub_type {
             }
             fn type_input() -> ::pyo3_stub_gen::TypeInfo {
                 $(<$base>::type_input()) | *
+            }
+        }
+    };
+    ($ty:ty = $base:ty) => {
+        impl ::pyo3_stub_gen::PyStubType for $ty {
+            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
+                <$base>::type_output()
+            }
+            fn type_input() -> ::pyo3_stub_gen::TypeInfo {
+                <$base>::type_input()
             }
         }
     };
