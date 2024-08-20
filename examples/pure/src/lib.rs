@@ -1,6 +1,7 @@
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
+use ahash::RandomState;
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
 use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
 use std::{collections::HashMap, path::PathBuf};
@@ -74,6 +75,16 @@ fn echo_path(path: PathBuf) -> PyResult<PathBuf> {
     Ok(path)
 }
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn ahash_dict() -> HashMap<String, i32, RandomState> {
+    let mut map: HashMap<String, i32, RandomState> = HashMap::with_hasher(RandomState::new());
+    map.insert("apple".to_string(), 3);
+    map.insert("banana".to_string(), 2);
+    map.insert("orange".to_string(), 5);
+    map
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -85,6 +96,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
+    m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     Ok(())
 }
 

@@ -1,4 +1,4 @@
-from pure import sum, create_dict, read_dict, echo_path
+from pure import sum, create_dict, read_dict, echo_path, ahash_dict
 import pytest
 import pathlib
 
@@ -10,6 +10,10 @@ def test_sum():
 
 def test_create_dict():
     assert create_dict(3) == {0: [], 1: [0], 2: [0, 1]}
+
+
+def test_ahash_dict():
+    assert ahash_dict() == {"apple": 3, "banana": 2, "orange": 5}
 
 
 def test_read_dict():
