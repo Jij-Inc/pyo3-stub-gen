@@ -41,10 +41,11 @@ impl_builtin!(num_complex::Complex64, "complex");
 
 impl_builtin!(char, "str");
 impl_builtin!(&str, "str");
-impl_builtin!(String, "str");
 impl_builtin!(OsStr, "str");
+impl_builtin!(String, "str");
 impl_builtin!(OsString, "str");
 impl_builtin!(Cow<'_, str>, "str");
+impl_builtin!(Cow<'_, OsStr>, "str");
 
 impl PyStubType for PathBuf {
     fn type_output() -> TypeInfo {
