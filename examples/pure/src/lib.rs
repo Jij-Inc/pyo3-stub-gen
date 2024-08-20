@@ -68,9 +68,10 @@ fn str_len(x: &str) -> PyResult<usize> {
     Ok(x.len())
 }
 
+#[gen_stub_pyfunction]
 #[pyfunction]
-fn create_path() -> PyResult<PathBuf> {
-    Ok("path".into())
+fn echo_path(path: PathBuf) -> PyResult<PathBuf> {
+    Ok(path)
 }
 
 /// Initializes the Python module
@@ -83,7 +84,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
-    m.add_function(wrap_pyfunction!(create_path, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     Ok(())
 }
 
