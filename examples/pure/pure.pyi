@@ -12,6 +12,9 @@ class A:
         ...
 
 
+def ahash_dict() -> dict[str, int]:
+    ...
+
 def create_a(x:int) -> A:
     ...
 
