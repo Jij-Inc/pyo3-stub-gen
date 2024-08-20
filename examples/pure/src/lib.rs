@@ -85,11 +85,22 @@ fn ahash_dict() -> HashMap<String, i32, RandomState> {
     map
 }
 
+#[gen_stub_pyclass_enum]
+#[pyclass]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Number {
+    #[pyo3(name = "FLOAT")]
+    Float,
+    #[pyo3(name = "INTEGER")]
+    Integer,
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type_bound::<MyError>())?;
     m.add_class::<A>()?;
+    m.add_class::<Number>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
