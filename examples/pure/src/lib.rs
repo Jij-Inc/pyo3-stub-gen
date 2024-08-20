@@ -3,7 +3,7 @@ mod readme {}
 
 use pyo3::{exceptions::PyRuntimeError, prelude::*};
 use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
 #[gen_stub_pyfunction]
@@ -68,6 +68,11 @@ fn str_len(x: &str) -> PyResult<usize> {
     Ok(x.len())
 }
 
+#[pyfunction]
+fn create_path() -> PyResult<PathBuf> {
+    Ok("path".into())
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -78,6 +83,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
+    m.add_function(wrap_pyfunction!(create_path, m)?)?;
     Ok(())
 }
 
