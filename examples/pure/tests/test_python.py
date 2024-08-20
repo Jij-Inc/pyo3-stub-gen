@@ -1,5 +1,6 @@
-from pure import sum, create_dict, read_dict
+from pure import sum, create_dict, read_dict, echo_path
 import pytest
+import pathlib
 
 
 def test_sum():
@@ -29,3 +30,11 @@ def test_read_dict():
     assert (
         str(e.value) == "argument 'dict': 'int' object cannot be converted to 'PyDict'"
     )
+
+
+def test_path():
+    out = echo_path(pathlib.Path("test"))
+    assert out == "test"
+
+    out = echo_path("test")
+    assert out == "test"
