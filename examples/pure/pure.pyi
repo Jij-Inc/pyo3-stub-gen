@@ -4,6 +4,7 @@
 import os
 import pathlib
 import typing
+from enum import Enum, auto
 
 class A:
     x: int
@@ -11,6 +12,10 @@ class A:
     def show_x(self) -> None:
         ...
 
+
+class Number(Enum):
+    FLOAT = auto()
+    INTEGER = auto()
 
 def ahash_dict() -> dict[str, int]:
     ...
