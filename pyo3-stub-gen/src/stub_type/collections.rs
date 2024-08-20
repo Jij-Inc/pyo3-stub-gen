@@ -1,5 +1,5 @@
 use crate::stub_type::*;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
@@ -51,6 +51,26 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         let TypeInfo { name, import } = T::type_output();
         TypeInfo {
             name: format!("list[{}]", name),
+            import,
+        }
+    }
+}
+
+impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, import } = T::type_output();
+        TypeInfo {
+            name: format!("set[{}]", name),
+            import,
+        }
+    }
+}
+
+impl<T: PyStubType> PyStubType for BTreeSet<T> {
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, import } = T::type_output();
+        TypeInfo {
+            name: format!("set[{}]", name),
             import,
         }
     }
