@@ -1,4 +1,4 @@
-//! Define PyStubType for built-in types based on https://pyo3.rs/v0.22.2/conversions/tables#argument-types
+//! Define PyStubType for built-in types based on <https://pyo3.rs/v0.22.2/conversions/tables#argument-types>
 
 use crate::stub_type::*;
 use std::path::PathBuf;
