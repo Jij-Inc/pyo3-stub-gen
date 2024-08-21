@@ -56,6 +56,24 @@ impl<T: PyStubType> PyStubType for Vec<T> {
     }
 }
 
+impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
+    fn type_input() -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_input();
+        import.insert("typing".into());
+        TypeInfo {
+            name: format!("typing.Sequence[{}]", name),
+            import,
+        }
+    }
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, import } = T::type_output();
+        TypeInfo {
+            name: format!("list[{}]", name),
+            import,
+        }
+    }
+}
+
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
     fn type_output() -> TypeInfo {
         let TypeInfo { name, import } = T::type_output();
