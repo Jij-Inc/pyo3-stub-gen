@@ -1,8 +1,8 @@
+use super::remove_lifetime;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
-    TypeReference,
 };
 
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
@@ -20,8 +20,8 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             // Regard the first argument with `PyRef<'_, Self>` and `PyMutRef<'_, Self>` types as a receiver.
             if n == 0 && (last.ident == "PyRef" || last.ident == "PyRefMut") {
                 if let PathArguments::AngleBracketed(inner) = &last.arguments {
-                    assert!(inner.args.len() == 2);
-                    if let GenericArgument::Type(Type::Path(TypePath { path, .. })) = &inner.args[1]
+                    if let GenericArgument::Type(Type::Path(TypePath { path, .. })) =
+                        &inner.args[inner.args.len() - 1]
                     {
                         let last = path.segments.last().unwrap();
                         if last.ident == "Self" {
@@ -57,55 +57,16 @@ impl TryFrom<FnArg> for ArgInfo {
     }
 }
 
-fn type_to_token(ty: &Type) -> TokenStream2 {
-    match ty {
-        Type::Path(TypePath { path, .. }) => {
-            if let Some(last_seg) = path.segments.last() {
-                // `CompareOp` is an enum for `__richcmp__`
-                // PyO3 reference: https://docs.rs/pyo3/latest/pyo3/pyclass/enum.CompareOp.html
-                // PEP: https://peps.python.org/pep-0207/
-                if last_seg.ident == "CompareOp" {
-                    quote! { ::pyo3_stub_gen::type_info::compare_op_type_input }
-                } else {
-                    quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input }
-                }
-            } else {
-                unreachable!("Empty path segment: {:?}", path);
-            }
-        }
-        Type::Reference(TypeReference { elem, .. }) => {
-            match elem.as_ref() {
-                Type::Path(TypePath { path, .. }) => {
-                    if let Some(last) = path.segments.last() {
-                        match last.ident.to_string().as_str() {
-                            // Types where `&T: ::pyo3_stub_gen::PyStubType` instead of `T: ::pyo3_stub_gen::PyStubType`
-                            // i.e. `&str` and most of `Py*` types defined in PyO3.
-                            "str" | "PyAny" | "PyString" | "PyDict" => {
-                                return quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input };
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-                Type::Slice(_) => {
-                    return quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input };
-                }
-                _ => {}
-            }
-            type_to_token(elem)
-        }
-        _ => {
-            quote! { <#ty as ::pyo3_stub_gen::PyStubType>::type_input }
-        }
-    }
-}
-
 impl ToTokens for ArgInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self { name, r#type: ty } = self;
-        let type_tt = type_to_token(ty);
+        let mut ty = ty.clone();
+        remove_lifetime(&mut ty);
         tokens.append_all(quote! {
-            ::pyo3_stub_gen::type_info::ArgInfo { name: #name, r#type: #type_tt }
+            ::pyo3_stub_gen::type_info::ArgInfo {
+                name: #name,
+                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input
+            }
         });
     }
 }

@@ -1,5 +1,6 @@
 use crate::stub_type::*;
 use ::pyo3::{
+    basic::CompareOp,
     pybacked::{PyBackedBytes, PyBackedStr},
     pyclass::boolean_struct::False,
     types::*,
@@ -78,3 +79,4 @@ impl_builtin!(PyByteArray, "bytearray");
 impl_builtin!(PyBytes, "bytes");
 impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
+impl_builtin!(CompareOp, "int");

@@ -1,6 +1,15 @@
 use crate::stub_type::*;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
+impl<T: PyStubType> PyStubType for &T {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();

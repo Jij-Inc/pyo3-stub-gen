@@ -36,6 +36,14 @@ pub fn remove_lifetime(ty: &mut Type) {
             rty.lifetime = None;
             remove_lifetime(rty.elem.as_mut());
         }
+        Type::Tuple(ty) => {
+            for elem in &mut ty.elems {
+                remove_lifetime(elem);
+            }
+        }
+        Type::Array(ary) => {
+            remove_lifetime(ary.elem.as_mut());
+        }
         _ => {}
     }
 }
