@@ -12,6 +12,9 @@ class A:
     def show_x(self) -> None:
         ...
 
+    def ref_test(self, x:dict) -> dict:
+        ...
+
 
 class Number(Enum):
     FLOAT = auto()
