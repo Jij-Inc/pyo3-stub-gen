@@ -178,11 +178,11 @@ macro_rules! define_stub_info_gatherer {
 
 #[macro_export]
 macro_rules! module_variable {
-    ($module:ident, $name:ident: $ty:ty) => {
+    ($module:expr, $name:expr, $ty:ty) => {
         $crate::inventory::submit! {
             $crate::type_info::PyVariableInfo{
-                name: stringify!($name),
-                module: stringify!($module),
+                name: $name,
+                module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
             }
         }

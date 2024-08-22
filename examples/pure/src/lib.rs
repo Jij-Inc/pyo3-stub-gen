@@ -65,7 +65,6 @@ fn create_a(x: usize) -> A {
 }
 
 create_exception!(pure, MyError, PyRuntimeError);
-module_variable!(pure, MY_CONSTANT: usize);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -99,6 +98,8 @@ pub enum Number {
     #[pyo3(name = "INTEGER")]
     Integer,
 }
+
+module_variable!("pure", "MY_CONSTANT", usize);
 
 /// Initializes the Python module
 #[pymodule]
