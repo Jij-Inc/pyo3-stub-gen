@@ -2,7 +2,7 @@
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{exceptions::PyRuntimeError, prelude::*};
+use pyo3::{exceptions::PyRuntimeError, prelude::*, types::*};
 use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
 use std::{collections::HashMap, path::PathBuf};
 
@@ -51,6 +51,10 @@ impl A {
 
     fn show_x(&self) {
         println!("x = {}", self.x);
+    }
+
+    fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
+        x
     }
 }
 
