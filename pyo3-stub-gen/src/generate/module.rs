@@ -13,6 +13,7 @@ pub struct Module {
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, FunctionDef>,
     pub error: BTreeMap<&'static str, ErrorDef>,
+    pub variables: BTreeMap<&'static str, VariableDef>,
     pub name: String,
     pub default_module_name: String,
     /// Direct submodules of this module.
@@ -51,6 +52,9 @@ impl fmt::Display for Module {
         }
         writeln!(f)?;
 
+        for var in self.variables.values() {
+            writeln!(f, "{}", var)?;
+        }
         for class in self.class.values().sorted_by_key(|class| class.name) {
             write!(f, "{}", class)?;
         }

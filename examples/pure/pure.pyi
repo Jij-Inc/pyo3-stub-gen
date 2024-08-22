@@ -6,6 +6,7 @@ import pathlib
 import typing
 from enum import Enum, auto
 
+MY_CONSTANT: int
 class A:
     x: int
     def __new__(cls,x:int): ...

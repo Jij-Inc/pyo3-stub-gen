@@ -10,6 +10,7 @@ mod method;
 mod module;
 mod new;
 mod stub_info;
+mod variable;
 
 pub use arg::*;
 pub use class::*;
@@ -21,6 +22,7 @@ pub use method::*;
 pub use module::*;
 pub use new::*;
 pub use stub_info::*;
+pub use variable::*;
 
 use crate::stub_type::ModuleRef;
 use std::collections::HashSet;

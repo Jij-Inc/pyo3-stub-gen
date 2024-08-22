@@ -175,3 +175,16 @@ macro_rules! define_stub_info_gatherer {
         }
     };
 }
+
+#[macro_export]
+macro_rules! module_variable {
+    ($module:expr, $name:expr, $ty:ty) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyVariableInfo{
+                name: $name,
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+            }
+        }
+    };
+}
