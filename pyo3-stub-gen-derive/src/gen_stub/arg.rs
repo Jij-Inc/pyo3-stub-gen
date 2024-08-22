@@ -20,8 +20,8 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             // Regard the first argument with `PyRef<'_, Self>` and `PyMutRef<'_, Self>` types as a receiver.
             if n == 0 && (last.ident == "PyRef" || last.ident == "PyRefMut") {
                 if let PathArguments::AngleBracketed(inner) = &last.arguments {
-                    assert!(inner.args.len() == 2);
-                    if let GenericArgument::Type(Type::Path(TypePath { path, .. })) = &inner.args[1]
+                    if let GenericArgument::Type(Type::Path(TypePath { path, .. })) =
+                        &inner.args[inner.args.len() - 1]
                     {
                         let last = path.segments.last().unwrap();
                         if last.ident == "Self" {
