@@ -12,7 +12,7 @@ impl From<&PyVariableInfo> for VariableDef {
     fn from(info: &PyVariableInfo) -> Self {
         Self {
             name: info.name,
-            type_: (info.type_)(),
+            type_: (info.r#type)(),
         }
     }
 }

@@ -142,7 +142,7 @@ inventory::collect!(PyErrorInfo);
 pub struct PyVariableInfo {
     pub name: &'static str,
     pub module: &'static str,
-    pub type_: fn() -> TypeInfo,
+    pub r#type: fn() -> TypeInfo,
 }
 
 inventory::collect!(PyVariableInfo);

@@ -3,7 +3,7 @@ mod readme {}
 
 use ahash::RandomState;
 use pyo3::{exceptions::PyRuntimeError, prelude::*, types::*};
-use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*};
+use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*, module_variable};
 use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
@@ -65,6 +65,7 @@ fn create_a(x: usize) -> A {
 }
 
 create_exception!(pure, MyError, PyRuntimeError);
+module_variable!(pure, MY_CONSTANT: usize);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -103,6 +104,7 @@ pub enum Number {
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type_bound::<MyError>())?;
+    m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
     m.add_class::<Number>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
