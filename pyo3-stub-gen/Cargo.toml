@@ -19,11 +19,13 @@ numpy = { workspace = true, optional = true }
 pyo3.workspace = true
 serde.workspace = true
 toml.workspace = true
+chrono = {version = "0.4.38", optional = true}
 
 [dependencies.pyo3-stub-gen-derive]
 version = "0.6.1"
 path = "../pyo3-stub-gen-derive"
 
 [features]
-default = ["numpy"]
+default = ["numpy", "chrono"]
 numpy = ["dep:numpy"]
+chrono = ["dep:chrono"]
