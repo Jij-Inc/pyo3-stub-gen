@@ -5,7 +5,10 @@ use std::{
     borrow::Cow,
     ffi::{OsStr, OsString},
     path::PathBuf,
+    time::SystemTime,
 };
+
+use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 
 macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
@@ -68,32 +71,17 @@ impl PyStubType for PathBuf {
     }
 }
 
-/// Adding chrono types supported by pyo3 [here](https://pyo3.rs/v0.22.2/conversions/tables)
-#[cfg(feature = "chrono")]
-mod chrono_exports {
-    use std::time::SystemTime;
-
-    use super::{PyStubType, TypeInfo};
-    use chrono::{
-        DateTime, Duration, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc,
-    };
-
-    impl<Tz: TimeZone> PyStubType for DateTime<Tz> {
-        fn type_output() -> TypeInfo {
-            TypeInfo::with_module("datetime.datetime", "datetime".into())
-        }
+impl<Tz: TimeZone> PyStubType for DateTime<Tz> {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module("datetime.datetime", "datetime".into())
     }
-
-    impl_with_module!(SystemTime, "datetime.datetime", "datetime");
-    impl_with_module!(NaiveDateTime, "datetime.datetime", "datetime");
-    impl_with_module!(NaiveDate, "datetime.date", "datetime");
-    impl_with_module!(NaiveTime, "datetime.time", "datetime");
-    impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
-    impl_with_module!(Utc, "datetime.tzinfo", "datetime");
-    impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
-    impl_with_module!(Duration, "datetime.timedelta", "datetime");
 }
 
-#[allow(unused_imports)]
-#[cfg(feature = "chrono")]
-pub use chrono_exports::*;
+impl_with_module!(SystemTime, "datetime.datetime", "datetime");
+impl_with_module!(NaiveDateTime, "datetime.datetime", "datetime");
+impl_with_module!(NaiveDate, "datetime.date", "datetime");
+impl_with_module!(NaiveTime, "datetime.time", "datetime");
+impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
+impl_with_module!(Utc, "datetime.tzinfo", "datetime");
+impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
+impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
