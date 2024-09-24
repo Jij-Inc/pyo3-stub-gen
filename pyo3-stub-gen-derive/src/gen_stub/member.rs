@@ -1,3 +1,5 @@
+use crate::gen_stub::extract_documents;
+
 use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -6,6 +8,7 @@ use syn::{Error, Field, ImplItemFn, Result, Type};
 
 #[derive(Debug)]
 pub struct MemberInfo {
+    doc: String,
     name: String,
     r#type: Type,
 }
@@ -29,10 +32,12 @@ impl TryFrom<ImplItemFn> for MemberInfo {
     fn try_from(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_candidate_item(&item)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let doc = extract_documents(&attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
                 return Ok(MemberInfo {
+                    doc,
                     name: name.unwrap_or(sig.ident.to_string()),
                     r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
                 });
@@ -54,21 +59,28 @@ impl TryFrom<Field> for MemberInfo {
                 field_name = Some(name);
             }
         }
+        let doc = extract_documents(&attrs).join("\n");
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: ty,
+            doc: doc,
         })
     }
 }
 
 impl ToTokens for MemberInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let Self { name, r#type: ty } = self;
+        let Self {
+            name,
+            r#type: ty,
+            doc,
+        } = self;
         let name = name.strip_prefix("get_").unwrap_or(name);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MemberInfo {
                 name: #name,
-                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output
+                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
+                doc: #doc,
             }
         })
     }

@@ -4,8 +4,10 @@ use std::{collections::HashSet, fmt};
 /// Definition of a class member.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MemberDef {
+    pub is_property: bool,
     pub name: &'static str,
     pub r#type: TypeInfo,
+    pub doc: &'static str,
 }
 
 impl Import for MemberDef {
@@ -17,8 +19,10 @@ impl Import for MemberDef {
 impl From<&MemberInfo> for MemberDef {
     fn from(info: &MemberInfo) -> Self {
         Self {
+            is_property: false,
             name: info.name,
             r#type: (info.r#type)(),
+            doc: info.doc,
         }
     }
 }
@@ -26,6 +30,19 @@ impl From<&MemberInfo> for MemberDef {
 impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
-        writeln!(f, "{indent}{}: {}", self.name, self.r#type)
+        if self.is_property {
+            writeln!(f, "{indent}@property")?;
+            writeln!(f, "{indent}def {}(self) -> {}:", self.name, self.r#type)?;
+            if !self.doc.is_empty() {
+                writeln!(f, r#"{indent}    """{}""""#, self.doc)?;
+            }
+            writeln!(f, "{indent}    ...")
+        } else {
+            writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
+            if !self.doc.is_empty() {
+                writeln!(f, r#"{indent}"""{}""""#, self.doc)?;
+            }
+            Ok(())
+        }
     }
 }
