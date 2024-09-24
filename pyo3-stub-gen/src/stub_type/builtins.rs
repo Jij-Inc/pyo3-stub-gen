@@ -47,6 +47,8 @@ impl_builtin!(OsString, "str");
 impl_builtin!(Cow<'_, str>, "str");
 impl_builtin!(Cow<'_, OsStr>, "str");
 
+impl_builtin!(&[u8], "bytes");
+
 impl PyStubType for PathBuf {
     fn type_output() -> TypeInfo {
         TypeInfo::builtin("str")
