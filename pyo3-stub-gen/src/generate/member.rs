@@ -1,5 +1,10 @@
+use itertools::Itertools;
+
 use crate::{generate::*, type_info::*, TypeInfo};
-use std::{collections::HashSet, fmt};
+use std::{
+    collections::HashSet,
+    fmt::{self, format},
+};
 
 /// Definition of a class member.
 #[derive(Debug, Clone, PartialEq)]
@@ -30,17 +35,18 @@ impl From<&MemberInfo> for MemberDef {
 impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
+        let doc = self.doc.split("\n").join(&format!("\n{indent}"));
         if self.is_property {
             writeln!(f, "{indent}@property")?;
             writeln!(f, "{indent}def {}(self) -> {}:", self.name, self.r#type)?;
-            if !self.doc.is_empty() {
-                writeln!(f, r#"{indent}    """{}""""#, self.doc)?;
+            if !doc.is_empty() {
+                writeln!(f, r#"{indent}    """{doc}""""#)?;
             }
             writeln!(f, "{indent}    ...")
         } else {
             writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
-            if !self.doc.is_empty() {
-                writeln!(f, r#"{indent}"""{}""""#, self.doc)?;
+            if !doc.is_empty() {
+                writeln!(f, r#"{indent}"""{doc}""""#)?;
             }
             Ok(())
         }
