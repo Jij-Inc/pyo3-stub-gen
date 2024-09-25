@@ -5,7 +5,10 @@ use std::{
     borrow::Cow,
     ffi::{OsStr, OsString},
     path::PathBuf,
+    time::SystemTime,
 };
+
+use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 
 macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
@@ -15,6 +18,16 @@ macro_rules! impl_builtin {
                     name: $pytype.to_string(),
                     import: HashSet::new(),
                 }
+            }
+        }
+    };
+}
+
+macro_rules! impl_with_module {
+    ($ty:ty, $pytype:expr, $module:expr) => {
+        impl PyStubType for $ty {
+            fn type_output() -> TypeInfo {
+                TypeInfo::with_module($pytype, $module.into())
             }
         }
     };
@@ -57,3 +70,18 @@ impl PyStubType for PathBuf {
             | TypeInfo::with_module("pathlib.Path", "pathlib".into())
     }
 }
+
+impl<Tz: TimeZone> PyStubType for DateTime<Tz> {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module("datetime.datetime", "datetime".into())
+    }
+}
+
+impl_with_module!(SystemTime, "datetime.datetime", "datetime");
+impl_with_module!(NaiveDateTime, "datetime.datetime", "datetime");
+impl_with_module!(NaiveDate, "datetime.date", "datetime");
+impl_with_module!(NaiveTime, "datetime.time", "datetime");
+impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
+impl_with_module!(Utc, "datetime.tzinfo", "datetime");
+impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
+impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
