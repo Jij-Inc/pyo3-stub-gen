@@ -36,7 +36,7 @@ jobs:
           echo "NEW_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')" >> $GITHUB_ENV
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           title: "Start developing ${{ env.NEW_VERSION }}"
           branch: "rust-version-update/${{ env.NEW_VERSION }}"
