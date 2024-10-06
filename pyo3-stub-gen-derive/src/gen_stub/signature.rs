@@ -45,7 +45,9 @@ impl ToTokens for SignatureArg {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         match self {
             SignatureArg::Ident(ident) => tokens.append_all(quote! { #ident }),
-            SignatureArg::Assign(ident, _eq, _value) => tokens.append_all(quote! { #ident = ... }),
+            SignatureArg::Assign(ident, _eq, value) => {
+                tokens.append_all(quote! { #ident = #value })
+            }
             SignatureArg::Star(star) => tokens.append_all(quote! { #star }),
             SignatureArg::Args(star, ident) => tokens.append_all(quote! { #star #ident }),
             SignatureArg::Keywords(star1, star2, ident) => {
@@ -77,7 +79,7 @@ impl ToTokens for Signature {
             .iter()
             .map(|arg| arg.to_token_stream().to_string())
             .collect::<Vec<String>>()
-            .join(",");
+            .join(", ");
         tokens.append_all(quote! { #sig });
     }
 }

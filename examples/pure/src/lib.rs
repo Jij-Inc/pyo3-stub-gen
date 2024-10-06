@@ -14,6 +14,23 @@ fn sum(v: Vec<u32>) -> u32 {
 }
 
 #[gen_stub_pyfunction]
+#[pyfunction(signature=(x=0, y=0))]
+fn add_two_number(x: i32, y: i32) -> i32 {
+    x + y
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction(signature=(numbers, precision=None))]
+fn calculate_average(numbers: Vec<f64>, precision: Option<usize>) -> f64 {
+    let total: f64 = numbers.iter().sum();
+    let average = total / numbers.len() as f64;
+    match precision {
+        Some(p) => (average * 10f64.powi(p as i32)).round() / 10f64.powi(p as i32),
+        None => average,
+    }
+}
+
+#[gen_stub_pyfunction]
 #[pyfunction]
 fn read_dict(dict: HashMap<usize, HashMap<usize, usize>>) {
     for (k, v) in dict {
@@ -109,6 +126,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<A>()?;
     m.add_class::<Number>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
+    m.add_function(wrap_pyfunction!(add_two_number, m)?)?;
+    m.add_function(wrap_pyfunction!(calculate_average, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
