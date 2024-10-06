@@ -21,7 +21,13 @@ class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
+def add_two_number(x:int = 0, y:int = 0) -> int:
+    ...
+
 def ahash_dict() -> dict[str, int]:
+    ...
+
+def calculate_average(numbers:typing.Sequence[float], precision:typing.Optional[int] = None) -> float:
     ...
 
 def create_a(x:int) -> A:
