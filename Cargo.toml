@@ -33,5 +33,5 @@ proc-macro2 = "1.0.86"
 pyo3 = ">= 0.21.0"
 quote = "1.0.37"
 serde = { version = "1.0.210", features = ["derive"] }
-syn = "2.0.77"
+syn = "2.0.79"
 toml = "0.8.19"
