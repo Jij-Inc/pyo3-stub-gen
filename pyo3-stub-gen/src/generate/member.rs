@@ -13,13 +13,16 @@ pub struct MemberDef {
 
 impl MemberDef {
     pub fn as_docs(&self, indent: &str) -> String {
-        format!(
-            "{}: {}",
-            self.name,
-            self.doc
-                .split("\n")
-                .join(&format!("\n{indent}{indent}{indent}"))
-        )
+        let Self { name, doc, .. } = self;
+        let docs = format!("{name} ({})", &self.r#type.name);
+        if doc.len() > 0 {
+            format!(
+                "{docs}: {}",
+                doc.split("\n").join(&format!("\n{indent}{indent}{indent}"))
+            )
+        } else {
+            docs
+        }
     }
 }
 
