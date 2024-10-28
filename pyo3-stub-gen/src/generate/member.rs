@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{collections::HashSet, fmt};
 
@@ -6,6 +8,22 @@ use std::{collections::HashSet, fmt};
 pub struct MemberDef {
     pub name: &'static str,
     pub r#type: TypeInfo,
+    pub doc: &'static str,
+}
+
+impl MemberDef {
+    pub fn as_docs(&self, indent: &str) -> String {
+        let Self { name, doc, .. } = self;
+        let docs = format!("{name} ({})", &self.r#type.name);
+        if doc.len() > 0 {
+            format!(
+                "{docs}: {}",
+                doc.split("\n").join(&format!("\n{indent}{indent}{indent}"))
+            )
+        } else {
+            docs
+        }
+    }
 }
 
 impl Import for MemberDef {
@@ -19,6 +37,7 @@ impl From<&MemberInfo> for MemberDef {
         Self {
             name: info.name,
             r#type: (info.r#type)(),
+            doc: info.doc,
         }
     }
 }

@@ -4,6 +4,7 @@ use syn::{parse_quote, Error, ItemStruct, Result, Type};
 
 use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
 
+#[derive(Debug)]
 pub struct PyClassInfo {
     pyclass_name: String,
     struct_type: Type,

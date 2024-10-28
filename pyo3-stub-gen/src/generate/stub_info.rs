@@ -122,6 +122,7 @@ impl StubInfoBuilder {
                     entry.members.push(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
+                        doc: getter.doc,
                     });
                 }
                 for method in info.methods {
