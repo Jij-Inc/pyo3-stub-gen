@@ -51,6 +51,13 @@ impl fmt::Display for ClassDef {
             for line in doc.lines() {
                 writeln!(f, "{indent}{}", line)?;
             }
+            if self.members.len() > 0 {
+                writeln!(f, "\n{indent}Attributes:")?;
+                for member in &self.members {
+                    writeln!(f, "{indent}{indent}{}", member.as_docs(indent))?;
+                }
+            }
+
             writeln!(f, r#"{indent}""""#)?;
         }
         for member in &self.members {

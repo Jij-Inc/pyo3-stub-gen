@@ -2,12 +2,13 @@ use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{Error, Field, ImplItemFn, Result, Type};
+use syn::{Attribute, Error, Field, ImplItemFn, Result, Type};
 
 #[derive(Debug)]
 pub struct MemberInfo {
     name: String,
     r#type: Type,
+    doc: String,
 }
 
 impl MemberInfo {
@@ -24,17 +25,44 @@ impl MemberInfo {
     }
 }
 
+fn extract_docs(attrs: &Vec<Attribute>) -> String {
+    attrs
+        .iter()
+        .filter_map(|attr| match &attr.meta {
+            syn::Meta::NameValue(meta_name_value) => match &meta_name_value.value {
+                syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
+                    syn::Lit::Str(lit_str) => Some(lit_str.token().to_string()),
+                    _ => None,
+                },
+                _ => None,
+            },
+            _ => None,
+        })
+        .map(|attr| {
+            let attr2 = attr.strip_prefix("\"").unwrap_or(&attr);
+            attr2
+                .strip_suffix("\"")
+                .unwrap_or(&attr2)
+                .trim()
+                .to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 impl TryFrom<ImplItemFn> for MemberInfo {
     type Error = Error;
     fn try_from(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_candidate_item(&item)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let docs = extract_docs(attrs);
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
                 return Ok(MemberInfo {
                     name: name.unwrap_or(sig.ident.to_string()),
                     r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
+                    doc: docs,
                 });
             }
         }
@@ -54,21 +82,28 @@ impl TryFrom<Field> for MemberInfo {
                 field_name = Some(name);
             }
         }
+        let docs = extract_docs(&attrs);
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: ty,
+            doc: docs,
         })
     }
 }
 
 impl ToTokens for MemberInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let Self { name, r#type: ty } = self;
+        let Self {
+            name,
+            r#type: ty,
+            doc,
+        } = self;
         let name = name.strip_prefix("get_").unwrap_or(name);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MemberInfo {
                 name: #name,
-                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output
+                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
+                doc: #doc,
             }
         })
     }
