@@ -59,6 +59,7 @@ impl fmt::Display for TypeInfo {
 }
 
 impl TypeInfo {
+    /// A `None` type annotation.
     pub fn none() -> Self {
         Self {
             name: "None".to_string(),
@@ -66,6 +67,7 @@ impl TypeInfo {
         }
     }
 
+    /// A `typing.Any` type annotation.
     pub fn any() -> Self {
         Self {
             name: "typing.Any".to_string(),
@@ -73,6 +75,7 @@ impl TypeInfo {
         }
     }
 
+    /// A type annotation of a built-in type, such as `int`, `str`, or `float`. Generic builtin types are also possible, such as `dict[str, str]`.
     pub fn builtin(name: &str) -> Self {
         Self {
             name: name.to_string(),
@@ -80,6 +83,11 @@ impl TypeInfo {
         }
     }
 
+    /// A type annotation of a type that must be imported. The type name must be qualified with the module name:
+    ///
+    /// ```
+    /// pyo3_stub_gen::TypeInfo::with_module("pathlib.Path", "pathlib".into());
+    /// ```
     pub fn with_module(name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
         import.insert(module);
