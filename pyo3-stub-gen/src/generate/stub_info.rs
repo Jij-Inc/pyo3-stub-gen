@@ -9,9 +9,18 @@ pub struct StubInfo {
 }
 
 impl StubInfo {
+    /// Initialize [StubInfo] from a `pyproject.toml` file in `CARGO_MANIFEST_DIR`.
+    /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
         Ok(StubInfoBuilder::from_pyproject_toml(pyproject).build())
+    }
+
+    /// Initialize [StubInfo] with a specific module name and project root.
+    /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
+    /// not in the `gen_stub` executables due to [inventory]'s mechanism.
+    pub fn from_project_root(default_module_name: String, project_root: PathBuf) -> Result<Self> {
+        Ok(StubInfoBuilder::from_project_root(default_module_name, project_root).build())
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -47,12 +56,19 @@ struct StubInfoBuilder {
 
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject) -> Self {
-        Self {
-            modules: BTreeMap::new(),
-            default_module_name: pyproject.module_name().to_string(),
-            python_root: pyproject
+        StubInfoBuilder::from_project_root(
+            pyproject.module_name().to_string(),
+            pyproject
                 .python_source()
                 .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
+        )
+    }
+
+    fn from_project_root(default_module_name: String, project_root: PathBuf) -> Self {
+        Self {
+            modules: BTreeMap::new(),
+            default_module_name,
+            python_root: project_root,
         }
     }
 
