@@ -5,27 +5,22 @@ use std::{collections::BTreeMap, fs, io::Write, path::*};
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
     pub modules: BTreeMap<String, Module>,
-    pub pyproject: PyProject,
+    pub python_root: PathBuf,
 }
 
 impl StubInfo {
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        Ok(StubInfoBuilder::new(pyproject).build())
+        Ok(StubInfoBuilder::from_pyproject_toml(pyproject).build())
     }
 
     pub fn generate(&self) -> Result<()> {
-        let python_root = self
-            .pyproject
-            .python_source()
-            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
-
         for (name, module) in self.modules.iter() {
             let path = name.replace(".", "/");
             let dest = if module.submodules.is_empty() {
-                python_root.join(format!("{path}.pyi"))
+                self.python_root.join(format!("{path}.pyi"))
             } else {
-                python_root.join(path).join("__init__.pyi")
+                self.python_root.join(path).join("__init__.pyi")
             };
 
             let dir = dest.parent().context("Cannot get parent directory")?;
@@ -47,15 +42,17 @@ impl StubInfo {
 struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
-    pyproject: PyProject,
+    python_root: PathBuf,
 }
 
 impl StubInfoBuilder {
-    fn new(pyproject: PyProject) -> Self {
+    fn from_pyproject_toml(pyproject: PyProject) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name: pyproject.module_name().to_string(),
-            pyproject,
+            python_root: pyproject
+                .python_source()
+                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
         }
     }
 
@@ -158,7 +155,7 @@ impl StubInfoBuilder {
         self.register_submodules();
         StubInfo {
             modules: self.modules,
-            pyproject: self.pyproject,
+            python_root: self.python_root,
         }
     }
 }
