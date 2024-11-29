@@ -56,6 +56,10 @@ impl A {
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
+
+    async fn async_get_x(&self) -> usize {
+        self.x
+    }
 }
 
 #[gen_stub_pyfunction]
@@ -101,6 +105,12 @@ pub enum Number {
 
 module_variable!("pure", "MY_CONSTANT", usize);
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+async fn async_num() -> i32 {
+    123
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -115,6 +125,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
+    m.add_function(wrap_pyfunction!(async_num, m)?)?;
     Ok(())
 }
 

@@ -51,6 +51,7 @@ pub struct MethodInfo {
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+    pub is_async: bool,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -125,6 +126,7 @@ pub struct PyFunctionInfo {
     pub doc: &'static str,
     pub signature: Option<&'static str>,
     pub module: Option<&'static str>,
+    pub is_async: bool,
 }
 
 inventory::collect!(PyFunctionInfo);

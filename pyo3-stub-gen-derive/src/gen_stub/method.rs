@@ -18,6 +18,7 @@ pub struct MethodInfo {
     doc: String,
     is_static: bool,
     is_class: bool,
+    is_async: bool,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -83,6 +84,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             doc,
             is_static,
             is_class,
+            is_async: sig.asyncness.is_some(),
         })
     }
 }
@@ -97,6 +99,7 @@ impl ToTokens for MethodInfo {
             doc,
             is_class,
             is_static,
+            is_async,
         } = self;
         let sig_tt = quote_option(sig);
         let ret_tt = if let Some(ret) = ret {
@@ -113,6 +116,7 @@ impl ToTokens for MethodInfo {
                 doc: #doc,
                 is_static: #is_static,
                 is_class: #is_class,
+                is_async: #is_async,
             }
         })
     }

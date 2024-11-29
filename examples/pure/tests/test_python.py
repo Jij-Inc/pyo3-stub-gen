@@ -1,4 +1,4 @@
-from pure import sum, create_dict, read_dict, echo_path, ahash_dict
+from pure import sum, create_dict, read_dict, echo_path, ahash_dict, async_num, create_a
 import pytest
 import pathlib
 
@@ -42,3 +42,10 @@ def test_path():
 
     out = echo_path("test")
     assert out == "test"
+
+
+@pytest.mark.asyncio
+async def test_async():
+    assert await async_num() == 123
+    a = create_a(1337)
+    assert await a.async_get_x() == 1337
