@@ -8,6 +8,7 @@ pub struct FunctionDef {
     pub args: Vec<Arg>,
     pub r#return: TypeInfo,
     pub doc: &'static str,
+    pub is_async: bool,
 }
 
 impl Import for FunctionDef {
@@ -27,13 +28,15 @@ impl From<&PyFunctionInfo> for FunctionDef {
             args: info.args.iter().map(Arg::from).collect(),
             r#return: (info.r#return)(),
             doc: info.doc,
+            is_async: info.is_async,
         }
     }
 }
 
 impl fmt::Display for FunctionDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "def {}(", self.name)?;
+        let async_ = if self.is_async { "async " } else { "" };
+        write!(f, "{async_}def {}(", self.name)?;
         for (i, arg) in self.args.iter().enumerate() {
             write!(f, "{arg}")?;
             if i != self.args.len() - 1 {

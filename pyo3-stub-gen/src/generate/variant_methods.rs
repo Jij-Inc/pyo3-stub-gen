@@ -25,6 +25,7 @@ pub(super) fn get_variant_methods(
             },
             doc: "",
             r#type: MethodType::New,
+            is_async: false,
         });
 
     if let VariantForm::Tuple = info.form {
@@ -38,6 +39,7 @@ pub(super) fn get_variant_methods(
                 r#return: TypeInfo::builtin("int"),
                 doc: "",
                 r#type: MethodType::Instance,
+                is_async: false,
             });
 
         let getitem_name = "__getitem__";
@@ -54,6 +56,7 @@ pub(super) fn get_variant_methods(
                 r#return: TypeInfo::any(),
                 doc: "",
                 r#type: MethodType::Instance,
+                is_async: false,
             });
     }
 

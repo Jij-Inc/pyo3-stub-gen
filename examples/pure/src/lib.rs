@@ -98,6 +98,10 @@ impl A {
         x
     }
 
+    async fn async_get_x(&self) -> usize {
+        self.x
+    }
+
     #[gen_stub(skip)]
     fn need_skip(&self) {}
 }
@@ -250,6 +254,12 @@ impl Number {
 
 module_variable!("pure", "MY_CONSTANT", usize);
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+async fn async_num() -> i32 {
+    123
+}
+
 // Test if non-any PyObject Target can be a default value
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -279,6 +289,7 @@ submit! {
         r#return: || i64::type_output(),
         module: None,
         doc: "",
+        is_async: false,
     }
 }
 /// Second example: all hints manually `submit!`ed via macro.
@@ -305,6 +316,7 @@ submit! {
         r#return: || f64::type_output(),
         module: None,
         doc: "Increments float by 1",
+        is_async: false,
     }
 }
 
@@ -319,6 +331,7 @@ submit! {
         r#return: || i64::type_output(),
         module: None,
         doc: "Increments integer by 1",
+        is_async: false,
     }
 }
 
@@ -360,6 +373,7 @@ submit! {
                 r#type: MethodType::Instance,
                 r#return: || i64::type_output(),
                 doc: "And this is for the second comment",
+                is_async: false,
             }
         ],
     }
@@ -402,6 +416,7 @@ submit! {
                 r#type: MethodType::Instance,
                 r#return: || i64::type_output(),
                 doc: "increment_2 for integers, submitted by hands",
+                is_async: false,
             },
             MethodInfo {
                 name: "__new__",
@@ -409,6 +424,7 @@ submit! {
                 r#type: MethodType::New,
                 r#return: || Incrementer2::type_output(),
                 doc: "Constructor for Incrementer2",
+                is_async: false,
             },
             MethodInfo {
                 name: "increment_2",
@@ -422,6 +438,7 @@ submit! {
                 r#type: MethodType::Instance,
                 r#return: || f64::type_output(),
                 doc: "increment_2 for floats, submitted by hands",
+                is_async: false,
             },
         ],
     }
@@ -450,6 +467,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
+    m.add_function(wrap_pyfunction!(async_num, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
