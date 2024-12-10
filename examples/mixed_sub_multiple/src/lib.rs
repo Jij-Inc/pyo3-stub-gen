@@ -30,7 +30,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 #[pymodule]
 fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
-    let sub = PyModule::new_bound(py, "mod_a")?;
+    let sub = PyModule::new(py, "mod_a")?;
     sub.add_function(wrap_pyfunction!(greet_a, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
@@ -39,7 +39,7 @@ fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
 #[pymodule]
 fn mod_b(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
-    let sub = PyModule::new_bound(py, "mod_b")?;
+    let sub = PyModule::new(py, "mod_b")?;
     sub.add_function(wrap_pyfunction!(greet_b, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
