@@ -1,0 +1,15 @@
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "mixed_sub_multiple"
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+test = ["pytest", "pyright", "ruff"]
+
+[tool.maturin]
+python-source = "python"
+module-name = "mixed_sub_multiple.main_mod"
+features = ["pyo3/extension-module"]
