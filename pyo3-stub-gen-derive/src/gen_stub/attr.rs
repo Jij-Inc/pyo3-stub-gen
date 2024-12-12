@@ -54,6 +54,7 @@ pub enum Attr {
     GetAll,
     Module(String),
     Signature(Signature),
+    Extends(String),
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -118,6 +119,11 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                     [Ident(ident), Punct(_), Group(group)] => {
                         if ident == "signature" {
                             pyo3_attrs.push(Attr::Signature(syn::parse2(group.to_token_stream())?));
+                        }
+                    }
+                    [Ident(ident), Punct(_), Ident(ident2)] => {
+                        if ident == "extends" {
+                            pyo3_attrs.push(Attr::Extends(ident2.to_string()));
                         }
                     }
                     _ => {}

@@ -10,6 +10,7 @@ pub struct PyClassInfo {
     module: Option<String>,
     members: Vec<MemberInfo>,
     doc: String,
+    bases: Vec<(Option<String>, String)>,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -41,6 +42,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut pyclass_name = None;
         let mut module = None;
         let mut is_get_all = false;
+        let mut bases = Vec::new();
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -48,6 +50,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                     module = Some(name);
                 }
                 Attr::GetAll => is_get_all = true,
+                // TODO: allow other modules
+                Attr::Extends(name) => bases.push((module.clone(), name)),
                 _ => {}
             }
         }
@@ -65,6 +69,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             members,
             module,
             doc,
+            bases,
         })
     }
 }
@@ -77,8 +82,13 @@ impl ToTokens for PyClassInfo {
             members,
             doc,
             module,
+            bases,
         } = self;
         let module = quote_option(module);
+        let bases: Vec<_> = bases.into_iter().map(|(mod_, name)| {
+            let mod_ = quote_option(mod_);
+            quote! { (#mod_, #name) }
+        }).collect();
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyClassInfo {
                 pyclass_name: #pyclass_name,
@@ -86,6 +96,7 @@ impl ToTokens for PyClassInfo {
                 members: &[ #( #members),* ],
                 module: #module,
                 doc: #doc,
+                bases: &[ #(#bases),* ],
             }
         })
     }

@@ -9,6 +9,7 @@ pub struct ClassDef {
     pub new: Option<NewDef>,
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
+    pub bases: &'static [(Option<&'static str>, &'static str)],
 }
 
 impl Import for ClassDef {
@@ -37,13 +38,20 @@ impl From<&PyClassInfo> for ClassDef {
             doc: info.doc,
             members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
+            bases: info.bases,
         }
     }
 }
 
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "class {}:", self.name)?;
+        let bases = self.bases
+            .into_iter()
+            .map(|(m, n)| m.map(|m| format!("{m}.{n}")).unwrap_or_else(|| n.to_string()))
+            .reduce(|acc, path| format!("{acc}, {path}"))
+            .map(|bases| format!("({bases})"))
+            .unwrap_or_default();
+        writeln!(f, "class {}{}:", self.name, bases)?;
         let indent = indent();
         let doc = self.doc.trim();
         if !doc.is_empty() {
