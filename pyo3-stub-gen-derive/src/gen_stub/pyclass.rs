@@ -85,10 +85,13 @@ impl ToTokens for PyClassInfo {
             bases,
         } = self;
         let module = quote_option(module);
-        let bases: Vec<_> = bases.into_iter().map(|(mod_, name)| {
-            let mod_ = quote_option(mod_);
-            quote! { (#mod_, #name) }
-        }).collect();
+        let bases: Vec<_> = bases
+            .into_iter()
+            .map(|(mod_, name)| {
+                let mod_ = quote_option(mod_);
+                quote! { (#mod_, #name) }
+            })
+            .collect();
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyClassInfo {
                 pyclass_name: #pyclass_name,

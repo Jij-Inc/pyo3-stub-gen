@@ -45,9 +45,13 @@ impl From<&PyClassInfo> for ClassDef {
 
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let bases = self.bases
+        let bases = self
+            .bases
             .into_iter()
-            .map(|(m, n)| m.map(|m| format!("{m}.{n}")).unwrap_or_else(|| n.to_string()))
+            .map(|(m, n)| {
+                m.map(|m| format!("{m}.{n}"))
+                    .unwrap_or_else(|| n.to_string())
+            })
             .reduce(|acc, path| format!("{acc}, {path}"))
             .map(|bases| format!("({bases})"))
             .unwrap_or_default();
