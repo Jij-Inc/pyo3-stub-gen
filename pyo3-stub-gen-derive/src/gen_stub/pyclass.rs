@@ -86,7 +86,7 @@ impl ToTokens for PyClassInfo {
         } = self;
         let module = quote_option(module);
         let bases: Vec<_> = bases
-            .into_iter()
+            .iter()
             .map(|(mod_, name)| {
                 let mod_ = quote_option(mod_);
                 quote! { (#mod_, #name) }

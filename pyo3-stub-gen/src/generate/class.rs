@@ -47,7 +47,7 @@ impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let bases = self
             .bases
-            .into_iter()
+            .iter()
             .map(|(m, n)| {
                 m.map(|m| format!("{m}.{n}"))
                     .unwrap_or_else(|| n.to_string())
