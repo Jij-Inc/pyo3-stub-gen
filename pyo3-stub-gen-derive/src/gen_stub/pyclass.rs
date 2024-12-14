@@ -150,6 +150,7 @@ mod test {
             ],
             module: Some("my_module"),
             doc: "",
+            bases: &[],
         }
         "###);
         Ok(())
