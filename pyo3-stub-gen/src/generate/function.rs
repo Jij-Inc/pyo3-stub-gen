@@ -1,5 +1,5 @@
 use crate::{generate::*, type_info::*, TypeInfo};
-use std::fmt;
+use std::{collections::HashMap, fmt};
 
 /// Definition of a Python function.
 #[derive(Debug, Clone, PartialEq)]
@@ -37,12 +37,31 @@ impl fmt::Display for FunctionDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "def {}(", self.name)?;
         if let Some(sig) = self.signature {
-            write!(f, "{}", sig)?;
+            let mut signature_map = HashMap::new();
+            let split_sig = sig.split(",").map(|s| s.trim());
+            for s in split_sig {
+                let name_value: Vec<&str> = s.split('=').map(|s| s.trim()).collect();
+                if name_value.len() == 2 {
+                    signature_map.insert(name_value[0].to_string(), name_value[1].to_string());
+                } else {
+                    continue;
+                }
+            }
+            for (i, arg) in self.args.iter().enumerate() {
+                if let Some(value) = signature_map.get(arg.name) {
+                    write!(f, "{} = {}", arg, value)?;
+                } else {
+                    write!(f, "{}", arg)?;
+                }
+                if i != self.args.len() - 1 {
+                    write!(f, ", ")?;
+                }
+            }
         } else {
             for (i, arg) in self.args.iter().enumerate() {
                 write!(f, "{}", arg)?;
                 if i != self.args.len() - 1 {
-                    write!(f, ",")?;
+                    write!(f, ", ")?;
                 }
             }
         }

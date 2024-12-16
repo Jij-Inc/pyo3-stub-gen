@@ -1,4 +1,4 @@
-from pure import sum, create_dict, read_dict, echo_path, ahash_dict
+from pure import sum, create_dict, read_dict, echo_path, ahash_dict, add_two_number, calculate_average
 import pytest
 import pathlib
 
@@ -7,6 +7,14 @@ def test_sum():
     assert sum([1, 2]) == 3
     assert sum((1, 2)) == 3
 
+def test_add_two_number():
+    assert add_two_number() == 0
+    assert add_two_number(10) == 10
+    assert add_two_number(24, 36) == 60
+
+def test_calculate_average():
+    assert calculate_average([1,2,3,4]) == 2.5
+    assert calculate_average([1,2,3,4], 2) == 2.50
 
 def test_create_dict():
     assert create_dict(3) == {0: [], 1: [0], 2: [0, 1]}
