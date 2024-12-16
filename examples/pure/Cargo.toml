@@ -11,6 +11,7 @@ ahash.workspace = true
 env_logger.workspace = true
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
 pyo3.workspace = true
+pyo3.features = ["experimental-async"]
 
 [[bin]]
 name = "stub_gen"
