@@ -80,7 +80,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 
 fn sub_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
-    let sub = PyModule::new_bound(py, "sub_mod")?;
+    let sub = PyModule::new(py, "sub_mod")?;
     sub.add_class::<C>()?;
     sub.add_function(wrap_pyfunction!(create_c, &sub)?)?;
     parent.add_submodule(&sub)?;
