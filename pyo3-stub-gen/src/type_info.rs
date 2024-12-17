@@ -95,6 +95,8 @@ pub struct PyClassInfo {
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
     pub members: &'static [MemberInfo],
+    /// Base classes specified by `#[pyclass(extends = Type)]`
+    pub bases: &'static [(Option<&'static str>, &'static str)],
 }
 
 inventory::collect!(PyClassInfo);

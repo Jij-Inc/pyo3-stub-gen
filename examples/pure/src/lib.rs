@@ -34,7 +34,7 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 }
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
     #[pyo3(get, set)]
@@ -63,6 +63,11 @@ impl A {
 fn create_a(x: usize) -> A {
     A { x }
 }
+
+#[gen_stub_pyclass]
+#[pyclass(extends=A)]
+#[derive(Debug)]
+struct B;
 
 create_exception!(pure, MyError, PyRuntimeError);
 
@@ -107,6 +112,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
+    m.add_class::<B>()?;
     m.add_class::<Number>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
