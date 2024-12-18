@@ -123,6 +123,7 @@
 //!     doc: "This is a foo method.",
 //!     is_static: false,
 //!     is_class: false,
+//!     is_new: false,
 //! };
 //!
 //! assert_eq!(
