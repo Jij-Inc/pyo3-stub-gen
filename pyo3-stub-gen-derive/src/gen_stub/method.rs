@@ -18,6 +18,7 @@ pub struct MethodInfo {
     doc: String,
     is_static: bool,
     is_class: bool,
+    pub(crate) is_new: bool,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -64,16 +65,18 @@ impl TryFrom<ImplItemFn> for MethodInfo {
         let mut text_sig = Signature::overriding_operator(&sig);
         let mut is_static = false;
         let mut is_class = false;
+        let mut is_new = false;
         for attr in attrs {
             match attr {
                 Attr::Name(name) => method_name = Some(name),
                 Attr::Signature(text_sig_) => text_sig = Some(text_sig_),
                 Attr::StaticMethod => is_static = true,
                 Attr::ClassMethod => is_class = true,
+                Attr::New => {is_new = true; is_class = true},
                 _ => {}
             }
         }
-        let name = method_name.unwrap_or(sig.ident.to_string());
+        let name = if is_new { "__new__".to_string() } else { method_name.unwrap_or(sig.ident.to_string()) };
         let r#return = escape_return_type(&sig.output);
         Ok(MethodInfo {
             name,
@@ -83,6 +86,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             doc,
             is_static,
             is_class,
+            is_new,
         })
     }
 }
@@ -97,6 +101,7 @@ impl ToTokens for MethodInfo {
             doc,
             is_class,
             is_static,
+            is_new,
         } = self;
         let sig_tt = quote_option(sig);
         let ret_tt = if let Some(ret) = ret {
@@ -113,6 +118,7 @@ impl ToTokens for MethodInfo {
                 doc: #doc,
                 is_static: #is_static,
                 is_class: #is_class,
+                is_new: #is_new
             }
         })
     }

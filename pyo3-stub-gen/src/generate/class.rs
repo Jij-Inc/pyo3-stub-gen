@@ -6,7 +6,7 @@ use std::fmt;
 pub struct ClassDef {
     pub name: &'static str,
     pub doc: &'static str,
-    pub new: Option<NewDef>,
+    pub new: Option<MethodDef>,
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
 }

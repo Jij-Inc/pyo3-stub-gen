@@ -51,6 +51,7 @@ pub struct MethodInfo {
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+    pub is_new: bool,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -60,20 +61,13 @@ pub struct MemberInfo {
     pub r#type: fn() -> TypeInfo,
 }
 
-/// Info of `#[new]`-attributed methods appears in `#[pymethods]`
-#[derive(Debug)]
-pub struct NewInfo {
-    pub args: &'static [ArgInfo],
-    pub signature: Option<&'static str>,
-}
-
 /// Info of `#[pymethod]`
 #[derive(Debug)]
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
     /// Method specified `#[new]` attribute
-    pub new: Option<NewInfo>,
+    pub new: Option<MethodInfo>,
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
     /// Other usual methods

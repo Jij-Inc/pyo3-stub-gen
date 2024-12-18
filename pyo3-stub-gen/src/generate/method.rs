@@ -11,6 +11,7 @@ pub struct MethodDef {
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+    pub is_new: bool,
 }
 
 impl Import for MethodDef {
@@ -33,6 +34,7 @@ impl From<&MethodInfo> for MethodDef {
             doc: info.doc,
             is_static: info.is_static,
             is_class: info.is_class,
+            is_new: info.is_new,
         }
     }
 }
@@ -44,8 +46,11 @@ impl fmt::Display for MethodDef {
         if self.is_static {
             writeln!(f, "{indent}@staticmethod")?;
             write!(f, "{indent}def {}(", self.name)?;
-        } else if self.is_class {
-            writeln!(f, "{indent}@classmethod")?;
+        } else if self.is_new || self.is_class {
+            if !self.is_new {
+                // new is a classmethod without the decorator
+                writeln!(f, "{indent}@classmethod")?;
+            }
             write!(f, "{indent}def {}(cls", self.name)?;
             needs_comma = true;
         } else {
