@@ -41,6 +41,15 @@ pub struct ArgInfo {
     pub r#type: fn() -> TypeInfo,
 }
 
+/// Type of a method
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MethodType {
+    Instance,
+    Static,
+    Class,
+    New,
+}
+
 /// Info of usual method appears in `#[pymethod]`
 #[derive(Debug)]
 pub struct MethodInfo {
@@ -49,9 +58,7 @@ pub struct MethodInfo {
     pub r#return: fn() -> TypeInfo,
     pub signature: Option<&'static str>,
     pub doc: &'static str,
-    pub is_static: bool,
-    pub is_class: bool,
-    pub is_new: bool,
+    pub r#type: MethodType,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`

@@ -121,9 +121,7 @@
 //!     signature: None,
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
-//!     is_static: false,
-//!     is_class: false,
-//!     is_new: false,
+//!     r#type: MethodType::Instance,
 //! };
 //!
 //! assert_eq!(

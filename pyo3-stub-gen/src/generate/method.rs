@@ -1,6 +1,8 @@
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{collections::HashSet, fmt};
 
+pub use crate::type_info::MethodType;
+
 /// Definition of a class method.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MethodDef {
@@ -9,9 +11,7 @@ pub struct MethodDef {
     pub signature: Option<&'static str>,
     pub r#return: TypeInfo,
     pub doc: &'static str,
-    pub is_static: bool,
-    pub is_class: bool,
-    pub is_new: bool,
+    pub r#type: MethodType,
 }
 
 impl Import for MethodDef {
@@ -32,9 +32,7 @@ impl From<&MethodInfo> for MethodDef {
             signature: info.signature,
             r#return: (info.r#return)(),
             doc: info.doc,
-            is_static: info.is_static,
-            is_class: info.is_class,
-            is_new: info.is_new,
+            r#type: info.r#type,
         }
     }
 }
@@ -43,19 +41,23 @@ impl fmt::Display for MethodDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         let mut needs_comma = false;
-        if self.is_static {
-            writeln!(f, "{indent}@staticmethod")?;
-            write!(f, "{indent}def {}(", self.name)?;
-        } else if self.is_new || self.is_class {
-            if !self.is_new {
-                // new is a classmethod without the decorator
-                writeln!(f, "{indent}@classmethod")?;
+        match self.r#type {
+            MethodType::Static => {
+                writeln!(f, "{indent}@staticmethod")?;
+                write!(f, "{indent}def {}(", self.name)?;
             }
-            write!(f, "{indent}def {}(cls", self.name)?;
-            needs_comma = true;
-        } else {
-            write!(f, "{indent}def {}(self", self.name)?;
-            needs_comma = true;
+            MethodType::Class | MethodType::New => {
+                if self.r#type == MethodType::Class {
+                    // new is a classmethod without the decorator
+                    writeln!(f, "{indent}@classmethod")?;
+                }
+                write!(f, "{indent}def {}(cls", self.name)?;
+                needs_comma = true;
+            }
+            MethodType::Instance => {
+                write!(f, "{indent}def {}(self", self.name)?;
+                needs_comma = true;
+            }
         }
         if let Some(signature) = self.signature {
             if needs_comma {
