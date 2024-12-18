@@ -66,8 +66,6 @@ pub struct MemberInfo {
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
-    /// Method specified `#[new]` attribute
-    pub new: Option<MethodInfo>,
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
     /// Other usual methods
