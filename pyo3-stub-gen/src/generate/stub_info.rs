@@ -134,9 +134,6 @@ impl StubInfoBuilder {
                 for method in info.methods {
                     entry.methods.push(MethodDef::from(method))
                 }
-                if let Some(new) = &info.new {
-                    entry.new = Some(NewDef::from(new));
-                }
                 return;
             }
         }
