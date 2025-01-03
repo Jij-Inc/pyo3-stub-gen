@@ -114,9 +114,14 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyMethodsInfo::try_from(parse2::<ItemImpl>(item.clone())?)?;
+    let mut item_impl = parse2::<ItemImpl>(item)?;
+    let inner = PyMethodsInfo::try_from(item_impl.clone())?;
+    // `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+    // it's only designed to receive user's setting.
+    // We need to remove all `#[gen_stub(xxx)]` before exit this macro
+    pymethods::prune_attrs(&mut item_impl);
     Ok(quote! {
-        #item
+        #item_impl
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner
@@ -125,10 +130,15 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut inner = PyFunctionInfo::try_from(parse2::<ItemFn>(item.clone())?)?;
+    let mut item_fn = parse2::<ItemFn>(item)?;
+    let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
     inner.parse_attr(attr)?;
+    // `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+    // it's only designed to receive user's setting.
+    // We need to remove all `#[gen_stub(xxx)]` before exit this macro
+    pyfunction::prune_attrs(&mut item_fn);
     Ok(quote! {
-        #item
+        #item_fn
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner

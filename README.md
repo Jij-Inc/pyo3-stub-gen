@@ -86,6 +86,17 @@ fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
 define_stub_info_gatherer!(stub_info);
 ```
 
+**Optional**, you can use `#[gen_stub(signature = (xxx))]` to override/specify the signature in stub file, avaiable in both `pyfunction` and `pymethods`.
+``` rust
+#[gen_stub_pyfunction]  // Proc-macro attribute to register a function to stub file generator.
+#[gen_stub(signature = (a: int = 2, b: int = 3))] // Optional, override/specify the signature in stub file.
+#[pyfunction]
+#[pyo3(signature = (a = 2, b = 3))]
+fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
+    Ok((a + b).to_string())
+}
+```
+
 ## Generate a stub file
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:

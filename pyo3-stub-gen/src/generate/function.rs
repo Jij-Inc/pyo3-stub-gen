@@ -28,7 +28,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
             args: info.args.iter().map(Arg::from).collect(),
             r#return: (info.r#return)(),
             doc: info.doc,
-            signature: info.signature,
+            signature: info.specified_signature.or(info.signature),
         }
     }
 }

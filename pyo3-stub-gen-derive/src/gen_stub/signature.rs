@@ -92,4 +92,16 @@ impl Signature {
         }
         None
     }
+    pub fn args_name(&self) -> Vec<String> {
+        self.args
+            .iter()
+            .filter_map(|arg| match arg {
+                SignatureArg::Ident(ident)
+                | SignatureArg::Assign(ident, _, _)
+                | SignatureArg::Args(_, ident)
+                | SignatureArg::Keywords(_, _, ident) => Some(ident.to_string()),
+                SignatureArg::Star(_) => None,
+            })
+            .collect()
+    }
 }

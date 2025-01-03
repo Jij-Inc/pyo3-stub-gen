@@ -9,7 +9,7 @@ from enum import Enum, auto
 MY_CONSTANT: int
 class A:
     x: int
-    def __new__(cls,x:int): ...
+    def __new__(cls,x: int = 2): ...
     def show_x(self) -> None:
         ...
 
@@ -24,7 +24,7 @@ class Number(Enum):
 def ahash_dict() -> dict[str, int]:
     ...
 
-def create_a(x:int) -> A:
+def create_a(x: int = 2) -> A:
     ...
 
 def create_dict(n:int) -> dict[int, list[int]]:

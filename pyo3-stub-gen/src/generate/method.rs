@@ -28,7 +28,7 @@ impl From<&MethodInfo> for MethodDef {
         Self {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
-            signature: info.signature,
+            signature: info.specified_signature.or(info.signature),
             r#return: (info.r#return)(),
             doc: info.doc,
             is_static: info.is_static,

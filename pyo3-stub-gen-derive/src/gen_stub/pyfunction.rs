@@ -6,8 +6,8 @@ use syn::{
 };
 
 use super::{
-    escape_return_type, extract_documents, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
-    Attr, Signature,
+    check_specified_signature, escape_return_type, extract_documents, parse_args, parse_pyo3_attrs,
+    quote_option, ArgInfo, Attr, Signature,
 };
 
 pub struct PyFunctionInfo {
@@ -15,6 +15,7 @@ pub struct PyFunctionInfo {
     args: Vec<ArgInfo>,
     r#return: Option<Type>,
     sig: Option<Signature>,
+    specified_sig: Option<String>,
     doc: String,
     module: Option<String>,
 }
@@ -54,17 +55,23 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
         let r#return = escape_return_type(&item.sig.output);
         let mut name = None;
         let mut sig = None;
+        let mut specified_sig = None;
         for attr in parse_pyo3_attrs(&item.attrs)? {
             match attr {
                 Attr::Name(function_name) => name = Some(function_name),
                 Attr::Signature(signature) => sig = Some(signature),
+                Attr::SpecifiedSignature(specified_signature) => {
+                    specified_sig = Some(specified_signature)
+                }
                 _ => {}
             }
         }
         let name = name.unwrap_or_else(|| item.sig.ident.to_string());
+        check_specified_signature(&name, &specified_sig, &args, &sig)?;
         Ok(Self {
             args,
             sig,
+            specified_sig,
             r#return,
             name,
             doc,
@@ -81,6 +88,7 @@ impl ToTokens for PyFunctionInfo {
             name,
             doc,
             sig,
+            specified_sig,
             module,
         } = self;
         let ret_tt = if let Some(ret) = ret {
@@ -89,6 +97,7 @@ impl ToTokens for PyFunctionInfo {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
         let sig_tt = quote_option(sig);
+        let specified_sig_tt = quote_option(specified_sig);
         let module_tt = quote_option(module);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
@@ -97,8 +106,22 @@ impl ToTokens for PyFunctionInfo {
                 r#return: #ret_tt,
                 doc: #doc,
                 signature: #sig_tt,
+                specified_signature: #specified_sig_tt,
                 module: #module_tt,
             }
         })
     }
+}
+
+pub(crate) fn prune_attrs(item_fn: &mut ItemFn) {
+    item_fn.attrs = std::mem::take(&mut item_fn.attrs)
+        .into_iter()
+        .filter_map(|attr| {
+            if attr.path().is_ident("gen_stub") {
+                None
+            } else {
+                Some(attr)
+            }
+        })
+        .collect();
 }

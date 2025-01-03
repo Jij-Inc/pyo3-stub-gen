@@ -45,6 +45,12 @@ struct A {
 #[pymethods]
 impl A {
     #[new]
+    #[pyo3(signature = (
+        x = 2,
+    ))]
+    #[gen_stub(signature = (
+        x: int = 2,
+    ))]
     fn new(x: usize) -> Self {
         Self { x }
     }
@@ -60,6 +66,12 @@ impl A {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
+#[pyo3(signature = (
+    x = 2,
+))]
+#[gen_stub(signature = (
+    x: int = 2,
+))]
 fn create_a(x: usize) -> A {
     A { x }
 }

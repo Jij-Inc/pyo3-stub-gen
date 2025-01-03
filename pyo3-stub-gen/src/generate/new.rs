@@ -22,7 +22,7 @@ impl From<&NewInfo> for NewDef {
     fn from(info: &NewInfo) -> Self {
         Self {
             args: info.args.iter().map(Arg::from).collect(),
-            signature: info.signature,
+            signature: info.specified_signature.or(info.signature),
         }
     }
 }

@@ -38,7 +38,7 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
 
 #[derive(Debug)]
 pub struct ArgInfo {
-    name: String,
+    pub name: String,
     pub r#type: Type,
 }
 

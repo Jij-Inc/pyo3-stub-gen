@@ -48,6 +48,7 @@ pub struct MethodInfo {
     pub args: &'static [ArgInfo],
     pub r#return: fn() -> TypeInfo,
     pub signature: Option<&'static str>,
+    pub specified_signature: Option<&'static str>,
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
@@ -65,6 +66,7 @@ pub struct MemberInfo {
 pub struct NewInfo {
     pub args: &'static [ArgInfo],
     pub signature: Option<&'static str>,
+    pub specified_signature: Option<&'static str>,
 }
 
 /// Info of `#[pymethod]`
@@ -124,6 +126,7 @@ pub struct PyFunctionInfo {
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub signature: Option<&'static str>,
+    pub specified_signature: Option<&'static str>,
     pub module: Option<&'static str>,
 }
 

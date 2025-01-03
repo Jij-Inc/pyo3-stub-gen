@@ -11,6 +11,23 @@ pub struct PyMethodsInfo {
     methods: Vec<MethodInfo>,
 }
 
+pub(crate) fn prune_attrs(item: &mut ItemImpl) {
+    for inner in item.items.iter_mut() {
+        if let ImplItem::Fn(item_fn) = inner {
+            item_fn.attrs = std::mem::take(&mut item_fn.attrs)
+                .into_iter()
+                .filter_map(|attr| {
+                    if attr.path().is_ident("gen_stub") {
+                        None
+                    } else {
+                        Some(attr)
+                    }
+                })
+                .collect();
+        }
+    }
+}
+
 impl TryFrom<ItemImpl> for PyMethodsInfo {
     type Error = Error;
     fn try_from(item: ItemImpl) -> Result<Self> {
