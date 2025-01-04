@@ -112,10 +112,16 @@ impl ToTokens for MethodInfo {
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
+        let args_tt = if specified_sig.is_some() {
+            // turn-off auto type inference when specified signature
+            quote! { &[] }
+        } else {
+            quote! { &[ #(#args),* ] }
+        };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                args: &[ #(#args),* ],
+                args: #args_tt,
                 r#return: #ret_tt,
                 signature: #sig_tt,
                 specified_signature: #specified_sig_tt,

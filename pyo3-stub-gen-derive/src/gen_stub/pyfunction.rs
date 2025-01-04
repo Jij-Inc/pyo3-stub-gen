@@ -98,11 +98,17 @@ impl ToTokens for PyFunctionInfo {
         };
         let sig_tt = quote_option(sig);
         let specified_sig_tt = quote_option(specified_sig);
+        let args_tt = if specified_sig.is_some() {
+            // turn-off auto type inference when specified signature
+            quote! { &[] }
+        } else {
+            quote! { &[ #(#args),* ] }
+        };
         let module_tt = quote_option(module);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
                 name: #name,
-                args: &[ #(#args),* ],
+                args: #args_tt,
                 r#return: #ret_tt,
                 doc: #doc,
                 signature: #sig_tt,

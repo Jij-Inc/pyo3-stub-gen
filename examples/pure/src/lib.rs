@@ -64,16 +64,22 @@ impl A {
     }
 }
 
+struct MyInt(usize);
+impl FromPyObject<'_> for MyInt {
+    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+        Ok(Self(ob.extract::<usize>()?))
+    }
+}
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (
-    x = 2,
+    x = MyInt(2),
 ))]
 #[gen_stub(signature = (
     x: int = 2,
 ))]
-fn create_a(x: usize) -> A {
-    A { x }
+fn create_a(x: MyInt) -> A {
+    A { x: x.0 }
 }
 
 create_exception!(pure, MyError, PyRuntimeError);

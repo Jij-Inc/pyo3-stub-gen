@@ -54,9 +54,15 @@ impl ToTokens for NewInfo {
         } = self;
         let sig_tt = quote_option(sig);
         let specified_sig_tt = quote_option(specified_sig);
+        let args_tt = if specified_sig.is_some() {
+            // turn-off auto type inference when specified signature
+            quote! { &[] }
+        } else {
+            quote! { &[ #(#args),* ] }
+        };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::NewInfo {
-                args: &[ #(#args),* ],
+                args: #args_tt,
                 signature: #sig_tt,
                 specified_signature: #specified_sig_tt,
             }
