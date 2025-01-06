@@ -9,7 +9,9 @@ from enum import Enum, auto
 MY_CONSTANT: int
 class A:
     x: int
-    def __new__(cls,x:int): ...
+    def __new__(cls, x:int) -> A:
+        ...
+
     def show_x(self) -> None:
         ...
 
