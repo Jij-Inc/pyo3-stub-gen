@@ -11,6 +11,7 @@ pub struct MethodDef {
     pub doc: &'static str,
     pub is_static: bool,
     pub is_class: bool,
+    pub is_async: bool,
 }
 
 impl Import for MethodDef {
@@ -33,6 +34,7 @@ impl From<&MethodInfo> for MethodDef {
             doc: info.doc,
             is_static: info.is_static,
             is_class: info.is_class,
+            is_async: info.is_async,
         }
     }
 }
@@ -41,15 +43,16 @@ impl fmt::Display for MethodDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         let mut needs_comma = false;
+        let async_ = if self.is_async { "async" } else { "" };
         if self.is_static {
             writeln!(f, "{indent}@staticmethod")?;
-            write!(f, "{indent}def {}(", self.name)?;
+            write!(f, "{indent}{async_}def {}(", self.name)?;
         } else if self.is_class {
             writeln!(f, "{indent}@classmethod")?;
-            write!(f, "{indent}def {}(cls", self.name)?;
+            write!(f, "{indent}{async_}def {}(cls", self.name)?;
             needs_comma = true;
         } else {
-            write!(f, "{indent}def {}(self", self.name)?;
+            write!(f, "{indent}{async_}def {}(self", self.name)?;
             needs_comma = true;
         }
         if let Some(signature) = self.signature {

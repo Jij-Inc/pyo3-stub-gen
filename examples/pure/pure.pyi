@@ -16,12 +16,18 @@ class A:
     def ref_test(self, x:dict) -> dict:
         ...
 
+    async def async_get_x(self) -> int:
+        ...
+
 
 class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
 def ahash_dict() -> dict[str, int]:
+    ...
+
+async def async_num() -> int:
     ...
 
 def create_a(x:int) -> A:
