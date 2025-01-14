@@ -1,6 +1,4 @@
-use super::remove_lifetime;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens, TokenStreamExt};
+use quote::ToTokens;
 use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
 };
@@ -38,7 +36,7 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
 
 #[derive(Debug)]
 pub struct ArgInfo {
-    name: String,
+    pub name: String,
     pub r#type: Type,
 }
 
@@ -54,19 +52,5 @@ impl TryFrom<FnArg> for ArgInfo {
             }
         }
         Err(syn::Error::new(span, "Expected typed argument"))
-    }
-}
-
-impl ToTokens for ArgInfo {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let Self { name, r#type: ty } = self;
-        let mut ty = ty.clone();
-        remove_lifetime(&mut ty);
-        tokens.append_all(quote! {
-            ::pyo3_stub_gen::type_info::ArgInfo {
-                name: #name,
-                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input
-            }
-        });
     }
 }

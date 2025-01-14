@@ -1,11 +1,17 @@
+use std::collections::HashMap;
+
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parenthesized,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token, Expr, Ident, Result, Token,
+    token, Expr, Ident, Result, Token, Type,
 };
+
+use crate::gen_stub::remove_lifetime;
+
+use super::ArgInfo;
 
 #[derive(Debug, Clone, PartialEq)]
 enum SignatureArg {
@@ -41,20 +47,6 @@ impl Parse for SignatureArg {
     }
 }
 
-impl ToTokens for SignatureArg {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
-        match self {
-            SignatureArg::Ident(ident) => tokens.append_all(quote! { #ident }),
-            SignatureArg::Assign(ident, _eq, _value) => tokens.append_all(quote! { #ident = ... }),
-            SignatureArg::Star(star) => tokens.append_all(quote! { #star }),
-            SignatureArg::Args(star, ident) => tokens.append_all(quote! { #star #ident }),
-            SignatureArg::Keywords(star1, star2, ident) => {
-                tokens.append_all(quote! { #star1 #star2 #ident })
-            }
-        }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Signature {
     paren: token::Paren,
@@ -70,15 +62,108 @@ impl Parse for Signature {
     }
 }
 
-impl ToTokens for Signature {
+pub struct ArgsWithSignature<'a> {
+    pub args: &'a Vec<ArgInfo>,
+    pub sig: &'a Option<Signature>,
+}
+
+impl<'a> ToTokens for ArgsWithSignature<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let sig = self
-            .args
-            .iter()
-            .map(|arg| arg.to_token_stream().to_string())
-            .collect::<Vec<String>>()
-            .join(",");
-        tokens.append_all(quote! { #sig });
+        let arg_infos: Vec<TokenStream2> = if let Some(sig) = self.sig {
+            // record all Type information from rust's args
+            let args_map: HashMap<String, Type> = self
+                .args
+                .iter()
+                .map(|arg| {
+                    let mut ty = arg.r#type.clone();
+                    remove_lifetime(&mut ty);
+                    (arg.name.clone(), ty)
+                })
+                .collect();
+            sig.args.iter().map(|sig_arg| match sig_arg {
+                SignatureArg::Ident(ident) => {
+                    let name = ident.to_string();
+                    let ty = args_map.get(&name).unwrap();
+                    quote! {
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: #name,
+                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                        }
+                    }
+                }
+                SignatureArg::Assign(ident, _eq, value) => {
+                    let name = ident.to_string();
+                    let ty = args_map.get(&name).unwrap();
+                    quote! {
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: #name,
+                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
+                                default: {
+                                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                                        pyo3::prepare_freethreaded_python();
+                                        ::pyo3::Python::with_gil(|py| -> String {
+                                            let v: #ty = #value;
+                                            <#ty as ::pyo3::IntoPyObject>::into_pyobject(v, py)
+                                                .unwrap()
+                                                .to_string()
+                                        })
+                                    });
+                                    &DEFAULT
+                                }
+                            }),
+                        }
+                    }
+                },
+                SignatureArg::Star(_) => quote! {
+                    ::pyo3_stub_gen::type_info::ArgInfo {
+                        name: "",
+                        r#type: <() as ::pyo3_stub_gen::PyStubType>::type_input,
+                        signature: Some(pyo3_stub_gen::type_info::SignatureArg::Star),
+                    }
+                },
+                SignatureArg::Args(_, ident) => {
+                    let name = ident.to_string();
+                    let ty = args_map.get(&name).unwrap();
+                    quote! {
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: #name,
+                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
+                        }
+                    }
+                },
+                SignatureArg::Keywords(_, _, ident) => {
+                    let name = ident.to_string();
+                    let ty = args_map.get(&name).unwrap();
+                    quote! {
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: #name,
+                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
+                        }
+                    }
+                }
+            }).collect()
+        } else {
+            self.args
+                .iter()
+                .map(|arg| {
+                    let mut ty = arg.r#type.clone();
+                    remove_lifetime(&mut ty);
+                    let name = &arg.name;
+                    quote! {
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: #name,
+                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: None,
+                        }
+                    }
+                })
+                .collect()
+        };
+        tokens.append_all(quote! { &[ #(#arg_infos),* ] });
     }
 }
 
