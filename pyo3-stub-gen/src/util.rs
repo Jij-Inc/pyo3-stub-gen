@@ -1,6 +1,7 @@
 use pyo3::{prelude::*, types::*};
 
-/// Reference to https://github.com/Jij-Inc/serde-pyobject/blob/5916fefc5b7f0e096ed13869dc41b36ad6f62dc2/src/de.rs#L309-L333
+/// Reference to <https://github.com/Jij-Inc/serde-pyobject/blob/5916fefc5b7f0e096ed13869dc41b36ad6f62dc2/src/de.rs#L309-L333>
+#[allow(clippy::result_unit_err)]
 pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> Result<String, ()> {
     if any.is_instance_of::<PyDict>() {
         return any.downcast::<PyDict>().map_err(|_| ()).and_then(|dict| {
@@ -108,19 +109,37 @@ mod test {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             // str
-            assert_eq!(Ok("\"123\"".to_owned()), fmt_py_obj(&"123".into_bound_py_any(py).unwrap()));
+            assert_eq!(
+                Ok("\"123\"".to_owned()),
+                fmt_py_obj(&"123".into_bound_py_any(py).unwrap())
+            );
             // bool
-            assert_eq!(Ok("True".to_owned()), fmt_py_obj(&true.into_bound_py_any(py).unwrap()));
-            assert_eq!(Ok("False".to_owned()), fmt_py_obj(&false.into_bound_py_any(py).unwrap()));
+            assert_eq!(
+                Ok("True".to_owned()),
+                fmt_py_obj(&true.into_bound_py_any(py).unwrap())
+            );
+            assert_eq!(
+                Ok("False".to_owned()),
+                fmt_py_obj(&false.into_bound_py_any(py).unwrap())
+            );
             // int
-            assert_eq!(Ok("123".to_owned()), fmt_py_obj(&123.into_bound_py_any(py).unwrap()));
+            assert_eq!(
+                Ok("123".to_owned()),
+                fmt_py_obj(&123.into_bound_py_any(py).unwrap())
+            );
             // float
-            assert_eq!(Ok("1.23".to_owned()), fmt_py_obj(&1.23.into_bound_py_any(py).unwrap()));
+            assert_eq!(
+                Ok("1.23".to_owned()),
+                fmt_py_obj(&1.23.into_bound_py_any(py).unwrap())
+            );
             // None
-            let none: Option<usize>  = None;
-            assert_eq!(Ok("None".to_owned()), fmt_py_obj(&none.into_bound_py_any(py).unwrap()));
+            let none: Option<usize> = None;
+            assert_eq!(
+                Ok("None".to_owned()),
+                fmt_py_obj(&none.into_bound_py_any(py).unwrap())
+            );
             // class A variable can not be formatted
-            assert_eq!(Err(()), fmt_py_obj(&A{}.into_bound_py_any(py).unwrap()));
+            assert_eq!(Err(()), fmt_py_obj(&A {}.into_bound_py_any(py).unwrap()));
         })
     }
 }
