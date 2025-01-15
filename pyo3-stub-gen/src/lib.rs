@@ -152,6 +152,7 @@ pub mod generate;
 pub mod pyproject;
 mod stub_type;
 pub mod type_info;
+pub mod util;
 
 pub use generate::StubInfo;
 pub use stub_type::{PyStubType, TypeInfo};

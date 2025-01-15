@@ -102,12 +102,13 @@ impl ToTokens for ArgsWithSignature<'_> {
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
                                 default: {
                                     static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
-                                        pyo3::prepare_freethreaded_python();
+                                        ::pyo3::prepare_freethreaded_python();
                                         ::pyo3::Python::with_gil(|py| -> String {
                                             let v: #ty = #value;
                                             <#ty as ::pyo3::IntoPyObject>::into_pyobject(v, py)
-                                                .unwrap()
-                                                .to_string()
+                                                .map_err(|_| ())
+                                                .and_then(|py_obj| ::pyo3_stub_gen::util::fmt_py_obj(&py_obj))
+                                                .unwrap_or("...".to_owned())
                                         })
                                     });
                                     &DEFAULT
