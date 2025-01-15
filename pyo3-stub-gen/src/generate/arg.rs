@@ -30,7 +30,7 @@ impl fmt::Display for Arg {
             match signature {
                 SignatureArg::Ident => write!(f, "{}:{}", self.name, self.r#type),
                 SignatureArg::Assign { default } => {
-                    let default: &String = &*default;
+                    let default: &String = default;
                     write!(f, "{}:{}={}", self.name, self.r#type, default)
                 }
                 SignatureArg::Star => write!(f, "*"),

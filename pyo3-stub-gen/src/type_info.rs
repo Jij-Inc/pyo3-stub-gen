@@ -57,8 +57,8 @@ impl PartialEq for SignatureArg {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Assign { default: l_default }, Self::Assign { default: r_default }) => {
-                let l_default: &String = &*l_default;
-                let r_default: &String = &*r_default;
+                let l_default: &String = l_default;
+                let r_default: &String = r_default;
                 l_default.eq(r_default)
             }
             _ => core::mem::discriminant(self) == core::mem::discriminant(other),

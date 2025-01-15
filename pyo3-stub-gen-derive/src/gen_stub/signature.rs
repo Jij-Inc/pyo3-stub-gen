@@ -67,7 +67,7 @@ pub struct ArgsWithSignature<'a> {
     pub sig: &'a Option<Signature>,
 }
 
-impl<'a> ToTokens for ArgsWithSignature<'a> {
+impl ToTokens for ArgsWithSignature<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let arg_infos: Vec<TokenStream2> = if let Some(sig) = self.sig {
             // record all Type information from rust's args
