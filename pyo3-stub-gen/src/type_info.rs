@@ -82,6 +82,7 @@ pub struct MethodInfo {
 pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub default: Option<&'static std::sync::LazyLock<String>>,
     pub doc: &'static str,
 }
 

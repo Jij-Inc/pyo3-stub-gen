@@ -8,9 +8,9 @@ from enum import Enum, auto
 
 MY_CONSTANT: int
 class A:
-    x: int
+    x: int = 3
     r"""
-    Class variable `x`
+    Class variable `x`, the default value is 3
     """
     def __new__(cls,x:int): ...
     def show_x(self) -> None:

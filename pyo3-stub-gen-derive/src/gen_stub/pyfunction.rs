@@ -102,3 +102,10 @@ impl ToTokens for PyFunctionInfo {
         })
     }
 }
+
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_fn back
+pub fn prune_attrs(item_fn: &mut ItemFn) {
+    super::attr::prune_attrs(&mut item_fn.attrs);
+}

@@ -37,9 +37,15 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 #[pyclass]
 #[derive(Debug)]
 struct A {
-    /// Class variable `x`
+    /// Class variable `x`, the default value is 3
     #[pyo3(get, set)]
+    #[gen_stub(default = A::default().x)]
     x: usize,
+}
+impl Default for A {
+    fn default() -> Self {
+        Self { x: 1 + 2 }
+    }
 }
 
 #[gen_stub_pymethods]
@@ -57,6 +63,9 @@ impl A {
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
+
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
 }
 
 #[gen_stub_pyfunction]
