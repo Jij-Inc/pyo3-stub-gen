@@ -37,6 +37,7 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 #[pyclass]
 #[derive(Debug)]
 struct A {
+    /// Class variable `x`
     #[pyo3(get, set)]
     x: usize,
 }

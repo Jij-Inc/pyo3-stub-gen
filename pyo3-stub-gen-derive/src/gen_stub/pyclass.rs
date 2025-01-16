@@ -105,6 +105,8 @@ mod test {
                 Debug, Clone, PyNeg, PyAdd, PySub, PyMul, PyDiv, PyMod, PyPow, PyCmp, PyIndex, PyPrint,
             )]
             pub struct PyPlaceholder {
+                /// doc line 1
+                /// doc line 2
                 #[pyo3(get)]
                 pub name: String,
                 #[pyo3(get)]
@@ -124,14 +126,17 @@ mod test {
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "doc line 1\ndoc line 2",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
             ],
             module: Some("my_module"),
