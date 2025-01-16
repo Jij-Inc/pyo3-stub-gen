@@ -1,46 +1,42 @@
 use pyo3::{prelude::*, types::*};
 
-pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> String {
-    fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
-        if any.is_instance_of::<PyString>()
-            || any.is_instance_of::<PyBool>()
-            || any.is_instance_of::<PyInt>()
-            || any.is_instance_of::<PyFloat>()
-            || any.is_none()
-        {
-            return true;
-        }
-        if any.is_instance_of::<PyDict>() {
-            return any
-                .downcast::<PyDict>()
-                .map(|dict| {
-                    dict.into_iter()
-                        .all(|(k, v)| all_builtin_types(&k) && all_builtin_types(&v))
-                })
-                .unwrap_or(false);
-        }
-        if any.is_instance_of::<PyList>() {
-            return any
-                .downcast::<PyList>()
-                .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
-                .unwrap_or(false);
-        }
-        if any.is_instance_of::<PyTuple>() {
-            return any
-                .downcast::<PyTuple>()
-                .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
-                .unwrap_or(false);
-        }
-        false
+pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
+    if any.is_instance_of::<PyString>()
+        || any.is_instance_of::<PyBool>()
+        || any.is_instance_of::<PyInt>()
+        || any.is_instance_of::<PyFloat>()
+        || any.is_none()
+    {
+        return true;
     }
+    if any.is_instance_of::<PyDict>() {
+        return any
+            .downcast::<PyDict>()
+            .map(|dict| {
+                dict.into_iter()
+                    .all(|(k, v)| all_builtin_types(&k) && all_builtin_types(&v))
+            })
+            .unwrap_or(false);
+    }
+    if any.is_instance_of::<PyList>() {
+        return any
+            .downcast::<PyList>()
+            .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
+            .unwrap_or(false);
+    }
+    if any.is_instance_of::<PyTuple>() {
+        return any
+            .downcast::<PyTuple>()
+            .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
+            .unwrap_or(false);
+    }
+    false
+}
+
+pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> String {
     if all_builtin_types(any) {
-        // `to_string` for `PyString` will lose quotes
-        if any.is_instance_of::<PyString>() {
-            if let Ok(s) = any.extract::<String>() {
-                return format!("'{s}'");
-            }
-        } else {
-            return any.to_string();
+        if let Ok(py_str) = any.repr() {
+            return py_str.to_string();
         }
     }
     "...".to_owned()
@@ -97,6 +93,14 @@ mod test {
         Python::with_gil(|py| {
             // str
             assert_eq!("'123'", fmt_py_obj(&"123".into_bound_py_any(py).unwrap()));
+            assert_eq!(
+                "\"don't\"",
+                fmt_py_obj(&"don't".into_bound_py_any(py).unwrap())
+            );
+            assert_eq!(
+                "'str\\\\'",
+                fmt_py_obj(&"str\\".into_bound_py_any(py).unwrap())
+            );
             // bool
             assert_eq!("True", fmt_py_obj(&true.into_bound_py_any(py).unwrap()));
             assert_eq!("False", fmt_py_obj(&false.into_bound_py_any(py).unwrap()));
