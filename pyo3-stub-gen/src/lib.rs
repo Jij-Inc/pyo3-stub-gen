@@ -117,8 +117,7 @@
 //!
 //! let method = MethodDef {
 //!     name: "foo",
-//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
-//!     signature: None,
+//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int"), signature: None, }],
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     is_static: false,
@@ -153,6 +152,7 @@ pub mod generate;
 pub mod pyproject;
 mod stub_type;
 pub mod type_info;
+pub mod util;
 
 pub use generate::StubInfo;
 pub use stub_type::{PyStubType, TypeInfo};

@@ -60,6 +60,7 @@ impl A {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
+#[pyo3(signature = (x = 2))]
 fn create_a(x: usize) -> A {
     A { x }
 }

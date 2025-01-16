@@ -1,4 +1,4 @@
-use super::{parse_args, parse_pyo3_attrs, quote_option, ArgInfo, Attr, Signature};
+use super::{parse_args, parse_pyo3_attrs, ArgInfo, ArgsWithSignature, Attr, Signature};
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
@@ -39,11 +39,10 @@ impl TryFrom<ImplItemFn> for NewInfo {
 impl ToTokens for NewInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self { args, sig } = self;
-        let sig_tt = quote_option(sig);
+        let args_with_sig = ArgsWithSignature { args, sig };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::NewInfo {
-                args: &[ #(#args),* ],
-                signature: #sig_tt,
+                args: #args_with_sig,
             }
         })
     }

@@ -6,7 +6,6 @@ use std::{collections::HashSet, fmt};
 pub struct MethodDef {
     pub name: &'static str,
     pub args: Vec<Arg>,
-    pub signature: Option<&'static str>,
     pub r#return: TypeInfo,
     pub doc: &'static str,
     pub is_static: bool,
@@ -28,7 +27,6 @@ impl From<&MethodInfo> for MethodDef {
         Self {
             name: info.name,
             args: info.args.iter().map(Arg::from).collect(),
-            signature: info.signature,
             r#return: (info.r#return)(),
             doc: info.doc,
             is_static: info.is_static,
@@ -52,19 +50,12 @@ impl fmt::Display for MethodDef {
             write!(f, "{indent}def {}(self", self.name)?;
             needs_comma = true;
         }
-        if let Some(signature) = self.signature {
+        for arg in &self.args {
             if needs_comma {
                 write!(f, ", ")?;
             }
-            write!(f, "{}", signature)?;
-        } else {
-            for arg in &self.args {
-                if needs_comma {
-                    write!(f, ", ")?;
-                }
-                write!(f, "{}", arg)?;
-                needs_comma = true;
-            }
+            write!(f, "{}", arg)?;
+            needs_comma = true;
         }
         writeln!(f, ") -> {}:", self.r#return)?;
 
