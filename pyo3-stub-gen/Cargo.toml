@@ -11,6 +11,7 @@ readme.workspace = true
 [dependencies]
 anyhow.workspace = true
 chrono.workspace = true
+indexmap = { workspace = true, optional = true }
 inventory.workspace = true
 itertools.workspace = true
 log.workspace = true
