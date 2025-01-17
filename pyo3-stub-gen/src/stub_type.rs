@@ -61,6 +61,8 @@ impl fmt::Display for TypeInfo {
 impl TypeInfo {
     /// A `None` type annotation.
     pub fn none() -> Self {
+        // NOTE: since 3.10, NoneType is provided from types module,
+        // but there is no corresponding definitions prior to 3.10.
         Self {
             name: "None".to_string(),
             import: HashSet::new(),
@@ -75,11 +77,19 @@ impl TypeInfo {
         }
     }
 
-    /// A type annotation of a built-in type, such as `int`, `str`, or `float`. Generic builtin types are also possible, such as `dict[str, str]`.
+    /// A type annotation of a built-in type provided from `builtins` module, such as `int`, `str`, or `float`. Generic builtin types are also possible, such as `dict[str, str]`.
     pub fn builtin(name: &str) -> Self {
         Self {
+            name: format!("builtins.{name}"),
+            import: hashset! { "builtins".into() },
+        }
+    }
+
+    /// Unqualified type.
+    pub fn unqualified(name: &str) -> Self {
+        Self {
             name: name.to_string(),
-            import: HashSet::new(),
+            import: hashset! {},
         }
     }
 
