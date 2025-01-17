@@ -30,6 +30,9 @@ def create_a(x:int=2) -> A:
 def create_dict(n:int) -> dict[int, list[int]]:
     ...
 
+def default_value(num:Number=...) -> Number:
+    ...
+
 def echo_path(path:str | os.PathLike | pathlib.Path) -> str:
     ...
 
