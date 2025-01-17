@@ -566,7 +566,6 @@ version = "0.7.0"
 dependencies = [
  "anyhow",
  "chrono",
- "indexmap",
  "inventory",
  "itertools",
  "log",
