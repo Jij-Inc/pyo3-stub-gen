@@ -40,10 +40,14 @@
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 default: None,
+//!                 doc: "",
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 default: None,
+//!                 doc: "",
 //!             },
 //!         ],
 //!         doc: "Docstring used in Python",

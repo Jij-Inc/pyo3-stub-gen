@@ -1,13 +1,17 @@
-use super::{escape_return_type, parse_pyo3_attrs, Attr};
+use super::{
+    escape_return_type, extract_documents, parse_gen_stub_default, parse_pyo3_attrs, Attr,
+};
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{Error, Field, ImplItemFn, Result, Type};
+use syn::{Error, Expr, Field, ImplItemFn, Result, Type};
 
 #[derive(Debug)]
 pub struct MemberInfo {
     name: String,
     r#type: Type,
+    default: Option<Expr>,
+    doc: String,
 }
 
 impl MemberInfo {
@@ -29,12 +33,16 @@ impl TryFrom<ImplItemFn> for MemberInfo {
     fn try_from(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_candidate_item(&item)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let default = parse_gen_stub_default(attrs)?;
+        let doc = extract_documents(attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
                 return Ok(MemberInfo {
                     name: name.unwrap_or(sig.ident.to_string()),
                     r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
+                    default,
+                    doc,
                 });
             }
         }
@@ -54,21 +62,52 @@ impl TryFrom<Field> for MemberInfo {
                 field_name = Some(name);
             }
         }
+        let default = parse_gen_stub_default(&attrs)?;
+        let doc = extract_documents(&attrs).join("\n");
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: ty,
+            default,
+            doc,
         })
     }
 }
 
 impl ToTokens for MemberInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let Self { name, r#type: ty } = self;
+        let Self {
+            name,
+            r#type: ty,
+            default,
+            doc,
+        } = self;
         let name = name.strip_prefix("get_").unwrap_or(name);
+        let default_tt = if let Some(default) = default {
+            quote! {
+                Some({
+                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                        ::pyo3::prepare_freethreaded_python();
+                        ::pyo3::Python::with_gil(|py| -> String {
+                            let v: #ty = #default;
+                            if let Ok(py_obj) = <#ty as ::pyo3::IntoPyObject>::into_pyobject(v, py) {
+                                ::pyo3_stub_gen::util::fmt_py_obj(&py_obj)
+                            } else {
+                                "...".to_owned()
+                            }
+                        })
+                    });
+                    &DEFAULT
+                })
+            }
+        } else {
+            quote! {None}
+        };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MemberInfo {
                 name: #name,
-                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output
+                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
+                default: #default_tt,
+                doc: #doc,
             }
         })
     }

@@ -91,6 +91,16 @@ impl ToTokens for PyClassInfo {
     }
 }
 
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_struct back
+pub fn prune_attrs(item_struct: &mut ItemStruct) {
+    super::attr::prune_attrs(&mut item_struct.attrs);
+    for field in item_struct.fields.iter_mut() {
+        super::attr::prune_attrs(&mut field.attrs);
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -105,6 +115,8 @@ mod test {
                 Debug, Clone, PyNeg, PyAdd, PySub, PyMul, PyDiv, PyMod, PyPow, PyCmp, PyIndex, PyPrint,
             )]
             pub struct PyPlaceholder {
+                /// doc line 1
+                /// doc line 2
                 #[pyo3(get)]
                 pub name: String,
                 #[pyo3(get)]
@@ -124,14 +136,20 @@ mod test {
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    default: None,
+                    doc: "doc line 1\ndoc line 2",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
+                    default: None,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+                    default: None,
+                    doc: "",
                 },
             ],
             module: Some("my_module"),

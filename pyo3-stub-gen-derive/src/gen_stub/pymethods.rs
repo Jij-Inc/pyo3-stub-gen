@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Error, ImplItem, ItemImpl, Result, Type};
 
-use super::{quote_option, MemberInfo, MethodInfo, NewInfo};
+use super::{parse_gen_stub_skip, quote_option, MemberInfo, MethodInfo, NewInfo};
 
 pub struct PyMethodsInfo {
     struct_id: Type,
@@ -21,6 +21,9 @@ impl TryFrom<ItemImpl> for PyMethodsInfo {
 
         for inner in item.items {
             if let ImplItem::Fn(item_fn) = inner {
+                if parse_gen_stub_skip(&item_fn.attrs)? {
+                    continue;
+                }
                 if NewInfo::is_candidate(&item_fn)? {
                     new = Some(NewInfo::try_from(item_fn)?);
                 } else if MemberInfo::is_candidate_item(&item_fn)? {
@@ -58,5 +61,17 @@ impl ToTokens for PyMethodsInfo {
                 methods: &[ #(#methods),* ],
             }
         })
+    }
+}
+
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_impl back
+pub fn prune_attrs(item_impl: &mut ItemImpl) {
+    super::attr::prune_attrs(&mut item_impl.attrs);
+    for inner in item_impl.items.iter_mut() {
+        if let ImplItem::Fn(item_fn) = inner {
+            super::attr::prune_attrs(&mut item_fn.attrs);
+        }
     }
 }
