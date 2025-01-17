@@ -22,13 +22,13 @@ class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
-def ahash_dict() -> dict[builtins.str, builtins.int]:
+def ahash_dict() -> builtins.dict[builtins.str, builtins.int]:
     ...
 
 def create_a(x:builtins.int=2) -> A:
     ...
 
-def create_dict(n:builtins.int) -> dict[builtins.int, list[builtins.int]]:
+def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]:
     ...
 
 def default_value(num:Number=...) -> Number:
