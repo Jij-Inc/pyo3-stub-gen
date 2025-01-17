@@ -35,7 +35,7 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
 
 pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> String {
     if all_builtin_types(any) {
-        if let Ok(py_str) = any.as_any().repr() {
+        if let Ok(py_str) = any.repr() {
             return py_str.to_string();
         }
     }
