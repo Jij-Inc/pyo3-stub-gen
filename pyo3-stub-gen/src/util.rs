@@ -1,6 +1,7 @@
 use pyo3::{prelude::*, types::*};
 
-pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
+pub fn all_builtin_types<T>(input: &Bound<'_, T>) -> bool {
+    let any = input.as_any();
     if any.is_instance_of::<PyString>()
         || any.is_instance_of::<PyBool>()
         || any.is_instance_of::<PyInt>()
@@ -33,9 +34,10 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     false
 }
 
-pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> String {
+pub fn fmt_py_obj<T>(input: &Bound<'_, T>) -> String {
+    let any = input.as_any();
     if all_builtin_types(any) {
-        if let Ok(py_str) = any.repr() {
+        if let Ok(py_str) = any.as_any().repr() {
             return py_str.to_string();
         }
     }
