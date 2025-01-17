@@ -105,7 +105,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                                         ::pyo3::prepare_freethreaded_python();
                                         ::pyo3::Python::with_gil(|py| -> String {
                                             let v: #ty = #value;
-                                            if let Ok(py_obj) = <#ty as ::pyo3::IntoPyObject>::into_pyobject(v, py) {
+                                            if let Ok(py_obj) = <#ty as ::pyo3::IntoPyObjectExt>::into_bound_py_any(v, py) {
                                                 ::pyo3_stub_gen::util::fmt_py_obj(&py_obj)
                                             } else {
                                                 "...".to_owned()
