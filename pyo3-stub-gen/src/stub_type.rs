@@ -77,6 +77,44 @@ impl TypeInfo {
         }
     }
 
+    /// A `list[Type]` type annotation.
+    pub fn list_of<T: PyStubType>() -> Self {
+        let TypeInfo { name, mut import } = T::type_output();
+        import.insert("builtins".into());
+        TypeInfo {
+            name: format!("builtins.list[{}]", name),
+            import,
+        }
+    }
+
+    /// A `set[Type]` type annotation.
+    pub fn set_of<T: PyStubType>() -> Self {
+        let TypeInfo { name, mut import } = T::type_output();
+        import.insert("builtins".into());
+        TypeInfo {
+            name: format!("builtins.set[{}]", name),
+            import,
+        }
+    }
+
+    /// A `dict[Type]` type annotation.
+    pub fn dict_of<K: PyStubType, V: PyStubType>() -> Self {
+        let TypeInfo {
+            name: name_k,
+            mut import,
+        } = K::type_output();
+        let TypeInfo {
+            name: name_v,
+            import: import_v,
+        } = V::type_output();
+        import.extend(import_v);
+        import.insert("builtins".into());
+        TypeInfo {
+            name: format!("builtins.set[{}, {}]", name_k, name_v),
+            import,
+        }
+    }
+
     /// A type annotation of a built-in type provided from `builtins` module, such as `int`, `str`, or `float`. Generic builtin types are also possible, such as `dict[str, str]`.
     pub fn builtin(name: &str) -> Self {
         Self {
@@ -192,49 +230,23 @@ mod test {
     use super::*;
     use maplit::hashset;
     use std::collections::HashMap;
+    use test_case::test_case;
 
-    #[test]
-    fn test() {
-        assert_eq!(bool::type_input().name, "bool");
-        assert!(bool::type_input().import.is_empty());
-
-        assert_eq!(<&str>::type_input().name, "str");
-        assert!(<&str>::type_input().import.is_empty());
-
-        assert_eq!(Vec::<u32>::type_input().name, "typing.Sequence[int]");
-        assert_eq!(
-            Vec::<u32>::type_input().import,
-            hashset! { "typing".into() }
-        );
-
-        assert_eq!(Vec::<u32>::type_output().name, "list[int]");
-        assert!(Vec::<u32>::type_output().import.is_empty());
-
-        assert_eq!(
-            HashMap::<u32, String>::type_input().name,
-            "typing.Mapping[int, str]"
-        );
-        assert_eq!(
-            HashMap::<u32, String>::type_input().import,
-            hashset! { "typing".into() }
-        );
-
-        assert_eq!(HashMap::<u32, String>::type_output().name, "dict[int, str]");
-        assert!(HashMap::<u32, String>::type_output().import.is_empty());
-
-        assert_eq!(
-            HashMap::<u32, Vec<u32>>::type_input().name,
-            "typing.Mapping[int, typing.Sequence[int]]"
-        );
-        assert_eq!(
-            HashMap::<u32, Vec<u32>>::type_input().import,
-            hashset! { "typing".into() }
-        );
-
-        assert_eq!(
-            HashMap::<u32, Vec<u32>>::type_output().name,
-            "dict[int, list[int]]"
-        );
-        assert!(HashMap::<u32, Vec<u32>>::type_output().import.is_empty());
+    #[test_case(bool::type_input(), "builtins.bool", hashset! { "builtins".into() } ; "bool_input")]
+    #[test_case(<&str>::type_input(), "builtins.str", hashset! { "builtins".into() } ; "str_input")]
+    #[test_case(Vec::<u32>::type_input(), "typing.Sequence[builtins.int]", hashset! { "typing".into(), "builtins".into() } ; "Vec_u32_input")]
+    #[test_case(Vec::<u32>::type_output(), "builtins.list[builtins.int]", hashset! {  "builtins".into() } ; "Vec_u32_output")]
+    #[test_case(HashMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "HashMap_u32_String_input")]
+    #[test_case(HashMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "HashMap_u32_String_output")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { "builtins".into(), "typing".into() } ; "HashMap_u32_Vec_u32_input")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
+    #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
+    fn test(tinfo: TypeInfo, name: &str, import: HashSet<ModuleRef>) {
+        assert_eq!(tinfo.name, name);
+        if import.is_empty() {
+            assert!(tinfo.import.is_empty());
+        } else {
+            assert_eq!(tinfo.import, import);
+        }
     }
 }
