@@ -25,6 +25,9 @@ toml.workspace = true
 version = "0.7.0"
 path = "../pyo3-stub-gen-derive"
 
+[dev-dependencies]
+test-case.workspace = true
+
 [features]
 default = ["numpy"]
 numpy = ["dep:numpy"]

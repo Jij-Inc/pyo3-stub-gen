@@ -127,7 +127,7 @@
 //! assert_eq!(
 //!     method.to_string().trim(),
 //!     r#"
-//!     def foo(self, x:int) -> int:
+//!     def foo(self, x:builtins.int) -> builtins.int:
 //!         r"""
 //!         This is a foo method.
 //!         """

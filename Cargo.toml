@@ -38,3 +38,4 @@ quote = "1.0.38"
 serde = { version = "1.0.217", features = ["derive"] }
 syn = "2.0.96"
 toml = "0.8.19"
+test-case = "3.3.1"
