@@ -7,7 +7,7 @@ use syn::{
 
 use super::{
     escape_return_type, extract_documents, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
-    Attr, Signature,
+    ArgsWithSignature, Attr, Signature,
 };
 
 pub struct PyFunctionInfo {
@@ -88,15 +88,15 @@ impl ToTokens for PyFunctionInfo {
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
-        let sig_tt = quote_option(sig);
+        // let sig_tt = quote_option(sig);
         let module_tt = quote_option(module);
+        let args_with_sig = ArgsWithSignature { args, sig };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
                 name: #name,
-                args: &[ #(#args),* ],
+                args: #args_with_sig,
                 r#return: #ret_tt,
                 doc: #doc,
-                signature: #sig_tt,
                 module: #module_tt,
             }
         })

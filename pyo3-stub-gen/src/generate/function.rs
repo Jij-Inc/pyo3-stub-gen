@@ -7,7 +7,6 @@ pub struct FunctionDef {
     pub name: &'static str,
     pub args: Vec<Arg>,
     pub r#return: TypeInfo,
-    pub signature: Option<&'static str>,
     pub doc: &'static str,
 }
 
@@ -28,7 +27,6 @@ impl From<&PyFunctionInfo> for FunctionDef {
             args: info.args.iter().map(Arg::from).collect(),
             r#return: (info.r#return)(),
             doc: info.doc,
-            signature: info.signature,
         }
     }
 }
@@ -36,14 +34,10 @@ impl From<&PyFunctionInfo> for FunctionDef {
 impl fmt::Display for FunctionDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "def {}(", self.name)?;
-        if let Some(sig) = self.signature {
-            write!(f, "{}", sig)?;
-        } else {
-            for (i, arg) in self.args.iter().enumerate() {
-                write!(f, "{}", arg)?;
-                if i != self.args.len() - 1 {
-                    write!(f, ",")?;
-                }
+        for (i, arg) in self.args.iter().enumerate() {
+            write!(f, "{}", arg)?;
+            if i != self.args.len() - 1 {
+                write!(f, ", ")?;
             }
         }
         writeln!(f, ") -> {}:", self.r#return)?;
