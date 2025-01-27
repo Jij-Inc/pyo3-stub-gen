@@ -46,7 +46,11 @@
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!             },
 //!         ],
+//!
 //!         doc: "Docstring used in Python",
+//!
+//!         // Base classes
+//!         bases: &[],
 //!     }
 //! }
 //! ```
