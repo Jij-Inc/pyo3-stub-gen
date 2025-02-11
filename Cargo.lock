@@ -625,6 +625,7 @@ dependencies = [
 name = "pyo3-stub-gen-derive"
 version = "0.8.0"
 dependencies = [
+ "heck",
  "insta",
  "inventory",
  "prettyplease",

@@ -27,6 +27,10 @@ class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
+class NumberRenameAll(Enum):
+    FLOAT = auto()
+    INTEGER = auto()
+
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]:
     ...
 
