@@ -59,16 +59,27 @@ impl fmt::Display for MethodDef {
         }
         writeln!(f, ") -> {}:", self.r#return)?;
 
-        let doc = self.doc;
+        write!(f, "{}", DocPrinter(self.doc))?;
+        writeln!(f, "{indent}{indent}...")?;
+        writeln!(f)?;
+        Ok(())
+    }
+}
+
+pub struct DocPrinter(pub &'static str);
+
+impl fmt::Display for DocPrinter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let doc = self.0;
         if !doc.is_empty() {
+            let indent = indent();
             writeln!(f, r#"{indent}{indent}r""""#)?;
             for line in doc.lines() {
                 writeln!(f, "{indent}{indent}{}", line)?;
             }
             writeln!(f, r#"{indent}{indent}""""#)?;
         }
-        writeln!(f, "{indent}{indent}...")?;
-        writeln!(f)?;
+
         Ok(())
     }
 }
