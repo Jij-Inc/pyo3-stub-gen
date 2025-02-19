@@ -3,7 +3,7 @@ use itertools::Itertools;
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{
     collections::HashSet,
-    fmt::{self, format},
+    fmt::{self},
 };
 
 /// Definition of a class member.

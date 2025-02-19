@@ -38,12 +38,12 @@ impl fmt::Display for EnumDef {
         for variants in self.variants {
             writeln!(f, "{indent}{} = auto()", variants)?;
         }
-        writeln!(f)?;
         for member in &self.members {
+            writeln!(f)?;
             member.fmt(f)?;
         }
-        writeln!(f)?;
         for methods in &self.methods {
+            writeln!(f)?;
             methods.fmt(f)?;
         }
         writeln!(f)?;
