@@ -40,7 +40,7 @@ impl fmt::Display for FunctionDef {
                 write!(f, ", ")?;
             }
         }
-        writeln!(f, ") -> {}:", self.r#return)?;
+        write!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         let indent = indent();
@@ -50,8 +50,9 @@ impl fmt::Display for FunctionDef {
                 writeln!(f, "{indent}{}", line)?;
             }
             writeln!(f, r#"{indent}""""#)?;
+        } else {
+            writeln!(f, " ...")?;
         }
-        writeln!(f, "{indent}...")?;
         writeln!(f)?;
         Ok(())
     }
