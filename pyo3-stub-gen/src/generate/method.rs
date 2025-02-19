@@ -62,7 +62,7 @@ impl fmt::Display for MethodDef {
         let doc = self.doc;
         if !doc.is_empty() {
             writeln!(f)?;
-            write!(f, r#"{indent}{indent}r""""#)?;
+            writeln!(f, r#"{indent}{indent}r""""#)?;
             for line in doc.lines() {
                 writeln!(f, "{indent}{indent}{}", line)?;
             }
