@@ -3,11 +3,6 @@
 
 import builtins
 
-class C:
-    def show_x(self) -> None:
-        ...
-
-
-def create_c(x:builtins.int) -> C:
+def dummy_int_fun(x:builtins.int) -> builtins.int:
     ...
 

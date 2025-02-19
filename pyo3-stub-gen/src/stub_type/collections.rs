@@ -57,11 +57,7 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("list[{}]", name),
-            import,
-        }
+        TypeInfo::list_of::<T>()
     }
 }
 
@@ -75,31 +71,19 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("list[{}]", name),
-            import,
-        }
+        TypeInfo::list_of::<T>()
     }
 }
 
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("set[{}]", name),
-            import,
-        }
+        TypeInfo::set_of::<T>()
     }
 }
 
 impl<T: PyStubType> PyStubType for BTreeSet<T> {
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("set[{}]", name),
-            import,
-        }
+        TypeInfo::set_of::<T>()
     }
 }
 
@@ -131,8 +115,9 @@ macro_rules! impl_map_inner {
                 import: value_import,
             } = Value::type_output();
             import.extend(value_import);
+            import.insert("builtins".into());
             TypeInfo {
-                name: format!("dict[{}, {}]", key_name, value_name),
+                name: format!("builtins.dict[{}, {}]", key_name, value_name),
                 import,
             }
         }

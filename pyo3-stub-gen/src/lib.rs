@@ -121,8 +121,7 @@
 //!
 //! let method = MethodDef {
 //!     name: "foo",
-//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int") }],
-//!     signature: None,
+//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int"), signature: None, }],
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     is_static: false,
@@ -132,7 +131,7 @@
 //! assert_eq!(
 //!     method.to_string().trim(),
 //!     r#"
-//!     def foo(self, x:int) -> int:
+//!     def foo(self, x:builtins.int) -> builtins.int:
 //!         r"""
 //!         This is a foo method.
 //!         """
@@ -157,6 +156,7 @@ pub mod generate;
 pub mod pyproject;
 mod stub_type;
 pub mod type_info;
+pub mod util;
 
 pub use generate::StubInfo;
 pub use stub_type::{PyStubType, TypeInfo};

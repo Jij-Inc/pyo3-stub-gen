@@ -46,7 +46,7 @@ impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
 impl PyStubType for PyUntypedArray {
     fn type_output() -> TypeInfo {
         TypeInfo {
-            name: "numpy.NDArray[typing.Any]".into(),
+            name: "numpy.typing.NDArray[typing.Any]".into(),
             import: hashset!["numpy.typing".into(), "typing".into()],
         }
     }
