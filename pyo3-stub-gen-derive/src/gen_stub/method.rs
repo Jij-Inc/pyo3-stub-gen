@@ -1,6 +1,6 @@
 use super::{
-    arg::parse_args, escape_return_type, extract_documents, parse_pyo3_attrs, quote_option,
-    ArgInfo, Attr, Signature,
+    arg::parse_args, escape_return_type, extract_documents, parse_pyo3_attrs, ArgInfo,
+    ArgsWithSignature, Attr, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -107,7 +107,7 @@ impl ToTokens for MethodInfo {
             doc,
             r#type,
         } = self;
-        let sig_tt = quote_option(sig);
+        let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
             quote! { <#ret as pyo3_stub_gen::PyStubType>::type_output }
         } else {
@@ -122,9 +122,8 @@ impl ToTokens for MethodInfo {
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                args: &[ #(#args),* ],
+                args: #args_with_sig,
                 r#return: #ret_tt,
-                signature: #sig_tt,
                 doc: #doc,
                 r#type: #type_tt
             }

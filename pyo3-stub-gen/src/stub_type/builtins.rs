@@ -14,10 +14,7 @@ macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
         impl PyStubType for $ty {
             fn type_output() -> TypeInfo {
-                TypeInfo {
-                    name: $pytype.to_string(),
-                    import: HashSet::new(),
-                }
+                TypeInfo::builtin($pytype)
             }
         }
     };
@@ -33,7 +30,12 @@ macro_rules! impl_with_module {
     };
 }
 
-impl_builtin!((), "None");
+// NOTE:
+impl PyStubType for () {
+    fn type_output() -> TypeInfo {
+        TypeInfo::none()
+    }
+}
 impl_builtin!(bool, "bool");
 impl_builtin!(u8, "int");
 impl_builtin!(u16, "int");
@@ -59,6 +61,7 @@ impl_builtin!(String, "str");
 impl_builtin!(OsString, "str");
 impl_builtin!(Cow<'_, str>, "str");
 impl_builtin!(Cow<'_, OsStr>, "str");
+impl_builtin!(Cow<'_, [u8]>, "bytes");
 
 impl PyStubType for PathBuf {
     fn type_output() -> TypeInfo {
