@@ -130,7 +130,6 @@ impl StubInfoBuilder {
                         is_property: false,
                         name: getter.name,
                         r#type: (getter.r#type)(),
-                        doc: getter.doc,
                     });
                 }
                 for method in info.methods {
@@ -146,7 +145,6 @@ impl StubInfoBuilder {
                         is_property: true,
                         name: getter.name,
                         r#type: (getter.r#type)(),
-                        doc: getter.doc,
                     });
                 }
                 for method in info.methods {
