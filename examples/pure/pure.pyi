@@ -18,10 +18,12 @@ class A:
 class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
+
     @property
     def is_float(self) -> builtins.bool:
         """Whether the number is a float."""
         ...
+
     @property
     def is_integer(self) -> builtins.bool:
         """Whether the number is an integer."""
@@ -37,12 +39,10 @@ def str_len(x: builtins.str) -> builtins.int:
     r"""
     Returns the length of the string.
     """
-    ...
 
 def sum(v: typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
     """
-    ...
 
 class MyError(RuntimeError): ...

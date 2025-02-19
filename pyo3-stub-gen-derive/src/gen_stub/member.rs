@@ -32,7 +32,7 @@ impl TryFrom<ImplItemFn> for MemberInfo {
     fn try_from(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_candidate_item(&item)?);
         let ImplItemFn { attrs, sig, .. } = &item;
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
@@ -63,7 +63,7 @@ impl TryFrom<Field> for MemberInfo {
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: ty,
-            doc: doc,
+            doc,
         })
     }
 }
