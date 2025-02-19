@@ -20,10 +20,12 @@ class Number(Enum):
 
     @property
     def is_float(self) -> builtins.bool:
+        """Whether the number is a float."""
         ...
 
     @property
     def is_integer(self) -> builtins.bool:
+        """Whether the number is an integer."""
         ...
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
