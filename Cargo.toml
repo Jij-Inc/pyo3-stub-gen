@@ -34,6 +34,7 @@ numpy = ">= 0.21.0"
 prettyplease = "0.2.29"
 proc-macro2 = "1.0.93"
 pyo3 = ">= 0.21.0"
+pyo3-arrow = "0.7.2"
 quote = "1.0.38"
 serde = { version = "1.0.218", features = ["derive"] }
 syn = "2.0.98"

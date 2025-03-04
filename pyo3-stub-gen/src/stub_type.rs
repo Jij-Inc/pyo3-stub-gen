@@ -5,6 +5,9 @@ mod pyo3;
 #[cfg(feature = "numpy")]
 mod numpy;
 
+#[cfg(feature = "pyarrow")]
+mod pyarrow;
+
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 
