@@ -138,6 +138,11 @@ impl StubInfoBuilder {
                     entry.new = Some(NewDef::from(new));
                 }
                 return;
+            } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
+                for method in info.methods {
+                    entry.methods.push(MethodDef::from(method))
+                }
+                return;
             }
         }
         unreachable!("Missing struct_id = {:?}", struct_id);

@@ -7,6 +7,17 @@ pub struct EnumDef {
     pub name: &'static str,
     pub doc: &'static str,
     pub variants: &'static [&'static str],
+    pub methods: Vec<MethodDef>,
+}
+
+impl Import for EnumDef {
+    fn import(&self) -> HashSet<ModuleRef> {
+        let mut import = HashSet::new();
+        for method in &self.methods {
+            import.extend(method.import());
+        }
+        import
+    }
 }
 
 impl From<&PyEnumInfo> for EnumDef {
@@ -15,13 +26,14 @@ impl From<&PyEnumInfo> for EnumDef {
             name: info.pyclass_name,
             doc: info.doc,
             variants: info.variants,
+            methods: Vec::new(),
         }
     }
 }
 
 impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "class {}(Enum):", self.name)?;
+        writeln!(f, "class {}:", self.name)?;
         let indent = indent();
         let doc = self.doc.trim();
         if !doc.is_empty() {
@@ -31,10 +43,15 @@ impl fmt::Display for EnumDef {
             }
             writeln!(f, r#"{indent}""""#)?;
         }
-        for variants in self.variants {
-            writeln!(f, "{indent}{} = auto()", variants)?;
+        for variant in self.variants {
+            writeln!(f, "{indent}{}: {}", variant, self.name)?;
         }
         writeln!(f)?;
+
+        for method in &self.methods {
+            method.fmt(f)?;
+        }
+
         Ok(())
     }
 }

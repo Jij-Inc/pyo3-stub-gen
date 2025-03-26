@@ -100,6 +100,14 @@ pub enum Number {
     Integer,
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl Number {
+    pub fn is_a_float(&self) -> bool {
+        matches!(self, Number::Float)
+    }
+}
+
 module_variable!("pure", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value
