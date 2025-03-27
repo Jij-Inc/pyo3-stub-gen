@@ -95,8 +95,10 @@ fn ahash_dict() -> HashMap<String, i32, RandomState> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Number {
     #[pyo3(name = "FLOAT")]
+    /// A floating point number.
     Float,
     #[pyo3(name = "INTEGER")]
+    /// An integer.
     Integer,
 }
 

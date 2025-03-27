@@ -19,11 +19,16 @@ class A:
 
 class Number:
     FLOAT: Number
+    r"""
+    A floating point number.
+    """
     INTEGER: Number
+    r"""
+    An integer.
+    """
 
     def is_a_float(self) -> builtins.bool:
         ...
-
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]:
     ...

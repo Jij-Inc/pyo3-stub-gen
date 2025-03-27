@@ -1,12 +1,18 @@
 use crate::{generate::*, type_info::*};
 use std::fmt;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct VariantDef {
+    pub name: &'static str,
+    pub doc: &'static str,
+}
+
 /// Definition of a Python enum.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EnumDef {
     pub name: &'static str,
     pub doc: &'static str,
-    pub variants: &'static [&'static str],
+    pub variants: Vec<VariantDef>,
     pub methods: Vec<MethodDef>,
 }
 
@@ -25,7 +31,11 @@ impl From<&PyEnumInfo> for EnumDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            variants: info.variants,
+            variants: info
+                .variants
+                .iter()
+                .map(|(variant, doc)| VariantDef { name: variant, doc })
+                .collect(),
             methods: Vec::new(),
         }
     }
@@ -43,8 +53,19 @@ impl fmt::Display for EnumDef {
             }
             writeln!(f, r#"{indent}""""#)?;
         }
-        for variant in self.variants {
-            writeln!(f, "{indent}{}: {}", variant, self.name)?;
+        for variant in &self.variants {
+            writeln!(f, "{indent}{}: {}", variant.name, self.name)?;
+            if !variant.doc.is_empty() {
+                writeln!(f, r#"{indent}r""""#)?;
+                for line in variant.doc.lines() {
+                    if line.is_empty() {
+                        writeln!(f)?;
+                    } else {
+                        writeln!(f, "{indent}{}", line)?;
+                    }
+                }
+                writeln!(f, r#"{indent}""""#)?;
+            }
         }
         writeln!(f)?;
 
