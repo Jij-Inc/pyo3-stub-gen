@@ -10,6 +10,15 @@ impl<T: PyStubType> PyStubType for &T {
     }
 }
 
+impl<T: PyStubType> PyStubType for &mut T {
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+}
+
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
