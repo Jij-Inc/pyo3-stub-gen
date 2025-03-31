@@ -87,6 +87,13 @@ impl<T: PyStubType> PyStubType for BTreeSet<T> {
     }
 }
 
+#[cfg(feature = "indexmap")]
+impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
+    fn type_output() -> TypeInfo {
+        TypeInfo::set_of::<T>()
+    }
+}
+
 macro_rules! impl_map_inner {
     () => {
         fn type_input() -> TypeInfo {
@@ -129,6 +136,13 @@ impl<Key: PyStubType, Value: PyStubType> PyStubType for BTreeMap<Key, Value> {
 }
 
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType for HashMap<Key, Value, State> {
+    impl_map_inner!();
+}
+
+#[cfg(feature = "indexmap")]
+impl<Key: PyStubType, Value: PyStubType, State> PyStubType
+    for indexmap::IndexMap<Key, Value, State>
+{
     impl_map_inner!();
 }
 

@@ -11,6 +11,7 @@ readme.workspace = true
 [dependencies]
 anyhow.workspace = true
 chrono.workspace = true
+indexmap = { workspace = true, optional = true }
 inventory.workspace = true
 itertools.workspace = true
 log.workspace = true
@@ -29,5 +30,6 @@ path = "../pyo3-stub-gen-derive"
 test-case.workspace = true
 
 [features]
-default = ["numpy"]
+default = ["numpy", "indexmap"]
 numpy = ["dep:numpy"]
+indexmap = ["dep:indexmap"]
