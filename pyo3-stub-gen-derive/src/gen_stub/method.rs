@@ -23,7 +23,7 @@ pub struct MethodInfo {
 fn replace_inner(ty: &mut Type, self_: &Type) {
     match ty {
         Type::Path(TypePath { path, .. }) => {
-            if let Some(last) = path.segments.iter_mut().last() {
+            if let Some(last) = path.segments.last_mut() {
                 if let PathArguments::AngleBracketed(arg) = &mut last.arguments {
                     for arg in &mut arg.args {
                         if let GenericArgument::Type(ty) = arg {
