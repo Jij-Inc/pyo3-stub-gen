@@ -78,7 +78,6 @@ impl<T: PyStubType> PyStubType for BTreeSet<T> {
     }
 }
 
-#[cfg(feature = "indexmap")]
 impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
@@ -130,7 +129,6 @@ impl<Key: PyStubType, Value: PyStubType, State> PyStubType for HashMap<Key, Valu
     impl_map_inner!();
 }
 
-#[cfg(feature = "indexmap")]
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType
     for indexmap::IndexMap<Key, Value, State>
 {
