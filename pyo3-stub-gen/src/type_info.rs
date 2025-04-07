@@ -88,6 +88,8 @@ pub struct MemberInfo {
 #[derive(Debug)]
 pub struct NewInfo {
     pub args: &'static [ArgInfo],
+    /// Docstring
+    pub doc: &'static str,
 }
 
 /// Info of `#[pymethod]`

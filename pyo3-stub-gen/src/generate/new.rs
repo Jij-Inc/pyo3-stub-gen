@@ -5,6 +5,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub struct NewDef {
     pub args: Vec<Arg>,
+    pub doc: &'static str,
 }
 
 impl Import for NewDef {
@@ -21,6 +22,7 @@ impl From<&NewInfo> for NewDef {
     fn from(info: &NewInfo) -> Self {
         Self {
             args: info.args.iter().map(Arg::from).collect(),
+            doc: info.doc,
         }
     }
 }
@@ -35,7 +37,11 @@ impl fmt::Display for NewDef {
                 write!(f, ", ")?;
             }
         }
-        writeln!(f, "): ...")?;
+        writeln!(f, "):")?;
+        write!(f, "{}", DocPrinter(self.doc))?;
+        writeln!(f, "{indent}{indent}...")?;
+        writeln!(f)?;
+
         Ok(())
     }
 }
