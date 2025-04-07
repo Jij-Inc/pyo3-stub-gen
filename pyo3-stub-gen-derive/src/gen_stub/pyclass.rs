@@ -124,14 +124,17 @@ mod test {
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
             ],
             module: Some("my_module"),

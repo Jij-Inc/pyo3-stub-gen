@@ -127,8 +127,10 @@ impl StubInfoBuilder {
             if let Some(entry) = module.class.get_mut(&struct_id) {
                 for getter in info.getters {
                     entry.members.push(MemberDef {
+                        is_property: false,
                         name: getter.name,
                         r#type: (getter.r#type)(),
+                        doc: getter.doc,
                     });
                 }
                 for method in info.methods {
@@ -138,9 +140,22 @@ impl StubInfoBuilder {
                     entry.new = Some(NewDef::from(new));
                 }
                 return;
+            } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
+                for getter in info.getters {
+                    entry.members.push(MemberDef {
+                        is_property: true,
+                        name: getter.name,
+                        r#type: (getter.r#type)(),
+                        doc: getter.doc,
+                    });
+                }
+                for method in info.methods {
+                    entry.methods.push(MethodDef::from(method))
+                }
+                return;
             }
         }
-        unreachable!("Missing struct_id = {:?}", struct_id);
+        unreachable!("Missing struct_id/enum_id = {:?}", struct_id);
     }
 
     fn build(mut self) -> StubInfo {
