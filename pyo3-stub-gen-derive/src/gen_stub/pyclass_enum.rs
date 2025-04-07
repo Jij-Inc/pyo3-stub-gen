@@ -41,10 +41,12 @@ impl TryFrom<ItemEnum> for PyEnumInfo {
         let doc = extract_documents(&attrs).join("\n");
         let mut pyclass_name = None;
         let mut module = None;
+        let mut renaming_rule = None;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
                 Attr::Module(name) => module = Some(name),
+                Attr::RenameAll(name) => renaming_rule = Some(name),
                 _ => {}
             }
         }
@@ -59,7 +61,11 @@ impl TryFrom<ItemEnum> for PyEnumInfo {
                         var_name = Some(name);
                     }
                 }
-                Ok(var_name.unwrap_or_else(|| var.ident.to_string()))
+                let mut var_name = var_name.unwrap_or_else(|| var.ident.to_string());
+                if let Some(renaming_rule) = renaming_rule {
+                    var_name = renaming_rule.apply(&var_name);
+                }
+                Ok(var_name)
             })
             .collect::<Result<Vec<String>>>()?;
         Ok(Self {
