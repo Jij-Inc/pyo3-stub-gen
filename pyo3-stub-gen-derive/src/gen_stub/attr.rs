@@ -185,6 +185,7 @@ mod test {
         }
         Ok(())
     }
+
     #[test]
     fn test_parse_pyo3_attr_full_path() -> Result<()> {
         let item: ItemStruct = parse_str(
