@@ -10,7 +10,9 @@ from enum import Enum, auto
 MY_CONSTANT: builtins.int
 class A:
     x: builtins.int
-    def __new__(cls,x:builtins.int): ...
+    def __new__(cls, x:builtins.int) -> A:
+        ...
+
     def show_x(self) -> None:
         ...
 
