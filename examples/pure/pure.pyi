@@ -11,6 +11,9 @@ MY_CONSTANT: builtins.int
 class A:
     x: builtins.int
     def __new__(cls, x:builtins.int) -> A:
+        r"""
+        This is a constructor of :class:`A`.
+        """
         ...
 
     def show_x(self) -> None:
