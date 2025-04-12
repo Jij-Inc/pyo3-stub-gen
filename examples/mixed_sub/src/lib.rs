@@ -68,6 +68,12 @@ fn create_c(x: usize) -> C {
     C { x }
 }
 
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod.int")]
+#[pyfunction]
+fn dummy_int_fun(x: usize) -> usize {
+    x
+}
+
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<A>()?;
@@ -75,14 +81,24 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(create_b, m)?)?;
     sub_mod(m)?;
+    int_mod(m)?;
     Ok(())
 }
 
 fn sub_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
-    let sub = PyModule::new_bound(py, "sub_mod")?;
+    let sub = PyModule::new(py, "sub_mod")?;
     sub.add_class::<C>()?;
     sub.add_function(wrap_pyfunction!(create_c, &sub)?)?;
+    parent.add_submodule(&sub)?;
+    Ok(())
+}
+
+/// A dummy module to pollute namespace with unqualified `int`
+fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
+    let py = parent.py();
+    let sub = PyModule::new(py, "int")?;
+    sub.add_function(wrap_pyfunction!(dummy_int_fun, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
 }

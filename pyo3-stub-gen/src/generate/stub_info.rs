@@ -1,6 +1,11 @@
 use crate::{generate::*, pyproject::PyProject, type_info::*};
 use anyhow::{Context, Result};
-use std::{collections::BTreeMap, fs, io::Write, path::*};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs,
+    io::Write,
+    path::*,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
@@ -81,18 +86,20 @@ impl StubInfoBuilder {
     }
 
     fn register_submodules(&mut self) {
-        let mut map = BTreeMap::new();
+        let mut map: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         for module in self.modules.keys() {
             let path = module.split('.').collect::<Vec<_>>();
             let n = path.len();
             if n <= 1 {
                 continue;
             }
-            map.insert(path[..n - 1].join("."), path[n - 1].to_string());
+            map.entry(path[..n - 1].join("."))
+                .or_default()
+                .insert(path[n - 1].to_string());
         }
-        for (parent, child) in map {
+        for (parent, children) in map {
             if let Some(module) = self.modules.get_mut(&parent) {
-                module.submodules.insert(child);
+                module.submodules.extend(children);
             }
         }
     }
@@ -139,9 +146,6 @@ impl StubInfoBuilder {
                 }
                 for method in info.methods {
                     entry.methods.push(MethodDef::from(method))
-                }
-                if let Some(new) = &info.new {
-                    entry.new = Some(NewDef::from(new));
                 }
                 return;
             }

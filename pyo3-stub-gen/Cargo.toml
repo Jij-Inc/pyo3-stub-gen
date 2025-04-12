@@ -10,19 +10,24 @@ readme.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+chrono.workspace = true
+indexmap.workspace = true
 inventory.workspace = true
 itertools.workspace = true
 log.workspace = true
 maplit.workspace = true
-num-complex = "0.4.6"
+num-complex.workspace = true
 numpy = { workspace = true, optional = true }
 pyo3.workspace = true
 serde.workspace = true
 toml.workspace = true
 
 [dependencies.pyo3-stub-gen-derive]
-version = "0.6.0"
+version = "0.8.0"
 path = "../pyo3-stub-gen-derive"
+
+[dev-dependencies]
+test-case.workspace = true
 
 [features]
 default = ["numpy"]

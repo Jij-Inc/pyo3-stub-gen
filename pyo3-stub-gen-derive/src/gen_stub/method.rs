@@ -1,6 +1,6 @@
 use super::{
-    arg::parse_args, escape_return_type, extract_documents, parse_pyo3_attrs, quote_option,
-    ArgInfo, Attr, Signature,
+    arg::parse_args, escape_return_type, extract_documents, parse_pyo3_attrs, ArgInfo,
+    ArgsWithSignature, Attr, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -9,6 +9,14 @@ use syn::{
     Error, GenericArgument, ImplItemFn, PathArguments, Result, Type, TypePath, TypeReference,
 };
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MethodType {
+    Instance,
+    Static,
+    Class,
+    New,
+}
+
 #[derive(Debug)]
 pub struct MethodInfo {
     name: String,
@@ -16,14 +24,13 @@ pub struct MethodInfo {
     sig: Option<Signature>,
     r#return: Option<Type>,
     doc: String,
-    is_static: bool,
-    is_class: bool,
+    r#type: MethodType,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
     match ty {
         Type::Path(TypePath { path, .. }) => {
-            if let Some(last) = path.segments.iter_mut().last() {
+            if let Some(last) = path.segments.last_mut() {
                 if let PathArguments::AngleBracketed(arg) = &mut last.arguments {
                     for arg in &mut arg.args {
                         if let GenericArgument::Type(ty) = arg {
@@ -62,18 +69,22 @@ impl TryFrom<ImplItemFn> for MethodInfo {
         let attrs = parse_pyo3_attrs(&attrs)?;
         let mut method_name = None;
         let mut text_sig = Signature::overriding_operator(&sig);
-        let mut is_static = false;
-        let mut is_class = false;
+        let mut method_type = MethodType::Instance;
         for attr in attrs {
             match attr {
                 Attr::Name(name) => method_name = Some(name),
                 Attr::Signature(text_sig_) => text_sig = Some(text_sig_),
-                Attr::StaticMethod => is_static = true,
-                Attr::ClassMethod => is_class = true,
+                Attr::StaticMethod => method_type = MethodType::Static,
+                Attr::ClassMethod => method_type = MethodType::Class,
+                Attr::New => method_type = MethodType::New,
                 _ => {}
             }
         }
-        let name = method_name.unwrap_or(sig.ident.to_string());
+        let name = if method_type == MethodType::New {
+            "__new__".to_string()
+        } else {
+            method_name.unwrap_or(sig.ident.to_string())
+        };
         let r#return = escape_return_type(&sig.output);
         Ok(MethodInfo {
             name,
@@ -81,8 +92,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             args: parse_args(sig.inputs)?,
             r#return,
             doc,
-            is_static,
-            is_class,
+            r#type: method_type,
         })
     }
 }
@@ -95,24 +105,27 @@ impl ToTokens for MethodInfo {
             args,
             sig,
             doc,
-            is_class,
-            is_static,
+            r#type,
         } = self;
-        let sig_tt = quote_option(sig);
+        let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
             quote! { <#ret as pyo3_stub_gen::PyStubType>::type_output }
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
+        let type_tt = match r#type {
+            MethodType::Instance => quote! { ::pyo3_stub_gen::type_info::MethodType::Instance },
+            MethodType::Static => quote! { ::pyo3_stub_gen::type_info::MethodType::Static },
+            MethodType::Class => quote! { ::pyo3_stub_gen::type_info::MethodType::Class },
+            MethodType::New => quote! { ::pyo3_stub_gen::type_info::MethodType::New },
+        };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                args: &[ #(#args),* ],
+                args: #args_with_sig,
                 r#return: #ret_tt,
-                signature: #sig_tt,
                 doc: #doc,
-                is_static: #is_static,
-                is_class: #is_class,
+                r#type: #type_tt
             }
         })
     }

@@ -1,15 +1,6 @@
 use crate::stub_type::*;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-impl<T: PyStubType> PyStubType for &T {
-    fn type_input() -> TypeInfo {
-        T::type_input()
-    }
-    fn type_output() -> TypeInfo {
-        T::type_output()
-    }
-}
-
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
@@ -57,11 +48,7 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("list[{}]", name),
-            import,
-        }
+        TypeInfo::list_of::<T>()
     }
 }
 
@@ -75,31 +62,25 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("list[{}]", name),
-            import,
-        }
+        TypeInfo::list_of::<T>()
     }
 }
 
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("set[{}]", name),
-            import,
-        }
+        TypeInfo::set_of::<T>()
     }
 }
 
 impl<T: PyStubType> PyStubType for BTreeSet<T> {
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, import } = T::type_output();
-        TypeInfo {
-            name: format!("set[{}]", name),
-            import,
-        }
+        TypeInfo::set_of::<T>()
+    }
+}
+
+impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
+    fn type_output() -> TypeInfo {
+        TypeInfo::set_of::<T>()
     }
 }
 
@@ -131,8 +112,9 @@ macro_rules! impl_map_inner {
                 import: value_import,
             } = Value::type_output();
             import.extend(value_import);
+            import.insert("builtins".into());
             TypeInfo {
-                name: format!("dict[{}, {}]", key_name, value_name),
+                name: format!("builtins.dict[{}, {}]", key_name, value_name),
                 import,
             }
         }
@@ -144,6 +126,12 @@ impl<Key: PyStubType, Value: PyStubType> PyStubType for BTreeMap<Key, Value> {
 }
 
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType for HashMap<Key, Value, State> {
+    impl_map_inner!();
+}
+
+impl<Key: PyStubType, Value: PyStubType, State> PyStubType
+    for indexmap::IndexMap<Key, Value, State>
+{
     impl_map_inner!();
 }
 

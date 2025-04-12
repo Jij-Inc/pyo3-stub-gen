@@ -39,6 +39,40 @@ pub fn no_return_type_output() -> TypeInfo {
 pub struct ArgInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub signature: Option<SignatureArg>,
+}
+#[derive(Debug, Clone)]
+pub enum SignatureArg {
+    Ident,
+    Assign {
+        default: &'static std::sync::LazyLock<String>,
+    },
+    Star,
+    Args,
+    Keywords,
+}
+
+impl PartialEq for SignatureArg {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Assign { default: l_default }, Self::Assign { default: r_default }) => {
+                let l_default: &String = l_default;
+                let r_default: &String = r_default;
+                l_default.eq(r_default)
+            }
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
+}
+
+/// Type of a method
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MethodType {
+    Instance,
+    Static,
+    Class,
+    New,
 }
 
 /// Info of usual method appears in `#[pymethod]`
@@ -47,10 +81,8 @@ pub struct MethodInfo {
     pub name: &'static str,
     pub args: &'static [ArgInfo],
     pub r#return: fn() -> TypeInfo,
-    pub signature: Option<&'static str>,
     pub doc: &'static str,
-    pub is_static: bool,
-    pub is_class: bool,
+    pub r#type: MethodType,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -60,20 +92,11 @@ pub struct MemberInfo {
     pub r#type: fn() -> TypeInfo,
 }
 
-/// Info of `#[new]`-attributed methods appears in `#[pymethods]`
-#[derive(Debug)]
-pub struct NewInfo {
-    pub args: &'static [ArgInfo],
-    pub signature: Option<&'static str>,
-}
-
 /// Info of `#[pymethod]`
 #[derive(Debug)]
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
-    /// Method specified `#[new]` attribute
-    pub new: Option<NewInfo>,
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
     /// Other usual methods
@@ -123,7 +146,6 @@ pub struct PyFunctionInfo {
     pub args: &'static [ArgInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
-    pub signature: Option<&'static str>,
     pub module: Option<&'static str>,
 }
 
