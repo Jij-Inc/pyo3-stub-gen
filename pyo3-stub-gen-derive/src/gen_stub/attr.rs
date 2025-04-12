@@ -75,10 +75,19 @@ pub fn parse_pyo3_attrs(attrs: &[Attribute]) -> Result<Vec<Attr>> {
 pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
     let mut pyo3_attrs = Vec::new();
     let path = attr.path();
+    let is_full_path_pyo3_attr = path.segments.len() == 2
+        && path
+            .segments
+            .first()
+            .is_some_and(|seg| seg.ident.eq("pyo3"))
+        && path.segments.last().is_some_and(|seg| {
+            seg.ident.eq("pyclass") || seg.ident.eq("pymethods") || seg.ident.eq("pyfunction")
+        });
     if path.is_ident("pyclass")
         || path.is_ident("pymethods")
         || path.is_ident("pyfunction")
         || path.is_ident("pyo3")
+        || is_full_path_pyo3_attr
     {
         // Inner tokens of `#[pyo3(...)]` may not be nested meta
         // which can be parsed by `Attribute::parse_nested_meta`
@@ -151,6 +160,37 @@ mod test {
         let item: ItemStruct = parse_str(
             r#"
             #[pyclass(mapping, module = "my_module", name = "Placeholder")]
+            pub struct PyPlaceholder {
+                #[pyo3(get)]
+                pub name: String,
+            }
+            "#,
+        )?;
+        // `#[pyclass]` part
+        let attrs = parse_pyo3_attr(&item.attrs[0])?;
+        assert_eq!(
+            attrs,
+            vec![
+                Attr::Module("my_module".to_string()),
+                Attr::Name("Placeholder".to_string())
+            ]
+        );
+
+        // `#[pyo3(get)]` part
+        if let Fields::Named(fields) = item.fields {
+            let attrs = parse_pyo3_attr(&fields.named[0].attrs[0])?;
+            assert_eq!(attrs, vec![Attr::Get]);
+        } else {
+            unreachable!()
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_pyo3_attr_full_path() -> Result<()> {
+        let item: ItemStruct = parse_str(
+            r#"
+            #[pyo3::pyclass(mapping, module = "my_module", name = "Placeholder")]
             pub struct PyPlaceholder {
                 #[pyo3(get)]
                 pub name: String,
