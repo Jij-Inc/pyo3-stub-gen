@@ -101,6 +101,15 @@ pub enum Number {
     Integer,
 }
 
+#[gen_stub_pyclass_enum]
+#[pyclass(eq, eq_int)]
+#[pyo3(rename_all = "UPPERCASE")]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum NumberRenameAll {
+    Float,
+    Integer,
+}
+
 module_variable!("pure", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value
@@ -118,6 +127,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
     m.add_class::<Number>()?;
+    m.add_class::<NumberRenameAll>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
