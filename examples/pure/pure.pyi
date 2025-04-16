@@ -23,6 +23,9 @@ class A:
         ...
 
 
+class B(A):
+    ...
+
 class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
