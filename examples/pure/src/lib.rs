@@ -101,6 +101,22 @@ pub enum Number {
     Integer,
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl Number {
+    #[getter]
+    /// Whether the number is a float.
+    fn is_float(&self) -> bool {
+        matches!(self, Self::Float)
+    }
+
+    #[getter]
+    /// Whether the number is an integer.
+    fn is_integer(&self) -> bool {
+        matches!(self, Self::Integer)
+    }
+}
+
 module_variable!("pure", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value

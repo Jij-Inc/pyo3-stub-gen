@@ -7,6 +7,8 @@ pub struct EnumDef {
     pub name: &'static str,
     pub doc: &'static str,
     pub variants: &'static [&'static str],
+    pub methods: Vec<MethodDef>,
+    pub members: Vec<MemberDef>,
 }
 
 impl From<&PyEnumInfo> for EnumDef {
@@ -15,6 +17,8 @@ impl From<&PyEnumInfo> for EnumDef {
             name: info.pyclass_name,
             doc: info.doc,
             variants: info.variants,
+            methods: Vec::new(),
+            members: Vec::new(),
         }
     }
 }
@@ -33,6 +37,14 @@ impl fmt::Display for EnumDef {
         }
         for variants in self.variants {
             writeln!(f, "{indent}{} = auto()", variants)?;
+        }
+        for member in &self.members {
+            writeln!(f)?;
+            member.fmt(f)?;
+        }
+        for methods in &self.methods {
+            writeln!(f)?;
+            methods.fmt(f)?;
         }
         writeln!(f)?;
         Ok(())

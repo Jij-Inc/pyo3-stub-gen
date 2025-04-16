@@ -40,10 +40,12 @@
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 doc: "Name docstring",
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 doc: "Description docstring",
 //!             },
 //!         ],
 //!         doc: "Docstring used in Python",
@@ -59,7 +61,9 @@
 //!     Docstring used in Python
 //!     """
 //!     name: str
+//!     """Name docstring"""
 //!     description: Optional[str]
+//!     """Description docstring"""
 //! ```
 //!
 //! We want to generate this [type_info::PyClassInfo] section automatically from `MyClass` Rust struct definition.
@@ -130,7 +134,6 @@
 //!         r"""
 //!         This is a foo method.
 //!         """
-//!         ...
 //!     "#.trim()
 //! );
 //! ```
