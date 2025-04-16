@@ -10,7 +10,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.7.1"
+version = "0.8.0"
 edition = "2021"
 
 description = "Stub file (*.pyi) generator for PyO3"
@@ -21,21 +21,22 @@ readme = "README.md"
 
 [workspace.dependencies]
 ahash = "0.8.11"
-anyhow = "1.0.96"
+anyhow = "1.0.98"
 chrono = "0.4.40"
-env_logger = "0.11.6"
+env_logger = "0.11.8"
+indexmap = ">= 2.7.0"
 insta = "1.42.2"
-inventory = "0.3.19"
+inventory = "0.3.20"
 itertools = "0.13.0"
-log = "0.4.26"
+log = "0.4.27"
 maplit = "1.0.2"
 num-complex = "0.4.6"
 numpy = ">= 0.21.0"
-prettyplease = "0.2.29"
-proc-macro2 = "1.0.93"
+prettyplease = "0.2.32"
+proc-macro2 = "1.0.94"
 pyo3 = ">= 0.21.0"
-quote = "1.0.38"
-serde = { version = "1.0.218", features = ["derive"] }
-syn = "2.0.98"
+quote = "1.0.40"
+serde = { version = "1.0.219", features = ["derive"] }
+syn = "2.0.100"
 toml = "0.8.20"
 test-case = "3.3.1"

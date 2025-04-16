@@ -1,15 +1,6 @@
 use crate::stub_type::*;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-impl<T: PyStubType> PyStubType for &T {
-    fn type_input() -> TypeInfo {
-        T::type_input()
-    }
-    fn type_output() -> TypeInfo {
-        T::type_output()
-    }
-}
-
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
@@ -87,6 +78,12 @@ impl<T: PyStubType> PyStubType for BTreeSet<T> {
     }
 }
 
+impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
+    fn type_output() -> TypeInfo {
+        TypeInfo::set_of::<T>()
+    }
+}
+
 macro_rules! impl_map_inner {
     () => {
         fn type_input() -> TypeInfo {
@@ -129,6 +126,12 @@ impl<Key: PyStubType, Value: PyStubType> PyStubType for BTreeMap<Key, Value> {
 }
 
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType for HashMap<Key, Value, State> {
+    impl_map_inner!();
+}
+
+impl<Key: PyStubType, Value: PyStubType, State> PyStubType
+    for indexmap::IndexMap<Key, Value, State>
+{
     impl_map_inner!();
 }
 

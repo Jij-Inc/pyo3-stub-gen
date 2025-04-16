@@ -10,27 +10,31 @@ use std::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct StubInfo {
     pub modules: BTreeMap<String, Module>,
-    pub pyproject: PyProject,
+    pub python_root: PathBuf,
 }
 
 impl StubInfo {
+    /// Initialize [StubInfo] from a `pyproject.toml` file in `CARGO_MANIFEST_DIR`.
+    /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        Ok(StubInfoBuilder::new(pyproject).build())
+        Ok(StubInfoBuilder::from_pyproject_toml(pyproject).build())
+    }
+
+    /// Initialize [StubInfo] with a specific module name and project root.
+    /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
+    /// not in the `gen_stub` executables due to [inventory]'s mechanism.
+    pub fn from_project_root(default_module_name: String, project_root: PathBuf) -> Result<Self> {
+        Ok(StubInfoBuilder::from_project_root(default_module_name, project_root).build())
     }
 
     pub fn generate(&self) -> Result<()> {
-        let python_root = self
-            .pyproject
-            .python_source()
-            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
-
         for (name, module) in self.modules.iter() {
             let path = name.replace(".", "/");
             let dest = if module.submodules.is_empty() {
-                python_root.join(format!("{path}.pyi"))
+                self.python_root.join(format!("{path}.pyi"))
             } else {
-                python_root.join(path).join("__init__.pyi")
+                self.python_root.join(path).join("__init__.pyi")
             };
 
             let dir = dest.parent().context("Cannot get parent directory")?;
@@ -52,15 +56,24 @@ impl StubInfo {
 struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
-    pyproject: PyProject,
+    python_root: PathBuf,
 }
 
 impl StubInfoBuilder {
-    fn new(pyproject: PyProject) -> Self {
+    fn from_pyproject_toml(pyproject: PyProject) -> Self {
+        StubInfoBuilder::from_project_root(
+            pyproject.module_name().to_string(),
+            pyproject
+                .python_source()
+                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
+        )
+    }
+
+    fn from_project_root(default_module_name: String, project_root: PathBuf) -> Self {
         Self {
             modules: BTreeMap::new(),
-            default_module_name: pyproject.module_name().to_string(),
-            pyproject,
+            default_module_name,
+            python_root: project_root,
         }
     }
 
@@ -136,9 +149,6 @@ impl StubInfoBuilder {
                 for method in info.methods {
                     entry.methods.push(MethodDef::from(method))
                 }
-                if let Some(new) = &info.new {
-                    entry.new = Some(NewDef::from(new));
-                }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
                 for getter in info.getters {
@@ -180,7 +190,7 @@ impl StubInfoBuilder {
         self.register_submodules();
         StubInfo {
             modules: self.modules,
-            pyproject: self.pyproject,
+            python_root: self.python_root,
         }
     }
 }

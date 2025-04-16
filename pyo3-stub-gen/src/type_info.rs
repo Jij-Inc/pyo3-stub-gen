@@ -66,6 +66,15 @@ impl PartialEq for SignatureArg {
     }
 }
 
+/// Type of a method
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MethodType {
+    Instance,
+    Static,
+    Class,
+    New,
+}
+
 /// Info of usual method appears in `#[pymethod]`
 #[derive(Debug)]
 pub struct MethodInfo {
@@ -73,8 +82,7 @@ pub struct MethodInfo {
     pub args: &'static [ArgInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
-    pub is_static: bool,
-    pub is_class: bool,
+    pub r#type: MethodType,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -85,19 +93,11 @@ pub struct MemberInfo {
     pub doc: &'static str,
 }
 
-/// Info of `#[new]`-attributed methods appears in `#[pymethods]`
-#[derive(Debug)]
-pub struct NewInfo {
-    pub args: &'static [ArgInfo],
-}
-
 /// Info of `#[pymethod]`
 #[derive(Debug)]
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
-    /// Method specified `#[new]` attribute
-    pub new: Option<NewInfo>,
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
     /// Other usual methods

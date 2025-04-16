@@ -22,6 +22,10 @@ updates:
     allow:
       # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
+    # Ignore specific dependencies
+    ignore:
+      - dependency-name: "pyo3"
+      - dependency-name: "numpy"
     groups:
       dependencies:
         patterns:
