@@ -27,14 +27,7 @@ impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "class {}(Enum):", self.name)?;
         let indent = indent();
-        let doc = self.doc.trim();
-        if !doc.is_empty() {
-            writeln!(f, r#"{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}""""#)?;
-        }
+        docstring::write_docstring(f, self.doc, indent)?;
         for variants in self.variants {
             writeln!(f, "{indent}{} = auto()", variants)?;
         }
