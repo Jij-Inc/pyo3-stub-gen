@@ -14,28 +14,22 @@ class A:
         r"""
         This is a constructor of :class:`A`.
         """
-        ...
-
-    def show_x(self) -> None:
-        ...
-
-    def ref_test(self, x:dict) -> dict:
-        ...
-
+    def show_x(self) -> None: ...
+    def ref_test(self, x:dict) -> dict: ...
 
 class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
-    @property
-    def is_float(self) -> builtins.bool:
-        """Whether the number is a float."""
-        ...
+    is_float: builtins.bool
+    r"""
+    Whether the number is a float.
+    """
 
-    @property
-    def is_integer(self) -> builtins.bool:
-        """Whether the number is an integer."""
-        ...
+    is_integer: builtins.bool
+    r"""
+    Whether the number is an integer.
+    """
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
