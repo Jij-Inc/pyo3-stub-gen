@@ -44,6 +44,7 @@ struct A {
 #[gen_stub_pymethods]
 #[pymethods]
 impl A {
+    /// This is a constructor of :class:`A`.
     #[new]
     fn new(x: usize) -> Self {
         Self { x }

@@ -10,9 +10,18 @@ from enum import Enum, auto
 MY_CONSTANT: builtins.int
 class A:
     x: builtins.int
-    def __new__(cls,x:builtins.int): ...
-    def show_x(self) -> None: ...
-    def ref_test(self, x:dict) -> dict: ...
+    def __new__(cls, x:builtins.int) -> A:
+        r"""
+        This is a constructor of :class:`A`.
+        """
+        ...
+
+    def show_x(self) -> None:
+        ...
+
+    def ref_test(self, x:dict) -> dict:
+        ...
+
 
 class Number(Enum):
     FLOAT = auto()
