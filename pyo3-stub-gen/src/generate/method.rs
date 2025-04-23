@@ -69,11 +69,8 @@ impl fmt::Display for MethodDef {
         let doc = self.doc;
         if !doc.is_empty() {
             writeln!(f)?;
-            writeln!(f, r#"{indent}{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}{indent}""""#)?;
+            let double_indent = format!("{indent}{indent}");
+            docstring::write_docstring(f, self.doc, &double_indent)?;
         } else {
             writeln!(f, " ...")?;
         }

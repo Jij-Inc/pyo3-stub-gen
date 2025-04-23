@@ -2,6 +2,7 @@
 
 mod arg;
 mod class;
+mod docstring;
 mod enum_;
 mod error;
 mod function;
