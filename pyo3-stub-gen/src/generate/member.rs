@@ -32,7 +32,7 @@ impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
-        docstring::write_docstring(f, self.doc, &indent)?;
+        docstring::write_docstring(f, self.doc, indent)?;
         Ok(())
     }
 }
