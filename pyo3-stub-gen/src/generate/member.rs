@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{
     collections::HashSet,
@@ -33,13 +31,8 @@ impl From<&MemberInfo> for MemberDef {
 impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
-        let doc = self.doc.split("\n").join(&format!("\n{indent}"));
         writeln!(f, "{indent}{}: {}", self.name, self.r#type)?;
-        if !doc.is_empty() {
-            writeln!(f, r#"{indent}r""""#)?;
-            writeln!(f, r#"{indent}{doc}"#)?;
-            writeln!(f, r#"{indent}""""#)?;
-        }
+        docstring::write_docstring(f, self.doc, &indent)?;
         Ok(())
     }
 }
