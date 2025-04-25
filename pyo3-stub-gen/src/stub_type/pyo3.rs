@@ -81,7 +81,6 @@ impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
-
 macro_rules! impl_simple {
     ($ty:ty, $mod:expr, $pytype:expr) => {
         impl PyStubType for $ty {
