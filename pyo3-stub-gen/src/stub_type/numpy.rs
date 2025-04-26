@@ -1,7 +1,8 @@
 use super::{PyStubType, TypeInfo};
 use maplit::hashset;
 use numpy::{
-    ndarray::Dimension, Element, PyArray, PyReadonlyArray, PyReadwriteArray, PyUntypedArray,
+    ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
+    PyUntypedArray,
 };
 
 trait NumPyScalar {
@@ -71,5 +72,14 @@ where
 {
     fn type_output() -> TypeInfo {
         PyArray::<T, D>::type_output()
+    }
+}
+
+impl PyStubType for PyArrayDescr {
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "numpy.dtype".into(),
+            import: hashset!["numpy.typing".into()],
+        }
     }
 }
