@@ -86,7 +86,7 @@ fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
 define_stub_info_gatherer!(stub_info);
 ```
 
-> ![NOTE]
+> [!NOTE]
 > The `#[gen_stub_pyfunction]` macro must be placed before `#[pyfunction]` macro.
 
 ## Generate a stub file
