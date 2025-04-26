@@ -2,6 +2,7 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import datetime
 import os
 import pathlib
 import typing
@@ -14,52 +15,52 @@ class A:
         r"""
         This is a constructor of :class:`A`.
         """
-        ...
+    def show_x(self) -> None: ...
+    def ref_test(self, x:dict) -> dict: ...
 
-    def show_x(self) -> None:
-        ...
+class B(A):
+    ...
 
-    def ref_test(self, x:dict) -> dict:
-        ...
-
+class MyDate(datetime.date):
+    ...
 
 class Number(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
+    is_float: builtins.bool
+    r"""
+    Whether the number is a float.
+    """
+
+    is_integer: builtins.bool
+    r"""
+    Whether the number is an integer.
+    """
+
 class NumberRenameAll(Enum):
     FLOAT = auto()
     INTEGER = auto()
 
-def ahash_dict() -> builtins.dict[builtins.str, builtins.int]:
-    ...
+def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
-def create_a(x:builtins.int=2) -> A:
-    ...
+def create_a(x:builtins.int=2) -> A: ...
 
-def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]:
-    ...
+def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
-def default_value(num:Number=...) -> Number:
-    ...
+def default_value(num:Number=...) -> Number: ...
 
-def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> builtins.str:
-    ...
+def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> builtins.str: ...
 
-def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None:
-    ...
+def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
 
-def str_len(x:builtins.str) -> builtins.int:
-    r"""
+def str_len(x:builtins.str) -> builtins.int:    r"""
     Returns the length of the string.
     """
-    ...
 
-def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
-    r"""
+def sum(v:typing.Sequence[builtins.int]) -> builtins.int:    r"""
     Returns the sum of two numbers as a string.
     """
-    ...
 
 class MyError(RuntimeError): ...
 

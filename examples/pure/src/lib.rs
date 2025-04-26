@@ -34,7 +34,11 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 }
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(extends=PyDate)]
+struct MyDate;
+
+#[gen_stub_pyclass]
+#[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
     #[pyo3(get, set)]
@@ -65,6 +69,11 @@ impl A {
 fn create_a(x: usize) -> A {
     A { x }
 }
+
+#[gen_stub_pyclass]
+#[pyclass(extends=A)]
+#[derive(Debug)]
+struct B;
 
 create_exception!(pure, MyError, PyRuntimeError);
 
@@ -110,6 +119,22 @@ pub enum NumberRenameAll {
     Integer,
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl Number {
+    #[getter]
+    /// Whether the number is a float.
+    fn is_float(&self) -> bool {
+        matches!(self, Self::Float)
+    }
+
+    #[getter]
+    /// Whether the number is an integer.
+    fn is_integer(&self) -> bool {
+        matches!(self, Self::Integer)
+    }
+}
+
 module_variable!("pure", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value
@@ -125,7 +150,9 @@ fn default_value(num: Number) -> Number {
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
+    m.add_class::<MyDate>()?;
     m.add_class::<A>()?;
+    m.add_class::<B>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;

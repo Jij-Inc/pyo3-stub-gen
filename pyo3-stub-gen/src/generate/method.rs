@@ -64,18 +64,16 @@ impl fmt::Display for MethodDef {
             write!(f, "{}", arg)?;
             needs_comma = true;
         }
-        writeln!(f, ") -> {}:", self.r#return)?;
+        write!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
         if !doc.is_empty() {
-            writeln!(f, r#"{indent}{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}{indent}""""#)?;
+            writeln!(f)?;
+            let double_indent = format!("{indent}{indent}");
+            docstring::write_docstring(f, self.doc, &double_indent)?;
+        } else {
+            writeln!(f, " ...")?;
         }
-        writeln!(f, "{indent}{indent}...")?;
-        writeln!(f)?;
         Ok(())
     }
 }

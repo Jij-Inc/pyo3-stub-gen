@@ -90,6 +90,7 @@ pub struct MethodInfo {
 pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub doc: &'static str,
 }
 
 /// Info of `#[pymethod]`
@@ -118,6 +119,8 @@ pub struct PyClassInfo {
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
     pub members: &'static [MemberInfo],
+    /// Base classes specified by `#[pyclass(extends = Type)]`
+    pub bases: &'static [fn() -> TypeInfo],
 }
 
 inventory::collect!(PyClassInfo);

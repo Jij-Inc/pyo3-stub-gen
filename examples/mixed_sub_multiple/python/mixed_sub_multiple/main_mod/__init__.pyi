@@ -4,6 +4,5 @@
 from . import mod_a
 from . import mod_b
 
-def greet_main() -> None:
-    ...
+def greet_main() -> None: ...
 

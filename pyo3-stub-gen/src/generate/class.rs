@@ -1,4 +1,4 @@
-use crate::{generate::*, type_info::*};
+use crate::{generate::*, type_info::*, TypeInfo};
 use std::fmt;
 
 /// Definition of a Python class.
@@ -8,11 +8,15 @@ pub struct ClassDef {
     pub doc: &'static str,
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
+    pub bases: Vec<TypeInfo>,
 }
 
 impl Import for ClassDef {
     fn import(&self) -> HashSet<ModuleRef> {
         let mut import = HashSet::new();
+        for base in &self.bases {
+            import.extend(base.import.clone());
+        }
         for member in &self.members {
             import.extend(member.import());
         }
@@ -32,22 +36,24 @@ impl From<&PyClassInfo> for ClassDef {
             doc: info.doc,
             members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
+            bases: info.bases.iter().map(|f| f()).collect(),
         }
     }
 }
 
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "class {}:", self.name)?;
+        let bases = self
+            .bases
+            .iter()
+            .map(|i| i.name.clone())
+            .reduce(|acc, path| format!("{acc}, {path}"))
+            .map(|bases| format!("({bases})"))
+            .unwrap_or_default();
+        writeln!(f, "class {}{}:", self.name, bases)?;
         let indent = indent();
         let doc = self.doc.trim();
-        if !doc.is_empty() {
-            writeln!(f, r#"{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}""""#)?;
-        }
+        docstring::write_docstring(f, doc, indent)?;
         for member in &self.members {
             member.fmt(f)?;
         }

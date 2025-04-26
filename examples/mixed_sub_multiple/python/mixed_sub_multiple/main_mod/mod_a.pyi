@@ -2,6 +2,5 @@
 # ruff: noqa: E501, F401
 
 
-def greet_a() -> None:
-    ...
+def greet_a() -> None: ...
 

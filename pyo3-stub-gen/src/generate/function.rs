@@ -40,18 +40,14 @@ impl fmt::Display for FunctionDef {
                 write!(f, ", ")?;
             }
         }
-        writeln!(f, ") -> {}:", self.r#return)?;
+        write!(f, ") -> {}:", self.r#return)?;
 
         let doc = self.doc;
-        let indent = indent();
         if !doc.is_empty() {
-            writeln!(f, r#"{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}""""#)?;
+            docstring::write_docstring(f, self.doc, indent())?;
+        } else {
+            writeln!(f, " ...")?;
         }
-        writeln!(f, "{indent}...")?;
         writeln!(f)?;
         Ok(())
     }

@@ -10,6 +10,7 @@ pub struct PyClassInfo {
     module: Option<String>,
     members: Vec<MemberInfo>,
     doc: String,
+    bases: Vec<Type>,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -41,6 +42,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut pyclass_name = None;
         let mut module = None;
         let mut is_get_all = false;
+        let mut bases = Vec::new();
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -48,6 +50,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                     module = Some(name);
                 }
                 Attr::GetAll => is_get_all = true,
+                Attr::Extends(typ) => bases.push(typ),
                 _ => {}
             }
         }
@@ -65,6 +68,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             members,
             module,
             doc,
+            bases,
         })
     }
 }
@@ -77,6 +81,7 @@ impl ToTokens for PyClassInfo {
             members,
             doc,
             module,
+            bases,
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
@@ -86,6 +91,7 @@ impl ToTokens for PyClassInfo {
                 members: &[ #( #members),* ],
                 module: #module,
                 doc: #doc,
+                bases: &[ #( <#bases as ::pyo3_stub_gen::PyStubType>::type_output ),* ],
             }
         })
     }
@@ -124,18 +130,22 @@ mod test {
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
                 },
             ],
             module: Some("my_module"),
             doc: "",
+            bases: &[],
         }
         "###);
         Ok(())
