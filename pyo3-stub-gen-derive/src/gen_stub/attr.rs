@@ -1,4 +1,4 @@
-use super::Signature;
+use super::{RenamingRule, Signature};
 use proc_macro2::TokenTree;
 use quote::ToTokens;
 use syn::{Attribute, Expr, ExprLit, Ident, Lit, Meta, MetaList, Result, Type};
@@ -54,6 +54,7 @@ pub enum Attr {
     GetAll,
     Module(String),
     Signature(Signature),
+    RenameAll(RenamingRule),
     Extends(Type),
 
     // Attributes appears in components within `#[pymethods]`
@@ -124,6 +125,12 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                             pyo3_attrs
                                 .push(Attr::Module(lit.to_string().trim_matches('"').to_string()));
                         }
+                        if ident == "rename_all" {
+                            let name = lit.to_string().trim_matches('"').to_string();
+                            if let Some(renaming_rule) = RenamingRule::try_new(&name) {
+                                pyo3_attrs.push(Attr::RenameAll(renaming_rule));
+                            }
+                        }
                     }
                     [Ident(ident), Punct(_), Group(group)] => {
                         if ident == "signature" {
@@ -166,6 +173,7 @@ mod test {
         let item: ItemStruct = parse_str(
             r#"
             #[pyclass(mapping, module = "my_module", name = "Placeholder")]
+            #[pyo3(rename_all = "SCREAMING_SNAKE_CASE")]
             pub struct PyPlaceholder {
                 #[pyo3(get)]
                 pub name: String,
@@ -173,12 +181,13 @@ mod test {
             "#,
         )?;
         // `#[pyclass]` part
-        let attrs = parse_pyo3_attr(&item.attrs[0])?;
+        let attrs = parse_pyo3_attrs(&item.attrs)?;
         assert_eq!(
             attrs,
             vec![
                 Attr::Module("my_module".to_string()),
-                Attr::Name("Placeholder".to_string())
+                Attr::Name("Placeholder".to_string()),
+                Attr::RenameAll(RenamingRule::ScreamingSnakeCase),
             ]
         );
 

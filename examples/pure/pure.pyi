@@ -38,6 +38,10 @@ class Number(Enum):
     Whether the number is an integer.
     """
 
+class NumberRenameAll(Enum):
+    FLOAT = auto()
+    INTEGER = auto()
+
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
 def create_a(x:builtins.int=2) -> A: ...
