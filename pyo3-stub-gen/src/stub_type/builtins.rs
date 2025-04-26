@@ -4,6 +4,7 @@ use crate::stub_type::*;
 use std::{
     borrow::Cow,
     ffi::{OsStr, OsString},
+    net::{Ipv4Addr, Ipv6Addr},
     path::PathBuf,
     rc::Rc,
     sync::Arc,
@@ -90,6 +91,9 @@ impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
 impl_with_module!(Utc, "datetime.tzinfo", "datetime");
 impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
 impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
+
+impl_with_module!(Ipv4Addr, "ipaddress.IPv4Address", "ipaddress");
+impl_with_module!(Ipv6Addr, "ipaddress.IPv6Address", "ipaddress");
 
 impl<T: PyStubType> PyStubType for &T {
     fn type_input() -> TypeInfo {
