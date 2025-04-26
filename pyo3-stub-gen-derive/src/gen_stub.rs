@@ -15,14 +15,17 @@
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 doc: "",
 //!             },
 //!             MemberInfo {
 //!                 name: "ndim",
 //!                 r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 doc: "",
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
+//!                 doc: "",
 //!             },
 //!         ],
 //!         doc: "",

@@ -90,6 +90,7 @@ pub struct MethodInfo {
 pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub doc: &'static str,
 }
 
 /// Info of `#[pymethod]`
