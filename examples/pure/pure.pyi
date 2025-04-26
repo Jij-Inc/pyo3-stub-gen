@@ -2,6 +2,7 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import datetime
 import os
 import pathlib
 import typing
@@ -16,6 +17,12 @@ class A:
         """
     def show_x(self) -> None: ...
     def ref_test(self, x:dict) -> dict: ...
+
+class B(A):
+    ...
+
+class MyDate(datetime.date):
+    ...
 
 class Number(Enum):
     FLOAT = auto()

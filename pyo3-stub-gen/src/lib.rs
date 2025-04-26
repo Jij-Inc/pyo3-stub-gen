@@ -48,7 +48,11 @@
 //!                 doc: "Description docstring",
 //!             },
 //!         ],
+//!
 //!         doc: "Docstring used in Python",
+//!
+//!         // Base classes
+//!         bases: &[],
 //!     }
 //! }
 //! ```
