@@ -86,6 +86,9 @@ fn your_module_name(m: &Bound<PyModule>) -> PyResult<()> {
 define_stub_info_gatherer!(stub_info);
 ```
 
+> ![NOTE]
+> The `#[gen_stub_pyfunction]` macro must be placed before `#[pyfunction]` macro.
+
 ## Generate a stub file
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
