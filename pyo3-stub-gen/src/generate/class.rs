@@ -53,13 +53,7 @@ impl fmt::Display for ClassDef {
         writeln!(f, "class {}{}:", self.name, bases)?;
         let indent = indent();
         let doc = self.doc.trim();
-        if !doc.is_empty() {
-            writeln!(f, r#"{indent}r""""#)?;
-            for line in doc.lines() {
-                writeln!(f, "{indent}{}", line)?;
-            }
-            writeln!(f, r#"{indent}""""#)?;
-        }
+        docstring::write_docstring(f, doc, indent)?;
         for member in &self.members {
             member.fmt(f)?;
         }
