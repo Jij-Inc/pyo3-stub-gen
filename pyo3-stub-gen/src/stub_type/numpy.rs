@@ -79,7 +79,7 @@ impl PyStubType for PyArrayDescr {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "numpy.dtype".into(),
-            import: hashset!["numpy.typing".into()],
+            import: hashset!["numpy".into()],
         }
     }
 }
