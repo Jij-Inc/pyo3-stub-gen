@@ -386,7 +386,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -395,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -404,7 +404,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub_multiple"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -530,7 +530,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "ahash",
  "env_logger",
@@ -603,7 +603,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "anyhow",
  "chrono",
@@ -623,7 +623,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "heck",
  "insta",
