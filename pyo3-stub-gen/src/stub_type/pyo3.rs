@@ -82,8 +82,9 @@ impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
 /// impl PyStubType for PyO3 types which only available on non-`Py_LIMITED_API`
-#[cfg(feature = "pyo3-non-limited-apis")]
+#[cfg(feature = "pyo3-unlimited-apis")]
 mod non_limited_apis {
+    use super::*;
     macro_rules! impl_simple {
         ($ty:ty, $mod:expr, $pytype:expr) => {
             impl PyStubType for $ty {

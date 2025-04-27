@@ -34,6 +34,10 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 }
 
 #[gen_stub_pyclass]
+#[pyclass(extends=PyDate)]
+struct MyDate;
+
+#[gen_stub_pyclass]
 #[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
@@ -148,6 +152,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
+    m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
