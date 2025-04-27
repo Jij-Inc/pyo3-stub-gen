@@ -2,7 +2,8 @@
 members = [
   "pyo3-stub-gen",
   "pyo3-stub-gen-derive",
-  "examples/pure",
+  "examples/pure-abi3",
+  "examples/pure-native",
   "examples/mixed",
   "examples/mixed_sub",
   "examples/mixed_sub_multiple",

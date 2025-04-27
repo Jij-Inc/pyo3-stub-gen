@@ -529,7 +529,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "pure"
+name = "pure-abi3"
+version = "0.8.2"
+dependencies = [
+ "ahash",
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
+name = "pure-native"
 version = "0.8.2"
 dependencies = [
  "ahash",

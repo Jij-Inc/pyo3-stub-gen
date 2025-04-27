@@ -1,5 +1,5 @@
 [package]
-name = "pure"
+name = "pure-abi3"
 version.workspace = true
 edition.workspace = true
 
