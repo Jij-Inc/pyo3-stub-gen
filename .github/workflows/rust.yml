@@ -100,6 +100,7 @@ jobs:
       matrix:
         crate:
           - pure
+          - pure-abi3
           - mixed
           - mixed_sub
     steps:
@@ -117,10 +118,18 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Generate stub file
+        if: ${{ matrix.crate != 'pure-abi3' }}
         uses: actions-rs/cargo@v1
         with:
           command: run
           args: --bin stub_gen -p ${{ matrix.crate }}
+
+      - name: Generate stub file
+        if: ${{ matrix.crate == 'pure-abi3' }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --bin stub_gen -p pure --features abi3
 
       - name: Check if stub file is up to date
         run: git diff --exit-code
