@@ -46,7 +46,7 @@ jobs:
       - name: Check with clippy
         uses: actions-rs/clippy-check@v1
         with:
-          args: -- -D warnings
+          args: --all-features -- -D warnings
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:

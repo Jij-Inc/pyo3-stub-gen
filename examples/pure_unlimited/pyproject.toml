@@ -6,3 +6,6 @@ build-backend = "maturin"
 name = "pure_unlimited"
 version = "0.1"
 requires-python = ">=3.9"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
