@@ -56,11 +56,13 @@ def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 
 def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
 
-def str_len(x:builtins.str) -> builtins.int:    r"""
+def str_len(x:builtins.str) -> builtins.int:
+    r"""
     Returns the length of the string.
     """
 
-def sum(v:typing.Sequence[builtins.int]) -> builtins.int:    r"""
+def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
+    r"""
     Returns the sum of two numbers as a string.
     """
 
