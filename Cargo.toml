@@ -1,7 +1,8 @@
 [workspace]
-members = [
-  "pyo3-stub-gen",
-  "pyo3-stub-gen-derive",
+members = ["pyo3-stub-gen", "pyo3-stub-gen-derive"]
+exclude = [
+  # Note: "pure-abi3" and "pure-native" cannot be built simultaneously
+  #       since the ABI3 version of PyO3 is not compatible with the native version
   "examples/pure-abi3",
   "examples/pure-native",
   "examples/mixed",

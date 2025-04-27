@@ -1,16 +1,17 @@
 [package]
 name = "pure-abi3"
-version.workspace = true
-edition.workspace = true
+edition = "2021"
+version = "0.1.0"
+description = "Example for pure-Rust layout with ABI3"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-ahash.workspace = true
-env_logger.workspace = true
+ahash = "0.8.11"
+env_logger = "0.11.8"
+pyo3 = ">= 0.21.0"
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
-pyo3.workspace = true
 
 [features]
 non-abi3 = ["pyo3-stub-gen/pyo3-non-limited-apis"]
