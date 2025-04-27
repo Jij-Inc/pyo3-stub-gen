@@ -93,7 +93,7 @@ jobs:
         with:
           command: test
 
-  stub-gen-examples:
+  stub-gen:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

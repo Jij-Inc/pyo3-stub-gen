@@ -1,4 +1,4 @@
-from pure import sum, create_dict, read_dict, echo_path, ahash_dict
+from pure_abi3 import sum, create_dict, read_dict, echo_path, ahash_dict
 import pytest
 import pathlib
 
