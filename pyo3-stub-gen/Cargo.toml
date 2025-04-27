@@ -32,3 +32,5 @@ test-case.workspace = true
 [features]
 default = ["numpy"]
 numpy = ["dep:numpy"]
+# Enable support of PyO3 APIs which disappears when "pyo3/abi3-*" feature is enabled
+pyo3-non-limited-apis = []

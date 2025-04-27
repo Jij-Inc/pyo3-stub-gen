@@ -81,21 +81,25 @@ impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
-macro_rules! impl_simple {
-    ($ty:ty, $mod:expr, $pytype:expr) => {
-        impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
-                TypeInfo {
-                    name: concat!($mod, ".", $pytype).to_string(),
-                    import: hashset! { $mod.into() },
+/// impl PyStubType for PyO3 types which only available on non-`Py_LIMITED_API`
+#[cfg(feature = "pyo3-non-limited-apis")]
+mod non_limited_apis {
+    macro_rules! impl_simple {
+        ($ty:ty, $mod:expr, $pytype:expr) => {
+            impl PyStubType for $ty {
+                fn type_output() -> TypeInfo {
+                    TypeInfo {
+                        name: concat!($mod, ".", $pytype).to_string(),
+                        import: hashset! { $mod.into() },
+                    }
                 }
             }
-        }
-    };
-}
+        };
+    }
 
-impl_simple!(PyDate, "datetime", "date");
-impl_simple!(PyDateTime, "datetime", "datetime");
-impl_simple!(PyDelta, "datetime", "timedelta");
-impl_simple!(PyTime, "datetime", "time");
-impl_simple!(PyTzInfo, "datetime", "tzinfo");
+    impl_simple!(PyDate, "datetime", "date");
+    impl_simple!(PyDateTime, "datetime", "datetime");
+    impl_simple!(PyDelta, "datetime", "timedelta");
+    impl_simple!(PyTime, "datetime", "time");
+    impl_simple!(PyTzInfo, "datetime", "tzinfo");
+}
