@@ -33,7 +33,7 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
     dict
 }
 
-#[cfg(feature = "abi3")]
+#[cfg(feature = "non-abi3")]
 #[gen_stub_pyclass]
 #[pyclass(extends=PyDate)]
 struct MyDate;
@@ -164,7 +164,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
 
-    #[cfg(feature = "abi3")]
+    #[cfg(feature = "non-abi3")]
     m.add_class::<MyDate>()?;
 
     Ok(())

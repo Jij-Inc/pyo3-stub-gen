@@ -69,7 +69,7 @@ jobs:
       - name: Check with clippy
         uses: actions-rs/clippy-check@v1
         with:
-          args: --all-features -- -D warnings
+          args: -- -D warnings
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:

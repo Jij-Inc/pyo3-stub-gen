@@ -13,6 +13,7 @@ pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
 pyo3.workspace = true
 
 [features]
+non-abi3 = ["pyo3-stub-gen/pyo3-non-limited-apis"]
 abi3 = ["pyo3/abi3-py39"]
 
 [[bin]]
