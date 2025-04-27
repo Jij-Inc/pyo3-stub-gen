@@ -1,0 +1,24 @@
+name: "Setup Test Environment"
+description: "Setup common environment for testing jobs"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+        repo-token: ${{ github.token }}
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Setup caching for Rust
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        python-version: 3.9

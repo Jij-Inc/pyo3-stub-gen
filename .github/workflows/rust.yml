@@ -13,16 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
       - name: Check warnings in documents
         uses: actions-rs/cargo@v1
         with:
@@ -36,14 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: rustfmt
-
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         with:
@@ -55,17 +41,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: clippy
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
       - name: Check with clippy
         uses: actions-rs/clippy-check@v1
         with:
@@ -77,17 +54,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: clippy
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
@@ -106,23 +74,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: clippy
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
       - name: Generate stub file
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --bin stub_gen --manifest-path examples/${{ matrix.crate }}/Cargo.toml
-
+        run: task ${{ matrix.crate}}:stub-gen
       - name: Check if stub file is up to date
         run: git diff --exit-code
 
@@ -131,7 +86,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
