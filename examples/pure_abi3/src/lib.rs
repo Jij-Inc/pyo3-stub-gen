@@ -34,10 +34,6 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 }
 
 #[gen_stub_pyclass]
-#[pyclass(extends=PyDate)]
-struct MyDate;
-
-#[gen_stub_pyclass]
 #[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
@@ -75,7 +71,7 @@ fn create_a(x: usize) -> A {
 #[derive(Debug)]
 struct B;
 
-create_exception!(pure, MyError, PyRuntimeError);
+create_exception!(pure_abi3, MyError, PyRuntimeError);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -135,7 +131,7 @@ impl Number {
     }
 }
 
-module_variable!("pure", "MY_CONSTANT", usize);
+module_variable!("pure_abi3", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value
 #[gen_stub_pyfunction]
@@ -147,12 +143,11 @@ fn default_value(num: Number) -> Number {
 
 /// Initializes the Python module
 #[pymodule]
-fn pure(m: &Bound<PyModule>) -> PyResult<()> {
+fn pure_abi3(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
-    m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;

@@ -1,0 +1,37 @@
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  stub-gen:
+    cmds:
+      - task: stub-gen:pure_abi3
+      - task: stub-gen:pure_unlimited
+      - task: stub-gen:mixed
+      - task: stub-gen:mixed_sub
+      - task: stub-gen:mixed_sub_multiple
+
+  stub-gen:pure_abi3:
+    cmds:
+      - cargo run --bin stub_gen
+    dir: examples/pure_abi3
+
+  stub-gen:pure_unlimited:
+    cmds:
+      - cargo run --bin stub_gen
+    dir: examples/pure_unlimited
+
+  stub-gen:mixed:
+    cmds:
+      - cargo run --bin stub_gen
+    dir: examples/mixed
+
+  stub-gen:mixed_sub:
+    cmds:
+      - cargo run --bin stub_gen
+    dir: examples/mixed_sub
+
+  stub-gen:mixed_sub_multiple:
+    cmds:
+      - cargo run --bin stub_gen
+    dir: examples/mixed_sub_multiple

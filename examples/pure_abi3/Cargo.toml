@@ -1,5 +1,5 @@
 [package]
-name = "pure-abi3"
+name = "pure_abi3"
 edition = "2021"
 version = "0.1.0"
 description = "Example for pure-Rust layout with ABI3"
