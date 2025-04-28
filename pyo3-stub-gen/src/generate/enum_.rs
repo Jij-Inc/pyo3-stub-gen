@@ -6,7 +6,7 @@ use std::fmt;
 pub struct EnumDef {
     pub name: &'static str,
     pub doc: &'static str,
-    pub variants: &'static [&'static str],
+    pub variants: &'static [(&'static str, &'static str)],
     pub methods: Vec<MethodDef>,
     pub members: Vec<MemberDef>,
 }
@@ -28,8 +28,9 @@ impl fmt::Display for EnumDef {
         writeln!(f, "class {}(Enum):", self.name)?;
         let indent = indent();
         docstring::write_docstring(f, self.doc, indent)?;
-        for variants in self.variants {
-            writeln!(f, "{indent}{} = auto()", variants)?;
+        for (variant, variant_doc) in self.variants {
+            writeln!(f, "{indent}{} = auto()", variant)?;
+            docstring::write_docstring(f, variant_doc, indent)?;
         }
         for member in &self.members {
             writeln!(f)?;

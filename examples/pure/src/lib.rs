@@ -140,6 +140,7 @@ pub enum Number {
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NumberRenameAll {
+    /// Float variant
     Float,
     Integer,
 }

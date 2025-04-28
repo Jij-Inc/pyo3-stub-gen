@@ -40,6 +40,9 @@ class Number(Enum):
 
 class NumberRenameAll(Enum):
     FLOAT = auto()
+    r"""
+    Float variant
+    """
     INTEGER = auto()
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...

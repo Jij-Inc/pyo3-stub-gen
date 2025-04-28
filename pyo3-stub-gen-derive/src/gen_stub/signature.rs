@@ -95,11 +95,11 @@ impl ToTokens for ArgsWithSignature<'_> {
                 SignatureArg::Assign(ident, _eq, value) => {
                     let name = ident.to_string();
                     let ty = args_map.get(&name).unwrap();
-                    let default = if value.to_token_stream().to_string()=="None"{
+                    let default = if value.to_token_stream().to_string() == "None" {
                         quote! {
                             "None".to_string()
                         }
-                    }else{
+                    } else {
                         quote! {
                             ::pyo3::prepare_freethreaded_python();
                             ::pyo3::Python::with_gil(|py| -> String {
