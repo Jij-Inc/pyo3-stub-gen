@@ -1,4 +1,5 @@
 use pyo3::{prelude::*, types::*};
+use std::ffi::CString;
 
 pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     if any.is_instance_of::<PyString>()
@@ -33,8 +34,26 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     false
 }
 
+/// whether eval(repr(any)) == any
+pub fn valid_external_repr(any: &Bound<'_, PyAny>) -> Option<bool> {
+    let globals = get_globals(any).ok()?;
+    let fmt_str = any.repr().ok()?.to_string();
+    let fmt_cstr = CString::new(fmt_str.clone()).ok()?;
+    let new_any = any.py().eval(&fmt_cstr, Some(&globals), None).ok()?;
+    new_any.eq(any).ok()
+}
+
+fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
+    let type_object = any.get_type();
+    let type_name = type_object.getattr("__name__")?;
+    let type_name: &str = type_name.extract()?;
+    let globals = PyDict::new(any.py());
+    globals.set_item(type_name, type_object)?;
+    Ok(globals)
+}
+
 pub fn fmt_py_obj(any: &Bound<'_, PyAny>) -> String {
-    if all_builtin_types(any) {
+    if all_builtin_types(any) || valid_external_repr(any).is_some_and(|valid| valid) {
         if let Ok(py_str) = any.repr() {
             return py_str.to_string();
         }
@@ -114,5 +133,21 @@ mod test {
             // class A variable can not be formatted
             assert_eq!("...", fmt_py_obj(&A {}.into_bound_py_any(py).unwrap()));
         })
+    }
+    #[test]
+    fn test_fmt_enum() {
+        #[pyclass(eq, eq_int)]
+        #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+        pub enum Number {
+            Float,
+            Integer,
+        }
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            assert_eq!(
+                "Number.Float",
+                fmt_py_obj(&Number::Float.into_bound_py_any(py).unwrap())
+            );
+        });
     }
 }
