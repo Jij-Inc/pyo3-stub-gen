@@ -48,7 +48,7 @@ impl fmt::Display for Module {
             writeln!(f, "from . import {}", submod)?;
         }
         if !self.enum_.is_empty() {
-            writeln!(f, "from enum import Enum, auto")?;
+            writeln!(f, "from enum import Enum")?;
         }
         writeln!(f)?;
 
