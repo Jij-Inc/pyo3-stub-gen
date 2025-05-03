@@ -8,7 +8,7 @@ pub struct PyEnumInfo {
     pyclass_name: String,
     enum_type: Type,
     module: Option<String>,
-    variants: Vec<String>,
+    variants: Vec<(String, String)>,
     doc: String,
 }
 
@@ -54,7 +54,7 @@ impl TryFrom<ItemEnum> for PyEnumInfo {
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.to_string());
         let variants = variants
             .into_iter()
-            .map(|var| -> Result<String> {
+            .map(|var| -> Result<(String, String)> {
                 let mut var_name = None;
                 for attr in parse_pyo3_attrs(&var.attrs)? {
                     if let Attr::Name(name) = attr {
@@ -65,9 +65,10 @@ impl TryFrom<ItemEnum> for PyEnumInfo {
                 if let Some(renaming_rule) = renaming_rule {
                     var_name = renaming_rule.apply(&var_name);
                 }
-                Ok(var_name)
+                let var_doc = extract_documents(&var.attrs).join("\n");
+                Ok((var_name, var_doc))
             })
-            .collect::<Result<Vec<String>>>()?;
+            .collect::<Result<Vec<(String, String)>>>()?;
         Ok(Self {
             doc,
             enum_type: struct_type,
@@ -88,6 +89,10 @@ impl ToTokens for PyEnumInfo {
             module,
         } = self;
         let module = quote_option(module);
+        let variants: Vec<_> = variants
+            .iter()
+            .map(|(name, doc)| quote! {(#name,#doc)})
+            .collect();
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyEnumInfo {
                 pyclass_name: #pyclass_name,
