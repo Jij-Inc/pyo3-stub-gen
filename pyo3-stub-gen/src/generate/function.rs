@@ -44,6 +44,7 @@ impl fmt::Display for FunctionDef {
 
         let doc = self.doc;
         if !doc.is_empty() {
+            writeln!(f)?;
             docstring::write_docstring(f, self.doc, indent())?;
         } else {
             writeln!(f, " ...")?;

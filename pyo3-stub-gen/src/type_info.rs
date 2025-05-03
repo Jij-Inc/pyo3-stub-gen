@@ -136,8 +136,8 @@ pub struct PyEnumInfo {
     pub module: Option<&'static str>,
     /// Docstring
     pub doc: &'static str,
-    /// Variants of enum
-    pub variants: &'static [&'static str],
+    /// Variants of enum (name, doc)
+    pub variants: &'static [(&'static str, &'static str)],
 }
 
 inventory::collect!(PyEnumInfo);
