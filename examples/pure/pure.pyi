@@ -6,7 +6,7 @@ import datetime
 import os
 import pathlib
 import typing
-from enum import Enum, auto
+from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
@@ -25,8 +25,8 @@ class MyDate(datetime.date):
     ...
 
 class Number(Enum):
-    FLOAT = auto()
-    INTEGER = auto()
+    FLOAT = ...
+    INTEGER = ...
 
     is_float: builtins.bool
     r"""
@@ -39,11 +39,11 @@ class Number(Enum):
     """
 
 class NumberRenameAll(Enum):
-    FLOAT = auto()
+    FLOAT = ...
     r"""
     Float variant
     """
-    INTEGER = auto()
+    INTEGER = ...
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
@@ -53,7 +53,7 @@ def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[bui
 
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
-def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> builtins.str: ...
+def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 

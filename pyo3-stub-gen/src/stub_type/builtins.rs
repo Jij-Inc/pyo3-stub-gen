@@ -67,7 +67,7 @@ impl_builtin!(Cow<'_, [u8]>, "bytes");
 
 impl PyStubType for PathBuf {
     fn type_output() -> TypeInfo {
-        TypeInfo::builtin("str")
+        TypeInfo::with_module("pathlib.Path", "pathlib".into())
     }
     fn type_input() -> TypeInfo {
         TypeInfo::builtin("str")
