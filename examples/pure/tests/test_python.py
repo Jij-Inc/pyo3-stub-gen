@@ -38,7 +38,7 @@ def test_read_dict():
 
 def test_path():
     out = echo_path(pathlib.Path("test"))
-    assert out == "test"
+    assert out == pathlib.Path("test")
 
     out = echo_path("test")
-    assert out == "test"
+    assert out == pathlib.Path("test")
