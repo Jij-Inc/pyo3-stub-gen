@@ -6,7 +6,7 @@ import datetime
 import os
 import pathlib
 import typing
-from enum import Enum, auto
+from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
@@ -25,8 +25,8 @@ class MyDate(datetime.date):
     ...
 
 class Number(Enum):
-    FLOAT = auto()
-    INTEGER = auto()
+    FLOAT = ...
+    INTEGER = ...
 
     is_float: builtins.bool
     r"""
@@ -39,8 +39,8 @@ class Number(Enum):
     """
 
 class NumberRenameAll(Enum):
-    FLOAT = auto()
-    INTEGER = auto()
+    FLOAT = ...
+    INTEGER = ...
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
