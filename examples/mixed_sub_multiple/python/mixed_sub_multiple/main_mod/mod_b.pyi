@@ -3,7 +3,7 @@
 
 from enum import Enum
 
-class GreatingEnum(Enum):
+class GreetingEnum(Enum):
     GREETA = ...
     GREETB = ...
 

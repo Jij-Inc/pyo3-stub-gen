@@ -3,5 +3,5 @@
 
 import mixed_sub_multiple.main_mod.mod_b
 
-def greet_a(kind:GreatingEnum) -> None: ...
+def greet_a(kind:mixed_sub_multiple.main_mod.mod_b.GreetingEnum) -> None: ...
 

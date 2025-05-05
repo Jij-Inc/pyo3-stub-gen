@@ -1,4 +1,4 @@
-use crate::{generate::Import, stub_type::ModuleRef, type_info::*, TypeInfo};
+use crate::{generate::*, stub_type::ModuleRef, type_info::*, TypeInfo};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -14,12 +14,14 @@ impl Import for Arg {
     }
 }
 
-impl From<&ArgInfo> for Arg {
-    fn from(info: &ArgInfo) -> Self {
-        Self {
-            name: info.name,
-            r#type: (info.r#type)(),
-            signature: info.signature.clone(),
+impl Build for ArgInfo {
+    type DefType = Arg;
+
+    fn build(&self, current_module_name: &str) -> Self::DefType {
+        Self::DefType {
+            name: self.name,
+            r#type: self.r#type.build(current_module_name),
+            signature: self.signature.clone(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{type_info::PyVariableInfo, TypeInfo};
+use crate::{generate::*, type_info::PyVariableInfo, TypeInfo};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableDef {
@@ -8,11 +8,13 @@ pub struct VariableDef {
     pub type_: TypeInfo,
 }
 
-impl From<&PyVariableInfo> for VariableDef {
-    fn from(info: &PyVariableInfo) -> Self {
-        Self {
-            name: info.name,
-            type_: (info.r#type)(),
+impl Build for PyVariableInfo {
+    type DefType = VariableDef;
+
+    fn build(&self, current_module_name: &str) -> Self::DefType {
+        Self::DefType {
+            name: self.name,
+            type_: self.r#type.build(current_module_name),
         }
     }
 }

@@ -2,16 +2,16 @@ use crate::stub_type::*;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 impl<T: PyStubType> PyStubType for Option<T> {
-    fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_input(current_module_name);
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{}]", name),
             import,
         }
     }
-    fn type_output() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_output();
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_output(current_module_name);
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{}]", name),
@@ -21,80 +21,80 @@ impl<T: PyStubType> PyStubType for Option<T> {
 }
 
 impl<T: PyStubType> PyStubType for Box<T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType, E> PyStubType for Result<T, E> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for Vec<T> {
-    fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_input(current_module_name);
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{}]", name),
             import,
         }
     }
-    fn type_output() -> TypeInfo {
-        TypeInfo::list_of::<T>()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        TypeInfo::list_of::<T>(current_module_name)
     }
 }
 
 impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
-    fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_input(current_module_name);
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{}]", name),
             import,
         }
     }
-    fn type_output() -> TypeInfo {
-        TypeInfo::list_of::<T>()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        TypeInfo::list_of::<T>(current_module_name)
     }
 }
 
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
-    fn type_output() -> TypeInfo {
-        TypeInfo::set_of::<T>()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        TypeInfo::set_of::<T>(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for BTreeSet<T> {
-    fn type_output() -> TypeInfo {
-        TypeInfo::set_of::<T>()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        TypeInfo::set_of::<T>(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
-    fn type_output() -> TypeInfo {
-        TypeInfo::set_of::<T>()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        TypeInfo::set_of::<T>(current_module_name)
     }
 }
 
 macro_rules! impl_map_inner {
     () => {
-        fn type_input() -> TypeInfo {
+        fn type_input(current_module_name: &str) -> TypeInfo {
             let TypeInfo {
                 name: key_name,
                 mut import,
-            } = Key::type_input();
+            } = Key::type_input(current_module_name);
             let TypeInfo {
                 name: value_name,
                 import: value_import,
-            } = Value::type_input();
+            } = Value::type_input(current_module_name);
             import.extend(value_import);
             import.insert("typing".into());
             TypeInfo {
@@ -102,15 +102,15 @@ macro_rules! impl_map_inner {
                 import,
             }
         }
-        fn type_output() -> TypeInfo {
+        fn type_output(current_module_name: &str) -> TypeInfo {
             let TypeInfo {
                 name: key_name,
                 mut import,
-            } = Key::type_output();
+            } = Key::type_output(current_module_name);
             let TypeInfo {
                 name: value_name,
                 import: value_import,
-            } = Value::type_output();
+            } = Value::type_output(current_module_name);
             import.extend(value_import);
             import.insert("builtins".into());
             TypeInfo {
@@ -138,11 +138,11 @@ impl<Key: PyStubType, Value: PyStubType, State> PyStubType
 macro_rules! impl_tuple {
     ($($T:ident),*) => {
         impl<$($T: PyStubType),*> PyStubType for ($($T),*) {
-            fn type_output() -> TypeInfo {
+            fn type_output(current_module_name: &str) -> TypeInfo {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_output();
+                let TypeInfo { name, import } = $T::type_output(current_module_name);
                 names.push(name);
                 merged.extend(import);
                 )*
@@ -151,11 +151,11 @@ macro_rules! impl_tuple {
                     import: merged,
                 }
             }
-            fn type_input() -> TypeInfo {
+            fn type_input(current_module_name: &str) -> TypeInfo {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_input();
+                let TypeInfo { name, import } = $T::type_input(current_module_name);
                 names.push(name);
                 merged.extend(import);
                 )*
