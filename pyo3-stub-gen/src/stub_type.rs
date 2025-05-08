@@ -7,6 +7,33 @@ mod numpy;
 
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
+use std::cmp::Ordering;
+
+/// Indicates what to import.
+/// Module: The purpose is to import the entire module(eg import builtins).
+/// Type: The purpose is to import the types in the module(eg from moduleX import typeX).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ImportRef {
+    Module(ModuleRef),
+    Type(TypeRef),
+}
+
+impl PartialOrd for ImportRef {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ImportRef {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (ImportRef::Module(a), ImportRef::Module(b)) => a.get().cmp(&b.get()),
+            (ImportRef::Type(a), ImportRef::Type(b)) => a.cmp(b),
+            (ImportRef::Module(_), ImportRef::Type(_)) => Ordering::Greater,
+            (ImportRef::Type(_), ImportRef::Module(_)) => Ordering::Less,
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub enum ModuleRef {
@@ -39,6 +66,22 @@ impl From<&str> for ModuleRef {
     }
 }
 
+
+/// Indicates the type of import(eg class enum).
+/// from module import type.
+/// name, type name. module, module name(which type defined).
+ #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
+pub struct  TypeRef {
+    pub module: ModuleRef,
+    pub name: String,
+}
+
+impl  TypeRef  {
+    pub fn new(module_ref: ModuleRef, name: String) -> Self {
+        Self{module: module_ref, name}
+    }
+}
+
 /// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
@@ -49,7 +92,7 @@ pub struct TypeInfo {
     ///
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
-    pub import: HashSet<ModuleRef>,
+    pub import: HashSet<ImportRef>,
 }
 
 impl fmt::Display for TypeInfo {
@@ -73,14 +116,14 @@ impl TypeInfo {
     pub fn any() -> Self {
         Self {
             name: "typing.Any".to_string(),
-            import: hashset! { "typing".into() },
+            import: hashset! { ImportRef::Module("builtins".into()) },
         }
     }
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
         let TypeInfo { name, mut import } = T::type_output();
-        import.insert("builtins".into());
+        import.insert(ImportRef::Module("builtins".into()));
         TypeInfo {
             name: format!("builtins.list[{}]", name),
             import,
@@ -90,7 +133,7 @@ impl TypeInfo {
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
         let TypeInfo { name, mut import } = T::type_output();
-        import.insert("builtins".into());
+        import.insert(ImportRef::Module("builtins".into()));
         TypeInfo {
             name: format!("builtins.set[{}]", name),
             import,
@@ -108,7 +151,7 @@ impl TypeInfo {
             import: import_v,
         } = V::type_output();
         import.extend(import_v);
-        import.insert("builtins".into());
+        import.insert(ImportRef::Module("builtins".into()));
         TypeInfo {
             name: format!("builtins.set[{}, {}]", name_k, name_v),
             import,
@@ -119,7 +162,7 @@ impl TypeInfo {
     pub fn builtin(name: &str) -> Self {
         Self {
             name: format!("builtins.{name}"),
-            import: hashset! { "builtins".into() },
+            import: hashset! { ImportRef::Module("builtins".into()) },
         }
     }
 
@@ -138,9 +181,26 @@ impl TypeInfo {
     /// ```
     pub fn with_module(name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
-        import.insert(module);
+        import.insert(ImportRef::Module(module));
         Self {
             name: name.to_string(),
+            import,
+        }
+    }
+
+    /// A type annotation of a type that must be imported.
+    ///
+    /// ```
+    /// Class A is defined in module A, referenced in module B. "from ModuleA import ClassA"
+    /// pyo3_stub_gen::TypeInfo::with_type("ClassA", "ModuleA".into());
+    /// ```
+    pub fn with_type(type_name: &str, module: ModuleRef) -> Self {
+        let mut import = HashSet::new();
+        let type_ref = TypeRef::new(module, type_name.to_string());
+        import.insert(ImportRef::Type(type_ref));
+
+        Self {
+            name: type_name.to_string(),
             import,
         }
     }
@@ -232,19 +292,19 @@ mod test {
     use std::collections::HashMap;
     use test_case::test_case;
 
-    #[test_case(bool::type_input(), "builtins.bool", hashset! { "builtins".into() } ; "bool_input")]
-    #[test_case(<&str>::type_input(), "builtins.str", hashset! { "builtins".into() } ; "str_input")]
-    #[test_case(Vec::<u32>::type_input(), "typing.Sequence[builtins.int]", hashset! { "typing".into(), "builtins".into() } ; "Vec_u32_input")]
-    #[test_case(Vec::<u32>::type_output(), "builtins.list[builtins.int]", hashset! {  "builtins".into() } ; "Vec_u32_output")]
-    #[test_case(HashMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "HashMap_u32_String_input")]
-    #[test_case(HashMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "HashMap_u32_String_output")]
-    #[test_case(indexmap::IndexMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "IndexMap_u32_String_input")]
-    #[test_case(indexmap::IndexMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "IndexMap_u32_String_output")]
-    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { "builtins".into(), "typing".into() } ; "HashMap_u32_Vec_u32_input")]
-    #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
-    #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
-    #[test_case(indexmap::IndexSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "IndexSet_u32_input")]
-    fn test(tinfo: TypeInfo, name: &str, import: HashSet<ModuleRef>) {
+    #[test_case(bool::type_input(), "builtins.bool", hashset! { ImportRef::Module("builtins".into()) } ; "bool_input")]
+    #[test_case(<&str>::type_input(), "builtins.str", hashset! { ImportRef::Module("builtins".into()) } ; "str_input")]
+    #[test_case(Vec::<u32>::type_input(), "typing.Sequence[builtins.int]", hashset! { ImportRef::Module("typing".into()), ImportRef::Module("builtins".into()) } ; "Vec_u32_input")]
+    #[test_case(Vec::<u32>::type_output(), "builtins.list[builtins.int]", hashset! {  ImportRef::Module("builtins".into()) } ; "Vec_u32_output")]
+    #[test_case(HashMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { ImportRef::Module("typing".into()), ImportRef::Module("builtins".into()) } ; "HashMap_u32_String_input")]
+    #[test_case(HashMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { ImportRef::Module("builtins".into()) } ; "HashMap_u32_String_output")]
+    #[test_case(indexmap::IndexMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { ImportRef::Module("typing".into()), ImportRef::Module("builtins".into()) } ; "IndexMap_u32_String_input")]
+    #[test_case(indexmap::IndexMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { ImportRef::Module("builtins".into()) } ; "IndexMap_u32_String_output")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { ImportRef::Module("builtins".into()), ImportRef::Module("typing".into()) } ; "HashMap_u32_Vec_u32_input")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { ImportRef::Module("builtins".into()) } ; "HashMap_u32_Vec_u32_output")]
+    #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { ImportRef::Module("builtins".into()) } ; "HashSet_u32_input")]
+    #[test_case(indexmap::IndexSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { ImportRef::Module("builtins".into()) } ; "IndexSet_u32_input")]
+    fn test(tinfo: TypeInfo, name: &str, import: HashSet<ImportRef>) {
         assert_eq!(tinfo.name, name);
         if import.is_empty() {
             assert!(tinfo.import.is_empty());

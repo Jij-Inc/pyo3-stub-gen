@@ -11,7 +11,7 @@ pub struct FunctionDef {
 }
 
 impl Import for FunctionDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());
