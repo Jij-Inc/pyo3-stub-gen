@@ -12,7 +12,7 @@ impl PyStubType for PyAny {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "typing.Any".to_string(),
-            import: hashset! { "typing".into() },
+            import: hashset! { ImportRef::Module("typing".into()) },
         }
     }
 }
@@ -87,7 +87,7 @@ macro_rules! impl_simple {
             fn type_output() -> TypeInfo {
                 TypeInfo {
                     name: concat!($mod, ".", $pytype).to_string(),
-                    import: hashset! { $mod.into() },
+                    import: hashset! { ImportRef::Module($mod.into()) },
                 }
             }
         }

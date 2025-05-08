@@ -395,6 +395,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mixed_sub_import_type"
+version = "0.9.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "mixed_sub_multiple"
 version = "0.9.0"
 dependencies = [
