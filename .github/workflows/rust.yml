@@ -67,10 +67,10 @@ jobs:
       fail-fast: false
       matrix:
         crate:
-          - pure_unlimited
-          - pure_abi3
+          - pure
           - mixed
           - mixed_sub
+          - mixed_sub_multiple
     steps:
       - name: Checkout
         uses: actions/checkout@v4
