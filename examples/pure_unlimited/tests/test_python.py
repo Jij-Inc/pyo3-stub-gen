@@ -1,4 +1,4 @@
-from pure import sum, create_dict, read_dict, echo_path, ahash_dict
+from pure_unlimited import sum, create_dict, read_dict, echo_path, ahash_dict
 import pytest
 import pathlib
 
@@ -38,7 +38,7 @@ def test_read_dict():
 
 def test_path():
     out = echo_path(pathlib.Path("test"))
-    assert out == pathlib.Path("test")
+    assert out == "test"
 
     out = echo_path("test")
-    assert out == pathlib.Path("test")
+    assert out == "test"

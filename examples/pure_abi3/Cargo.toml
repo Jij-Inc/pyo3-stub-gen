@@ -1,7 +1,8 @@
 [package]
-name = "pure"
-version = "0.1.0"
+name = "pure_abi3"
 edition = "2021"
+version = "0.1.0"
+description = "Example for pure-Rust layout with ABI3"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -9,8 +10,8 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 ahash = "0.8.11"
 env_logger = "0.11.8"
+pyo3 = { version = ">= 0.21.0", features = ["abi3-py39"] }
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
-pyo3 = ">= 0.24.0"
 
 [[bin]]
 name = "stub_gen"

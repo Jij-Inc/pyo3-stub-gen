@@ -7,7 +7,8 @@ members = [
     "mixed",
     "mixed-sub",
     "mixed-sub-multiple",
-    "pure",
+    "pure-abi3",
+    "pure-unlimited",
 ]
 
 [manifest.dependency-groups]
@@ -86,9 +87,14 @@ wheels = [
 ]
 
 [[package]]
-name = "pure"
+name = "pure-abi3"
 version = "0.1"
-source = { editable = "examples/pure" }
+source = { editable = "examples/pure_abi3" }
+
+[[package]]
+name = "pure-unlimited"
+version = "0.1"
+source = { editable = "examples/pure_unlimited" }
 
 [[package]]
 name = "pyright"
