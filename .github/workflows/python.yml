@@ -10,33 +10,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - pure
+          - mixed
+          - mixed_sub
+          - mixed_sub_multiple
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.9"
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          profile: minimal
-
-      - name: Build and install
-        run: uv sync --all-extras
-
-      - name: Python Test
-        run: uv run pytest -vv
-
-      - name: Type check
-        run: uv run pyright
-
-      - name: Lint
-        run: uvx ruff check
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
+      - name: Test
+        run: task ${{ matrix.crate }}:test
