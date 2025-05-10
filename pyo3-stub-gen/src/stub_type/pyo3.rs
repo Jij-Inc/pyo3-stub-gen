@@ -9,7 +9,7 @@ use ::pyo3::{
 use maplit::hashset;
 
 impl PyStubType for PyAny {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo {
             name: "typing.Any".to_string(),
             import: hashset! { "typing".into() },
@@ -18,45 +18,45 @@ impl PyStubType for PyAny {
 }
 
 impl<T: PyStubType> PyStubType for Py<T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType + PyClass> PyStubType for PyRef<'_, T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType + PyClass<Frozen = False>> PyStubType for PyRefMut<'_, T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for Bound<'_, T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
         impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
+            fn type_output(_current_module_name: &str) -> TypeInfo {
                 TypeInfo {
                     name: $pytype.to_string(),
                     import: HashSet::new(),
@@ -84,7 +84,7 @@ impl_builtin!(CompareOp, "int");
 macro_rules! impl_simple {
     ($ty:ty, $mod:expr, $pytype:expr) => {
         impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
+            fn type_output(_current_module_name: &str) -> TypeInfo {
                 TypeInfo {
                     name: concat!($mod, ".", $pytype).to_string(),
                     import: hashset! { $mod.into() },

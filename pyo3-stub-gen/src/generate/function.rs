@@ -20,13 +20,15 @@ impl Import for FunctionDef {
     }
 }
 
-impl From<&PyFunctionInfo> for FunctionDef {
-    fn from(info: &PyFunctionInfo) -> Self {
-        Self {
-            name: info.name,
-            args: info.args.iter().map(Arg::from).collect(),
-            r#return: (info.r#return)(),
-            doc: info.doc,
+impl Build for PyFunctionInfo {
+    type DefType = FunctionDef;
+
+    fn build(&self, current_module_name: &str) -> Self::DefType {
+        Self::DefType {
+            name: self.name,
+            args: self.args.build(current_module_name),
+            r#return: self.r#return.build(current_module_name),
+            doc: self.doc,
         }
     }
 }

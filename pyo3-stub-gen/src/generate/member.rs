@@ -18,12 +18,14 @@ impl Import for MemberDef {
     }
 }
 
-impl From<&MemberInfo> for MemberDef {
-    fn from(info: &MemberInfo) -> Self {
-        Self {
-            name: info.name,
-            r#type: (info.r#type)(),
-            doc: info.doc,
+impl Build for MemberInfo {
+    type DefType = MemberDef;
+
+    fn build(&self, current_module_name: &str) -> Self::DefType {
+        Self::DefType {
+            name: self.name,
+            r#type: self.r#type.build(current_module_name),
+            doc: self.doc,
         }
     }
 }
