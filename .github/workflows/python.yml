@@ -10,22 +10,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - pure
-          - mixed
-          - mixed_sub
-          - mixed_sub_multiple
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.9
+          python-version: "3.9"
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
@@ -38,16 +30,13 @@ jobs:
           profile: minimal
 
       - name: Build and install
-        run: pip install -v "./examples/${{ matrix.crate }}[test]"
+        run: uv sync --all-extras
 
       - name: Python Test
-        run: pytest
-        working-directory: ./examples/${{ matrix.crate }}
+        run: uv run pytest -vv
 
       - name: Type check
-        run: pyright
-        working-directory: ./examples/${{ matrix.crate }}
+        run: uv run pyright
 
       - name: Lint
-        run: ruff check
-        working-directory: ./examples/${{ matrix.crate }}
+        run: uvx ruff check
