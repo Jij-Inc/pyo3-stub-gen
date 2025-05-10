@@ -71,6 +71,7 @@ jobs:
           - pure_abi3
           - mixed
           - mixed_sub
+          - mixed_sub_multiple
     steps:
       - name: Checkout
         uses: actions/checkout@v4
