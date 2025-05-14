@@ -139,7 +139,7 @@ impl StubInfoBuilder {
         for module in self.modules.values_mut() {
             if let Some(entry) = module.class.get_mut(&struct_id) {
                 for attr in info.attrs {
-                    entry.members.push(MemberDef {
+                    entry.attrs.push(MemberDef {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
@@ -168,7 +168,7 @@ impl StubInfoBuilder {
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
                 for attr in info.attrs {
-                    entry.members.push(MemberDef {
+                    entry.attrs.push(MemberDef {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,

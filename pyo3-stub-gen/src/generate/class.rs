@@ -6,7 +6,7 @@ use std::fmt;
 pub struct ClassDef {
     pub name: &'static str,
     pub doc: &'static str,
-    pub members: Vec<MemberDef>,
+    pub attrs: Vec<MemberDef>,
     pub getters: Vec<MemberDef>,
     pub setters: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
@@ -19,8 +19,8 @@ impl Import for ClassDef {
         for base in &self.bases {
             import.extend(base.import.clone());
         }
-        for member in &self.members {
-            import.extend(member.import());
+        for attr in &self.attrs {
+            import.extend(attr.import());
         }
         for getter in &self.getters {
             import.extend(getter.import());
@@ -42,7 +42,7 @@ impl From<&PyClassInfo> for ClassDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: Vec::new(),
+            attrs: Vec::new(),
             setters: info.setters.iter().map(MemberDef::from).collect(),
             getters: info.getters.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
@@ -64,8 +64,8 @@ impl fmt::Display for ClassDef {
         let indent = indent();
         let doc = self.doc.trim();
         docstring::write_docstring(f, doc, indent)?;
-        for member in &self.members {
-            member.fmt(f)?;
+        for attr in &self.attrs {
+            attr.fmt(f)?;
         }
         for getter in &self.getters {
             GetterDisplay(getter).fmt(f)?;
@@ -76,7 +76,7 @@ impl fmt::Display for ClassDef {
         for method in &self.methods {
             method.fmt(f)?;
         }
-        if self.members.is_empty()
+        if self.attrs.is_empty()
             && self.getters.is_empty()
             && self.setters.is_empty()
             && self.methods.is_empty()
