@@ -1,7 +1,6 @@
 [workspace]
-members = [
-  "pyo3-stub-gen",
-  "pyo3-stub-gen-derive",
+members = ["pyo3-stub-gen", "pyo3-stub-gen-derive"]
+exclude = [
   "examples/pure",
   "examples/mixed",
   "examples/mixed_sub",

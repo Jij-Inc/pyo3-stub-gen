@@ -21,33 +21,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          profile: minimal
-
-      - name: Build and install
-        run: pip install -v "./examples/${{ matrix.crate }}[test]"
-
-      - name: Python Test
-        run: pytest
-        working-directory: ./examples/${{ matrix.crate }}
-
-      - name: Type check
-        run: pyright
-        working-directory: ./examples/${{ matrix.crate }}
-
-      - name: Lint
-        run: ruff check
-        working-directory: ./examples/${{ matrix.crate }}
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
+      - name: Test
+        run: task ${{ matrix.crate }}:test

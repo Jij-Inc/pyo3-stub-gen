@@ -1,0 +1,32 @@
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+includes:
+  pure:
+    taskfile: examples/pure/Taskfile.yml
+    dir: examples/pure
+  mixed:
+    taskfile: examples/mixed/Taskfile.yml
+    dir: examples/mixed
+  mixed_sub:
+    taskfile: examples/mixed_sub/Taskfile.yml
+    dir: examples/mixed_sub
+  mixed_sub_multiple:
+    taskfile: examples/mixed_sub_multiple/Taskfile.yml
+    dir: examples/mixed_sub_multiple
+
+tasks:
+  stub-gen:
+    cmds:
+      - task: pure:stub-gen
+      - task: mixed:stub-gen
+      - task: mixed_sub:stub-gen
+      - task: mixed_sub_multiple:stub-gen
+
+  test:
+    cmds:
+      - task: pure:test
+      - task: mixed:test
+      - task: mixed_sub:test
+      - task: mixed_sub_multiple:test
