@@ -50,9 +50,14 @@ impl MemberInfo {
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
+                let fn_name = sig.ident.to_string();
+                let fn_getter_name = match fn_name.strip_prefix("get_") {
+                    Some(s) => s.to_owned(),
+                    None => fn_name,
+                };
                 return Ok(MemberInfo {
                     doc,
-                    name: name.unwrap_or(sig.ident.to_string()),
+                    name: name.unwrap_or(fn_getter_name),
                     r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
                     default: None,
                 });
@@ -67,9 +72,14 @@ impl MemberInfo {
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
             if let Attr::Getter(name) = attr {
+                let fn_name = sig.ident.to_string();
+                let fn_setter_name = match fn_name.strip_prefix("set_") {
+                    Some(s) => s.to_owned(),
+                    None => fn_name,
+                };
                 return Ok(MemberInfo {
                     doc,
-                    name: name.unwrap_or(sig.ident.to_string()),
+                    name: name.unwrap_or(fn_setter_name),
                     r#type: sig
                         .inputs
                         .get(1)
@@ -147,7 +157,6 @@ impl ToTokens for MemberInfo {
             doc,
             default,
         } = self;
-        let name = name.strip_prefix("get_").unwrap_or(name);
         let default = default
             .as_ref()
             .map(|value| {
