@@ -529,6 +529,7 @@ dependencies = [
  "num-complex",
  "numpy",
  "pyo3",
+ "pyo3-build-config",
  "pyo3-stub-gen-derive",
  "serde",
  "toml",

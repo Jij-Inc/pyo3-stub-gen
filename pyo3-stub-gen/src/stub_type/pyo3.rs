@@ -94,8 +94,13 @@ macro_rules! impl_simple {
     };
 }
 
+#[cfg(not(Py_LIMITED_API))]
 impl_simple!(PyDate, "datetime", "date");
+#[cfg(not(Py_LIMITED_API))]
 impl_simple!(PyDateTime, "datetime", "datetime");
+#[cfg(not(Py_LIMITED_API))]
 impl_simple!(PyDelta, "datetime", "timedelta");
+#[cfg(not(Py_LIMITED_API))]
 impl_simple!(PyTime, "datetime", "time");
+#[cfg(not(Py_LIMITED_API))]
 impl_simple!(PyTzInfo, "datetime", "tzinfo");
