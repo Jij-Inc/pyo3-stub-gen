@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Error, ImplItem, ItemImpl, Result, Type};
 
-use super::{MemberInfo, MethodInfo};
+use super::{attr::parse_gen_stub_skip, MemberInfo, MethodInfo};
 
 #[derive(Debug)]
 pub struct PyMethodsInfo {
@@ -24,11 +24,17 @@ impl TryFrom<ItemImpl> for PyMethodsInfo {
         for inner in item.items.into_iter() {
             match inner {
                 ImplItem::Const(item_const) => {
+                    if parse_gen_stub_skip(&item_const.attrs)? {
+                        continue;
+                    }
                     if MemberInfo::is_classattr(&item_const.attrs)? {
                         attrs.push(MemberInfo::new_classattr_const(item_const)?);
                     }
                 }
                 ImplItem::Fn(item_fn) => {
+                    if parse_gen_stub_skip(&item_fn.attrs)? {
+                        continue;
+                    }
                     if MemberInfo::is_getter(&item_fn.attrs)? {
                         getters.push(MemberInfo::new_getter(item_fn)?);
                         continue;
@@ -76,5 +82,17 @@ impl ToTokens for PyMethodsInfo {
                 methods: &[ #(#methods),* ],
             }
         })
+    }
+}
+
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_impl back
+pub fn prune_attrs(item_impl: &mut ItemImpl) {
+    super::attr::prune_attrs(&mut item_impl.attrs);
+    for inner in item_impl.items.iter_mut() {
+        if let ImplItem::Fn(item_fn) = inner {
+            super::attr::prune_attrs(&mut item_fn.attrs);
+        }
     }
 }

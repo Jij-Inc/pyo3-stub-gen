@@ -1,4 +1,4 @@
-use crate::gen_stub::extract_documents;
+use crate::gen_stub::{attr::parse_gen_stub_default, extract_documents};
 
 use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
@@ -46,6 +46,7 @@ impl MemberInfo {
     pub fn new_getter(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_getter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
@@ -59,7 +60,7 @@ impl MemberInfo {
                     doc,
                     name: name.unwrap_or(fn_getter_name),
                     r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
-                    default: None,
+                    default,
                 });
             }
         }
@@ -68,6 +69,7 @@ impl MemberInfo {
     pub fn new_setter(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_setter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
@@ -91,7 +93,7 @@ impl MemberInfo {
                             }
                         })
                         .expect("Setter must input a type"),
-                    default: None,
+                    default,
                 });
             }
         }
@@ -100,12 +102,13 @@ impl MemberInfo {
     pub fn new_classattr_fn(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_classattr(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
+        let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         Ok(MemberInfo {
             doc,
             name: sig.ident.to_string(),
             r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
-            default: None,
+            default,
         })
     }
     pub fn new_classattr_const(item: ImplItemConst) -> Result<Self> {
@@ -140,11 +143,12 @@ impl TryFrom<Field> for MemberInfo {
             }
         }
         let doc = extract_documents(&attrs).join("\n");
+        let default = parse_gen_stub_default(&attrs)?;
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: ty,
             doc,
-            default: None,
+            default,
         })
     }
 }

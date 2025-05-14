@@ -121,6 +121,40 @@ cargo run --bin stub_gen
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
 
+## Advanced: `#[gen_stub(xxx)]` Attributes
+### `#[gen_stub(default=xx)]`
+
+For getters, setters, and classattr functions, you can specify the default value of it. e.g.
+```rust
+#[stub_gen_pyclass]
+#[pyclass]
+struct A {
+    #[pyo3(get,set)]
+    #[stub_gen(default = A::default().x)]
+    x: usize,
+    y: usize,
+}
+#[gen_stub_pymethods]
+#[pymethods]
+impl A {
+    #[stub_gen(default = A::default().y)]
+    fn get_y(&self) -> usize {
+        self.y
+    }
+}
+```
+
+### `#[gen_stub(skip)]`
+For classattrs or functions in pymethods, ignore it in .pyi file. e.g.
+```rust
+#[gen_stub_pymethods]
+#[pymethods]
+impl A {
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
+}
+```
+
 # Contribution
 To be written.
 

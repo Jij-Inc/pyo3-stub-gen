@@ -19,9 +19,15 @@ class A:
     class attribute NUM2
     """
     @property
-    def x(self) -> builtins.int: ...
+    def x(self) -> builtins.int:
+        r"""
+        default = 2
+        """
     @x.setter
-    def x(self, value: builtins.int) -> None: ...
+    def x(self, value: builtins.int) -> None:
+        r"""
+        default = 2
+        """
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.

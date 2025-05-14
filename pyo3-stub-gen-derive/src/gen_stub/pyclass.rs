@@ -107,6 +107,16 @@ impl ToTokens for PyClassInfo {
     }
 }
 
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_struct back
+pub fn prune_attrs(item_struct: &mut ItemStruct) {
+    super::attr::prune_attrs(&mut item_struct.attrs);
+    for field in item_struct.fields.iter_mut() {
+        super::attr::prune_attrs(&mut field.attrs);
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
