@@ -81,6 +81,7 @@ impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
+#[cfg_attr(Py_LIMITED_API, expect(unused_macros))]
 macro_rules! impl_simple {
     ($ty:ty, $mod:expr, $pytype:expr) => {
         impl PyStubType for $ty {
