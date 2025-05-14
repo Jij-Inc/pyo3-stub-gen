@@ -47,11 +47,14 @@ pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
 /// i.e. two `Attr`s will be created for this case.
 ///
 #[derive(Debug, Clone, PartialEq)]
+#[expect(clippy::enum_variant_names)]
 pub enum Attr {
     // Attributes appears in `#[pyo3(...)]` form or its equivalence
     Name(String),
     Get,
     GetAll,
+    Set,
+    SetAll,
     Module(String),
     Signature(Signature),
     RenameAll(RenamingRule),
@@ -61,8 +64,10 @@ pub enum Attr {
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
     New,
     Getter(Option<String>),
+    Setter(Option<String>),
     StaticMethod,
     ClassMethod,
+    ClassAttr,
 }
 
 pub fn parse_pyo3_attrs(attrs: &[Attribute]) -> Result<Vec<Attr>> {
@@ -115,6 +120,12 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         if ident == "get_all" {
                             pyo3_attrs.push(Attr::GetAll);
                         }
+                        if ident == "set" {
+                            pyo3_attrs.push(Attr::Set);
+                        }
+                        if ident == "set_all" {
+                            pyo3_attrs.push(Attr::SetAll);
+                        }
                     }
                     [Ident(ident), Punct(_), Literal(lit)] => {
                         if ident == "name" {
@@ -152,11 +163,19 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
         pyo3_attrs.push(Attr::StaticMethod);
     } else if path.is_ident("classmethod") {
         pyo3_attrs.push(Attr::ClassMethod);
+    } else if path.is_ident("classattr") {
+        pyo3_attrs.push(Attr::ClassAttr);
     } else if path.is_ident("getter") {
         if let Ok(inner) = attr.parse_args::<Ident>() {
             pyo3_attrs.push(Attr::Getter(Some(inner.to_string())));
         } else {
             pyo3_attrs.push(Attr::Getter(None));
+        }
+    } else if path.is_ident("setter") {
+        if let Ok(inner) = attr.parse_args::<Ident>() {
+            pyo3_attrs.push(Attr::Setter(Some(inner.to_string())));
+        } else {
+            pyo3_attrs.push(Attr::Setter(None));
         }
     }
 

@@ -7,6 +7,8 @@ pub struct ClassDef {
     pub name: &'static str,
     pub doc: &'static str,
     pub members: Vec<MemberDef>,
+    pub getters: Vec<MemberDef>,
+    pub setters: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
 }
@@ -19,6 +21,12 @@ impl Import for ClassDef {
         }
         for member in &self.members {
             import.extend(member.import());
+        }
+        for getter in &self.getters {
+            import.extend(getter.import());
+        }
+        for setter in &self.setters {
+            import.extend(setter.import());
         }
         for method in &self.methods {
             import.extend(method.import());
@@ -34,7 +42,9 @@ impl From<&PyClassInfo> for ClassDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: info.members.iter().map(MemberDef::from).collect(),
+            members: Vec::new(),
+            setters: info.setters.iter().map(MemberDef::from).collect(),
+            getters: info.getters.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
         }
@@ -57,10 +67,17 @@ impl fmt::Display for ClassDef {
         for member in &self.members {
             member.fmt(f)?;
         }
-        for method in &self.methods {
-            method.fmt(f)?;
+        for getter in &self.getters {
+            GetterDisplay(getter).fmt(f)?;
         }
-        if self.members.is_empty() && self.methods.is_empty() {
+        for setter in &self.setters {
+            SetterDisplay(setter).fmt(f)?;
+        }
+        if self.members.is_empty()
+            && self.getters.is_empty()
+            && self.setters.is_empty()
+            && self.methods.is_empty()
+        {
             writeln!(f, "{indent}...")?;
         }
         writeln!(f)?;

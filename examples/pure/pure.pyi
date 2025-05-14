@@ -10,13 +10,18 @@ from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
-    x: builtins.int
-    def __new__(cls, x:builtins.int) -> A:
-        r"""
-        This is a constructor of :class:`A`.
-        """
-    def show_x(self) -> None: ...
-    def ref_test(self, x:dict) -> dict: ...
+    NUM1: builtins.int = 2
+    r"""
+    class attribute NUM1
+    """
+    NUM2: builtins.int
+    r"""
+    class attribute NUM2
+    """
+    @property
+    def x(self) -> builtins.int: ...
+    @x.setter
+    def x(self, value: builtins.int) -> None: ...
 
 class B(A):
     ...
@@ -28,15 +33,16 @@ class Number(Enum):
     FLOAT = ...
     INTEGER = ...
 
-    is_float: builtins.bool
-    r"""
-    Whether the number is a float.
-    """
-
-    is_integer: builtins.bool
-    r"""
-    Whether the number is an integer.
-    """
+    @property
+    def is_float(self) -> builtins.bool:
+        r"""
+        Whether the number is a float.
+        """
+    @property
+    def is_integer(self) -> builtins.bool:
+        r"""
+        Whether the number is an integer.
+        """
 
 class NumberRenameAll(Enum):
     FLOAT = ...

@@ -36,18 +36,22 @@
 //!         // Python class name
 //!         pyclass_name: "MyClass",
 //!
-//!         members: &[
+//!         getters: &[
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Name docstring",
+//!                 default: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Description docstring",
+//!                 default: None,
 //!             },
 //!         ],
+//! 
+//!         setters: &[],
 //!
 //!         doc: "Docstring used in Python",
 //!

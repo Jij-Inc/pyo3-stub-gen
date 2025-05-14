@@ -9,6 +9,8 @@ pub struct EnumDef {
     pub variants: &'static [(&'static str, &'static str)],
     pub methods: Vec<MethodDef>,
     pub members: Vec<MemberDef>,
+    pub getters: Vec<MemberDef>,
+    pub setters: Vec<MemberDef>,
 }
 
 impl From<&PyEnumInfo> for EnumDef {
@@ -19,6 +21,8 @@ impl From<&PyEnumInfo> for EnumDef {
             variants: info.variants,
             methods: Vec::new(),
             members: Vec::new(),
+            getters: Vec::new(),
+            setters: Vec::new(),
         }
     }
 }
@@ -32,13 +36,24 @@ impl fmt::Display for EnumDef {
             writeln!(f, "{indent}{} = ...", variant)?;
             docstring::write_docstring(f, variant_doc, indent)?;
         }
-        for member in &self.members {
+        if !(self.members.is_empty()
+            && self.getters.is_empty()
+            && self.getters.is_empty()
+            && self.members.is_empty())
+        {
             writeln!(f)?;
-            member.fmt(f)?;
-        }
-        for methods in &self.methods {
-            writeln!(f)?;
-            methods.fmt(f)?;
+            for member in &self.members {
+                member.fmt(f)?;
+            }
+            for getter in &self.getters {
+                GetterDisplay(getter).fmt(f)?;
+            }
+            for setter in &self.setters {
+                SetterDisplay(setter).fmt(f)?;
+            }
+            for methods in &self.methods {
+                methods.fmt(f)?;
+            }
         }
         writeln!(f)?;
         Ok(())

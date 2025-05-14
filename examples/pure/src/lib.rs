@@ -53,7 +53,15 @@ impl A {
     fn new(x: usize) -> Self {
         Self { x }
     }
-
+    /// class attribute NUM1
+    #[classattr]
+    const NUM1: usize = 2;
+    /// class attribute NUM2
+    #[expect(non_snake_case)]
+    #[classattr]
+    fn NUM2() -> usize {
+        2
+    }
     fn show_x(&self) {
         println!("x = {}", self.x);
     }

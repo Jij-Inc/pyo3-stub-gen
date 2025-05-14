@@ -11,23 +11,27 @@
 //!         pyclass_name: "Placeholder",
 //!         module: Some("my_module"),
 //!         struct_id: std::any::TypeId::of::<PyPlaceholder>,
-//!         members: &[
+//!         getters: &[
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "ndim",
 //!                 r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!         ],
+//!         setters: &[],
 //!         doc: "",
 //!         bases: &[],
 //!     }
