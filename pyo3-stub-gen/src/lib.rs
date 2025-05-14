@@ -50,7 +50,7 @@
 //!                 default: None,
 //!             },
 //!         ],
-//! 
+//!
 //!         setters: &[],
 //!
 //!         doc: "Docstring used in Python",

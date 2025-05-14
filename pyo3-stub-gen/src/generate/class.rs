@@ -73,6 +73,9 @@ impl fmt::Display for ClassDef {
         for setter in &self.setters {
             SetterDisplay(setter).fmt(f)?;
         }
+        for method in &self.methods {
+            method.fmt(f)?;
+        }
         if self.members.is_empty()
             && self.getters.is_empty()
             && self.setters.is_empty()
