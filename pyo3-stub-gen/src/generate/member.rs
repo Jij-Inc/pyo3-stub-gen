@@ -56,7 +56,14 @@ impl fmt::Display for GetterDisplay<'_> {
             self.0.name, self.0.r#type
         )?;
         let doc = if let Some(default) = self.0.default {
-            Cow::Owned(format!("{}\ndefault = {default}", self.0.doc))
+            if default == "..." {
+                Cow::Borrowed(self.0.doc)
+            } else {
+                Cow::Owned(format!(
+                    "{}\n```python\ndefault = {default}\n```",
+                    self.0.doc
+                ))
+            }
         } else {
             Cow::Borrowed(self.0.doc)
         };
@@ -79,7 +86,14 @@ impl fmt::Display for SetterDisplay<'_> {
             self.0.name, self.0.name, self.0.r#type
         )?;
         let doc = if let Some(default) = self.0.default {
-            Cow::Owned(format!("{}\ndefault = {default}", self.0.doc))
+            if default == "..." {
+                Cow::Borrowed(self.0.doc)
+            } else {
+                Cow::Owned(format!(
+                    "{}\n```python\ndefault = {default}\n```",
+                    self.0.doc
+                ))
+            }
         } else {
             Cow::Borrowed(self.0.doc)
         };

@@ -21,12 +21,16 @@ class A:
     @property
     def x(self) -> builtins.int:
         r"""
+        ```python
         default = 2
+        ```
         """
     @x.setter
     def x(self, value: builtins.int) -> None:
         r"""
+        ```python
         default = 2
+        ```
         """
     def __new__(cls, x:builtins.int) -> A:
         r"""
