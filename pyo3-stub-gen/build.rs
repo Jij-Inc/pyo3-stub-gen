@@ -14,8 +14,7 @@ fn main() {
         .iter()
         .find(|p| p.name == "pyo3")
         .expect("`pyo3` not found in dependencies");
-    let pyo3_ver = Version::parse(&pyo3_pkg.version.to_string())
-        .expect("Invalid semver for pyo3");
+    let pyo3_ver = Version::parse(&pyo3_pkg.version.to_string()).expect("Invalid semver for pyo3");
     if pyo3_ver >= Version::new(0, 25, 0) {
         println!("cargo::rustc-check-cfg=cfg(pyo3_0_25)");
     }
