@@ -35,3 +35,8 @@ numpy = ["dep:numpy"]
 
 [build-dependencies]
 pyo3-build-config = { version = "0.24", features = ["resolve-config"] }
+cargo_metadata = "0.19"
+semver = "1.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pyo3_0_25)'] }

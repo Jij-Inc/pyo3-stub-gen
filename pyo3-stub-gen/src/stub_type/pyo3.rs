@@ -81,7 +81,7 @@ impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
-#[cfg_attr(Py_LIMITED_API, expect(unused_macros))]
+#[cfg_attr(all(not(pyo3_0_25), Py_LIMITED_API), expect(unused_macros))]
 macro_rules! impl_simple {
     ($ty:ty, $mod:expr, $pytype:expr) => {
         impl PyStubType for $ty {
@@ -95,13 +95,13 @@ macro_rules! impl_simple {
     };
 }
 
-#[cfg(not(Py_LIMITED_API))]
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
 impl_simple!(PyDate, "datetime", "date");
-#[cfg(not(Py_LIMITED_API))]
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
 impl_simple!(PyDateTime, "datetime", "datetime");
-#[cfg(not(Py_LIMITED_API))]
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
 impl_simple!(PyDelta, "datetime", "timedelta");
-#[cfg(not(Py_LIMITED_API))]
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
 impl_simple!(PyTime, "datetime", "time");
-#[cfg(not(Py_LIMITED_API))]
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
 impl_simple!(PyTzInfo, "datetime", "tzinfo");
