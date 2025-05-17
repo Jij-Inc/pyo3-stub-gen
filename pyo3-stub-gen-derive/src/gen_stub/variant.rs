@@ -2,7 +2,7 @@ use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{ToTokens};
 use syn::{Fields, Result, Variant};
 use crate::gen_stub::member::MemberInfo;
-use crate::gen_stub::pyclass::PyClassInfo;
+use crate::gen_stub::pyclass_tree::PyClassTreeInfo;
 use crate::gen_stub::renaming::RenamingRule;
 
 pub enum VariantInfo {
@@ -10,12 +10,12 @@ pub enum VariantInfo {
         tuple: MemberInfo
     },
     Struct {
-        pyclass: PyClassInfo
+        pyclass: PyClassTreeInfo
     }
 }
 
-impl From<PyClassInfo> for VariantInfo {
-    fn from(pyclass: PyClassInfo) -> Self {
+impl From<PyClassTreeInfo> for VariantInfo {
+    fn from(pyclass: PyClassTreeInfo) -> Self {
         VariantInfo::Struct { pyclass }
     }
 }
@@ -31,7 +31,7 @@ impl VariantInfo {
         match &variant.fields {
             Fields::Unit |
             Fields::Named(_) => {
-                Ok(PyClassInfo::from_variant(variant, r#enum, renaming_rule)?.into())
+                Ok(PyClassTreeInfo::from_variant(variant, r#enum, renaming_rule)?.into())
             }
             Fields::Unnamed(_) => {
                 Ok(MemberInfo::from_variant(variant, r#enum, renaming_rule)?.into())

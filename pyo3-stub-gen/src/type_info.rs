@@ -119,12 +119,45 @@ pub struct PyClassInfo {
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
     pub members: &'static [MemberInfo],
-    pub classes: &'static [PyClassInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
     pub bases: &'static [fn() -> TypeInfo],
 }
 
 inventory::collect!(PyClassInfo);
+
+/// Info of nested `#[pyclass]` with Rust struct and enums
+#[derive(Debug)]
+pub struct PyClassTreeInfo {
+    // Rust struct type-id
+    pub struct_id: fn() -> TypeId,
+    // The name exposed to Python
+    pub pyclass_name: &'static str,
+    /// Module name specified by `#[pyclass(module = "foo.bar")]`
+    pub module: Option<&'static str>,
+    /// Docstring
+    pub doc: &'static str,
+    /// static members by `#[pyo3(get, set)]`
+    pub members: &'static [MemberInfo],
+    pub classes: &'static [PyClassTreeInfo],
+    /// Base classes specified by `#[pyclass(extends = Type)]`
+    pub bases: &'static [fn() -> TypeInfo],
+}
+
+inventory::collect!(PyClassTreeInfo);
+
+// impl From<PyClassInfo> for PyClassTreeInfo {
+//     fn from(info: PyClassInfo) -> Self {
+//         Self {
+//             struct_id: info.struct_id,
+//             pyclass_name: info.pyclass_name,
+//             module: info.module,
+//             doc: info.doc,
+//             members: info.members,
+//             classes: &[],
+//             bases: info.bases,
+//         }
+//     }
+// }
 
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]

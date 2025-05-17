@@ -24,7 +24,25 @@ impl Import for ClassDef {
         for method in &self.methods {
             import.extend(method.import());
         }
+        for class in &self.classes {
+            import.extend(class.import());
+        }
         import
+    }
+}
+
+impl From<&PyClassTreeInfo> for ClassDef {
+    fn from(info: &PyClassTreeInfo) -> Self {
+        // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
+        // This is only an initializer. See `StubInfo::gather` for the actual merging.
+        Self {
+            name: info.pyclass_name,
+            doc: info.doc,
+            members: info.members.iter().map(MemberDef::from).collect(),
+            methods: Vec::new(),
+            classes: info.classes.iter().map(ClassDef::from).collect(),
+            bases: info.bases.iter().map(|f| f()).collect(),
+        }
     }
 }
 
@@ -37,7 +55,7 @@ impl From<&PyClassInfo> for ClassDef {
             doc: info.doc,
             members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
-            classes: info.classes.iter().map(ClassDef::from).collect(),
+            classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
         }
     }

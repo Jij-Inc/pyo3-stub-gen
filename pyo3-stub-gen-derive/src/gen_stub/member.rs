@@ -93,8 +93,10 @@ impl MemberInfo {
         let doc = extract_documents(&attrs).join("\n");
 
         if let Fields::Unnamed(fields) = fields {
-
-            let types: Type = parse_quote!{ #fields };
+            
+            let punctuated = fields.unnamed;
+            
+            let types: Type = parse_quote!{ ( #punctuated , ) };
             Ok(Self {
                 name: field_name,
                 r#type: types,
