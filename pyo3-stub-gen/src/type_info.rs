@@ -145,20 +145,6 @@ pub struct PyClassTreeInfo {
 
 inventory::collect!(PyClassTreeInfo);
 
-// impl From<PyClassInfo> for PyClassTreeInfo {
-//     fn from(info: PyClassInfo) -> Self {
-//         Self {
-//             struct_id: info.struct_id,
-//             pyclass_name: info.pyclass_name,
-//             module: info.module,
-//             doc: info.doc,
-//             members: info.members,
-//             classes: &[],
-//             bases: info.bases,
-//         }
-//     }
-// }
-
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]
 pub struct PyEnumInfo {
