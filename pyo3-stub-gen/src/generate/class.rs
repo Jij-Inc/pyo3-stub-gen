@@ -9,6 +9,7 @@ pub struct ClassDef {
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
+    pub classes: Vec<ClassDef>
 }
 
 impl Import for ClassDef {
@@ -36,6 +37,7 @@ impl From<&PyClassInfo> for ClassDef {
             doc: info.doc,
             members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
+            classes: info.classes.iter().map(ClassDef::from).collect(),
             bases: info.bases.iter().map(|f| f()).collect(),
         }
     }
@@ -60,7 +62,13 @@ impl fmt::Display for ClassDef {
         for method in &self.methods {
             method.fmt(f)?;
         }
-        if self.members.is_empty() && self.methods.is_empty() {
+        for class in &self.classes {
+            let emit = format!("{}", class);
+            for line in emit.lines() {
+                writeln!(f, "{}{}", indent, line)?;
+            }
+        }
+        if self.members.is_empty() && self.methods.is_empty() && self.classes.is_empty() {
             writeln!(f, "{indent}...")?;
         }
         writeln!(f)?;

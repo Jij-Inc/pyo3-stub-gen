@@ -51,6 +51,9 @@
 //!
 //!         doc: "Docstring used in Python",
 //!
+//!         // Used for variants of structured enums
+//!         classes: &[],
+//!
 //!         // Base classes
 //!         bases: &[],
 //!     }

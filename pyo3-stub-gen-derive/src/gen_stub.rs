@@ -29,6 +29,7 @@
 //!             },
 //!         ],
 //!         doc: "",
+//!         classes: &[],
 //!         bases: &[],
 //!     }
 //! }
@@ -75,6 +76,7 @@ mod renaming;
 mod signature;
 mod stub_type;
 mod util;
+mod variant;
 
 use arg::*;
 use attr::*;
@@ -107,6 +109,19 @@ pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
 
 pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let derive_stub_type = StubType::from(&inner);
+    Ok(quote! {
+        #item
+        #derive_stub_type
+        pyo3_stub_gen::inventory::submit! {
+            #inner
+        }
+    })
+}
+
+
+pub fn pyclass_complex_enum(item: TokenStream2) -> Result<TokenStream2> {
+    let inner = PyClassInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
     let derive_stub_type = StubType::from(&inner);
     Ok(quote! {
         #item

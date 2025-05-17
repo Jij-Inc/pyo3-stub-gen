@@ -119,6 +119,7 @@ pub struct PyClassInfo {
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
     pub members: &'static [MemberInfo],
+    pub classes: &'static [PyClassInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
     pub bases: &'static [fn() -> TypeInfo],
 }
