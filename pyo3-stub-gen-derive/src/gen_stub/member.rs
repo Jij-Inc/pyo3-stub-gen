@@ -2,11 +2,9 @@ use crate::gen_stub::extract_documents;
 
 use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
-use proc_macro2::{Ident, TokenStream as TokenStream2};
+use proc_macro2::{TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{parse_quote, Error, Field, Fields, ImplItemFn, Result, Type, Variant};
-use syn::spanned::Spanned;
-use crate::gen_stub::renaming::RenamingRule;
+use syn::{Error, Field, ImplItemFn, Result, Type};
 
 #[derive(Debug)]
 pub struct MemberInfo {
@@ -67,44 +65,6 @@ impl TryFrom<Field> for MemberInfo {
             r#type: ty,
             doc,
         })
-    }
-}
-
-impl MemberInfo {
-    pub fn from_variant(variant: Variant, _enum: Ident, renaming_rule: &Option<RenamingRule>) -> Result<Self> {
-        let span = variant.span();
-        let Variant {
-            ident,
-            fields,
-            attrs,
-            ..
-        } = variant.clone();
-
-        let mut field_name = None;
-        for attr in parse_pyo3_attrs(&attrs)? {
-            if let Attr::Name(name) = attr {
-                field_name = Some(name);
-            }
-        }
-        let mut field_name = field_name.unwrap_or(ident.to_string());
-        if let Some(renaming_rule) = renaming_rule {
-            field_name = renaming_rule.apply(&field_name);
-        }
-        let doc = extract_documents(&attrs).join("\n");
-
-        if let Fields::Unnamed(fields) = fields {
-            
-            let punctuated = fields.unnamed;
-            
-            let types: Type = parse_quote!{ ( #punctuated , ) };
-            Ok(Self {
-                name: field_name,
-                r#type: types,
-                doc,
-            })
-        } else {
-            Err(Error::new(span, "Variant must be unnamed"))
-        }
     }
 }
 

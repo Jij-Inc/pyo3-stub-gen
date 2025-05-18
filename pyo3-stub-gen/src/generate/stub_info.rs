@@ -110,10 +110,10 @@ impl StubInfoBuilder {
             .insert((info.struct_id)(), ClassDef::from(info));
     }
 
-    fn add_class_tree(&mut self, info: &PyClassTreeInfo) {
+    fn add_rich_enum(&mut self, info: &PyRichEnumInfo) {
         self.get_module(info.module)
             .class
-            .insert((info.struct_id)(), ClassDef::from(info));
+            .insert((info.enum_id)(), ClassDef::from(info));
     }
 
     fn add_enum(&mut self, info: &PyEnumInfo) {
@@ -176,8 +176,8 @@ impl StubInfoBuilder {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
-        for info in inventory::iter::<PyClassTreeInfo> {
-            self.add_class_tree(info);
+        for info in inventory::iter::<PyRichEnumInfo> {
+            self.add_rich_enum(info);
         }
         for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);

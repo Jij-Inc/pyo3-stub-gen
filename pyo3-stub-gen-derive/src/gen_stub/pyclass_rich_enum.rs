@@ -6,11 +6,10 @@ use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubT
 
 pub struct PyRichEnumInfo {
     pyclass_name: String,
-    struct_type: Type,
+    enum_type: Type,
     module: Option<String>,
     variants: Vec<VariantInfo>,
     doc: String,
-    bases: Vec<Type>,
 }
 
 impl From<&PyRichEnumInfo> for StubType {
@@ -18,11 +17,11 @@ impl From<&PyRichEnumInfo> for StubType {
         let PyRichEnumInfo {
             pyclass_name,
             module,
-            struct_type,
+            enum_type,
             ..
         } = info;
         Self {
-            ty: struct_type.clone(),
+            ty: enum_type.clone(),
             name: pyclass_name.clone(),
             module: module.clone(),
         }
@@ -56,20 +55,19 @@ impl TryFrom<ItemEnum> for PyRichEnumInfo {
             }
         }
 
-        let struct_type = parse_quote!(#ident);
+        let enum_type = parse_quote!(#ident);
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.clone().to_string());
 
         let mut items = Vec::new();
         for variant in variants {
-            items.push(VariantInfo::from_variant(variant, ident.clone(), &renaming_rule)?);
+            items.push(VariantInfo::from_variant(variant, &renaming_rule)?)
         }
 
         Ok(Self {
             doc,
-            struct_type,
+            enum_type,
             pyclass_name,
             module,
-            bases,
             variants: items,
         })
     }
@@ -79,32 +77,19 @@ impl ToTokens for PyRichEnumInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self {
             pyclass_name,
-            struct_type,
+            enum_type,
             variants,
             doc,
             module,
-            bases,
             ..
         } = self;
         let module = quote_option(module);
 
-        let mut members = Vec::new();
-        let mut classes = Vec::new();
-
-        for variant in variants {
-            match variant {
-                VariantInfo::Struct{pyclass} => classes.push(pyclass),
-                VariantInfo::Tuple{tuple} => members.push(tuple),
-            }
-        }
-
         tokens.append_all(quote! {
-            ::pyo3_stub_gen::type_info::PyClassTreeInfo {
+            ::pyo3_stub_gen::type_info::PyRichEnumInfo {
                 pyclass_name: #pyclass_name,
-                struct_id: std::any::TypeId::of::<#struct_type>,
-                members: &[ #( #members),* ],
-                classes: &[ #( #classes ),* ],
-                bases: &[ #( #bases ),* ],
+                enum_id: std::any::TypeId::of::<#enum_type>,
+                variants: &[ #( #variants ),* ],
                 module: #module,
                 doc: #doc,
             }
@@ -136,48 +121,58 @@ mod test {
         )?;
         let out = PyRichEnumInfo::try_from(input)?.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r#"
-        ::pyo3_stub_gen::type_info::PyClassTreeInfo {
+        ::pyo3_stub_gen::type_info::PyRichEnumInfo {
             pyclass_name: "Placeholder",
-            struct_id: std::any::TypeId::of::<PyPlaceholder>,
-            members: &[
-                ::pyo3_stub_gen::type_info::MemberInfo {
-                    name: "Name",
-                    r#type: <(String,) as ::pyo3_stub_gen::PyStubType>::type_output,
+            enum_id: std::any::TypeId::of::<PyPlaceholder>,
+            variants: &[
+                ::pyo3_stub_gen::type_info::VariantInfo {
+                    pyclass_name: "Name",
+                    fields: &[
+                        ::pyo3_stub_gen::type_info::MemberInfo {
+                            name: "_0",
+                            r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                            doc: "",
+                        },
+                    ],
+                    module: None,
                     doc: "",
                 },
-                ::pyo3_stub_gen::type_info::MemberInfo {
-                    name: "twonum",
-                    r#type: <(i32, f64) as ::pyo3_stub_gen::PyStubType>::type_output,
+                ::pyo3_stub_gen::type_info::VariantInfo {
+                    pyclass_name: "twonum",
+                    fields: &[
+                        ::pyo3_stub_gen::type_info::MemberInfo {
+                            name: "_0",
+                            r#type: <i32 as ::pyo3_stub_gen::PyStubType>::type_output,
+                            doc: "",
+                        },
+                        ::pyo3_stub_gen::type_info::MemberInfo {
+                            name: "_1",
+                            r#type: <f64 as ::pyo3_stub_gen::PyStubType>::type_output,
+                            doc: "",
+                        },
+                    ],
+                    module: None,
                     doc: "",
                 },
-            ],
-            classes: &[
-                ::pyo3_stub_gen::type_info::PyClassTreeInfo {
+                ::pyo3_stub_gen::type_info::VariantInfo {
                     pyclass_name: "ndim",
-                    struct_id: std::any::TypeId::of::<PyPlaceholder>,
-                    members: &[
+                    fields: &[
                         ::pyo3_stub_gen::type_info::MemberInfo {
                             name: "count",
                             r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
                             doc: "",
                         },
                     ],
-                    classes: &[],
                     module: None,
                     doc: "",
-                    bases: &[],
                 },
-                ::pyo3_stub_gen::type_info::PyClassTreeInfo {
+                ::pyo3_stub_gen::type_info::VariantInfo {
                     pyclass_name: "description",
-                    struct_id: std::any::TypeId::of::<PyPlaceholder>,
-                    members: &[],
-                    classes: &[],
+                    fields: &[],
                     module: None,
                     doc: "",
-                    bases: &[],
                 },
             ],
-            bases: &[],
             module: Some("my_module"),
             doc: "",
         }

@@ -68,7 +68,6 @@ mod attr;
 mod member;
 mod method;
 mod pyclass;
-mod pyclass_tree;
 mod pyclass_enum;
 mod pyclass_rich_enum;
 mod pyfunction;

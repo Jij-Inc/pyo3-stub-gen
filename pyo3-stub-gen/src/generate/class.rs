@@ -31,17 +31,30 @@ impl Import for ClassDef {
     }
 }
 
-impl From<&PyClassTreeInfo> for ClassDef {
-    fn from(info: &PyClassTreeInfo) -> Self {
+impl From<&PyRichEnumInfo> for ClassDef {
+    fn from(info: &PyRichEnumInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: info.members.iter().map(MemberDef::from).collect(),
+            members: Vec::new(),
             methods: Vec::new(),
-            classes: info.classes.iter().map(ClassDef::from).collect(),
-            bases: info.bases.iter().map(|f| f()).collect(),
+            classes: info.variants.iter().map(ClassDef::from).collect(),
+            bases: Vec::new(),
+        }
+    }
+}
+
+impl From<&VariantInfo> for ClassDef {
+    fn from(info: &VariantInfo) -> Self {
+        Self {
+            name: info.pyclass_name,
+            doc: info.doc,
+            members: info.fields.iter().map(MemberDef::from).collect(),
+            methods: Vec::new(),
+            classes: Vec::new(),
+            bases: Vec::new(),
         }
     }
 }

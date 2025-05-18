@@ -125,11 +125,20 @@ pub struct PyClassInfo {
 
 inventory::collect!(PyClassInfo);
 
-/// Info of nested `#[pyclass]` with Rust struct and enums
+/// Info of a `#[pyclass]` with a single variant of a rich (structured) Rust enum
 #[derive(Debug)]
-pub struct PyClassTreeInfo {
+pub struct VariantInfo {
+    pub pyclass_name: &'static str,
+    pub module: Option<&'static str>,
+    pub doc: &'static str,
+    pub fields: &'static [MemberInfo],
+}
+
+/// Info of a `#[pyclass]` with a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct PyRichEnumInfo {
     // Rust struct type-id
-    pub struct_id: fn() -> TypeId,
+    pub enum_id: fn() -> TypeId,
     // The name exposed to Python
     pub pyclass_name: &'static str,
     /// Module name specified by `#[pyclass(module = "foo.bar")]`
@@ -137,13 +146,10 @@ pub struct PyClassTreeInfo {
     /// Docstring
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
-    pub members: &'static [MemberInfo],
-    pub classes: &'static [PyClassTreeInfo],
-    /// Base classes specified by `#[pyclass(extends = Type)]`
-    pub bases: &'static [fn() -> TypeInfo],
+    pub variants: &'static [VariantInfo],
 }
 
-inventory::collect!(PyClassTreeInfo);
+inventory::collect!(PyRichEnumInfo);
 
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]
