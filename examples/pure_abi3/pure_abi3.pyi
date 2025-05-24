@@ -5,7 +5,7 @@ import builtins
 import os
 import pathlib
 import typing
-from enum import Enum, auto
+from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
@@ -21,8 +21,8 @@ class B(A):
     ...
 
 class Number(Enum):
-    FLOAT = auto()
-    INTEGER = auto()
+    FLOAT = ...
+    INTEGER = ...
 
     is_float: builtins.bool
     r"""
@@ -35,8 +35,8 @@ class Number(Enum):
     """
 
 class NumberRenameAll(Enum):
-    FLOAT = auto()
-    INTEGER = auto()
+    FLOAT = ...
+    INTEGER = ...
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
@@ -44,17 +44,19 @@ def create_a(x:builtins.int=2) -> A: ...
 
 def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
-def default_value(num:Number=...) -> Number: ...
+def default_value(num:Number=Number.FLOAT) -> Number: ...
 
-def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> builtins.str: ...
+def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 
 def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
 
-def str_len(x:builtins.str) -> builtins.int:    r"""
+def str_len(x:builtins.str) -> builtins.int:
+    r"""
     Returns the length of the string.
     """
 
-def sum(v:typing.Sequence[builtins.int]) -> builtins.int:    r"""
+def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
+    r"""
     Returns the sum of two numbers as a string.
     """
 
