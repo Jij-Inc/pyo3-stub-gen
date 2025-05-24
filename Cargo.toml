@@ -37,7 +37,7 @@ num-complex = "0.4.6"
 numpy = ">= 0.24.0"
 prettyplease = "0.2.32"
 proc-macro2 = "1.0.95"
-pyo3 = ">= 0.24.0"
+pyo3 = ">= 0.24.0, < 0.25.0"                           # Keep 0.24.x for testing
 quote = "1.0.40"
 serde = { version = "1.0.219", features = ["derive"] }
 syn = "2.0.101"
