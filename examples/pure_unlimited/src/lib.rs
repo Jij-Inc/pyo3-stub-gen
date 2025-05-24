@@ -100,31 +100,6 @@ impl pyo3_stub_gen::PyStubType for C {
     }
 }
 
-/// `C` only impl `FromPyObject`
-#[derive(Debug)]
-struct C {
-    x: usize,
-}
-#[gen_stub_pyfunction]
-#[pyfunction(signature = (c=None))]
-fn print_c(c: Option<C>) {
-    if let Some(c) = c {
-        println!("{}", c.x);
-    } else {
-        println!("None");
-    }
-}
-impl FromPyObject<'_> for C {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Ok(C { x: ob.extract()? })
-    }
-}
-impl pyo3_stub_gen::PyStubType for C {
-    fn type_output() -> pyo3_stub_gen::TypeInfo {
-        usize::type_output()
-    }
-}
-
 create_exception!(pure_unlimited, MyError, PyRuntimeError);
 
 /// Returns the length of the string.

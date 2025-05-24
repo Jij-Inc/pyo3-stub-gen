@@ -1,5 +1,5 @@
 use pyo3::{prelude::*, types::*};
-use std::ffi::CString;
+use std::{borrow::Cow, ffi::CString};
 
 pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     if any.is_instance_of::<PyString>()
@@ -46,7 +46,7 @@ pub fn valid_external_repr(any: &Bound<'_, PyAny>) -> Option<bool> {
 fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
     let type_object = any.get_type();
     let type_name = type_object.getattr("__name__")?;
-    let type_name: &str = type_name.extract()?;
+    let type_name: Cow<str> = type_name.extract()?;
     let globals = PyDict::new(any.py());
     globals.set_item(type_name, type_object)?;
     Ok(globals)
