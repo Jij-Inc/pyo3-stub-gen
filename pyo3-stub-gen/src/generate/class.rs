@@ -1,5 +1,5 @@
 use crate::{generate::*, type_info::*, TypeInfo};
-use std::fmt;
+use std::{fmt, vec};
 
 /// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
@@ -55,11 +55,42 @@ impl From<&PyRichEnumInfo> for ClassDef {
 
 impl From<&VariantInfo> for ClassDef {
     fn from(info: &VariantInfo) -> Self {
+        let bases = info.bases.iter().map(|f| f()).collect::<Vec<_>>();
+
+        let full_class_name = vec![
+            bases
+                .iter()
+                .map(|b| b.name.as_str())
+                .collect::<Vec<_>>()
+                .join("."),
+            info.pyclass_name.to_string(),
+        ]
+        .join(".");
+
+        let default_constructor = MethodDef {
+            name: "__new__",
+            args: info
+                .fields
+                .iter()
+                .map(|f| Arg {
+                    name: f.name,
+                    r#type: (f.r#type)(),
+                    signature: None,
+                })
+                .collect(),
+            r#return: TypeInfo {
+                name: full_class_name,
+                import: HashSet::new(),
+            },
+            doc: "",
+            r#type: MethodType::New,
+        };
+
         Self {
             name: info.pyclass_name,
             doc: info.doc,
             members: info.fields.iter().map(MemberDef::from).collect(),
-            methods: Vec::new(),
+            methods: vec![default_constructor],
             classes: Vec::new(),
             bases: Vec::new(),
         }

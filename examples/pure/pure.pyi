@@ -30,6 +30,7 @@ class NumberRich:
         Float variant
         """
         _0: builtins.float
+        def __new__(cls, _0:builtins.float) -> NumberRich.FLOAT: ...
     
     class INTEGER(NumberRich):
         r"""
@@ -39,6 +40,7 @@ class NumberRich:
         r"""
         The integer value
         """
+        def __new__(cls, int:builtins.int) -> NumberRich.INTEGER: ...
     
 
 class Number(Enum):
