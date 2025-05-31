@@ -36,7 +36,7 @@ impl_numpy_scalar!(num_complex::Complex32, "complex64");
 impl_numpy_scalar!(num_complex::Complex64, "complex128");
 
 impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_();
         import.insert("numpy.typing".into());
         TypeInfo {
@@ -47,7 +47,7 @@ impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
 }
 
 impl PyStubType for PyUntypedArray {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo {
             name: "numpy.typing.NDArray[typing.Any]".into(),
             import: hashset!["numpy.typing".into(), "typing".into()],
@@ -60,8 +60,8 @@ where
     T: NumPyScalar + Element,
     D: Dimension,
 {
-    fn type_output() -> TypeInfo {
-        PyArray::<T, D>::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        PyArray::<T, D>::type_output(current_module_name)
     }
 }
 
@@ -70,13 +70,13 @@ where
     T: NumPyScalar + Element,
     D: Dimension,
 {
-    fn type_output() -> TypeInfo {
-        PyArray::<T, D>::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        PyArray::<T, D>::type_output(current_module_name)
     }
 }
 
 impl PyStubType for PyArrayDescr {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo {
             name: "numpy.dtype".into(),
             import: hashset!["numpy".into()],

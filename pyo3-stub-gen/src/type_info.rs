@@ -21,24 +21,20 @@
 //! This process is done at runtime in [gen_stub](../../gen_stub) executable.
 //!
 
-use crate::{PyStubType, TypeInfo};
+use crate::TypeInfo;
 use std::any::TypeId;
 
-/// Work around for `CompareOp` for `__richcmp__` argument,
-/// which does not implements `FromPyObject`
-pub fn compare_op_type_input() -> TypeInfo {
-    <isize as PyStubType>::type_input()
-}
-
-pub fn no_return_type_output() -> TypeInfo {
+pub fn no_return_type_output(_current_module_name: &str) -> TypeInfo {
     TypeInfo::none()
 }
+
+pub type TypeInfoBuilderFcn = fn(&str) -> TypeInfo;
 
 /// Info of method argument appears in `#[pymethods]`
 #[derive(Debug)]
 pub struct ArgInfo {
     pub name: &'static str,
-    pub r#type: fn() -> TypeInfo,
+    pub r#type: TypeInfoBuilderFcn,
     pub signature: Option<SignatureArg>,
 }
 #[derive(Debug, Clone)]
@@ -80,7 +76,7 @@ pub enum MethodType {
 pub struct MethodInfo {
     pub name: &'static str,
     pub args: &'static [ArgInfo],
-    pub r#return: fn() -> TypeInfo,
+    pub r#return: TypeInfoBuilderFcn,
     pub doc: &'static str,
     pub r#type: MethodType,
 }
@@ -89,7 +85,7 @@ pub struct MethodInfo {
 #[derive(Debug)]
 pub struct MemberInfo {
     pub name: &'static str,
-    pub r#type: fn() -> TypeInfo,
+    pub r#type: TypeInfoBuilderFcn,
     pub doc: &'static str,
 }
 
@@ -111,6 +107,7 @@ inventory::collect!(PyMethodsInfo);
 pub struct PyClassInfo {
     // Rust struct type-id
     pub struct_id: fn() -> TypeId,
+
     // The name exposed to Python
     pub pyclass_name: &'static str,
     /// Module name specified by `#[pyclass(module = "foo.bar")]`
@@ -120,7 +117,7 @@ pub struct PyClassInfo {
     /// static members by `#[pyo3(get, set)]`
     pub members: &'static [MemberInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
-    pub bases: &'static [fn() -> TypeInfo],
+    pub bases: &'static [TypeInfoBuilderFcn],
 }
 
 inventory::collect!(PyClassInfo);
@@ -147,7 +144,7 @@ inventory::collect!(PyEnumInfo);
 pub struct PyFunctionInfo {
     pub name: &'static str,
     pub args: &'static [ArgInfo],
-    pub r#return: fn() -> TypeInfo,
+    pub r#return: TypeInfoBuilderFcn,
     pub doc: &'static str,
     pub module: Option<&'static str>,
 }
@@ -167,7 +164,7 @@ inventory::collect!(PyErrorInfo);
 pub struct PyVariableInfo {
     pub name: &'static str,
     pub module: &'static str,
-    pub r#type: fn() -> TypeInfo,
+    pub r#type: TypeInfoBuilderFcn,
 }
 
 inventory::collect!(PyVariableInfo);

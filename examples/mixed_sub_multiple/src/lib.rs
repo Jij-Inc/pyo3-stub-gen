@@ -3,8 +3,8 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
 #[gen_stub_pyfunction(module = "mixed_sub_multiple.main_mod.mod_a")]
 #[pyfunction(name = "greet_a")]
-pub fn greet_a() {
-    println!("Hello from mod_A!")
+pub fn greet_a(kind: GreetingEnum) {
+    println!("Hello from mod_A! (kind = ${kind:?}");
 }
 
 #[gen_stub_pyfunction(module = "mixed_sub_multiple.main_mod")]
@@ -17,6 +17,15 @@ pub fn greet_main() {
 #[pyfunction(name = "greet_b")]
 pub fn greet_b() {
     println!("Hello from mod_B!")
+}
+
+#[gen_stub_pyclass_enum]
+#[pyclass(eq, eq_int, module = "mixed_sub_multiple.main_mod.mod_b")]
+#[pyo3(rename_all = "UPPERCASE")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GreetingEnum {
+    GreetA,
+    GreetB,
 }
 
 #[pymodule]
@@ -41,6 +50,7 @@ fn mod_b(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
     let sub = PyModule::new(py, "mod_b")?;
     sub.add_function(wrap_pyfunction!(greet_b, &sub)?)?;
+    sub.add_class::<GreetingEnum>()?;
     parent.add_submodule(&sub)?;
     Ok(())
 }

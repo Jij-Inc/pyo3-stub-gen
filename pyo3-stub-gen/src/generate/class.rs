@@ -27,16 +27,18 @@ impl Import for ClassDef {
     }
 }
 
-impl From<&PyClassInfo> for ClassDef {
-    fn from(info: &PyClassInfo) -> Self {
+impl Build for PyClassInfo {
+    type DefType = ClassDef;
+
+    fn build(&self, current_module_name: &str) -> Self::DefType {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
-        // This is only an initializer. See `StubInfo::gather` for the actual merging.
-        Self {
-            name: info.pyclass_name,
-            doc: info.doc,
-            members: info.members.iter().map(MemberDef::from).collect(),
+        // This is only an initializer. See `StubInfo::add_methods` for the actual merging.
+        Self::DefType {
+            name: self.pyclass_name,
+            doc: self.doc,
+            members: self.members.build(current_module_name),
             methods: Vec::new(),
-            bases: info.bases.iter().map(|f| f()).collect(),
+            bases: self.bases.build(current_module_name),
         }
     }
 }

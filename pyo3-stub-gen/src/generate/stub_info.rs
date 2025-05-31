@@ -105,9 +105,9 @@ impl StubInfoBuilder {
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
-        self.get_module(info.module)
-            .class
-            .insert((info.struct_id)(), ClassDef::from(info));
+        let module = self.get_module(info.module);
+        let value = info.build(&module.name);
+        module.class.insert((info.struct_id)(), value);
     }
 
     fn add_enum(&mut self, info: &PyEnumInfo) {
@@ -117,9 +117,9 @@ impl StubInfoBuilder {
     }
 
     fn add_function(&mut self, info: &PyFunctionInfo) {
-        self.get_module(info.module)
-            .function
-            .insert(info.name, FunctionDef::from(info));
+        let module = self.get_module(info.module);
+        let value = info.build(&module.name);
+        module.function.insert(info.name, value);
     }
 
     fn add_error(&mut self, info: &PyErrorInfo) {
@@ -129,9 +129,9 @@ impl StubInfoBuilder {
     }
 
     fn add_variable(&mut self, info: &PyVariableInfo) {
-        self.get_module(Some(info.module))
-            .variables
-            .insert(info.name, VariableDef::from(info));
+        let module = self.get_module(Some(info.module));
+        let value = info.build(&module.name);
+        module.variables.insert(info.name, value);
     }
 
     fn add_methods(&mut self, info: &PyMethodsInfo) {
@@ -139,26 +139,22 @@ impl StubInfoBuilder {
         for module in self.modules.values_mut() {
             if let Some(entry) = module.class.get_mut(&struct_id) {
                 for getter in info.getters {
-                    entry.members.push(MemberDef {
-                        name: getter.name,
-                        r#type: (getter.r#type)(),
-                        doc: getter.doc,
-                    });
+                    entry.members.push(getter.build(&module.name));
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    entry.methods.push(method.build(&module.name));
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
                 for getter in info.getters {
                     entry.members.push(MemberDef {
                         name: getter.name,
-                        r#type: (getter.r#type)(),
+                        r#type: (getter.r#type)(&module.name),
                         doc: getter.doc,
                     });
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    entry.methods.push(method.build(&module.name));
                 }
                 return;
             }
