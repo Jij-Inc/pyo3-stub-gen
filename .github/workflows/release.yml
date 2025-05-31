@@ -27,6 +27,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
+
       - name: Install cargo-edit
         run: cargo install cargo-edit
 
@@ -34,6 +37,9 @@ jobs:
         run: |
           cargo set-version --bump patch
           echo "NEW_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')" >> $GITHUB_ENV
+
+      - name: Update Cargo.lock
+        run: task generate-lockfile
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
