@@ -24,6 +24,23 @@ class B(A):
 class MyDate(datetime.date):
     ...
 
+class NumberRich:
+    class FLOAT:
+        r"""
+        Float variant
+        """
+        _0: builtins.float
+    
+    class INTEGER:
+        r"""
+        Integer variant
+        """
+        int: builtins.int
+        r"""
+        The integer value
+        """
+    
+
 class Number(Enum):
     FLOAT = ...
     INTEGER = ...

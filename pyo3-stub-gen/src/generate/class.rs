@@ -9,6 +9,7 @@ pub struct ClassDef {
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
+    pub classes: Vec<ClassDef>
 }
 
 impl Import for ClassDef {
@@ -23,7 +24,45 @@ impl Import for ClassDef {
         for method in &self.methods {
             import.extend(method.import());
         }
+        for class in &self.classes {
+            import.extend(class.import());
+        }
         import
+    }
+}
+
+impl From<&PyRichEnumInfo> for ClassDef {
+    fn from(info: &PyRichEnumInfo) -> Self {
+        // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
+        // This is only an initializer. See `StubInfo::gather` for the actual merging.
+
+        let mut enum_info  = Self {
+            name: info.pyclass_name,
+            doc: info.doc,
+            members: Vec::new(),
+            methods: Vec::new(),
+            classes: info.variants.iter().map(ClassDef::from).collect(),
+            bases: Vec::new(),
+        };
+
+        for class in enum_info.classes.iter_mut() {
+            class.bases.push(TypeInfo::unqualified(info.pyclass_name));
+        }
+
+        enum_info
+    }
+}
+
+impl From<&VariantInfo> for ClassDef {
+    fn from(info: &VariantInfo) -> Self {
+        Self {
+            name: info.pyclass_name,
+            doc: info.doc,
+            members: info.fields.iter().map(MemberDef::from).collect(),
+            methods: Vec::new(),
+            classes: Vec::new(),
+            bases: Vec::new(),
+        }
     }
 }
 
@@ -36,6 +75,7 @@ impl From<&PyClassInfo> for ClassDef {
             doc: info.doc,
             members: info.members.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
+            classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
         }
     }
@@ -60,7 +100,13 @@ impl fmt::Display for ClassDef {
         for method in &self.methods {
             method.fmt(f)?;
         }
-        if self.members.is_empty() && self.methods.is_empty() {
+        for class in &self.classes {
+            let emit = format!("{}", class);
+            for line in emit.lines() {
+                writeln!(f, "{}{}", indent, line)?;
+            }
+        }
+        if self.members.is_empty() && self.methods.is_empty() && self.classes.is_empty() {
             writeln!(f, "{indent}...")?;
         }
         writeln!(f)?;

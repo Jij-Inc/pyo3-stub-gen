@@ -2,7 +2,7 @@ use crate::gen_stub::extract_documents;
 
 use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Error, Field, ImplItemFn, Result, Type};
 
