@@ -5,6 +5,9 @@ mod pyo3;
 #[cfg(feature = "numpy")]
 mod numpy;
 
+#[cfg(feature = "either")]
+mod either;
+
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 use std::cmp::Ordering;
