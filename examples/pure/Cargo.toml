@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 ahash = "0.8.11"
 env_logger = "0.11.8"
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
-pyo3 = ">= 0.21.0"
+pyo3 = ">= 0.24.0"
 
 [[bin]]
 name = "stub_gen"
