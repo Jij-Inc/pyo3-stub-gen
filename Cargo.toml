@@ -22,6 +22,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 [workspace.dependencies]
+either = "1.15.0"
 ahash = "0.8.11"
 anyhow = "1.0.98"
 chrono = "0.4.40"
