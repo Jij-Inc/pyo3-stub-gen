@@ -41,8 +41,15 @@ struct MyDate;
 #[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
+    #[gen_stub(default = A::default().x)]
     #[pyo3(get, set)]
     x: usize,
+}
+
+impl Default for A {
+    fn default() -> Self {
+        Self { x: 2 }
+    }
 }
 
 #[gen_stub_pymethods]
@@ -53,7 +60,15 @@ impl A {
     fn new(x: usize) -> Self {
         Self { x }
     }
-
+    /// class attribute NUM1
+    #[classattr]
+    const NUM1: usize = 2;
+    /// class attribute NUM2
+    #[expect(non_snake_case)]
+    #[classattr]
+    fn NUM2() -> usize {
+        2
+    }
     fn show_x(&self) {
         println!("x = {}", self.x);
     }
@@ -61,6 +76,9 @@ impl A {
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
+
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
 }
 
 #[gen_stub_pyfunction]
