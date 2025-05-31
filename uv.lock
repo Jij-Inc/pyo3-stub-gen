@@ -199,14 +199,10 @@ source = { editable = "examples/numpy_example" }
 dependencies = [
     { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "pyright" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "numpy", specifier = ">=2.0.0,<3.0.0" },
-    { name = "pyright", specifier = ">=1.1.400,<2.0.0" },
-]
+requires-dist = [{ name = "numpy", specifier = ">=2.0.0,<3.0.0" }]
 
 [[package]]
 name = "packaging"

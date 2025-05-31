@@ -18,6 +18,7 @@ jobs:
           - mixed
           - mixed_sub
           - mixed_sub_multiple
+          - numpy_example
     steps:
       - name: Checkout
         uses: actions/checkout@v4

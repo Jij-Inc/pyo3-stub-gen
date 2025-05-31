@@ -12,4 +12,5 @@ tasks:
     desc: Run tests
     cmds:
       - uv run pytest
+      - uv run pyright
       - uvx ruff check
