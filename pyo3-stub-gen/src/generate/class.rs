@@ -35,14 +35,21 @@ impl From<&PyRichEnumInfo> for ClassDef {
     fn from(info: &PyRichEnumInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
-        Self {
+
+        let mut enum_info  = Self {
             name: info.pyclass_name,
             doc: info.doc,
             members: Vec::new(),
             methods: Vec::new(),
             classes: info.variants.iter().map(ClassDef::from).collect(),
             bases: Vec::new(),
+        };
+
+        for class in enum_info.classes.iter_mut() {
+            class.bases.push(TypeInfo::unqualified(info.pyclass_name));
         }
+
+        enum_info
     }
 }
 
