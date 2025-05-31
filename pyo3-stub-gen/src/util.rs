@@ -111,9 +111,9 @@ mod test {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             // str
-            assert_eq!("'123'", fmt_py_obj(py, &"123"));
-            assert_eq!("\"don't\"", fmt_py_obj(py, &"don't"));
-            assert_eq!("'str\\\\'", fmt_py_obj(py, &"str\\"));
+            assert_eq!("'123'", fmt_py_obj(py, "123"));
+            assert_eq!("\"don't\"", fmt_py_obj(py, "don't"));
+            assert_eq!("'str\\\\'", fmt_py_obj(py, "str\\"));
             // bool
             assert_eq!("True", fmt_py_obj(py, true));
             assert_eq!("False", fmt_py_obj(py, false));
