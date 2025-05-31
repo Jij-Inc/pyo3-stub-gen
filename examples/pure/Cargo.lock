@@ -481,7 +481,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pure_unlimited"
+name = "pure"
 version = "0.1.0"
 dependencies = [
  "ahash",

@@ -1,7 +1,7 @@
 [tool.uv.workspace]
 members = [
     "examples/pure_abi3",
-    "examples/pure_unlimited",
+    "examples/pure",
     "examples/mixed",
     "examples/mixed_sub",
     "examples/mixed_sub_multiple",

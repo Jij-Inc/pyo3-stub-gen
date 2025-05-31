@@ -100,7 +100,7 @@ impl pyo3_stub_gen::PyStubType for C {
     }
 }
 
-create_exception!(pure_unlimited, MyError, PyRuntimeError);
+create_exception!(pure, MyError, PyRuntimeError);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -161,7 +161,7 @@ impl Number {
     }
 }
 
-module_variable!("pure_unlimited", "MY_CONSTANT", usize);
+module_variable!("pure", "MY_CONSTANT", usize);
 
 // Test if non-any PyObject Target can be a default value
 #[gen_stub_pyfunction]
@@ -173,7 +173,7 @@ fn default_value(num: Number) -> Number {
 
 /// Initializes the Python module
 #[pymodule]
-fn pure_unlimited(m: &Bound<PyModule>) -> PyResult<()> {
+fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;

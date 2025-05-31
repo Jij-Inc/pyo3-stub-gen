@@ -6,9 +6,9 @@ includes:
   pure_abi3:
     taskfile: examples/pure_abi3/Taskfile.yml
     dir: examples/pure_abi3
-  pure_unlimited:
-    taskfile: examples/pure_unlimited/Taskfile.yml
-    dir: examples/pure_unlimited
+  pure:
+    taskfile: examples/pure/Taskfile.yml
+    dir: examples/pure
   mixed:
     taskfile: examples/mixed/Taskfile.yml
     dir: examples/mixed
@@ -23,7 +23,7 @@ tasks:
   stub-gen:
     cmds:
       - task: pure_abi3:stub-gen
-      - task: pure_unlimited:stub-gen
+      - task: pure:stub-gen
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
       - task: mixed_sub_multiple:stub-gen
@@ -31,7 +31,7 @@ tasks:
   test:
     cmds:
       - task: pure_abi3:test
-      - task: pure_unlimited:test
+      - task: pure:test
       - task: mixed:test
       - task: mixed_sub:test
       - task: mixed_sub_multiple:test

@@ -15,7 +15,7 @@ jobs:
       matrix:
         crate:
           - pure_abi3
-          - pure_unlimited
+          - pure
           - mixed
           - mixed_sub
           - mixed_sub_multiple

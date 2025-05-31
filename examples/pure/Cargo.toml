@@ -2,7 +2,7 @@
 # we use "unlimited" to indicate that the API is not limited to ABI3.
 
 [package]
-name = "pure_unlimited"
+name = "pure"
 edition = "2021"
 version = "0.1.0"
 description = "Example for pure-Rust layout with non-ABI3 Python C API"
