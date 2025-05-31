@@ -3,7 +3,7 @@ requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "pure"
+name = "pure_abi3"
 version = "0.1"
 requires-python = ">=3.9"
 

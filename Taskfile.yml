@@ -3,6 +3,9 @@
 version: "3"
 
 includes:
+  pure_abi3:
+    taskfile: examples/pure_abi3/Taskfile.yml
+    dir: examples/pure_abi3
   pure:
     taskfile: examples/pure/Taskfile.yml
     dir: examples/pure
@@ -19,6 +22,7 @@ includes:
 tasks:
   stub-gen:
     cmds:
+      - task: pure_abi3:stub-gen
       - task: pure:stub-gen
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
@@ -26,6 +30,7 @@ tasks:
 
   test:
     cmds:
+      - task: pure_abi3:test
       - task: pure:test
       - task: mixed:test
       - task: mixed_sub:test
