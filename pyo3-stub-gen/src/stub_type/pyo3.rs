@@ -81,26 +81,27 @@ impl_builtin!(PyBackedBytes, "bytes");
 impl_builtin!(PyType, "type");
 impl_builtin!(CompareOp, "int");
 
-/// impl PyStubType for PyO3 types which only available on non-`Py_LIMITED_API`
-#[cfg(feature = "pyo3-unlimited-apis")]
-mod non_limited_apis {
-    use super::*;
-    macro_rules! impl_simple {
-        ($ty:ty, $mod:expr, $pytype:expr) => {
-            impl PyStubType for $ty {
-                fn type_output() -> TypeInfo {
-                    TypeInfo {
-                        name: concat!($mod, ".", $pytype).to_string(),
-                        import: hashset! { $mod.into() },
-                    }
+#[cfg_attr(all(not(pyo3_0_25), Py_LIMITED_API), expect(unused_macros))]
+macro_rules! impl_simple {
+    ($ty:ty, $mod:expr, $pytype:expr) => {
+        impl PyStubType for $ty {
+            fn type_output() -> TypeInfo {
+                TypeInfo {
+                    name: concat!($mod, ".", $pytype).to_string(),
+                    import: hashset! { $mod.into() },
                 }
             }
-        };
-    }
-
-    impl_simple!(PyDate, "datetime", "date");
-    impl_simple!(PyDateTime, "datetime", "datetime");
-    impl_simple!(PyDelta, "datetime", "timedelta");
-    impl_simple!(PyTime, "datetime", "time");
-    impl_simple!(PyTzInfo, "datetime", "tzinfo");
+        }
+    };
 }
+
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
+impl_simple!(PyDate, "datetime", "date");
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
+impl_simple!(PyDateTime, "datetime", "datetime");
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
+impl_simple!(PyDelta, "datetime", "timedelta");
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
+impl_simple!(PyTime, "datetime", "time");
+#[cfg(any(pyo3_0_25, not(Py_LIMITED_API)))]
+impl_simple!(PyTzInfo, "datetime", "tzinfo");
