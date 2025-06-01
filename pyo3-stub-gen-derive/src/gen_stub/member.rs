@@ -5,8 +5,9 @@ use super::{escape_return_type, parse_pyo3_attrs, Attr};
 use proc_macro2::{TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Error, Field, ImplItemFn, Result, Type};
+use crate::gen_stub::arg::ArgInfo;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MemberInfo {
     doc: String,
     name: String,
@@ -83,5 +84,21 @@ impl ToTokens for MemberInfo {
                 doc: #doc,
             }
         })
+    }
+}
+
+impl From<MemberInfo> for ArgInfo {
+    fn from(value: MemberInfo) -> Self {
+
+        let MemberInfo{
+            name,
+            r#type,
+            ..
+        } = value;
+
+        Self {
+            name,
+            r#type,
+        }
     }
 }

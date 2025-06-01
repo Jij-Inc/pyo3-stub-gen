@@ -1,5 +1,6 @@
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{fmt, vec};
+use crate::generate::variant_methods::get_variant_methods;
 
 /// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
@@ -9,7 +10,8 @@ pub struct ClassDef {
     pub members: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
-    pub classes: Vec<ClassDef>
+    pub classes: Vec<ClassDef>,
+    pub match_args:  Option<Vec<String>>,
 }
 
 impl Import for ClassDef {
@@ -36,63 +38,32 @@ impl From<&PyRichEnumInfo> for ClassDef {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
 
-        let mut enum_info  = Self {
+        let enum_info  = Self {
             name: info.pyclass_name,
             doc: info.doc,
             members: Vec::new(),
             methods: Vec::new(),
-            classes: info.variants.iter().map(ClassDef::from).collect(),
+            classes: info.variants.iter().map(|v|ClassDef::from_variant(info, v)).collect(),
             bases: Vec::new(),
+            match_args: None,
         };
-
-        for class in enum_info.classes.iter_mut() {
-            class.bases.push(TypeInfo::unqualified(info.pyclass_name));
-        }
 
         enum_info
     }
 }
 
-impl From<&VariantInfo> for ClassDef {
-    fn from(info: &VariantInfo) -> Self {
-        let bases = info.bases.iter().map(|f| f()).collect::<Vec<_>>();
-
-        let full_class_name = vec![
-            bases
-                .iter()
-                .map(|b| b.name.as_str())
-                .collect::<Vec<_>>()
-                .join("."),
-            info.pyclass_name.to_string(),
-        ]
-        .join(".");
-
-        let default_constructor = MethodDef {
-            name: "__new__",
-            args: info
-                .fields
-                .iter()
-                .map(|f| Arg {
-                    name: f.name,
-                    r#type: (f.r#type)(),
-                    signature: None,
-                })
-                .collect(),
-            r#return: TypeInfo {
-                name: full_class_name,
-                import: HashSet::new(),
-            },
-            doc: "",
-            r#type: MethodType::New,
-        };
+impl ClassDef {
+    fn from_variant(enum_info: &PyRichEnumInfo, info: &VariantInfo) -> Self {
+        let methods = get_variant_methods(enum_info, info);
 
         Self {
             name: info.pyclass_name,
             doc: info.doc,
             members: info.fields.iter().map(MemberDef::from).collect(),
-            methods: vec![default_constructor],
+            methods,
             classes: Vec::new(),
-            bases: Vec::new(),
+            bases: vec![TypeInfo::unqualified(enum_info.pyclass_name)],
+            match_args: Some(info.fields.iter().map(|f| f.name.to_string()).collect()),
         }
     }
 }
@@ -108,6 +79,7 @@ impl From<&PyClassInfo> for ClassDef {
             methods: Vec::new(),
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
+            match_args: None,
         }
     }
 }
@@ -125,6 +97,18 @@ impl fmt::Display for ClassDef {
         let indent = indent();
         let doc = self.doc.trim();
         docstring::write_docstring(f, doc, indent)?;
+
+        if let Some(match_args) = &self.match_args {
+
+            let match_args_txt = if match_args.is_empty() {
+              "()".to_string()
+            } else {
+                match_args.iter().map(|a| format!(r##""{}""##, a)).collect::<Vec<_>>().join(", ")
+            };
+
+            writeln!(f, "{}__match_args__ = ({},)", indent, match_args_txt)?;
+        }
+
         for member in &self.members {
             member.fmt(f)?;
         }

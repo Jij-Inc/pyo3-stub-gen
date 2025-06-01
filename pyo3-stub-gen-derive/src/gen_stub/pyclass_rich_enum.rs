@@ -113,6 +113,7 @@ mod test {
             pub enum PyPlaceholder {
                 #[pyo3(name="Name")]
                 name(String),
+                #[pyo3(constructor = (_0, _1=1.0))]
                 twonum(i32,f64),
                 ndim{count: usize},
                 description,
@@ -136,6 +137,14 @@ mod test {
                     ],
                     module: None,
                     doc: "",
+                    form: &pyo3_stub_gen::type_info::VariantForm::Tuple,
+                    constr_args: &[
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: "_0",
+                            r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: None,
+                        },
+                    ],
                 },
                 ::pyo3_stub_gen::type_info::VariantInfo {
                     pyclass_name: "twonum",
@@ -153,6 +162,31 @@ mod test {
                     ],
                     module: None,
                     doc: "",
+                    form: &pyo3_stub_gen::type_info::VariantForm::Tuple,
+                    constr_args: &[
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: "_0",
+                            r#type: <i32 as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                        },
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: "_1",
+                            r#type: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign {
+                                default: {
+                                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(||
+                                    {
+                                        ::pyo3::prepare_freethreaded_python();
+                                        ::pyo3::Python::with_gil(|py| -> String {
+                                            let v: f64 = 1.0;
+                                            ::pyo3_stub_gen::util::fmt_py_obj(py, v)
+                                        })
+                                    });
+                                    &DEFAULT
+                                },
+                            }),
+                        },
+                    ],
                 },
                 ::pyo3_stub_gen::type_info::VariantInfo {
                     pyclass_name: "ndim",
@@ -165,12 +199,22 @@ mod test {
                     ],
                     module: None,
                     doc: "",
+                    form: &pyo3_stub_gen::type_info::VariantForm::Struct,
+                    constr_args: &[
+                        ::pyo3_stub_gen::type_info::ArgInfo {
+                            name: "count",
+                            r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_input,
+                            signature: None,
+                        },
+                    ],
                 },
                 ::pyo3_stub_gen::type_info::VariantInfo {
                     pyclass_name: "description",
                     fields: &[],
                     module: None,
                     doc: "",
+                    form: &pyo3_stub_gen::type_info::VariantForm::Unit,
+                    constr_args: &[],
                 },
             ],
             module: Some("my_module"),

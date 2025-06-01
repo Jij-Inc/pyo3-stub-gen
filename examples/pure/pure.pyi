@@ -29,18 +29,22 @@ class NumberRich:
         r"""
         Float variant
         """
+        __match_args__ = ("_0",)
         _0: builtins.float
         def __new__(cls, _0:builtins.float) -> NumberRich.FLOAT: ...
+        def __len__(self) -> builtins.int: ...
+        def __getitem__(self, key:builtins.int) -> typing.Any: ...
     
     class INTEGER(NumberRich):
         r"""
         Integer variant
         """
+        __match_args__ = ("int",)
         int: builtins.int
         r"""
         The integer value
         """
-        def __new__(cls, int:builtins.int) -> NumberRich.INTEGER: ...
+        def __new__(cls, int:builtins.int=2) -> NumberRich.INTEGER: ...
     
 
 class Number(Enum):

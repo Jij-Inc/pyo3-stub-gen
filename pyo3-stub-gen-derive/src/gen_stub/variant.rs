@@ -1,17 +1,45 @@
-use proc_macro2::{Ident, TokenStream as TokenStream2};
+use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Fields, Result, Variant};
 use syn::spanned::Spanned;
+use crate::gen_stub::arg::ArgInfo;
 use crate::gen_stub::attr::{extract_documents, parse_pyo3_attrs, Attr};
 use crate::gen_stub::member::MemberInfo;
 use crate::gen_stub::renaming::RenamingRule;
+use crate::gen_stub::signature::{ArgsWithSignature, Signature};
 use crate::gen_stub::util::quote_option;
+
+#[derive(Debug, Clone, Copy)]
+pub enum VariantForm {
+    Struct,
+    Tuple,
+    Unit,
+}
+
+impl ToTokens for VariantForm {
+
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+
+        let token = match self {
+            VariantForm::Struct => Ident::new("Struct", Span::call_site()),
+            VariantForm::Tuple => Ident::new("Tuple", Span::call_site()),
+            VariantForm::Unit => Ident::new("Unit", Span::call_site()),
+        };
+        
+        tokens.append(token);
+        
+        
+    }
+}
 
 pub struct VariantInfo {
     pyclass_name: String,
     module: Option<String>,
     fields: Vec<MemberInfo>,
     doc: String,
+    form: VariantForm,
+    constr_args: Vec<ArgInfo>,
+    constr_sig: Option<Signature>,
 }
 
 
@@ -26,11 +54,15 @@ impl VariantInfo {
 
         let mut pyclass_name = None;
         let mut module = None;
+        let mut constr_sig = None;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
                 Attr::Module(name) => {
                     module = Some(name);
+                },
+                Attr::Constructor(sig) => {
+                    constr_sig = Some(sig);
                 }
                 _ => {}
             }
@@ -43,12 +75,15 @@ impl VariantInfo {
 
         let mut members = Vec::new();
 
-        match fields {
-            Fields::Unit => {},
+        let form = match fields {
+            Fields::Unit => {
+                VariantForm::Unit
+            },
             Fields::Named(fields) => {
                 for field in fields.named {
                     members.push(MemberInfo::try_from(field)?)
                 }
+                VariantForm::Struct
             },
             Fields::Unnamed(fields) => {
                 for (i, field) in fields.unnamed.iter().enumerate() {
@@ -56,9 +91,11 @@ impl VariantInfo {
                     named_field.ident = Some(Ident::new(&format!("_{}", i), field.ident.span()));
                     members.push(MemberInfo::try_from(named_field)?)
                 }
+                VariantForm::Tuple
             }
-        }
+        };
 
+        let constr_args = members.iter().map(|f| f.clone().into()).collect();
 
         let doc = extract_documents(&attrs).join("\n");
         Ok(Self {
@@ -66,7 +103,9 @@ impl VariantInfo {
             fields: members,
             module,
             doc,
-
+            form,
+            constr_args,
+            constr_sig,
         })
     }
 }
@@ -78,7 +117,16 @@ impl ToTokens for VariantInfo {
             fields,
             doc,
             module,
+            form,
+            constr_args,
+            constr_sig,
         } = self;
+        
+        let args_with_sig = ArgsWithSignature{
+          args: constr_args,
+          sig: constr_sig,  
+        };
+        
         let module = quote_option(module);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::VariantInfo {
@@ -86,6 +134,8 @@ impl ToTokens for VariantInfo {
                 fields: &[ #( #fields),* ],
                 module: #module,
                 doc: #doc,
+                form: &pyo3_stub_gen::type_info::VariantForm::#form,
+                constr_args: #args_with_sig,
             }
         })
     }

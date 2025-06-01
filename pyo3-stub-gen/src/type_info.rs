@@ -125,6 +125,13 @@ pub struct PyClassInfo {
 
 inventory::collect!(PyClassInfo);
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum VariantForm {
+    Unit,
+    Tuple,
+    Struct,
+}
+
 /// Info of a `#[pyclass]` with a single variant of a rich (structured) Rust enum
 #[derive(Debug)]
 pub struct VariantInfo {
@@ -132,6 +139,8 @@ pub struct VariantInfo {
     pub module: Option<&'static str>,
     pub doc: &'static str,
     pub fields: &'static [MemberInfo],
+    pub form: &'static  VariantForm,
+    pub constr_args: &'static [ArgInfo],
 }
 
 /// Info of a `#[pyclass]` with a rich (structured) Rust enum

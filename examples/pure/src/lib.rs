@@ -153,6 +153,7 @@ pub enum NumberRich {
     /// Float variant
     Float(f64),
     /// Integer variant
+    #[pyo3(constructor = (int=2))]
     Integer{
         /// The integer value
         int: i32
