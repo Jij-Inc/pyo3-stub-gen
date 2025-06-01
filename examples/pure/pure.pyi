@@ -25,13 +25,13 @@ class MyDate(datetime.date):
     ...
 
 class NumberRich:
-    class FLOAT:
+    class FLOAT(NumberRich):
         r"""
         Float variant
         """
         _0: builtins.float
     
-    class INTEGER:
+    class INTEGER(NumberRich):
         r"""
         Integer variant
         """
