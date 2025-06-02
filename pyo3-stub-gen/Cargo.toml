@@ -36,8 +36,8 @@ numpy = ["dep:numpy"]
 either = ["dep:either"]
 
 [build-dependencies]
-pyo3-build-config = { version = "0.24", features = ["resolve-config"] }
-cargo_metadata = "0.19"
+pyo3-build-config = { version = "0.25", features = ["resolve-config"] }
+cargo_metadata = "0.20"
 semver = "1.0"
 
 [lints.rust]
