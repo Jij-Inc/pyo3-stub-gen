@@ -1,4 +1,4 @@
-use crate::{generate::Import, stub_type::ModuleRef, type_info::*, TypeInfo};
+use crate::{generate::Import, stub_type::ImportRef, type_info::*, TypeInfo};
 use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -9,7 +9,7 @@ pub struct Arg {
 }
 
 impl Import for Arg {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         self.r#type.import.clone()
     }
 }

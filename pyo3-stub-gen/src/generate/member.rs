@@ -13,7 +13,7 @@ pub struct MemberDef {
 }
 
 impl Import for MemberDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         self.r#type.import.clone()
     }
 }

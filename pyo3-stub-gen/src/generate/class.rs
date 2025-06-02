@@ -12,7 +12,7 @@ pub struct ClassDef {
 }
 
 impl Import for ClassDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = HashSet::new();
         for base in &self.bases {
             import.extend(base.import.clone());
