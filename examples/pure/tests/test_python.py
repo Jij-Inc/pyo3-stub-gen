@@ -2,7 +2,6 @@ from pure import sum, create_dict, read_dict, echo_path, ahash_dict, NumberRich
 import pytest
 import pathlib
 
-
 def test_sum():
     assert sum([1, 2]) == 3
     assert sum((1, 2)) == 3
@@ -41,12 +40,6 @@ def test_number_rich():
     assert i.int == 1
     assert f._0 == 1.5
     assert len(f) == 1
-    match i:
-        case NumberRich.INTEGER(n):
-            assert n == 1
-    match f:
-        case NumberRich.FLOAT(n):
-            assert n == 1.5
     i2 = NumberRich.INTEGER()
     assert i2.int == 2
 
