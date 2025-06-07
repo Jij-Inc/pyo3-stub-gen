@@ -1,31 +1,31 @@
 version: 2
 
 updates:
+  # GitHub Actions updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
     allow:
-      # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
     groups:
       dependencies:
         patterns:
           - "*"
 
+  # Main workspace Cargo dependencies
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
     allow:
-      # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
-    # Ignore specific dependencies
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
@@ -42,6 +42,7 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
@@ -57,6 +58,7 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
@@ -72,6 +74,7 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
@@ -87,6 +90,7 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
@@ -102,6 +106,7 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
+      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
