@@ -6,7 +6,7 @@ def test_main_mod():
 
 
 def test_sub_mod_a():
-    main_mod.mod_a.greet_a()
+    main_mod.mod_a.greet_a(main_mod.mod_b.GreetingEnum.GREETA)
 
 
 def test_sub_mod_b():

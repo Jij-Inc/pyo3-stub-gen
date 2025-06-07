@@ -20,8 +20,8 @@ impl ToTokens for StubType {
         tokens.append_all(quote! {
             #[automatically_derived]
             impl ::pyo3_stub_gen::PyStubType for #ty {
-                fn type_output() -> ::pyo3_stub_gen::TypeInfo {
-                    ::pyo3_stub_gen::TypeInfo::with_module(#name, #module_tt)
+                fn type_output(current_module_name: &str) -> ::pyo3_stub_gen::TypeInfo {
+                    ::pyo3_stub_gen::TypeInfo::with_possible_local_module(#name, #module_tt, current_module_name)
                 }
             }
         })
