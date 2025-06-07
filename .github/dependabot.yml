@@ -14,93 +14,16 @@ updates:
         patterns:
           - "*"
 
-  # Main workspace Cargo dependencies
   - package-ecosystem: "cargo"
-    directory: "/"
+    directories:
+      - "/"
+      - "/examples/mixed"
+      - "/examples/mixed_sub"
+      - "/examples/mixed_sub_multiple"
+      - "/examples/pure"
+      - "/examples/pure_abi3"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
-    ignore:
-      - dependency-name: "pyo3"
-      - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  # Examples directories (individual Cargo workspaces)
-  - package-ecosystem: "cargo"
-    directory: "/examples/mixed"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
-    ignore:
-      - dependency-name: "pyo3"
-      - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "cargo"
-    directory: "/examples/mixed_sub"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
-    ignore:
-      - dependency-name: "pyo3"
-      - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "cargo"
-    directory: "/examples/mixed_sub_multiple"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
-    ignore:
-      - dependency-name: "pyo3"
-      - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "cargo"
-    directory: "/examples/pure"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
-    ignore:
-      - dependency-name: "pyo3"
-      - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "cargo"
-    directory: "/examples/pure_abi3"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
     allow:
       - dependency-type: "all"
     ignore:
