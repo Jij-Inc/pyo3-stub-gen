@@ -1,7 +1,6 @@
-from pure import sum, create_dict, read_dict, echo_path, ahash_dict
+from pure import sum, create_dict, read_dict, echo_path, ahash_dict, NumberRich
 import pytest
 import pathlib
-
 
 def test_sum():
     assert sum([1, 2]) == 3
@@ -34,6 +33,16 @@ def test_read_dict():
     assert (
         str(e.value) == "argument 'dict': 'int' object cannot be converted to 'PyDict'"
     )
+
+def test_number_rich():
+    i = NumberRich.INTEGER(1)
+    f = NumberRich.FLOAT(1.5)
+    assert i.int == 1
+    assert f._0 == 1.5
+    assert len(f) == 1
+    i2 = NumberRich.INTEGER()
+    assert i2.int == 2
+
 
 
 def test_path():
