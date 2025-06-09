@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         crate:
+          - pure_abi3
           - pure
           - mixed
           - mixed_sub
