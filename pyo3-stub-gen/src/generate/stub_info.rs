@@ -155,7 +155,7 @@ impl StubInfoBuilder {
                     });
                 }
                 for setter in info.setters {
-                    entry.getters.push(MemberDef {
+                    entry.setters.push(MemberDef {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,

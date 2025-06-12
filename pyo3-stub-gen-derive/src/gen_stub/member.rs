@@ -73,7 +73,7 @@ impl MemberInfo {
         let doc = extract_documents(attrs).join("\n");
         let attrs = parse_pyo3_attrs(attrs)?;
         for attr in attrs {
-            if let Attr::Getter(name) = attr {
+            if let Attr::Setter(name) = attr {
                 let fn_name = sig.ident.to_string();
                 let fn_setter_name = match fn_name.strip_prefix("set_") {
                     Some(s) => s.to_owned(),

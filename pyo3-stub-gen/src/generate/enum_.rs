@@ -38,7 +38,7 @@ impl fmt::Display for EnumDef {
         }
         if !(self.attrs.is_empty()
             && self.getters.is_empty()
-            && self.getters.is_empty()
+            && self.setters.is_empty()
             && self.methods.is_empty())
         {
             writeln!(f)?;
