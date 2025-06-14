@@ -7,6 +7,8 @@ fn main() {
         .exec()
         .expect("Failed to run cargo metadata");
 
+    dbg!(&metadata.target_directory);
+
     // Find pyo3 package
     let pyo3_pkg = metadata
         .packages
@@ -32,6 +34,8 @@ fn main() {
         .iter()
         .find(|node| node.id == pyo3_pkg.id)
         .expect("pyo3 not found in resolve nodes");
+
+    dbg!(pyo3_node);
 
     // Check if abi3 feature is enabled
     let has_abi3 = pyo3_node.features.iter().any(|f| f.starts_with("abi3"));
