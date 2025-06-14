@@ -91,6 +91,7 @@ pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
+    pub default: Option<&'static std::sync::LazyLock<String>>,
 }
 
 /// Info of `#[pymethod]`
@@ -98,8 +99,12 @@ pub struct MemberInfo {
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
+    /// Method/Const with `#[classattr]`
+    pub attrs: &'static [MemberInfo],
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
+    /// Methods decorated with `#[getter]`
+    pub setters: &'static [MemberInfo],
     /// Other usual methods
     pub methods: &'static [MethodInfo],
 }
@@ -117,8 +122,10 @@ pub struct PyClassInfo {
     pub module: Option<&'static str>,
     /// Docstring
     pub doc: &'static str,
-    /// static members by `#[pyo3(get, set)]`
-    pub members: &'static [MemberInfo],
+    /// static members by `#[pyo3(get)]`
+    pub getters: &'static [MemberInfo],
+    /// static members by `#[pyo3(set)]`
+    pub setters: &'static [MemberInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
     pub bases: &'static [fn() -> TypeInfo],
 }

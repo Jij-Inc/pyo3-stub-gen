@@ -69,7 +69,7 @@ pub struct ArgsWithSignature<'a> {
 
 impl ToTokens for ArgsWithSignature<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let arg_infos: Vec<TokenStream2> = if let Some(sig) = self.sig {
+        let arg_infos_res: Result<Vec<TokenStream2>> = if let Some(sig) = self.sig {
             // record all Type information from rust's args
             let args_map: HashMap<String, Type> = self
                 .args
@@ -83,32 +83,34 @@ impl ToTokens for ArgsWithSignature<'_> {
             sig.args.iter().map(|sig_arg| match sig_arg {
                 SignatureArg::Ident(ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    if let Some(ty) = args_map.get(&name){
+                        Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
-                        }
+                        }})
+                    } else {
+                        Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 }
                 SignatureArg::Assign(ident, _eq, value) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    let default = if value.to_token_stream().to_string() == "None" {
-                        quote! {
+                    if let Some(ty) = args_map.get(&name){
+                        let default = if value.to_token_stream().to_string() == "None" {
+                            quote! {
                             "None".to_string()
-                        }
-                    } else {
-                        quote! {
+                            }
+                        } else {
+                            quote! {
                             ::pyo3::prepare_freethreaded_python();
                             ::pyo3::Python::with_gil(|py| -> String {
                                 let v: #ty = #value;
                                 ::pyo3_stub_gen::util::fmt_py_obj(py, v)
                             })
-                        }
-                    };
-                    quote! {
+                            }
+                        };
+                        Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
@@ -120,36 +122,41 @@ impl ToTokens for ArgsWithSignature<'_> {
                                     &DEFAULT
                                 }
                             }),
-                        }
+                        }})
+                    } else {
+                        Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 },
-                SignatureArg::Star(_) => quote! {
+                SignatureArg::Star(_) =>Ok(quote! {
                     ::pyo3_stub_gen::type_info::ArgInfo {
                         name: "",
                         r#type: <() as ::pyo3_stub_gen::PyStubType>::type_input,
                         signature: Some(pyo3_stub_gen::type_info::SignatureArg::Star),
-                    }
-                },
+                }}),
                 SignatureArg::Args(_, ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    if let Some(ty) = args_map.get(&name){
+                        Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
-                        }
+                        }})
+                    } else {
+                        Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 },
                 SignatureArg::Keywords(_, _, ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    if let Some(ty) = args_map.get(&name){
+                        Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
-                        }
+                        }})
+                    } else {
+                        Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 }
             }).collect()
@@ -160,17 +167,20 @@ impl ToTokens for ArgsWithSignature<'_> {
                     let mut ty = arg.r#type.clone();
                     remove_lifetime(&mut ty);
                     let name = &arg.name;
-                    quote! {
+                    Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: None,
                         }
-                    }
+                    })
                 })
                 .collect()
         };
-        tokens.append_all(quote! { &[ #(#arg_infos),* ] });
+        match arg_infos_res {
+            Ok(arg_infos) => tokens.append_all(quote! { &[ #(#arg_infos),* ] }),
+            Err(err) => tokens.extend(err.to_compile_error()),
+        }
     }
 }
 
