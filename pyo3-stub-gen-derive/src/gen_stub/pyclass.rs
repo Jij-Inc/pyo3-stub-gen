@@ -1,7 +1,6 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemStruct, Result, Type};
-
 use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
 
 pub struct PyClassInfo {
@@ -122,7 +121,7 @@ mod test {
             "#,
         )?;
         let out = PyClassInfo::try_from(input)?.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyClassInfo {
             pyclass_name: "Placeholder",
             struct_id: std::any::TypeId::of::<PyPlaceholder>,
@@ -147,7 +146,7 @@ mod test {
             doc: "",
             bases: &[],
         }
-        "###);
+        "#);
         Ok(())
     }
 

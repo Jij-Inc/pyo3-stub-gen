@@ -53,6 +53,7 @@ pub enum Attr {
     Get,
     GetAll,
     Module(String),
+    Constructor(Signature),
     Signature(Signature),
     RenameAll(RenamingRule),
     Extends(Type),
@@ -135,6 +136,8 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                     [Ident(ident), Punct(_), Group(group)] => {
                         if ident == "signature" {
                             pyo3_attrs.push(Attr::Signature(syn::parse2(group.to_token_stream())?));
+                        } else if ident == "constructor" {
+                            pyo3_attrs.push(Attr::Constructor(syn::parse2(group.to_token_stream())?));
                         }
                     }
                     [Ident(ident), Punct(_), Ident(ident2)] => {

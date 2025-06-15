@@ -145,6 +145,21 @@ pub enum NumberRenameAll {
     Integer,
 }
 
+#[gen_stub_pyclass_rich_enum]
+#[pyclass]
+#[pyo3(rename_all = "UPPERCASE")]
+#[derive(Debug, Clone)]
+pub enum NumberRich {
+    /// Float variant
+    Float(f64),
+    /// Integer variant
+    #[pyo3(constructor = (int=2))]
+    Integer{
+        /// The integer value
+        int: i32
+    },
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Number {
@@ -181,6 +196,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
+    m.add_class::<NumberRich>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
