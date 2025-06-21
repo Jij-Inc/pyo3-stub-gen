@@ -34,11 +34,3 @@ test-case.workspace = true
 default = ["numpy", "either"]
 numpy = ["dep:numpy"]
 either = ["dep:either"]
-
-[build-dependencies]
-pyo3-build-config.workspace = true
-cargo_metadata.workspace = true
-semver.workspace = true
-
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(pyo3_0_25)'] }

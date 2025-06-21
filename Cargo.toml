@@ -24,7 +24,6 @@ readme = "README.md"
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.98"
-cargo_metadata = "0.19"
 chrono = "0.4.40"
 either = "1.15.0"
 env_logger = "0.11.8"
@@ -40,9 +39,7 @@ numpy = ">= 0.24.0"
 prettyplease = "0.2.32"
 proc-macro2 = "1.0.95"
 pyo3 = ">= 0.24.0"
-pyo3-build-config = { version = ">= 0.24", features = ["resolve-config"] }
 quote = "1.0.40"
-semver = "1.0"
 serde = { version = "1.0.219", features = ["derive"] }
 syn = "2.0.101"
 test-case = "3.3.1"
