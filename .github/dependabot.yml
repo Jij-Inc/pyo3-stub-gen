@@ -15,12 +15,7 @@ updates:
           - "*"
 
   - package-ecosystem: "cargo"
-    directories:
-      - "/"
-      - "/examples/mixed"
-      - "/examples/mixed_sub"
-      - "/examples/mixed_sub_multiple"
-      - "/examples/pure"
+    directory: "/"
     schedule:
       interval: "weekly"
     allow:
@@ -28,7 +23,6 @@ updates:
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"
-      - dependency-name: "pyo3-build-config"
     groups:
       dependencies:
         patterns:
