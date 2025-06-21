@@ -1,6 +1,7 @@
 use quote::ToTokens;
 use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
+    TypeReference,
 };
 
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
@@ -10,6 +11,21 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             continue;
         }
         let arg = ArgInfo::try_from(arg)?;
+        // Regard the first argument with `&Bound<'_, PyType>`
+        if let Type::Reference(TypeReference { elem, .. }) = &arg.r#type {
+            if let Type::Path(TypePath { path, .. }) = elem.as_ref() {
+                let last = path.segments.last().unwrap();
+                if n == 0 && last.ident == "Bound" {
+                    if let PathArguments::AngleBracketed(args, ..) = &last.arguments {
+                        if let Some(last_type) = args.args.last() {
+                            if last_type.to_token_stream().to_string() == "PyType" {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if let Type::Path(TypePath { path, .. }) = &arg.r#type {
             let last = path.segments.last().unwrap();
             if last.ident == "Python" {
@@ -49,6 +65,12 @@ impl TryFrom<FnArg> for ArgInfo {
                 ident.mutability = None;
                 let name = ident.to_token_stream().to_string();
                 return Ok(Self { name, r#type: *ty });
+            }
+            if let syn::Pat::Wild(_) = *pat {
+                return Ok(Self {
+                    name: "_".to_owned(),
+                    r#type: *ty,
+                });
             }
         }
         Err(syn::Error::new(span, "Expected typed argument"))
