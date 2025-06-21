@@ -130,7 +130,7 @@ For getters, setters, and classattr functions, you can specify the default value
 #[pyclass]
 struct A {
     #[pyo3(get,set)]
-    #[stub_gen(default = A::default().x)]
+    #[gen_stub(default = A::default().x)]
     x: usize,
     y: usize,
 }
