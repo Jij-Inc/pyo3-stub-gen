@@ -38,9 +38,6 @@ jobs:
           cargo set-version --bump patch
           echo "NEW_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')" >> $GITHUB_ENV
 
-      - name: Update Cargo.lock
-        run: task generate-lockfile
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
