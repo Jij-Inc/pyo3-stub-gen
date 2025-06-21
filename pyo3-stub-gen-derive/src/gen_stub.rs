@@ -11,23 +11,27 @@
 //!         pyclass_name: "Placeholder",
 //!         module: Some("my_module"),
 //!         struct_id: std::any::TypeId::of::<PyPlaceholder>,
-//!         members: &[
+//!         getters: &[
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "ndim",
 //!                 r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
 //!             },
 //!         ],
+//!         setters: &[],
 //!         doc: "",
 //!         bases: &[],
 //!     }
@@ -94,10 +98,12 @@ use quote::quote;
 use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyClassInfo::try_from(parse2::<ItemStruct>(item.clone())?)?;
+    let mut item_struct = parse2::<ItemStruct>(item)?;
+    let inner = PyClassInfo::try_from(item_struct.clone())?;
     let derive_stub_type = StubType::from(&inner);
+    pyclass::prune_attrs(&mut item_struct);
     Ok(quote! {
-        #item
+        #item_struct
         #derive_stub_type
         pyo3_stub_gen::inventory::submit! {
             #inner
@@ -118,9 +124,11 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyMethodsInfo::try_from(parse2::<ItemImpl>(item.clone())?)?;
+    let mut item_impl = parse2::<ItemImpl>(item)?;
+    let inner = PyMethodsInfo::try_from(item_impl.clone())?;
+    pymethods::prune_attrs(&mut item_impl);
     Ok(quote! {
-        #item
+        #item_impl
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner
@@ -129,10 +137,12 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut inner = PyFunctionInfo::try_from(parse2::<ItemFn>(item.clone())?)?;
+    let mut item_fn = parse2::<ItemFn>(item)?;
+    let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
     inner.parse_attr(attr)?;
+    pyfunction::prune_attrs(&mut item_fn);
     Ok(quote! {
-        #item
+        #item_fn
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner
