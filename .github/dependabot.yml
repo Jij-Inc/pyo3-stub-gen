@@ -21,7 +21,6 @@ updates:
       - "/examples/mixed_sub"
       - "/examples/mixed_sub_multiple"
       - "/examples/pure"
-      - "/examples/pure_abi3"
     schedule:
       interval: "weekly"
     allow:

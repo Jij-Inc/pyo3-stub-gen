@@ -8,11 +8,6 @@ tasks:
     cmds:
       - cargo run --bin stub_gen
 
-  generate-lockfile:
-    desc: Generate lockfile
-    cmds:
-      - cargo generate-lockfile
-
   test:
     desc: Run tests
     cmds:
