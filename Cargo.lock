@@ -385,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.1.0"
+version = "0.9.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -394,7 +394,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub"
-version = "0.1.0"
+version = "0.9.2"
 dependencies = [
  "env_logger",
  "pyo3",

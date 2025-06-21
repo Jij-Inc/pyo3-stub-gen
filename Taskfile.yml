@@ -24,13 +24,6 @@ tasks:
       - task: mixed_sub:stub-gen
       - task: mixed_sub_multiple:stub-gen
 
-  generate-lockfile:
-    cmds:
-      - task: pure:generate-lockfile
-      - task: mixed:generate-lockfile
-      - task: mixed_sub:generate-lockfile
-      - task: mixed_sub_multiple:generate-lockfile
-
   test:
     cmds:
       - task: pure:test

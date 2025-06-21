@@ -28,13 +28,9 @@ task stub-gen
 # Run comprehensive tests (pytest + pyright + ruff) for all examples  
 task test
 
-# Update dependency lockfiles for all examples
-task generate-lockfile
-
 # Work with specific example (replace 'pure' with mixed, mixed_sub, etc.)
 task pure:stub-gen
 task pure:test
-task pure:generate-lockfile
 ```
 
 ### Individual Example Commands
