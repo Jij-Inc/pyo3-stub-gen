@@ -1,11 +1,8 @@
-# Since the Python C API for ABI3 is called "Limited API",
-# we use "unlimited" to indicate that the API is not limited to ABI3.
-
 [package]
 name = "pure"
 edition = "2021"
 version = "0.1.0"
-description = "Example for pure-Rust layout with non-ABI3 Python C API"
+description = "Example for pure-Rust layout"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
