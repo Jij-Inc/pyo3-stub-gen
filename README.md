@@ -137,7 +137,7 @@ struct A {
 #[gen_stub_pymethods]
 #[pymethods]
 impl A {
-    #[stub_gen(default = A::default().y)]
+    #[gen_stub(default = A::default().y)]
     fn get_y(&self) -> usize {
         self.y
     }
