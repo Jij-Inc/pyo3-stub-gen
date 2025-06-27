@@ -81,8 +81,8 @@ impl TypeInfo {
     }
 
     /// A `list[Type]` type annotation.
-    pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+    pub fn list_of<T: PyStubType>(current_module_name: &str) -> Self {
+        let TypeInfo { name, mut import } = T::type_output(current_module_name);
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.list[{}]", name),
@@ -91,8 +91,8 @@ impl TypeInfo {
     }
 
     /// A `set[Type]` type annotation.
-    pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+    pub fn set_of<T: PyStubType>(current_module_name: &str) -> Self {
+        let TypeInfo { name, mut import } = T::type_output(current_module_name);
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.set[{}]", name),
@@ -101,15 +101,15 @@ impl TypeInfo {
     }
 
     /// A `dict[Type]` type annotation.
-    pub fn dict_of<K: PyStubType, V: PyStubType>() -> Self {
+    pub fn dict_of<K: PyStubType, V: PyStubType>(current_module_name: &str) -> Self {
         let TypeInfo {
             name: name_k,
             mut import,
-        } = K::type_output();
+        } = K::type_output(current_module_name);
         let TypeInfo {
             name: name_v,
             import: import_v,
-        } = V::type_output();
+        } = V::type_output(current_module_name);
         import.extend(import_v);
         import.insert("builtins".into());
         TypeInfo {
@@ -146,6 +146,31 @@ impl TypeInfo {
             name: name.to_string(),
             import,
         }
+    }
+
+    /// A type annotation of a type that must be imported. The type name must be qualified with the module name:
+    ///
+    /// ```
+    /// pyo3_stub_gen::TypeInfo::with_possible_local_module("Path", "pathlib".into(), "something");
+    /// ```
+    pub fn with_possible_local_module(
+        name: &str,
+        module: ModuleRef,
+        current_module_name: &str,
+    ) -> Self {
+        let name = if let ModuleRef::Named(module_name) = &module {
+            if module_name != current_module_name {
+                format!("{module_name}.{name}")
+            } else {
+                name.to_string()
+            }
+        } else {
+            name.to_string()
+        };
+
+        let mut import = HashSet::new();
+        import.insert(module);
+        Self { name, import }
     }
 }
 
@@ -194,21 +219,21 @@ impl ops::BitOr for TypeInfo {
 macro_rules! impl_stub_type {
     ($ty: ty = $($base:ty)|+) => {
         impl ::pyo3_stub_gen::PyStubType for $ty {
-            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
-                $(<$base>::type_output()) | *
+            fn type_output(current_module_name: &str) -> ::pyo3_stub_gen::TypeInfo {
+                $(<$base>::type_output(current_module_name)) | *
             }
-            fn type_input() -> ::pyo3_stub_gen::TypeInfo {
-                $(<$base>::type_input()) | *
+            fn type_input(current_module_name: &str) -> ::pyo3_stub_gen::TypeInfo {
+                $(<$base>::type_input(current_module_name)) | *
             }
         }
     };
     ($ty:ty = $base:ty) => {
         impl ::pyo3_stub_gen::PyStubType for $ty {
-            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
-                <$base>::type_output()
+            fn type_output(current_module_name: &str) -> ::pyo3_stub_gen::TypeInfo {
+                <$base>::type_output(current_module_name)
             }
-            fn type_input() -> ::pyo3_stub_gen::TypeInfo {
-                <$base>::type_input()
+            fn type_input(current_module_name: &str) -> ::pyo3_stub_gen::TypeInfo {
+                <$base>::type_input(current_module_name)
             }
         }
     };
@@ -217,14 +242,14 @@ macro_rules! impl_stub_type {
 /// Annotate Rust types with Python type information.
 pub trait PyStubType {
     /// The type to be used in the output signature, i.e. return type of the Python function or methods.
-    fn type_output() -> TypeInfo;
+    fn type_output(current_module_name: &str) -> TypeInfo;
 
     /// The type to be used in the input signature, i.e. the arguments of the Python function or methods.
     ///
     /// This defaults to the output type, but can be overridden for types that are not valid input types.
     /// For example, `Vec::<T>::type_output` returns `list[T]` while `Vec::<T>::type_input` returns `typing.Sequence[T]`.
-    fn type_input() -> TypeInfo {
-        Self::type_output()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        Self::type_output(current_module_name)
     }
 }
 
@@ -235,18 +260,18 @@ mod test {
     use std::collections::HashMap;
     use test_case::test_case;
 
-    #[test_case(bool::type_input(), "builtins.bool", hashset! { "builtins".into() } ; "bool_input")]
-    #[test_case(<&str>::type_input(), "builtins.str", hashset! { "builtins".into() } ; "str_input")]
-    #[test_case(Vec::<u32>::type_input(), "typing.Sequence[builtins.int]", hashset! { "typing".into(), "builtins".into() } ; "Vec_u32_input")]
-    #[test_case(Vec::<u32>::type_output(), "builtins.list[builtins.int]", hashset! {  "builtins".into() } ; "Vec_u32_output")]
-    #[test_case(HashMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "HashMap_u32_String_input")]
-    #[test_case(HashMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "HashMap_u32_String_output")]
-    #[test_case(indexmap::IndexMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "IndexMap_u32_String_input")]
-    #[test_case(indexmap::IndexMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "IndexMap_u32_String_output")]
-    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { "builtins".into(), "typing".into() } ; "HashMap_u32_Vec_u32_input")]
-    #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
-    #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
-    #[test_case(indexmap::IndexSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "IndexSet_u32_input")]
+    #[test_case(bool::type_input("BLUB"), "builtins.bool", hashset! { "builtins".into() } ; "bool_input")]
+    #[test_case(<&str>::type_input("BLUB"), "builtins.str", hashset! { "builtins".into() } ; "str_input")]
+    #[test_case(Vec::<u32>::type_input("BLUB"), "typing.Sequence[builtins.int]", hashset! { "typing".into(), "builtins".into() } ; "Vec_u32_input")]
+    #[test_case(Vec::<u32>::type_output("BLUB"), "builtins.list[builtins.int]", hashset! {  "builtins".into() } ; "Vec_u32_output")]
+    #[test_case(HashMap::<u32, String>::type_input("BLUB"), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "HashMap_u32_String_input")]
+    #[test_case(HashMap::<u32, String>::type_output("BLUB"), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "HashMap_u32_String_output")]
+    #[test_case(indexmap::IndexMap::<u32, String>::type_input("BLUB"), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "IndexMap_u32_String_input")]
+    #[test_case(indexmap::IndexMap::<u32, String>::type_output("BLUB"), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "IndexMap_u32_String_output")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_input("BLUB"), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { "builtins".into(), "typing".into() } ; "HashMap_u32_Vec_u32_input")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_output("BLUB"), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
+    #[test_case(HashSet::<u32>::type_input("BLUB"), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
+    #[test_case(indexmap::IndexSet::<u32>::type_input("BLUB"), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "IndexSet_u32_input")]
     fn test(tinfo: TypeInfo, name: &str, import: HashSet<ModuleRef>) {
         assert_eq!(tinfo.name, name);
         if import.is_empty() {

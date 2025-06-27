@@ -15,7 +15,7 @@ use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZon
 macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
         impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
+            fn type_output(_current_module_name: &str) -> TypeInfo {
                 TypeInfo::builtin($pytype)
             }
         }
@@ -25,7 +25,7 @@ macro_rules! impl_builtin {
 macro_rules! impl_with_module {
     ($ty:ty, $pytype:expr, $module:expr) => {
         impl PyStubType for $ty {
-            fn type_output() -> TypeInfo {
+            fn type_output(_current_module_name: &str) -> TypeInfo {
                 TypeInfo::with_module($pytype, $module.into())
             }
         }
@@ -34,7 +34,7 @@ macro_rules! impl_with_module {
 
 // NOTE:
 impl PyStubType for () {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo::none()
     }
 }
@@ -66,10 +66,10 @@ impl_builtin!(Cow<'_, OsStr>, "str");
 impl_builtin!(Cow<'_, [u8]>, "bytes");
 
 impl PyStubType for PathBuf {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo::with_module("pathlib.Path", "pathlib".into())
     }
-    fn type_input() -> TypeInfo {
+    fn type_input(_current_module_name: &str) -> TypeInfo {
         TypeInfo::builtin("str")
             | TypeInfo::with_module("os.PathLike", "os".into())
             | TypeInfo::with_module("pathlib.Path", "pathlib".into())
@@ -77,7 +77,7 @@ impl PyStubType for PathBuf {
 }
 
 impl<Tz: TimeZone> PyStubType for DateTime<Tz> {
-    fn type_output() -> TypeInfo {
+    fn type_output(_current_module_name: &str) -> TypeInfo {
         TypeInfo::with_module("datetime.datetime", "datetime".into())
     }
 }
@@ -92,28 +92,28 @@ impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
 impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
 
 impl<T: PyStubType> PyStubType for &T {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for Rc<T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }
 
 impl<T: PyStubType> PyStubType for Arc<T> {
-    fn type_input() -> TypeInfo {
-        T::type_input()
+    fn type_input(current_module_name: &str) -> TypeInfo {
+        T::type_input(current_module_name)
     }
-    fn type_output() -> TypeInfo {
-        T::type_output()
+    fn type_output(current_module_name: &str) -> TypeInfo {
+        T::type_output(current_module_name)
     }
 }

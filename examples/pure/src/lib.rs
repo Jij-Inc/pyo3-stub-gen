@@ -95,8 +95,8 @@ impl FromPyObject<'_> for C {
     }
 }
 impl pyo3_stub_gen::PyStubType for C {
-    fn type_output() -> pyo3_stub_gen::TypeInfo {
-        usize::type_output()
+    fn type_output(current_module_name: &str) -> pyo3_stub_gen::TypeInfo {
+        usize::type_output(current_module_name)
     }
 }
 
