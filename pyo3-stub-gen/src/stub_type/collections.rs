@@ -136,15 +136,18 @@ impl<Key: PyStubType, Value: PyStubType, State> PyStubType
 }
 
 macro_rules! impl_tuple {
-    ($($T:ident),*) => {
-        impl<$($T: PyStubType),*> PyStubType for ($($T),*) {
+    (  $T1:ident $(, $T:ident )*) => {
+        impl<$T1: PyStubType $(, $T: PyStubType )*> PyStubType for ($T1 $(, $T )*,) {
             fn type_output() -> TypeInfo {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
-                $(
-                let TypeInfo { name, import } = $T::type_output();
+                let TypeInfo { name, import } = $T1::type_output();
                 names.push(name);
                 merged.extend(import);
+                $(
+                    let TypeInfo { name, import } = $T::type_output();
+                    names.push(name);
+                    merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
@@ -154,10 +157,13 @@ macro_rules! impl_tuple {
             fn type_input() -> TypeInfo {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
-                $(
-                let TypeInfo { name, import } = $T::type_input();
+                let TypeInfo { name, import } = $T1::type_input();
                 names.push(name);
                 merged.extend(import);
+                $(
+                    let TypeInfo { name, import } = $T::type_input();
+                    names.push(name);
+                    merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
@@ -168,6 +174,7 @@ macro_rules! impl_tuple {
     };
 }
 
+impl_tuple!(T1);
 impl_tuple!(T1, T2);
 impl_tuple!(T1, T2, T3);
 impl_tuple!(T1, T2, T3, T4);
