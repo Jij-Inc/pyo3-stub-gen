@@ -194,3 +194,6 @@ macro_rules! module_variable {
         }
     };
 }
+
+#[doc = include_str!("../../README.md")]
+mod readme {}
