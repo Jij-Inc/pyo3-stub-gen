@@ -1,8 +1,8 @@
 [package]
 name = "pure"
-edition = "2021"
-version = "0.10.1"
 description = "Example for pure-Rust layout"
+edition.workspace = true
+version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
