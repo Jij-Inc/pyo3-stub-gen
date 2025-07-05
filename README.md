@@ -126,7 +126,10 @@ The stub file is automatically found by `maturin`, and it is included in the whe
 
 For getters, setters, and classattr functions, you can specify the default value of it. e.g.
 ```rust
-#[stub_gen_pyclass]
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
 #[pyclass]
 struct A {
     #[pyo3(get,set)]
@@ -134,6 +137,13 @@ struct A {
     x: usize,
     y: usize,
 }
+
+impl Default for A {
+    fn default() -> Self {
+        A { x: 0, y: 0 }
+    }
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl A {
@@ -147,6 +157,13 @@ impl A {
 ### `#[gen_stub(skip)]`
 For classattrs or functions in pymethods, ignore it in .pyi file. e.g.
 ```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct A;
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl A {
