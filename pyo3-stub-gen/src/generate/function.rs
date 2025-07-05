@@ -35,7 +35,7 @@ impl fmt::Display for FunctionDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "def {}(", self.name)?;
         for (i, arg) in self.args.iter().enumerate() {
-            write!(f, "{}", arg)?;
+            write!(f, "{arg}")?;
             if i != self.args.len() - 1 {
                 write!(f, ", ")?;
             }

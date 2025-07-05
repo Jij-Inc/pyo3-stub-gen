@@ -61,7 +61,7 @@ impl fmt::Display for MethodDef {
             if needs_comma {
                 write!(f, ", ")?;
             }
-            write!(f, "{}", arg)?;
+            write!(f, "{arg}")?;
             needs_comma = true;
         }
         write!(f, ") -> {}:", self.r#return)?;

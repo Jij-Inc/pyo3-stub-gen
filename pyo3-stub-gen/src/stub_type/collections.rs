@@ -6,7 +6,7 @@ impl<T: PyStubType> PyStubType for Option<T> {
         let TypeInfo { name, mut import } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
-            name: format!("typing.Optional[{}]", name),
+            name: format!("typing.Optional[{name}]"),
             import,
         }
     }
@@ -14,7 +14,7 @@ impl<T: PyStubType> PyStubType for Option<T> {
         let TypeInfo { name, mut import } = T::type_output();
         import.insert("typing".into());
         TypeInfo {
-            name: format!("typing.Optional[{}]", name),
+            name: format!("typing.Optional[{name}]"),
             import,
         }
     }
@@ -43,7 +43,7 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         let TypeInfo { name, mut import } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
-            name: format!("typing.Sequence[{}]", name),
+            name: format!("typing.Sequence[{name}]"),
             import,
         }
     }
@@ -57,7 +57,7 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
         let TypeInfo { name, mut import } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
-            name: format!("typing.Sequence[{}]", name),
+            name: format!("typing.Sequence[{name}]"),
             import,
         }
     }
