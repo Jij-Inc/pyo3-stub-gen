@@ -33,7 +33,7 @@ impl fmt::Display for EnumDef {
         let indent = indent();
         docstring::write_docstring(f, self.doc, indent)?;
         for (variant, variant_doc) in self.variants {
-            writeln!(f, "{indent}{} = ...", variant)?;
+            writeln!(f, "{indent}{variant} = ...")?;
             docstring::write_docstring(f, variant_doc, indent)?;
         }
         if !(self.attrs.is_empty()
