@@ -18,7 +18,7 @@ fn sum(v: Vec<u32>) -> u32 {
 fn read_dict(dict: HashMap<usize, HashMap<usize, usize>>) {
     for (k, v) in dict {
         for (k2, v2) in v {
-            println!("{} {} {}", k, k2, v2);
+            println!("{k} {k2} {v2}");
         }
     }
 }
