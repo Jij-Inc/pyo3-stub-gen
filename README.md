@@ -95,7 +95,7 @@ define_stub_info_gatherer!(stub_info);
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
 
-```rust
+```rust:ignore
 use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
