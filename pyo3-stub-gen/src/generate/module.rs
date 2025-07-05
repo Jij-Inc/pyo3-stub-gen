@@ -41,11 +41,11 @@ impl fmt::Display for Module {
         for import in self.import().into_iter().sorted() {
             let name = import.get().unwrap_or(&self.default_module_name);
             if name != self.name {
-                writeln!(f, "import {}", name)?;
+                writeln!(f, "import {name}")?;
             }
         }
         for submod in &self.submodules {
-            writeln!(f, "from . import {}", submod)?;
+            writeln!(f, "from . import {submod}")?;
         }
         if !self.enum_.is_empty() {
             writeln!(f, "from enum import Enum")?;
@@ -53,19 +53,19 @@ impl fmt::Display for Module {
         writeln!(f)?;
 
         for var in self.variables.values() {
-            writeln!(f, "{}", var)?;
+            writeln!(f, "{var}")?;
         }
         for class in self.class.values().sorted_by_key(|class| class.name) {
-            write!(f, "{}", class)?;
+            write!(f, "{class}")?;
         }
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
-            write!(f, "{}", enum_)?;
+            write!(f, "{enum_}")?;
         }
         for function in self.function.values() {
-            write!(f, "{}", function)?;
+            write!(f, "{function}")?;
         }
         for error in self.error.values() {
-            writeln!(f, "{}", error)?;
+            writeln!(f, "{error}")?;
         }
         Ok(())
     }
