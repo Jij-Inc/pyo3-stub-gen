@@ -138,11 +138,28 @@ impl StubInfoBuilder {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
             if let Some(entry) = module.class.get_mut(&struct_id) {
+                for attr in info.attrs {
+                    entry.attrs.push(MemberDef {
+                        name: attr.name,
+                        r#type: (attr.r#type)(),
+                        doc: attr.doc,
+                        default: attr.default.map(|s| s.as_str()),
+                    });
+                }
                 for getter in info.getters {
-                    entry.members.push(MemberDef {
+                    entry.getters.push(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
+                        default: getter.default.map(|s| s.as_str()),
+                    });
+                }
+                for setter in info.setters {
+                    entry.setters.push(MemberDef {
+                        name: setter.name,
+                        r#type: (setter.r#type)(),
+                        doc: setter.doc,
+                        default: setter.default.map(|s| s.as_str()),
                     });
                 }
                 for method in info.methods {
@@ -150,11 +167,28 @@ impl StubInfoBuilder {
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
+                for attr in info.attrs {
+                    entry.attrs.push(MemberDef {
+                        name: attr.name,
+                        r#type: (attr.r#type)(),
+                        doc: attr.doc,
+                        default: attr.default.map(|s| s.as_str()),
+                    });
+                }
                 for getter in info.getters {
-                    entry.members.push(MemberDef {
+                    entry.getters.push(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
+                        default: getter.default.map(|s| s.as_str()),
+                    });
+                }
+                for setter in info.setters {
+                    entry.setters.push(MemberDef {
+                        name: setter.name,
+                        r#type: (setter.r#type)(),
+                        doc: setter.doc,
+                        default: setter.default.map(|s| s.as_str()),
                     });
                 }
                 for method in info.methods {
