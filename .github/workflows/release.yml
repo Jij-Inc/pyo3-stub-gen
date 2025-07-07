@@ -27,6 +27,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
+
       - name: Install cargo-edit
         run: cargo install cargo-edit
 

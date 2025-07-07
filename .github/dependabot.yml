@@ -1,13 +1,13 @@
 version: 2
 
 updates:
+  # GitHub Actions updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
     allow:
-      # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
     groups:
       dependencies:
@@ -18,11 +18,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
     allow:
-      # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
-    # Ignore specific dependencies
     ignore:
       - dependency-name: "pyo3"
       - dependency-name: "numpy"

@@ -7,7 +7,9 @@ use crate::generate::variant_methods::get_variant_methods;
 pub struct ClassDef {
     pub name: &'static str,
     pub doc: &'static str,
-    pub members: Vec<MemberDef>,
+    pub attrs: Vec<MemberDef>,
+    pub getters: Vec<MemberDef>,
+    pub setters: Vec<MemberDef>,
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
@@ -20,8 +22,14 @@ impl Import for ClassDef {
         for base in &self.bases {
             import.extend(base.import.clone());
         }
-        for member in &self.members {
-            import.extend(member.import());
+        for attr in &self.attrs {
+            import.extend(attr.import());
+        }
+        for getter in &self.getters {
+            import.extend(getter.import());
+        }
+        for setter in &self.setters {
+            import.extend(setter.import());
         }
         for method in &self.methods {
             import.extend(method.import());
@@ -75,7 +83,9 @@ impl From<&PyClassInfo> for ClassDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: info.members.iter().map(MemberDef::from).collect(),
+            attrs: Vec::new(),
+            setters: info.setters.iter().map(MemberDef::from).collect(),
+            getters: info.getters.iter().map(MemberDef::from).collect(),
             methods: Vec::new(),
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
@@ -105,13 +115,19 @@ impl fmt::Display for ClassDef {
             } else {
                 match_args.iter().map(|a| format!(r##""{}""##, a)).collect::<Vec<_>>().join(", ")
             };
+        }
+        for attr in &self.attrs {
+            attr.fmt(f)?;
+        }
+        for getter in &self.getters {
+            GetterDisplay(getter).fmt(f)?;
+        }
+        for setter in &self.setters {
+            SetterDisplay(setter).fmt(f)?;
 
             writeln!(f, "{}__match_args__ = ({},)", indent, match_args_txt)?;
         }
 
-        for member in &self.members {
-            member.fmt(f)?;
-        }
         for method in &self.methods {
             method.fmt(f)?;
         }
@@ -121,7 +137,11 @@ impl fmt::Display for ClassDef {
                 writeln!(f, "{}{}", indent, line)?;
             }
         }
-        if self.members.is_empty() && self.methods.is_empty() && self.classes.is_empty() {
+        if self.attrs.is_empty()
+            && self.getters.is_empty()
+            && self.setters.is_empty()
+            && self.methods.is_empty()
+        {
             writeln!(f, "{indent}...")?;
         }
         writeln!(f)?;

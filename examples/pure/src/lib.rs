@@ -18,7 +18,7 @@ fn sum(v: Vec<u32>) -> u32 {
 fn read_dict(dict: HashMap<usize, HashMap<usize, usize>>) {
     for (k, v) in dict {
         for (k2, v2) in v {
-            println!("{} {} {}", k, k2, v2);
+            println!("{k} {k2} {v2}");
         }
     }
 }
@@ -41,8 +41,15 @@ struct MyDate;
 #[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
+    #[gen_stub(default = A::default().x)]
     #[pyo3(get, set)]
     x: usize,
+}
+
+impl Default for A {
+    fn default() -> Self {
+        Self { x: 2 }
+    }
 }
 
 #[gen_stub_pymethods]
@@ -53,7 +60,15 @@ impl A {
     fn new(x: usize) -> Self {
         Self { x }
     }
-
+    /// class attribute NUM1
+    #[classattr]
+    const NUM1: usize = 2;
+    /// class attribute NUM2
+    #[expect(non_snake_case)]
+    #[classattr]
+    fn NUM2() -> usize {
+        2
+    }
     fn show_x(&self) {
         println!("x = {}", self.x);
     }
@@ -61,6 +76,9 @@ impl A {
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
+
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
 }
 
 #[gen_stub_pyfunction]
@@ -191,9 +209,9 @@ fn default_value(num: Number) -> Number {
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
-    m.add_class::<MyDate>()?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
+    m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
     m.add_class::<NumberRich>()?;

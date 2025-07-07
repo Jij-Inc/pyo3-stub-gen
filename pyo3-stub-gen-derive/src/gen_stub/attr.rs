@@ -1,7 +1,9 @@
 use super::{RenamingRule, Signature};
 use proc_macro2::TokenTree;
 use quote::ToTokens;
-use syn::{Attribute, Expr, ExprLit, Ident, Lit, Meta, MetaList, Result, Type};
+use syn::{
+    parse::ParseStream, Attribute, Expr, ExprLit, Ident, Lit, Meta, MetaList, Result, Token, Type,
+};
 
 pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
     let mut docs = Vec::new();
@@ -47,11 +49,14 @@ pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
 /// i.e. two `Attr`s will be created for this case.
 ///
 #[derive(Debug, Clone, PartialEq)]
+#[expect(clippy::enum_variant_names)]
 pub enum Attr {
     // Attributes appears in `#[pyo3(...)]` form or its equivalence
     Name(String),
     Get,
     GetAll,
+    Set,
+    SetAll,
     Module(String),
     Constructor(Signature),
     Signature(Signature),
@@ -62,8 +67,10 @@ pub enum Attr {
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
     New,
     Getter(Option<String>),
+    Setter(Option<String>),
     StaticMethod,
     ClassMethod,
+    ClassAttr,
 }
 
 pub fn parse_pyo3_attrs(attrs: &[Attribute]) -> Result<Vec<Attr>> {
@@ -116,6 +123,12 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         if ident == "get_all" {
                             pyo3_attrs.push(Attr::GetAll);
                         }
+                        if ident == "set" {
+                            pyo3_attrs.push(Attr::Set);
+                        }
+                        if ident == "set_all" {
+                            pyo3_attrs.push(Attr::SetAll);
+                        }
                     }
                     [Ident(ident), Punct(_), Literal(lit)] => {
                         if ident == "name" {
@@ -155,15 +168,98 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
         pyo3_attrs.push(Attr::StaticMethod);
     } else if path.is_ident("classmethod") {
         pyo3_attrs.push(Attr::ClassMethod);
+    } else if path.is_ident("classattr") {
+        pyo3_attrs.push(Attr::ClassAttr);
     } else if path.is_ident("getter") {
         if let Ok(inner) = attr.parse_args::<Ident>() {
             pyo3_attrs.push(Attr::Getter(Some(inner.to_string())));
         } else {
             pyo3_attrs.push(Attr::Getter(None));
         }
+    } else if path.is_ident("setter") {
+        if let Ok(inner) = attr.parse_args::<Ident>() {
+            pyo3_attrs.push(Attr::Setter(Some(inner.to_string())));
+        } else {
+            pyo3_attrs.push(Attr::Setter(None));
+        }
     }
 
     Ok(pyo3_attrs)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum StubGenAttr {
+    /// Default value for getter
+    Default(Expr),
+    /// Skip a function in #[pymethods]
+    Skip,
+}
+
+pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
+    attrs.retain(|attr| !attr.path().is_ident("gen_stub"));
+}
+
+pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
+    for attr in parse_gen_stub_attrs(attrs)? {
+        if let StubGenAttr::Default(default) = attr {
+            return Ok(Some(default));
+        }
+    }
+    Ok(None)
+}
+pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
+    let skip = parse_gen_stub_attrs(attrs)?
+        .iter()
+        .any(|attr| matches!(attr, StubGenAttr::Skip));
+    Ok(skip)
+}
+fn parse_gen_stub_attrs(attrs: &[Attribute]) -> Result<Vec<StubGenAttr>> {
+    let mut out = Vec::new();
+    for attr in attrs {
+        let mut new = parse_gen_stub_attr(attr)?;
+        out.append(&mut new);
+    }
+    Ok(out)
+}
+
+fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
+    let mut gen_stub_attrs = Vec::new();
+    let path = attr.path();
+    if path.is_ident("gen_stub") {
+        attr.parse_args_with(|input: ParseStream| {
+            while !input.is_empty() {
+                let ident: Ident = input.parse()?;
+                #[allow(clippy::collapsible_else_if)]
+                if input.peek(Token![=]) {
+                    input.parse::<Token![=]>()?;
+                    if ident == "default" {
+                        gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
+                    } else {
+                        return Err(syn::Error::new(
+                            ident.span(),
+                            format!("Unsupport keyword `{ident}`, valid is `default=xxx`"),
+                        ));
+                    }
+                } else {
+                    if ident == "skip" {
+                        gen_stub_attrs.push(StubGenAttr::Skip);
+                    } else {
+                        return Err(syn::Error::new(
+                            ident.span(),
+                            format!("Unsupport keyword `{ident}`, valid is `skip`"),
+                        ));
+                    }
+                }
+                if input.peek(Token![,]) {
+                    input.parse::<Token![,]>()?;
+                } else {
+                    break;
+                }
+            }
+            Ok(())
+        })?;
+    }
+    Ok(gen_stub_attrs)
 }
 
 #[cfg(test)]
@@ -232,6 +328,41 @@ mod test {
         } else {
             unreachable!()
         }
+        Ok(())
+    }
+    #[test]
+    fn test_parse_gen_stub_attr() -> Result<()> {
+        let item: ItemStruct = parse_str(
+            r#"
+            pub struct PyPlaceholder {
+                #[gen_stub(default = String::from("foo"), skip)]
+                pub field0: String,
+                #[gen_stub(skip)]
+                pub field1: String,
+                #[gen_stub(default = 1+2)]
+                pub field2: usize,
+            }
+            "#,
+        )?;
+        let fields: Vec<_> = item.fields.into_iter().collect();
+        let field0_attrs = parse_gen_stub_attrs(&fields[0].attrs)?;
+        if let StubGenAttr::Default(expr) = &field0_attrs[0] {
+            assert_eq!(
+                expr.to_token_stream().to_string(),
+                "String :: from (\"foo\")"
+            );
+        } else {
+            panic!("attr shoubd be Default");
+        };
+        assert_eq!(&StubGenAttr::Skip, &field0_attrs[1]);
+        let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs)?;
+        assert_eq!(vec![StubGenAttr::Skip], field1_attrs);
+        let field2_attrs = parse_gen_stub_attrs(&fields[2].attrs)?;
+        if let StubGenAttr::Default(expr) = &field2_attrs[0] {
+            assert_eq!(expr.to_token_stream().to_string(), "1 + 2");
+        } else {
+            panic!("attr shoubd be Default");
+        };
         Ok(())
     }
 }

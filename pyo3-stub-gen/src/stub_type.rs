@@ -5,6 +5,9 @@ mod pyo3;
 #[cfg(feature = "numpy")]
 mod numpy;
 
+#[cfg(feature = "either")]
+mod either;
+
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 
@@ -82,7 +85,7 @@ impl TypeInfo {
         let TypeInfo { name, mut import } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
-            name: format!("builtins.list[{}]", name),
+            name: format!("builtins.list[{name}]"),
             import,
         }
     }
@@ -92,7 +95,7 @@ impl TypeInfo {
         let TypeInfo { name, mut import } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
-            name: format!("builtins.set[{}]", name),
+            name: format!("builtins.set[{name}]"),
             import,
         }
     }
@@ -110,7 +113,7 @@ impl TypeInfo {
         import.extend(import_v);
         import.insert("builtins".into());
         TypeInfo {
-            name: format!("builtins.set[{}, {}]", name_k, name_v),
+            name: format!("builtins.set[{name_k}, {name_v}]"),
             import,
         }
     }
