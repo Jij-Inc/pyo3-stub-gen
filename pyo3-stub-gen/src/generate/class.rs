@@ -49,11 +49,13 @@ impl From<&PyRichEnumInfo> for ClassDef {
         let enum_info  = Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: Vec::new(),
+            getters: Vec::new(),
+            setters: Vec::new(),
             methods: Vec::new(),
             classes: info.variants.iter().map(|v|ClassDef::from_variant(info, v)).collect(),
             bases: Vec::new(),
             match_args: None,
+            attrs: Vec::new(),
         };
 
         enum_info
@@ -67,11 +69,13 @@ impl ClassDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            members: info.fields.iter().map(MemberDef::from).collect(),
+            getters: info.fields.iter().map(MemberDef::from).collect(),
+            setters: Vec::new(),
             methods,
             classes: Vec::new(),
             bases: vec![TypeInfo::unqualified(enum_info.pyclass_name)],
             match_args: Some(info.fields.iter().map(|f| f.name.to_string()).collect()),
+            attrs: Vec::new(),
         }
     }
 }
@@ -115,6 +119,8 @@ impl fmt::Display for ClassDef {
             } else {
                 match_args.iter().map(|a| format!(r##""{}""##, a)).collect::<Vec<_>>().join(", ")
             };
+
+            writeln!(f, "{}__match_args__ = ({},)", indent, match_args_txt)?;
         }
         for attr in &self.attrs {
             attr.fmt(f)?;
@@ -124,8 +130,6 @@ impl fmt::Display for ClassDef {
         }
         for setter in &self.setters {
             SetterDisplay(setter).fmt(f)?;
-
-            writeln!(f, "{}__match_args__ = ({},)", indent, match_args_txt)?;
         }
 
         for method in &self.methods {
