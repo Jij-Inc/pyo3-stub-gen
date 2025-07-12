@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "mixed_sub"
 version = "0.1"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [tool.maturin]
 python-source = "python"
