@@ -137,7 +137,7 @@ impl<Key: PyStubType, Value: PyStubType, State> PyStubType
 
 macro_rules! impl_tuple {
     ($($T:ident),*) => {
-        impl<$($T: PyStubType),*> PyStubType for ($($T),*) {
+        impl<$($T: PyStubType),*> PyStubType for ($($T),* ,) {
             fn type_output() -> TypeInfo {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
@@ -168,6 +168,7 @@ macro_rules! impl_tuple {
     };
 }
 
+impl_tuple!(T1);
 impl_tuple!(T1, T2);
 impl_tuple!(T1, T2, T3);
 impl_tuple!(T1, T2, T3, T4);

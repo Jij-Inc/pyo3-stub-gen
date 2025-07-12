@@ -11,6 +11,7 @@ mod method;
 mod module;
 mod stub_info;
 mod variable;
+mod variant_methods;
 
 pub use arg::*;
 pub use class::*;

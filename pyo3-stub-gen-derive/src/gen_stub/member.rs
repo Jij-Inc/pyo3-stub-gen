@@ -2,11 +2,12 @@ use crate::gen_stub::{attr::parse_gen_stub_default, extract_documents};
 
 use super::{escape_return_type, parse_pyo3_attrs, Attr};
 
+use crate::gen_stub::arg::ArgInfo;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Attribute, Error, Expr, Field, FnArg, ImplItemConst, ImplItemFn, Result, Type};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MemberInfo {
     doc: String,
     name: String,
@@ -194,5 +195,13 @@ impl ToTokens for MemberInfo {
                 default: #default,
             }
         })
+    }
+}
+
+impl From<MemberInfo> for ArgInfo {
+    fn from(value: MemberInfo) -> Self {
+        let MemberInfo { name, r#type, .. } = value;
+
+        Self { name, r#type }
     }
 }
