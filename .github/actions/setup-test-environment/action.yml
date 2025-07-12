@@ -1,6 +1,12 @@
 name: "Setup Test Environment"
 description: "Setup common environment for testing jobs"
 
+inputs:
+  python-version:
+    description: "Python version to install"
+    required: false
+    default: "3.10"
+
 runs:
   using: "composite"
   steps:
@@ -21,4 +27,4 @@ runs:
     - name: Install uv
       uses: astral-sh/setup-uv@v3
       with:
-        python-version: 3.10
+        python-version: ${{ inputs.python-version }}
