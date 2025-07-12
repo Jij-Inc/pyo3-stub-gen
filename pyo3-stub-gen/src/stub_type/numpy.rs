@@ -1,8 +1,8 @@
 use super::{PyStubType, TypeInfo};
 use maplit::hashset;
 use numpy::{
-    ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
-    PyUntypedArray,
+    ndarray::Dimension, AllowTypeChange, Element, PyArray, PyArrayDescr, PyArrayLike,
+    PyReadonlyArray, PyReadwriteArray, PyUntypedArray, TypeMustMatch,
 };
 
 trait NumPyScalar {
@@ -36,6 +36,43 @@ impl_numpy_scalar!(num_complex::Complex32, "complex64");
 impl_numpy_scalar!(num_complex::Complex64, "complex128");
 
 impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_();
+        import.insert("numpy.typing".into());
+        TypeInfo {
+            name: format!("numpy.typing.NDArray[{name}]"),
+            import,
+        }
+    }
+}
+
+///
+/// AllowTypeChange uses [`numpy.asarray`](https://numpy.org/doc/stable/reference/generated/numpy.asarray.html), which accepts a lot of types.
+///
+impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
+    for PyArrayLike<'_, T, D, AllowTypeChange>
+{
+    fn type_output() -> TypeInfo {
+        let TypeInfo { name, mut import } = T::type_();
+        import.insert("numpy.typing".into());
+        import.insert("typing".into());
+        TypeInfo {
+            name: format!(
+                "typing.Union[\
+                  numpy.typing.NDArray[typing.Any],\
+                  numpy.typing.NDArray[{name}],\
+                  typing.Tuple[typing.Any, ...],\
+                  typing.List[typing.Any],\
+            ]"
+            ),
+            import,
+        }
+    }
+}
+
+impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
+    for PyArrayLike<'_, T, D, TypeMustMatch>
+{
     fn type_output() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_();
         import.insert("numpy.typing".into());

@@ -15,6 +15,9 @@ includes:
   mixed_sub_multiple:
     taskfile: examples/mixed_sub_multiple/Taskfile.yml
     dir: examples/mixed_sub_multiple
+  numpy_example:
+    taskfile: examples/numpy_example/Taskfile.yml
+    dir: examples/numpy_example
 
 tasks:
   stub-gen:
@@ -23,6 +26,7 @@ tasks:
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
       - task: mixed_sub_multiple:stub-gen
+      - task: numpy_example:stub-gen
 
   test:
     cmds:
@@ -30,3 +34,4 @@ tasks:
       - task: mixed:test
       - task: mixed_sub:test
       - task: mixed_sub_multiple:test
+      - task: numpy_example:test
