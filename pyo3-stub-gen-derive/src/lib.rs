@@ -45,7 +45,6 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
         .into()
 }
 
-
 /// Embed metadata for Python stub file generation for `#[pyclass]` macro with a complex enum
 ///
 /// ```

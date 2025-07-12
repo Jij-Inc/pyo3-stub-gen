@@ -1,8 +1,8 @@
-use proc_macro2::{TokenStream as TokenStream2};
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
+use crate::gen_stub::variant::VariantInfo;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
-use crate::gen_stub::variant::VariantInfo;
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
 
 pub struct PyRichEnumInfo {
     pyclass_name: String,
@@ -36,7 +36,6 @@ impl TryFrom<ItemEnum> for PyRichEnumInfo {
             variants,
             attrs,
             ident,
-
             ..
         } = item;
 

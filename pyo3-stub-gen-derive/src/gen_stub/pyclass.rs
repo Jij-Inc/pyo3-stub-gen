@@ -1,7 +1,7 @@
-use proc_macro2::{TokenStream as TokenStream2};
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemStruct, Result, Type};
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
 
 pub struct PyClassInfo {
     pyclass_name: String,

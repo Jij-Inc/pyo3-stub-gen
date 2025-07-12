@@ -126,7 +126,6 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     })
 }
 
-
 pub fn pyclass_rich_enum(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyRichEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
     let derive_stub_type = StubType::from(&inner);

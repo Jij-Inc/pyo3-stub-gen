@@ -172,9 +172,9 @@ pub enum NumberRich {
     Float(f64),
     /// Integer variant
     #[pyo3(constructor = (int=2))]
-    Integer{
+    Integer {
         /// The integer value
-        int: i32
+        int: i32,
     },
 }
 

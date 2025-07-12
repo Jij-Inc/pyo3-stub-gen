@@ -1,6 +1,6 @@
+use crate::generate::variant_methods::get_variant_methods;
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{fmt, vec};
-use crate::generate::variant_methods::get_variant_methods;
 
 /// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
@@ -13,7 +13,7 @@ pub struct ClassDef {
     pub methods: Vec<MethodDef>,
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
-    pub match_args:  Option<Vec<String>>,
+    pub match_args: Option<Vec<String>>,
 }
 
 impl Import for ClassDef {
@@ -46,13 +46,17 @@ impl From<&PyRichEnumInfo> for ClassDef {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
 
-        let enum_info  = Self {
+        let enum_info = Self {
             name: info.pyclass_name,
             doc: info.doc,
             getters: Vec::new(),
             setters: Vec::new(),
             methods: Vec::new(),
-            classes: info.variants.iter().map(|v|ClassDef::from_variant(info, v)).collect(),
+            classes: info
+                .variants
+                .iter()
+                .map(|v| ClassDef::from_variant(info, v))
+                .collect(),
             bases: Vec::new(),
             match_args: None,
             attrs: Vec::new(),
@@ -113,14 +117,17 @@ impl fmt::Display for ClassDef {
         docstring::write_docstring(f, doc, indent)?;
 
         if let Some(match_args) = &self.match_args {
-
             let match_args_txt = if match_args.is_empty() {
-              "()".to_string()
+                "()".to_string()
             } else {
-                match_args.iter().map(|a| format!(r##""{}""##, a)).collect::<Vec<_>>().join(", ")
+                match_args
+                    .iter()
+                    .map(|a| format!(r##""{a}""##))
+                    .collect::<Vec<_>>()
+                    .join(", ")
             };
 
-            writeln!(f, "{}__match_args__ = ({},)", indent, match_args_txt)?;
+            writeln!(f, "{indent}__match_args__ = ({match_args_txt},)")?;
         }
         for attr in &self.attrs {
             attr.fmt(f)?;
@@ -136,9 +143,9 @@ impl fmt::Display for ClassDef {
             method.fmt(f)?;
         }
         for class in &self.classes {
-            let emit = format!("{}", class);
+            let emit = format!("{class}");
             for line in emit.lines() {
-                writeln!(f, "{}{}", indent, line)?;
+                writeln!(f, "{indent}{line}")?;
             }
         }
         if self.attrs.is_empty()

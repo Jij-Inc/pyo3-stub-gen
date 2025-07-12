@@ -146,7 +146,7 @@ pub struct VariantInfo {
     pub module: Option<&'static str>,
     pub doc: &'static str,
     pub fields: &'static [MemberInfo],
-    pub form: &'static  VariantForm,
+    pub form: &'static VariantForm,
     pub constr_args: &'static [ArgInfo],
 }
 
