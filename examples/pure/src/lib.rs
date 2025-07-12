@@ -178,6 +178,39 @@ pub enum NumberRich {
     },
 }
 
+/// Example from PyO3 documentation for complex enum
+/// https://pyo3.rs/v0.25.1/class.html#complex-enums
+#[gen_stub_pyclass_rich_enum]
+#[pyclass]
+enum Shape1 {
+    Circle { radius: f64 },
+    Rectangle { width: f64, height: f64 },
+    RegularPolygon(u32, f64),
+    Nothing {},
+}
+
+/// Example from PyO3 documentation for complex enum
+/// https://pyo3.rs/v0.25.1/class.html#complex-enums
+#[gen_stub_pyclass_rich_enum]
+#[pyclass]
+enum Shape2 {
+    #[pyo3(constructor = (radius=1.0))]
+    Circle {
+        radius: f64,
+    },
+    #[pyo3(constructor = (*, width, height))]
+    Rectangle {
+        width: f64,
+        height: f64,
+    },
+    #[pyo3(constructor = (side_count, radius=1.0))]
+    RegularPolygon {
+        side_count: u32,
+        radius: f64,
+    },
+    Nothing {},
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Number {
@@ -215,6 +248,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
     m.add_class::<NumberRich>()?;
+    m.add_class::<Shape1>()?;
+    m.add_class::<Shape2>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
