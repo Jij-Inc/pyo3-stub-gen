@@ -51,7 +51,8 @@ class NumberRich:
         Float variant
         """
         __match_args__ = ("_0",)
-        _0: builtins.float
+        @property
+        def _0(self) -> builtins.float: ...
         def __new__(cls, _0:builtins.float) -> NumberRich.FLOAT: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
@@ -61,12 +62,14 @@ class NumberRich:
         Integer variant
         """
         __match_args__ = ("int",)
-        int: builtins.int
-        r"""
-        The integer value
-        """
+        @property
+        def int(self) -> builtins.int:
+            r"""
+            The integer value
+            """
         def __new__(cls, int:builtins.int=2) -> NumberRich.INTEGER: ...
     
+    ...
 
 class Number(Enum):
     FLOAT = ...
