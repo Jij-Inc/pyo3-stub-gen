@@ -73,7 +73,7 @@ mod member;
 mod method;
 mod pyclass;
 mod pyclass_enum;
-mod pyclass_rich_enum;
+mod pyclass_complex_enum;
 mod pyfunction;
 mod pymethods;
 mod renaming;
@@ -88,7 +88,7 @@ use member::*;
 use method::*;
 use pyclass::*;
 use pyclass_enum::*;
-use pyclass_rich_enum::*;
+use pyclass_complex_enum::*;
 use pyfunction::*;
 use pymethods::*;
 use renaming::*;
@@ -126,7 +126,7 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     })
 }
 
-pub fn pyclass_rich_enum(item: TokenStream2) -> Result<TokenStream2> {
+pub fn pyclass_complex_enum(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyRichEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
     let derive_stub_type = StubType::from(&inner);
     Ok(quote! {

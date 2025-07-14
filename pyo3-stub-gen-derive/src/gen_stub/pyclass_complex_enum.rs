@@ -102,7 +102,7 @@ mod test {
     use syn::parse_str;
 
     #[test]
-    fn test_rich_enum() -> Result<()> {
+    fn test_complex_enum() -> Result<()> {
         let input: ItemEnum = parse_str(
             r#"
             #[pyclass(mapping, module = "my_module", name = "Placeholder")]

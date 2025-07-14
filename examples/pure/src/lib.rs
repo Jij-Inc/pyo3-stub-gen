@@ -163,7 +163,7 @@ pub enum NumberRenameAll {
     Integer,
 }
 
-#[gen_stub_pyclass_rich_enum]
+#[gen_stub_pyclass_complex_enum]
 #[pyclass]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone)]
@@ -180,7 +180,7 @@ pub enum NumberRich {
 
 /// Example from PyO3 documentation for complex enum
 /// https://pyo3.rs/v0.25.1/class.html#complex-enums
-#[gen_stub_pyclass_rich_enum]
+#[gen_stub_pyclass_complex_enum]
 #[pyclass]
 enum Shape1 {
     Circle { radius: f64 },
@@ -191,7 +191,7 @@ enum Shape1 {
 
 /// Example from PyO3 documentation for complex enum
 /// https://pyo3.rs/v0.25.1/class.html#complex-enums
-#[gen_stub_pyclass_rich_enum]
+#[gen_stub_pyclass_complex_enum]
 #[pyclass]
 enum Shape2 {
     #[pyo3(constructor = (radius=1.0))]
