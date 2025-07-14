@@ -1,10 +1,10 @@
 use crate::generate::{Arg, MethodDef, MethodType};
-use crate::type_info::{PyRichEnumInfo, VariantForm, VariantInfo};
+use crate::type_info::{PyComplexEnumInfo, VariantForm, VariantInfo};
 use crate::TypeInfo;
 use std::collections::HashSet;
 
 pub(super) fn get_variant_methods(
-    enum_info: &PyRichEnumInfo,
+    enum_info: &PyComplexEnumInfo,
     info: &VariantInfo,
 ) -> Vec<MethodDef> {
     let full_class_name = format!("{}.{}", enum_info.pyclass_name, info.pyclass_name);

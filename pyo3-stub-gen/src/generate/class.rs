@@ -41,8 +41,8 @@ impl Import for ClassDef {
     }
 }
 
-impl From<&PyRichEnumInfo> for ClassDef {
-    fn from(info: &PyRichEnumInfo) -> Self {
+impl From<&PyComplexEnumInfo> for ClassDef {
+    fn from(info: &PyComplexEnumInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
 
@@ -67,7 +67,7 @@ impl From<&PyRichEnumInfo> for ClassDef {
 }
 
 impl ClassDef {
-    fn from_variant(enum_info: &PyRichEnumInfo, info: &VariantInfo) -> Self {
+    fn from_variant(enum_info: &PyComplexEnumInfo, info: &VariantInfo) -> Self {
         let methods = get_variant_methods(enum_info, info);
 
         Self {

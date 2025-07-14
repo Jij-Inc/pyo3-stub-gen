@@ -45,19 +45,19 @@ class B(A):
 class MyDate(datetime.date):
     ...
 
-class NumberRich:
-    class FLOAT(NumberRich):
+class NumberComplex:
+    class FLOAT(NumberComplex):
         r"""
         Float variant
         """
         __match_args__ = ("_0",)
         @property
         def _0(self) -> builtins.float: ...
-        def __new__(cls, _0:builtins.float) -> NumberRich.FLOAT: ...
+        def __new__(cls, _0:builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
     
-    class INTEGER(NumberRich):
+    class INTEGER(NumberComplex):
         r"""
         Integer variant
         """
@@ -67,7 +67,7 @@ class NumberRich:
             r"""
             The integer value
             """
-        def __new__(cls, int:builtins.int=2) -> NumberRich.INTEGER: ...
+        def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
     
     ...
 

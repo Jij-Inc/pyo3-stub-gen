@@ -4,7 +4,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
 
-pub struct PyRichEnumInfo {
+pub struct PyComplexEnumInfo {
     pyclass_name: String,
     enum_type: Type,
     module: Option<String>,
@@ -12,9 +12,9 @@ pub struct PyRichEnumInfo {
     doc: String,
 }
 
-impl From<&PyRichEnumInfo> for StubType {
-    fn from(info: &PyRichEnumInfo) -> Self {
-        let PyRichEnumInfo {
+impl From<&PyComplexEnumInfo> for StubType {
+    fn from(info: &PyComplexEnumInfo) -> Self {
+        let PyComplexEnumInfo {
             pyclass_name,
             module,
             enum_type,
@@ -28,7 +28,7 @@ impl From<&PyRichEnumInfo> for StubType {
     }
 }
 
-impl TryFrom<ItemEnum> for PyRichEnumInfo {
+impl TryFrom<ItemEnum> for PyComplexEnumInfo {
     type Error = Error;
 
     fn try_from(item: ItemEnum) -> Result<Self> {
@@ -72,7 +72,7 @@ impl TryFrom<ItemEnum> for PyRichEnumInfo {
     }
 }
 
-impl ToTokens for PyRichEnumInfo {
+impl ToTokens for PyComplexEnumInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self {
             pyclass_name,
@@ -85,7 +85,7 @@ impl ToTokens for PyRichEnumInfo {
         let module = quote_option(module);
 
         tokens.append_all(quote! {
-            ::pyo3_stub_gen::type_info::PyRichEnumInfo {
+            ::pyo3_stub_gen::type_info::PyComplexEnumInfo {
                 pyclass_name: #pyclass_name,
                 enum_id: std::any::TypeId::of::<#enum_type>,
                 variants: &[ #( #variants ),* ],
@@ -119,9 +119,9 @@ mod test {
             }
             "#,
         )?;
-        let out = PyRichEnumInfo::try_from(input)?.to_token_stream();
+        let out = PyComplexEnumInfo::try_from(input)?.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r#"
-        ::pyo3_stub_gen::type_info::PyRichEnumInfo {
+        ::pyo3_stub_gen::type_info::PyComplexEnumInfo {
             pyclass_name: "Placeholder",
             enum_id: std::any::TypeId::of::<PyPlaceholder>,
             variants: &[

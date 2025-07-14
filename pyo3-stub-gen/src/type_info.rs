@@ -152,7 +152,7 @@ pub struct VariantInfo {
 
 /// Info of a `#[pyclass]` with a rich (structured) Rust enum
 #[derive(Debug)]
-pub struct PyRichEnumInfo {
+pub struct PyComplexEnumInfo {
     // Rust struct type-id
     pub enum_id: fn() -> TypeId,
     // The name exposed to Python
@@ -165,7 +165,7 @@ pub struct PyRichEnumInfo {
     pub variants: &'static [VariantInfo],
 }
 
-inventory::collect!(PyRichEnumInfo);
+inventory::collect!(PyComplexEnumInfo);
 
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]

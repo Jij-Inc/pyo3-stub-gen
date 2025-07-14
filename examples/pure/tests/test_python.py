@@ -4,7 +4,7 @@ from pure import (
     read_dict,
     echo_path,
     ahash_dict,
-    NumberRich,
+    NumberComplex,
     Shape1,
     Shape2,
 )
@@ -45,13 +45,13 @@ def test_read_dict():
     )
 
 
-def test_number_rich():
-    i = NumberRich.INTEGER(1)
-    f = NumberRich.FLOAT(1.5)
+def test_number_complex():
+    i = NumberComplex.INTEGER(1)
+    f = NumberComplex.FLOAT(1.5)
     assert i.int == 1
     assert f._0 == 1.5
     assert len(f) == 1
-    i2 = NumberRich.INTEGER()
+    i2 = NumberComplex.INTEGER()
     assert i2.int == 2
 
 

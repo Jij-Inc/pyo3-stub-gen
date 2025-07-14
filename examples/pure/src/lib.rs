@@ -167,7 +167,7 @@ pub enum NumberRenameAll {
 #[pyclass]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone)]
-pub enum NumberRich {
+pub enum NumberComplex {
     /// Float variant
     Float(f64),
     /// Integer variant
@@ -247,7 +247,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
-    m.add_class::<NumberRich>()?;
+    m.add_class::<NumberComplex>()?;
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
