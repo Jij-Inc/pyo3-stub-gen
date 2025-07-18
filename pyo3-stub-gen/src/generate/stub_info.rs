@@ -59,6 +59,7 @@ struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
     python_root: PathBuf,
+    any_overloaded: bool,
 }
 
 impl StubInfoBuilder {
@@ -76,6 +77,7 @@ impl StubInfoBuilder {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
+            any_overloaded: false,
         }
     }
 
@@ -125,9 +127,14 @@ impl StubInfoBuilder {
     }
 
     fn add_function(&mut self, info: &PyFunctionInfo) {
-        self.get_module(info.module)
+        let target = self
+            .get_module(info.module)
             .function
-            .insert(info.name, FunctionDef::from(info));
+            .entry(info.name)
+            .or_default();
+        let is_overloaded = !target.is_empty();
+        target.push(FunctionDef::from(info));
+        self.any_overloaded |= is_overloaded;
     }
 
     fn add_error(&mut self, info: &PyErrorInfo) {
