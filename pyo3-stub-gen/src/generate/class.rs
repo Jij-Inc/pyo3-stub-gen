@@ -1,6 +1,6 @@
 use crate::generate::variant_methods::get_variant_methods;
 use crate::{generate::*, type_info::*, TypeInfo};
-use std::{fmt, vec};
+use std::{collections::HashMap, fmt, vec};
 
 /// Definition of a Python class.
 #[derive(Debug, Clone, PartialEq)]
@@ -10,7 +10,7 @@ pub struct ClassDef {
     pub attrs: Vec<MemberDef>,
     pub getters: Vec<MemberDef>,
     pub setters: Vec<MemberDef>,
-    pub methods: Vec<MethodDef>,
+    pub methods: HashMap<String, Vec<MethodDef>>,
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
     pub match_args: Option<Vec<String>>,
@@ -31,7 +31,7 @@ impl Import for ClassDef {
         for setter in &self.setters {
             import.extend(setter.import());
         }
-        for method in &self.methods {
+        for method in self.methods.values().flatten() {
             import.extend(method.import());
         }
         for class in &self.classes {
@@ -94,7 +94,7 @@ impl From<&PyClassInfo> for ClassDef {
             attrs: Vec::new(),
             setters: info.setters.iter().map(MemberDef::from).collect(),
             getters: info.getters.iter().map(MemberDef::from).collect(),
-            methods: Vec::new(),
+            methods: Default::default(),
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
             match_args: None,
@@ -138,9 +138,14 @@ impl fmt::Display for ClassDef {
         for setter in &self.setters {
             SetterDisplay(setter).fmt(f)?;
         }
-
-        for method in &self.methods {
-            method.fmt(f)?;
+        for methods in self.methods.values() {
+            let overloaded = methods.len() > 1;
+            for method in methods {
+                if overloaded {
+                    writeln!(f, "{indent}@typing.overload")?;
+                }
+                method.fmt(f)?;
+            }
         }
         for class in &self.classes {
             let emit = format!("{class}");

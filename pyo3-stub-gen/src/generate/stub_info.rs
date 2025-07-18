@@ -178,7 +178,11 @@ impl StubInfoBuilder {
                     });
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    entry
+                        .methods
+                        .entry(method.name.to_string())
+                        .or_default()
+                        .push(MethodDef::from(method))
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
