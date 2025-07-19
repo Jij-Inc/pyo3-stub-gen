@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  stub-gen:
+    cmds:
+      - cargo run --bin stub_gen
+    sources:
+      - src/**/*.rs
+      - Cargo.toml
+    generates:
+      - python/**/*.pyi
+
+  test:
+    deps: [stub-gen]
+    cmds:
+      - cd python && uv run pytest ../tests/
+      - cd python && uv run pyright ../tests/
+      - cd python && uvx ruff check ../tests/
