@@ -1,0 +1,7 @@
+[project]
+name = "test-dash-package"
+version = "0.1.0"
+
+[build-system]
+requires = ["maturin>=1"]
+build-backend = "maturin"

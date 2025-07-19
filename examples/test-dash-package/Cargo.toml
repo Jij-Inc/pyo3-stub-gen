@@ -1,0 +1,16 @@
+[package]
+name = "test-dash-package"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "test_dash_package"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { workspace = true }
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+
+[[bin]]
+name = "stub_gen"
+path = "src/bin/stub_gen.rs"
