@@ -110,6 +110,12 @@ impl StubInfoBuilder {
             .insert((info.struct_id)(), ClassDef::from(info));
     }
 
+    fn add_complex_enum(&mut self, info: &PyComplexEnumInfo) {
+        self.get_module(info.module)
+            .class
+            .insert((info.enum_id)(), ClassDef::from(info));
+    }
+
     fn add_enum(&mut self, info: &PyEnumInfo) {
         self.get_module(info.module)
             .enum_
@@ -203,6 +209,9 @@ impl StubInfoBuilder {
     fn build(mut self) -> StubInfo {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
+        }
+        for info in inventory::iter::<PyComplexEnumInfo> {
+            self.add_complex_enum(info);
         }
         for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);

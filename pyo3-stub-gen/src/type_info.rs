@@ -132,6 +132,41 @@ pub struct PyClassInfo {
 
 inventory::collect!(PyClassInfo);
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum VariantForm {
+    Unit,
+    Tuple,
+    Struct,
+}
+
+/// Info of a `#[pyclass]` with a single variant of a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct VariantInfo {
+    pub pyclass_name: &'static str,
+    pub module: Option<&'static str>,
+    pub doc: &'static str,
+    pub fields: &'static [MemberInfo],
+    pub form: &'static VariantForm,
+    pub constr_args: &'static [ArgInfo],
+}
+
+/// Info of a `#[pyclass]` with a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct PyComplexEnumInfo {
+    // Rust struct type-id
+    pub enum_id: fn() -> TypeId,
+    // The name exposed to Python
+    pub pyclass_name: &'static str,
+    /// Module name specified by `#[pyclass(module = "foo.bar")]`
+    pub module: Option<&'static str>,
+    /// Docstring
+    pub doc: &'static str,
+    /// static members by `#[pyo3(get, set)]`
+    pub variants: &'static [VariantInfo],
+}
+
+inventory::collect!(PyComplexEnumInfo);
+
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]
 pub struct PyEnumInfo {
