@@ -1,7 +1,12 @@
 [project]
+# maturin will convert `-` to `_` in the package name automatically
+# This module tests pyo3-stub-gen correctly handles package names with dashes
 name = "test-dash-package"
 version = "0.1.0"
 
 [build-system]
 requires = ["maturin>=1"]
 build-backend = "maturin"
+
+[tool.maturin]
+# For cases where we define `module-name` explicitly here are tested in other examples.
