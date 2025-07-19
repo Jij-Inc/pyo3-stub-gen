@@ -72,6 +72,7 @@ mod attr;
 mod member;
 mod method;
 mod pyclass;
+mod pyclass_complex_enum;
 mod pyclass_enum;
 mod pyfunction;
 mod pymethods;
@@ -79,12 +80,14 @@ mod renaming;
 mod signature;
 mod stub_type;
 mod util;
+mod variant;
 
 use arg::*;
 use attr::*;
 use member::*;
 use method::*;
 use pyclass::*;
+use pyclass_complex_enum::*;
 use pyclass_enum::*;
 use pyfunction::*;
 use pymethods::*;
@@ -113,6 +116,18 @@ pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
 
 pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     let inner = PyEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let derive_stub_type = StubType::from(&inner);
+    Ok(quote! {
+        #item
+        #derive_stub_type
+        pyo3_stub_gen::inventory::submit! {
+            #inner
+        }
+    })
+}
+
+pub fn pyclass_complex_enum(item: TokenStream2) -> Result<TokenStream2> {
+    let inner = PyComplexEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
     let derive_stub_type = StubType::from(&inner);
     Ok(quote! {
         #item
