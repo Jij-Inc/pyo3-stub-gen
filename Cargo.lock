@@ -776,6 +776,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "test-dash-package"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "toml"
 version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"

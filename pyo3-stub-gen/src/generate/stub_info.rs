@@ -30,7 +30,9 @@ impl StubInfo {
 
     pub fn generate(&self) -> Result<()> {
         for (name, module) in self.modules.iter() {
-            let path = name.replace(".", "/");
+            // Convert dashes to underscores for Python compatibility
+            let normalized_name = name.replace("-", "_");
+            let path = normalized_name.replace(".", "/");
             let dest = if module.submodules.is_empty() {
                 self.python_root.join(format!("{path}.pyi"))
             } else {
