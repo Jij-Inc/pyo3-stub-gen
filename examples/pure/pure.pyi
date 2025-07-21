@@ -2,6 +2,7 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import collections.abc
 import datetime
 import os
 import pathlib
@@ -85,7 +86,7 @@ class NumberComplex:
         def __new__(cls, _0:builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
-    
+
     class INTEGER(NumberComplex):
         r"""
         Integer variant
@@ -97,7 +98,7 @@ class NumberComplex:
             The integer value
             """
         def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
-    
+
     ...
 
 class Shape1:
@@ -110,7 +111,7 @@ class Shape1:
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius:builtins.float) -> Shape1.Circle: ...
-    
+
     class Rectangle(Shape1):
         __match_args__ = ("width", "height",)
         @property
@@ -118,7 +119,7 @@ class Shape1:
         @property
         def height(self) -> builtins.float: ...
         def __new__(cls, width:builtins.float, height:builtins.float) -> Shape1.Rectangle: ...
-    
+
     class RegularPolygon(Shape1):
         __match_args__ = ("_0", "_1",)
         @property
@@ -128,11 +129,11 @@ class Shape1:
         def __new__(cls, _0:builtins.int, _1:builtins.float) -> Shape1.RegularPolygon: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
-    
+
     class Nothing(Shape1):
         __match_args__ = ((),)
         def __new__(cls) -> Shape1.Nothing: ...
-    
+
     ...
 
 class Shape2:
@@ -145,7 +146,7 @@ class Shape2:
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius:builtins.float=1.0) -> Shape2.Circle: ...
-    
+
     class Rectangle(Shape2):
         __match_args__ = ("width", "height",)
         @property
@@ -153,7 +154,7 @@ class Shape2:
         @property
         def height(self) -> builtins.float: ...
         def __new__(cls, *, width:builtins.float, height:builtins.float) -> Shape2.Rectangle: ...
-    
+
     class RegularPolygon(Shape2):
         __match_args__ = ("side_count", "radius",)
         @property
@@ -161,11 +162,11 @@ class Shape2:
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, side_count:builtins.int, radius:builtins.float=1.0) -> Shape2.RegularPolygon: ...
-    
+
     class Nothing(Shape2):
         __match_args__ = ((),)
         def __new__(cls) -> Shape2.Nothing: ...
-    
+
     ...
 
 class Number(Enum):
@@ -199,6 +200,8 @@ def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[bui
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
 def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def override_type(cb:collections.abc.Callable[[str]]) -> None: ...
 
 @typing.overload
 def overload_example_1(x:builtins.int) -> builtins.int: ...
@@ -237,4 +240,3 @@ def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     """
 
 class MyError(RuntimeError): ...
-

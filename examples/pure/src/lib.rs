@@ -250,6 +250,16 @@ fn default_value(num: Number) -> Number {
     num
 }
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn override_type<'a>(
+    #[override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc"))]
+    cb: Bound<'a, PyAny>,
+) -> PyResult<()> {
+    cb.call1(("Hello!",))?;
+    Ok(())
+}
+
 // Test for `@overload` decorator generation
 
 /// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
@@ -443,6 +453,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
+    m.add_function(wrap_pyfunction!(override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     Ok(())

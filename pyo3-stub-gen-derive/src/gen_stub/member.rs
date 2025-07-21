@@ -202,6 +202,6 @@ impl From<MemberInfo> for ArgInfo {
     fn from(value: MemberInfo) -> Self {
         let MemberInfo { name, r#type, .. } = value;
 
-        Self { name, r#type }
+        Self::RustType { name, r#type }
     }
 }

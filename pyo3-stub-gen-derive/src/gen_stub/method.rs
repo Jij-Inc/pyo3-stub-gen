@@ -52,8 +52,14 @@ fn replace_inner(ty: &mut Type, self_: &Type) {
 
 impl MethodInfo {
     pub fn replace_self(&mut self, self_: &Type) {
-        for arg in &mut self.args {
-            replace_inner(&mut arg.r#type, self_);
+        for mut arg in &mut self.args {
+            let (ArgInfo::RustType {
+                r#type: ref mut ty, ..
+            }
+            | ArgInfo::OverrideType {
+                r#type: ref mut ty, ..
+            }) = &mut arg;
+            replace_inner(ty, self_);
         }
         if let Some(ret) = self.r#return.as_mut() {
             replace_inner(ret, self_);

@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{Error, ImplItem, ItemImpl, Result, Type};
+use syn::{Error, FnArg, ImplItem, ItemImpl, Result, Type};
 
 use super::{attr::parse_gen_stub_skip, MemberInfo, MethodInfo};
 
@@ -93,6 +93,13 @@ pub fn prune_attrs(item_impl: &mut ItemImpl) {
     for inner in item_impl.items.iter_mut() {
         if let ImplItem::Fn(item_fn) = inner {
             super::attr::prune_attrs(&mut item_fn.attrs);
+            for arg in item_fn.sig.inputs.iter_mut() {
+                if let FnArg::Typed(ref mut pat_type) = arg {
+                    pat_type
+                        .attrs
+                        .retain(|attr| !attr.path().is_ident("override_type"));
+                }
+            }
         }
     }
 }

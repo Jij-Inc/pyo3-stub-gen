@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parse::{Parse, ParseStream},
-    Error, ItemFn, Result, Type,
+    Error, FnArg, ItemFn, Result, Type,
 };
 
 use super::{
@@ -108,4 +108,11 @@ impl ToTokens for PyFunctionInfo {
 // We need to remove all `#[gen_stub(xxx)]` before print the item_fn back
 pub fn prune_attrs(item_fn: &mut ItemFn) {
     super::attr::prune_attrs(&mut item_fn.attrs);
+    for arg in item_fn.sig.inputs.iter_mut() {
+        if let FnArg::Typed(ref mut pat_type) = arg {
+            pat_type
+                .attrs
+                .retain(|attr| !attr.path().is_ident("override_type"));
+        }
+    }
 }
