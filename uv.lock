@@ -1,6 +1,6 @@
 version = 1
 revision = 2
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [manifest]
 members = [
@@ -8,6 +8,7 @@ members = [
     "mixed-sub",
     "mixed-sub-multiple",
     "pure",
+    "test-dash-package",
 ]
 
 [manifest.dependency-groups]
@@ -119,6 +120,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/ae/3c/c9d525a414d506893
 wheels = [
     { url = "https://files.pythonhosted.org/packages/30/3d/64ad57c803f1fa1e963a7946b6e0fea4a70df53c1a7fed304586539c2bac/pytest-8.3.5-py3-none-any.whl", hash = "sha256:c69214aa47deac29fad6c2a4f590b9c4a9fdb16a403176fe154b79c0b4d4d820", size = 343634, upload-time = "2025-03-02T12:54:52.069Z" },
 ]
+
+[[package]]
+name = "test-dash-package"
+version = "0.1.0"
+source = { editable = "examples/test-dash-package" }
 
 [[package]]
 name = "tomli"

@@ -30,7 +30,9 @@ impl StubInfo {
 
     pub fn generate(&self) -> Result<()> {
         for (name, module) in self.modules.iter() {
-            let path = name.replace(".", "/");
+            // Convert dashes to underscores for Python compatibility
+            let normalized_name = name.replace("-", "_");
+            let path = normalized_name.replace(".", "/");
             let dest = if module.submodules.is_empty() {
                 self.python_root.join(format!("{path}.pyi"))
             } else {
@@ -108,6 +110,12 @@ impl StubInfoBuilder {
         self.get_module(info.module)
             .class
             .insert((info.struct_id)(), ClassDef::from(info));
+    }
+
+    fn add_complex_enum(&mut self, info: &PyComplexEnumInfo) {
+        self.get_module(info.module)
+            .class
+            .insert((info.enum_id)(), ClassDef::from(info));
     }
 
     fn add_enum(&mut self, info: &PyEnumInfo) {
@@ -203,6 +211,9 @@ impl StubInfoBuilder {
     fn build(mut self) -> StubInfo {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
+        }
+        for info in inventory::iter::<PyComplexEnumInfo> {
+            self.add_complex_enum(info);
         }
         for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);

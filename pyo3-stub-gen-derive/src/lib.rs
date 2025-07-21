@@ -45,6 +45,26 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
         .into()
 }
 
+/// Embed metadata for Python stub file generation for `#[pyclass]` macro with a complex enum
+///
+/// ```
+/// #[pyo3_stub_gen_derive::gen_stub_pyclass_complex_enum]
+/// #[pyo3::pyclass(module = "my_module", name = "DataType")]
+/// #[derive(Debug, Clone)]
+/// pub enum PyDataType {
+///     #[pyo3(name = "FLOAT")]
+///     Float{f: f64},
+///     #[pyo3(name = "INTEGER")]
+///     Integer(i64),
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn gen_stub_pyclass_complex_enum(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pyclass_complex_enum(item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
+
 /// Embed metadata for Python stub file generation for `#[pymethods]` macro
 ///
 /// ```
