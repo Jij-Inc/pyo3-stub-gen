@@ -51,7 +51,7 @@ impl From<&PyComplexEnumInfo> for ClassDef {
             doc: info.doc,
             getters: Vec::new(),
             setters: Vec::new(),
-            methods: Vec::new(),
+            methods: HashMap::new(),
             classes: info
                 .variants
                 .iter()
