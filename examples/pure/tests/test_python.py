@@ -112,3 +112,35 @@ def test_path():
 
     out = echo_path("test")
     assert out == pathlib.Path("test")
+
+
+def test_overload_example_1():
+    from pure import overload_example_1
+
+    assert overload_example_1(1) == 2
+    assert overload_example_1(1.5) == 2.5
+
+
+def test_overload_example_2():
+    from pure import overload_example_2
+
+    assert overload_example_2(1) == 2
+    assert overload_example_2(1.5) == 2.5
+
+
+def test_overload_incrementer():
+    from pure import Incrementer
+
+    incr = Incrementer()
+
+    assert incr.increment_1(1.5) == 2.5
+    assert incr.increment_1(1) == 2
+
+
+def test_overload_incrementer_2():
+    from pure import Incrementer2
+
+    incr = Incrementer2()
+
+    assert incr.increment_2(1.5) == 2.5
+    assert incr.increment_2(1) == 2

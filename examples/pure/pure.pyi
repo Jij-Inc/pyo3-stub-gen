@@ -44,16 +44,28 @@ class B(A):
 
 class Incrementer:
     @typing.overload
-    def increment_1(self, x:builtins.int) -> builtins.int: ...
+    def increment_1(self, x:builtins.int) -> builtins.int:
+        r"""
+        And this is for the second comment
+        """
     @typing.overload
-    def increment_1(self, x:builtins.float) -> builtins.float: ...
+    def increment_1(self, x:builtins.float) -> builtins.float:
+        r"""
+        This is the original doc comment
+        """
     def new(self) -> Incrementer: ...
 
 class Incrementer2:
     @typing.overload
-    def increment_2(self, x:builtins.int) -> builtins.int: ...
+    def increment_2(self, x:builtins.int) -> builtins.int:
+        r"""
+        increment_2 for integers, submitted by hands
+        """
     @typing.overload
-    def increment_2(self, x:builtins.float) -> builtins.float: ...
+    def increment_2(self, x:builtins.float) -> builtins.float:
+        r"""
+        increment_2 for floats, submitted by hands
+        """
     def __new__(cls) -> Incrementer2:
         r"""
         Constructor for Incrementer2
@@ -199,12 +211,15 @@ def overload_example_1(x:builtins.float) -> builtins.float:
     """
 
 @typing.overload
-def overload_example_2(x:builtins.int) -> builtins.int: ...
+def overload_example_2(x:builtins.int) -> builtins.int:
+    r"""
+    Increments integer by 1
+    """
 
 @typing.overload
 def overload_example_2(x:builtins.float) -> builtins.float:
     r"""
-    Increments float or integer by 1
+    Increments float by 1
     """
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...

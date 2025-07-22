@@ -296,7 +296,7 @@ submit! {
         }],
         r#return: || f64::type_output(),
         module: None,
-        doc: "Increments float or integer by 1",
+        doc: "Increments float by 1",
     }
 }
 
@@ -310,7 +310,7 @@ submit! {
         }],
         r#return: || i64::type_output(),
         module: None,
-        doc: "",
+        doc: "Increments integer by 1",
     }
 }
 
@@ -327,6 +327,7 @@ impl Incrementer {
         Incrementer {}
     }
 
+    /// This is the original doc comment
     fn increment_1(&self, x: f64) -> f64 {
         x + 1.0
     }
@@ -350,7 +351,7 @@ submit! {
                 ],
                 r#type: MethodType::Instance,
                 r#return: || i64::type_output(),
-                doc: "",
+                doc: "And this is for the second comment",
             }
         ],
     }
@@ -392,7 +393,7 @@ submit! {
                 ],
                 r#type: MethodType::Instance,
                 r#return: || i64::type_output(),
-                doc: "",
+                doc: "increment_2 for integers, submitted by hands",
             },
             MethodInfo {
                 name: "__new__",
@@ -412,7 +413,7 @@ submit! {
                 ],
                 r#type: MethodType::Instance,
                 r#return: || f64::type_output(),
-                doc: "",
+                doc: "increment_2 for floats, submitted by hands",
             },
         ],
     }
