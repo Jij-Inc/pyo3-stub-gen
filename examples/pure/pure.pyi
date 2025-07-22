@@ -32,11 +32,11 @@ class A:
         default = 2
         ```
         """
+    def show_x(self) -> None: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
         """
-    def show_x(self) -> None: ...
     def ref_test(self, x:dict) -> dict: ...
 
 class B(A):
