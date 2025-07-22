@@ -1,15 +1,17 @@
+use indexmap::IndexMap;
+
 use crate::generate::{Arg, MethodDef, MethodType};
 use crate::type_info::{PyComplexEnumInfo, VariantForm, VariantInfo};
 use crate::TypeInfo;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::HashSet;
 
 pub(super) fn get_variant_methods(
     enum_info: &PyComplexEnumInfo,
     info: &VariantInfo,
-) -> BTreeMap<String, Vec<MethodDef>> {
+) -> IndexMap<String, Vec<MethodDef>> {
     let full_class_name = format!("{}.{}", enum_info.pyclass_name, info.pyclass_name);
 
-    let mut methods: BTreeMap<String, Vec<MethodDef>> = BTreeMap::new();
+    let mut methods: IndexMap<String, Vec<MethodDef>> = IndexMap::new();
 
     methods
         .entry("__new__".to_string())

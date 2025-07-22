@@ -1,6 +1,7 @@
+use indexmap::IndexMap;
+
 use crate::generate::variant_methods::get_variant_methods;
 use crate::{generate::*, type_info::*, TypeInfo};
-use std::collections::BTreeMap;
 use std::{fmt, vec};
 
 /// Definition of a Python class.
@@ -11,7 +12,7 @@ pub struct ClassDef {
     pub attrs: Vec<MemberDef>,
     pub getters: Vec<MemberDef>,
     pub setters: Vec<MemberDef>,
-    pub methods: BTreeMap<String, Vec<MethodDef>>,
+    pub methods: IndexMap<String, Vec<MethodDef>>,
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
     pub match_args: Option<Vec<String>>,
@@ -52,7 +53,7 @@ impl From<&PyComplexEnumInfo> for ClassDef {
             doc: info.doc,
             getters: Vec::new(),
             setters: Vec::new(),
-            methods: BTreeMap::new(),
+            methods: IndexMap::new(),
             classes: info
                 .variants
                 .iter()
