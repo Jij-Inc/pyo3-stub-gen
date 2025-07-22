@@ -68,7 +68,7 @@ impl fmt::Display for Module {
             write!(f, "{enum_}")?;
         }
         for functions in self.function.values() {
-            let overloaded = functions.len() == 1;
+            let overloaded = functions.len() > 1;
             for function in functions {
                 if overloaded {
                     writeln!(f, "@typing.overload")?;
