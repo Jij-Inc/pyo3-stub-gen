@@ -433,6 +433,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
     m.add_class::<Incrementer>()?;
+    m.add_class::<Incrementer2>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
