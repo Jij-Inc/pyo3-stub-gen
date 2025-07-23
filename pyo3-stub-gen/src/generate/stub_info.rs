@@ -59,7 +59,6 @@ struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
     python_root: PathBuf,
-    any_overloaded: bool,
 }
 
 impl StubInfoBuilder {
@@ -77,7 +76,6 @@ impl StubInfoBuilder {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
-            any_overloaded: false,
         }
     }
 
@@ -132,9 +130,7 @@ impl StubInfoBuilder {
             .function
             .entry(info.name)
             .or_default();
-        let is_overloaded = !target.is_empty();
         target.push(FunctionDef::from(info));
-        self.any_overloaded |= is_overloaded;
     }
 
     fn add_error(&mut self, info: &PyErrorInfo) {
@@ -180,7 +176,6 @@ impl StubInfoBuilder {
                 for method in info.methods {
                     let entries = entry.methods.entry(method.name.to_string()).or_default();
                     entries.push(MethodDef::from(method));
-                    self.any_overloaded |= entries.len() > 1;
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {

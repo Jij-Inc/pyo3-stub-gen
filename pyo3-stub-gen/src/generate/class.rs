@@ -33,8 +33,14 @@ impl Import for ClassDef {
         for setter in &self.setters {
             import.extend(setter.import());
         }
-        for method in self.methods.values().flatten() {
-            import.extend(method.import());
+        for method in self.methods.values() {
+            if method.len() > 1 {
+                // for @typing.overload
+                import.insert("typing".into());
+            }
+            for method in method {
+                import.extend(method.import());
+            }
         }
         for class in &self.classes {
             import.extend(class.import());
