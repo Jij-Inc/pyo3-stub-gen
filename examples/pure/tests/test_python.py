@@ -142,5 +142,5 @@ def test_overload_incrementer_2():
 
     incr = Incrementer2()
 
-    assert incr.increment_2(1.5) == 2.5
-    assert incr.increment_2(1) == 2
+    assert incr.increment_2(1.5) == 3.5
+    assert incr.increment_2(1) == 3
