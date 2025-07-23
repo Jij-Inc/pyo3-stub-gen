@@ -2,8 +2,21 @@
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{exceptions::PyRuntimeError, prelude::*, types::*};
-use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*, module_variable};
+use pyo3::{
+    exceptions::{PyRuntimeError, PyTypeError},
+    prelude::*,
+    types::*,
+    IntoPyObjectExt,
+};
+use pyo3_stub_gen::{
+    create_exception, define_stub_info_gatherer,
+    derive::*,
+    generate::MethodType,
+    inventory::submit,
+    module_variable,
+    type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
+    PyStubType,
+};
 use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
@@ -237,6 +250,175 @@ fn default_value(num: Number) -> Number {
     num
 }
 
+// Test for `@overload` decorator generation
+
+/// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
+/// and then manually with `submit!` macro.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn overload_example_1(x: f64) -> f64 {
+    x + 1.0
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_1",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || i64::type_input(),
+        }],
+        r#return: || i64::type_output(),
+        module: None,
+        doc: "",
+    }
+}
+/// Second example: all hints manually `submit!`ed via macro.
+#[pyfunction]
+fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+    let py = ob.py();
+    if let Ok(f) = ob.extract::<f64>() {
+        (f + 1.0).into_py_any(py)
+    } else if let Ok(i) = ob.extract::<i64>() {
+        (i + 1).into_py_any(py)
+    } else {
+        Err(PyTypeError::new_err("Invalid type, expected float or int"))
+    }
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_2",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || f64::type_input(),
+        }],
+        r#return: || f64::type_output(),
+        module: None,
+        doc: "Increments float by 1",
+    }
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_2",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || i64::type_input(),
+        }],
+        r#return: || i64::type_output(),
+        module: None,
+        doc: "Increments integer by 1",
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer {}
+
+#[pymethods]
+#[gen_stub_pymethods]
+impl Incrementer {
+    #[new]
+    fn new() -> Self {
+        Incrementer {}
+    }
+
+    /// This is the original doc comment
+    fn increment_1(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+
+submit! {
+    PyMethodsInfo {
+        struct_id: std::any::TypeId::of::<Incrementer>,
+        attrs: &[],
+        getters: &[],
+        setters: &[],
+        methods: &[
+            MethodInfo {
+                name: "increment_1",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || i64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || i64::type_output(),
+                doc: "And this is for the second comment",
+            }
+        ],
+    }
+}
+
+// Next, without gen_stub_pymethods and all submitted manually
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer2 {}
+
+#[pymethods]
+impl Incrementer2 {
+    #[new]
+    fn new() -> Self {
+        Incrementer2 {}
+    }
+
+    fn increment_2(&self, x: f64) -> f64 {
+        x + 2.0
+    }
+}
+
+submit! {
+    PyMethodsInfo {
+        struct_id: std::any::TypeId::of::<Incrementer2>,
+        attrs: &[],
+        getters: &[],
+        setters: &[],
+        methods: &[
+            MethodInfo {
+                name: "increment_2",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || i64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || i64::type_output(),
+                doc: "increment_2 for integers, submitted by hands",
+            },
+            MethodInfo {
+                name: "__new__",
+                args: &[],
+                r#type: MethodType::New,
+                r#return: || Incrementer2::type_output(),
+                doc: "Constructor for Incrementer2",
+            },
+            MethodInfo {
+                name: "increment_2",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || f64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || f64::type_output(),
+                doc: "increment_2 for floats, submitted by hands",
+            },
+        ],
+    }
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -250,6 +432,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NumberComplex>()?;
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
+    m.add_class::<Incrementer>()?;
+    m.add_class::<Incrementer2>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -259,6 +443,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
+    m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
+    m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     Ok(())
 }
 
