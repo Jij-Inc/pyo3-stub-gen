@@ -18,6 +18,7 @@ jobs:
           - mixed
           - mixed_sub
           - mixed_sub_multiple
+          - test-dash-package
         python-version:
           - "3.10"
           - "3.11"
@@ -30,5 +31,9 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Generate stub file
+        run: task ${{ matrix.crate }}:stub-gen
+      - name: Check if stub file is up to date
+        run: git diff --exit-code
       - name: Test
         run: task ${{ matrix.crate }}:test
