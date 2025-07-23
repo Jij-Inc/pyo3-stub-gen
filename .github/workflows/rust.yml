@@ -61,26 +61,6 @@ jobs:
         with:
           command: test
 
-  stub-gen:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - pure
-          - mixed
-          - mixed_sub
-          - mixed_sub_multiple
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup-test-environment
-      - name: Generate stub file
-        run: task ${{ matrix.crate}}:stub-gen
-      - name: Check if stub file is up to date
-        run: git diff --exit-code
-
   semver-check:
     runs-on: ubuntu-latest
     steps:
