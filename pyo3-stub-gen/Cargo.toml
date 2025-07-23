@@ -1,12 +1,12 @@
 [package]
 name = "pyo3-stub-gen"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
 repository.workspace = true
 keywords.workspace = true
 license.workspace = true
-readme.workspace = true
 
 [dependencies]
 anyhow.workspace = true
