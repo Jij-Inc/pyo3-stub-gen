@@ -198,6 +198,7 @@ pub enum StubGenAttr {
 
 pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
     attrs.retain(|attr| !attr.path().is_ident("gen_stub"));
+    attrs.retain(|attr| !attr.path().is_ident("override_type"));
 }
 
 pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {

@@ -252,12 +252,13 @@ fn default_value(num: Number) -> Number {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
+#[override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc"))]
 fn override_type<'a>(
     #[override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc"))]
     cb: Bound<'a, PyAny>,
-) -> PyResult<()> {
+) -> PyResult<Bound<'a, PyAny>> {
     cb.call1(("Hello!",))?;
-    Ok(())
+    Ok(cb)
 }
 
 // Test for `@overload` decorator generation

@@ -9,7 +9,7 @@ use syn::{
     token, Expr, Ident, Result, Token,
 };
 
-use crate::gen_stub::remove_lifetime;
+use crate::gen_stub::{remove_lifetime, util::TypeOrOverride};
 
 use super::ArgInfo;
 
@@ -75,31 +75,34 @@ impl ToTokens for ArgsWithSignature<'_> {
                 .args
                 .iter()
                 .map(|arg| match arg {
-                    ArgInfo::RustType { name, r#type } => {
+                    ArgInfo {
+                        name,
+                        r#type: TypeOrOverride::RustType { r#type },
+                    } => {
                         let mut ty = r#type.clone();
                         remove_lifetime(&mut ty);
                         (
                             name.clone(),
-                            ArgInfo::RustType {
+                            ArgInfo {
                                 name: name.clone(),
-                                r#type: ty,
+                                r#type: TypeOrOverride::RustType { r#type: ty },
                             },
                         )
                     }
-                    arg @ ArgInfo::OverrideType { name, .. } => (name.clone(), arg.clone()),
+                    arg @ ArgInfo { name, .. } => (name.clone(), arg.clone()),
                 })
                 .collect();
             sig.args.iter().map(|sig_arg| match sig_arg {
                 SignatureArg::Ident(ident) => {
                     let name = ident.to_string();
                     match args_map.get(&name) {
-                        Some(ArgInfo::RustType { name, r#type }) => Ok(quote! {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
                         }}),
-                        Some(ArgInfo::OverrideType { name, type_repr, imports, .. }) => {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
                             Ok(quote! {
                             ::pyo3_stub_gen::type_info::ArgInfo {
@@ -115,7 +118,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                     let name = ident.to_string();
 
                     match args_map.get(&name) {
-                        Some(ArgInfo::RustType { name, r#type }) => {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => {
                             let default = if value.to_token_stream().to_string() == "None" {
                                 quote! {
                                 "None".to_string()
@@ -143,7 +146,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 }),
                             }})
                         },
-                        Some(ArgInfo::OverrideType { name, type_repr, imports, r#type }) => {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, r#type }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
                             let default = if value.to_token_stream().to_string() == "None" {
                                 quote! {
@@ -184,13 +187,13 @@ impl ToTokens for ArgsWithSignature<'_> {
                 SignatureArg::Args(_, ident) => {
                     let name = ident.to_string();
                     match args_map.get(&name) {
-                        Some(ArgInfo::RustType { name, r#type }) => Ok(quote! {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
                         }}),
-                        Some(ArgInfo::OverrideType { name, type_repr, imports, .. }) => {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
                             Ok(quote! {
                             ::pyo3_stub_gen::type_info::ArgInfo {
@@ -205,13 +208,13 @@ impl ToTokens for ArgsWithSignature<'_> {
                 SignatureArg::Keywords(_, _, ident) => {
                     let name = ident.to_string();
                     match args_map.get(&name) {
-                        Some(ArgInfo::RustType { name, r#type }) => Ok(quote! {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
                         }}),
-                        Some(ArgInfo::OverrideType { name, type_repr, imports, .. }) => {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
                             Ok(quote! {
                             ::pyo3_stub_gen::type_info::ArgInfo {
@@ -229,7 +232,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                 .iter()
                 .map(|arg| {
                     match arg {
-                        ArgInfo::RustType { name, r#type } => {
+                        ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } } => {
                             let mut ty = r#type.clone();
                             remove_lifetime(&mut ty);
                             Ok(quote! {
@@ -240,7 +243,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 }
                             })
                         }
-                        ArgInfo::OverrideType { name, type_repr, imports, .. } => {
+                        ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }} => {
                             let imports = imports.iter().collect::<Vec<&String>>();
                             Ok(quote! {
                             ::pyo3_stub_gen::type_info::ArgInfo {

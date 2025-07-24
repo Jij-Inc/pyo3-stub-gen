@@ -1,13 +1,9 @@
-use std::collections::HashSet;
-
 use quote::ToTokens;
 use syn::{
-    parenthesized,
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    spanned::Spanned,
-    FnArg, GenericArgument, LitStr, PatType, PathArguments, Result, Token, Type, TypePath,
+    spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
 };
+
+use crate::gen_stub::util::{parse_override_type_attribute, TypeOrOverride};
 
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
     let mut args = Vec::new();
@@ -16,12 +12,19 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             continue;
         }
         let arg = ArgInfo::try_from(arg)?;
-        if let ArgInfo::RustType {
-            r#type: Type::Path(TypePath { path, .. }),
+        if let ArgInfo {
+            r#type:
+                TypeOrOverride::RustType {
+                    r#type: Type::Path(TypePath { path, .. }),
+                },
             ..
         }
-        | ArgInfo::OverrideType {
-            r#type: Type::Path(TypePath { path, .. }),
+        | ArgInfo {
+            r#type:
+                TypeOrOverride::OverrideType {
+                    r#type: Type::Path(TypePath { path, .. }),
+                    ..
+                },
             ..
         } = &arg
         {
@@ -49,17 +52,9 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
 }
 
 #[derive(Debug, Clone)]
-pub enum ArgInfo {
-    RustType {
-        name: String,
-        r#type: Type,
-    },
-    OverrideType {
-        name: String,
-        r#type: Type,
-        type_repr: String,
-        imports: HashSet<String>,
-    },
+pub struct ArgInfo {
+    pub(crate) name: String,
+    pub(crate) r#type: TypeOrOverride,
 }
 
 impl TryFrom<FnArg> for ArgInfo {
@@ -70,20 +65,14 @@ impl TryFrom<FnArg> for ArgInfo {
             if let syn::Pat::Ident(mut ident) = *pat {
                 ident.mutability = None;
                 let name = ident.to_token_stream().to_string();
-                for attr in &attrs {
-                    if attr.path().is_ident("override_type") {
-                        let attr: OverrideTypeAttribute = attr.parse_args()?;
-                        return Ok(Self::OverrideType {
-                            name: name,
-                            r#type: *ty,
-                            type_repr: attr.type_repr,
-                            imports: attr.imports,
-                        });
-                    }
+                if let Some(r#type) = parse_override_type_attribute((*ty).clone(), &attrs)? {
+                    return Ok(Self { name, r#type });
                 }
-                Ok(Self::RustType {
+                Ok(Self {
                     name,
-                    r#type: (*ty).clone(),
+                    r#type: TypeOrOverride::RustType {
+                        r#type: (*ty).clone(),
+                    },
                 })
             } else {
                 Err(syn::Error::new(span, "Expected identifier pattern"))
@@ -91,54 +80,5 @@ impl TryFrom<FnArg> for ArgInfo {
         } else {
             Err(syn::Error::new(span, "Expected typed argument"))
         }
-    }
-}
-
-pub struct OverrideTypeAttribute {
-    type_repr: String,
-    imports: HashSet<String>,
-}
-
-mod kw {
-    syn::custom_keyword!(type_repr);
-    syn::custom_keyword!(imports);
-    syn::custom_keyword!(override_type);
-}
-
-impl Parse for OverrideTypeAttribute {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let mut type_repr = None;
-        let mut imports = HashSet::new();
-
-        while !input.is_empty() {
-            let lookahead = input.lookahead1();
-
-            if lookahead.peek(kw::type_repr) {
-                input.parse::<kw::type_repr>()?;
-                input.parse::<Token![=]>()?;
-                type_repr = Some(input.parse::<LitStr>()?);
-            } else if lookahead.peek(kw::imports) {
-                input.parse::<kw::imports>()?;
-                input.parse::<Token![=]>()?;
-
-                let content;
-                parenthesized!(content in input);
-                let parsed_imports = Punctuated::<LitStr, Token![,]>::parse_terminated(&content)?;
-                imports = parsed_imports.into_iter().collect();
-            } else {
-                return Err(lookahead.error());
-            }
-
-            if !input.is_empty() {
-                input.parse::<Token![,]>()?;
-            }
-        }
-
-        Ok(OverrideTypeAttribute {
-            type_repr: type_repr
-                .ok_or_else(|| input.error("missing type_repr"))?
-                .value(),
-            imports: imports.iter().map(|i| i.value()).collect(),
-        })
     }
 }
