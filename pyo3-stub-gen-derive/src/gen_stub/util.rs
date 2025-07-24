@@ -59,7 +59,7 @@ pub fn remove_lifetime(ty: &mut Type) {
 /// For `PyResult<&'a T>` case, `'a` will be removed, i.e. returns `&T` for this case.
 pub fn extract_return_type(
     ret: &ReturnType,
-    attrs: &Vec<Attribute>,
+    attrs: &[Attribute],
 ) -> Result<Option<TypeOrOverride>> {
     let ret = if let ReturnType::Type(_, ty) = ret {
         unwrap_pyresult(ty)

@@ -60,7 +60,7 @@ impl MemberInfo {
                 return Ok(MemberInfo {
                     doc,
                     name: name.unwrap_or(fn_getter_name),
-                    r#type: extract_return_type(&sig.output, &attrs)?
+                    r#type: extract_return_type(&sig.output, attrs)?
                         .expect("Getter must return a type"),
                     default,
                 });
@@ -111,7 +111,7 @@ impl MemberInfo {
         Ok(MemberInfo {
             doc,
             name: sig.ident.to_string(),
-            r#type: extract_return_type(&sig.output, &attrs)?.expect("Getter must return a type"),
+            r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
         })
     }
