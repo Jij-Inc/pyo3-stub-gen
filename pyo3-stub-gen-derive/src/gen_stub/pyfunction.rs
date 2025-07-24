@@ -125,9 +125,7 @@ pub fn prune_attrs(item_fn: &mut ItemFn) {
     super::attr::prune_attrs(&mut item_fn.attrs);
     for arg in item_fn.sig.inputs.iter_mut() {
         if let FnArg::Typed(ref mut pat_type) = arg {
-            pat_type
-                .attrs
-                .retain(|attr| !attr.path().is_ident("override_type"));
+            super::attr::prune_attrs(&mut pat_type.attrs);
         }
     }
 }

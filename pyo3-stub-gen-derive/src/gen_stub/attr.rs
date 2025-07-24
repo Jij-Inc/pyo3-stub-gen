@@ -1,8 +1,13 @@
+use std::collections::HashSet;
+
 use super::{RenamingRule, Signature};
 use proc_macro2::TokenTree;
 use quote::ToTokens;
 use syn::{
-    parse::ParseStream, Attribute, Expr, ExprLit, Ident, Lit, Meta, MetaList, Result, Token, Type,
+    parenthesized,
+    parse::{Parse, ParseStream},
+    punctuated::Punctuated,
+    Attribute, Expr, ExprLit, Ident, Lit, LitStr, Meta, MetaList, Result, Token, Type,
 };
 
 pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
@@ -194,11 +199,21 @@ pub enum StubGenAttr {
     Default(Expr),
     /// Skip a function in #[pymethods]
     Skip,
+    /// Override the python type for a function argument or return type
+    OverrideType(OverrideTypeAttribute),
 }
 
 pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
     attrs.retain(|attr| !attr.path().is_ident("gen_stub"));
-    attrs.retain(|attr| !attr.path().is_ident("override_type"));
+}
+
+pub fn parse_gen_stub_override_type(attrs: &[Attribute]) -> Result<Option<OverrideTypeAttribute>> {
+    for attr in parse_gen_stub_attrs(attrs)? {
+        if let StubGenAttr::OverrideType(attr) = attr {
+            return Ok(Some(attr));
+        }
+    }
+    Ok(None)
 }
 
 pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
@@ -232,25 +247,21 @@ fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
             while !input.is_empty() {
                 let ident: Ident = input.parse()?;
                 #[allow(clippy::collapsible_else_if)]
-                if input.peek(Token![=]) {
+                if ident == "override_type" {
+                    let content;
+                    parenthesized!(content in input);
+                    let override_attr: OverrideTypeAttribute = content.parse()?;
+                    gen_stub_attrs.push(StubGenAttr::OverrideType(override_attr));
+                } else if ident == "skip" {
+                    gen_stub_attrs.push(StubGenAttr::Skip);
+                } else if ident == "default" && input.peek(Token![=]) {
                     input.parse::<Token![=]>()?;
-                    if ident == "default" {
-                        gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
-                    } else {
-                        return Err(syn::Error::new(
-                            ident.span(),
-                            format!("Unsupport keyword `{ident}`, valid is `default=xxx`"),
-                        ));
-                    }
+                    gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
                 } else {
-                    if ident == "skip" {
-                        gen_stub_attrs.push(StubGenAttr::Skip);
-                    } else {
-                        return Err(syn::Error::new(
-                            ident.span(),
-                            format!("Unsupport keyword `{ident}`, valid is `skip`"),
-                        ));
-                    }
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupport keyword `{ident}`, valid is `default=xxx`, skip or override_type(...)"),
+                    ));
                 }
                 if input.peek(Token![,]) {
                     input.parse::<Token![,]>()?;
@@ -262,6 +273,56 @@ fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
         })?;
     }
     Ok(gen_stub_attrs)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct OverrideTypeAttribute {
+    pub(crate) type_repr: String,
+    pub(crate) imports: HashSet<String>,
+}
+
+mod kw {
+    syn::custom_keyword!(type_repr);
+    syn::custom_keyword!(imports);
+    syn::custom_keyword!(override_type);
+}
+
+impl Parse for OverrideTypeAttribute {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut type_repr = None;
+        let mut imports = HashSet::new();
+
+        while !input.is_empty() {
+            let lookahead = input.lookahead1();
+
+            if lookahead.peek(kw::type_repr) {
+                input.parse::<kw::type_repr>()?;
+                input.parse::<Token![=]>()?;
+                type_repr = Some(input.parse::<LitStr>()?);
+            } else if lookahead.peek(kw::imports) {
+                input.parse::<kw::imports>()?;
+                input.parse::<Token![=]>()?;
+
+                let content;
+                parenthesized!(content in input);
+                let parsed_imports = Punctuated::<LitStr, Token![,]>::parse_terminated(&content)?;
+                imports = parsed_imports.into_iter().collect();
+            } else {
+                return Err(lookahead.error());
+            }
+
+            if !input.is_empty() {
+                input.parse::<Token![,]>()?;
+            }
+        }
+
+        Ok(OverrideTypeAttribute {
+            type_repr: type_repr
+                .ok_or_else(|| input.error("missing type_repr"))?
+                .value(),
+            imports: imports.iter().map(|i| i.value()).collect(),
+        })
+    }
 }
 
 #[cfg(test)]

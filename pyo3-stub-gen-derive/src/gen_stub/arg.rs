@@ -3,7 +3,7 @@ use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
 };
 
-use crate::gen_stub::util::{parse_override_type_attribute, TypeOrOverride};
+use crate::gen_stub::{attr::parse_gen_stub_override_type, util::TypeOrOverride};
 
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
     let mut args = Vec::new();
@@ -65,8 +65,15 @@ impl TryFrom<FnArg> for ArgInfo {
             if let syn::Pat::Ident(mut ident) = *pat {
                 ident.mutability = None;
                 let name = ident.to_token_stream().to_string();
-                if let Some(r#type) = parse_override_type_attribute((*ty).clone(), &attrs)? {
-                    return Ok(Self { name, r#type });
+                if let Some(attr) = parse_gen_stub_override_type(&attrs)? {
+                    return Ok(Self {
+                        name,
+                        r#type: TypeOrOverride::OverrideType {
+                            r#type: (*ty).clone(),
+                            type_repr: attr.type_repr,
+                            imports: attr.imports,
+                        },
+                    });
                 }
                 Ok(Self {
                     name,
