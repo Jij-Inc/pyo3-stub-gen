@@ -253,12 +253,26 @@ fn default_value(num: Number) -> Number {
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
-fn override_type<'a>(
+fn fn_override_type<'a>(
     #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
     cb: Bound<'a, PyAny>,
 ) -> PyResult<Bound<'a, PyAny>> {
     cb.call1(("Hello!",))?;
     Ok(cb)
+}
+#[gen_stub_pyclass]
+#[pyclass]
+struct OverrideType {}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl OverrideType {
+    #[gen_stub(override_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
+    fn error(&self) -> PyResult<()> {
+        Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+            "I'm an error!",
+        ))
+    }
 }
 
 // Test for `@overload` decorator generation
@@ -445,6 +459,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Shape2>()?;
     m.add_class::<Incrementer>()?;
     m.add_class::<Incrementer2>()?;
+    m.add_class::<OverrideType>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -454,7 +469,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
-    m.add_function(wrap_pyfunction!(override_type, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     Ok(())

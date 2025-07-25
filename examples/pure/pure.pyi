@@ -7,6 +7,7 @@ import datetime
 import os
 import pathlib
 import typing
+import typing_extensions
 from enum import Enum
 
 MY_CONSTANT: builtins.int
@@ -100,6 +101,9 @@ class NumberComplex:
         def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
     
     ...
+
+class OverrideType:
+    def error(self) -> typing_extensions.Never: ...
 
 class Shape1:
     r"""
@@ -201,6 +205,8 @@ def default_value(num:Number=Number.FLOAT) -> Number: ...
 
 def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 
+def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
+
 @typing.overload
 def overload_example_1(x:builtins.int) -> builtins.int: ...
 
@@ -222,8 +228,6 @@ def overload_example_2(x:builtins.float) -> builtins.float:
     r"""
     Increments float by 1
     """
-
-def override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 

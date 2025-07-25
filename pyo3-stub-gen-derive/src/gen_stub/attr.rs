@@ -328,7 +328,7 @@ impl Parse for OverrideTypeAttribute {
 #[cfg(test)]
 mod test {
     use super::*;
-    use syn::{parse_str, Fields, ItemStruct};
+    use syn::{parse_str, Fields, ItemFn, ItemStruct, PatType};
 
     #[test]
     fn test_parse_pyo3_attr() -> Result<()> {
@@ -394,7 +394,7 @@ mod test {
         Ok(())
     }
     #[test]
-    fn test_parse_gen_stub_attr() -> Result<()> {
+    fn test_parse_gen_stub_field_attr() -> Result<()> {
         let item: ItemStruct = parse_str(
             r#"
             pub struct PyPlaceholder {
@@ -415,7 +415,7 @@ mod test {
                 "String :: from (\"foo\")"
             );
         } else {
-            panic!("attr shoubd be Default");
+            panic!("attr should be Default");
         };
         assert_eq!(&StubGenAttr::Skip, &field0_attrs[1]);
         let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs)?;
@@ -424,8 +424,55 @@ mod test {
         if let StubGenAttr::Default(expr) = &field2_attrs[0] {
             assert_eq!(expr.to_token_stream().to_string(), "1 + 2");
         } else {
-            panic!("attr shoubd be Default");
+            panic!("attr should be Default");
         };
+        Ok(())
+    }
+    #[test]
+    fn test_parse_gen_stub_override_type_attr() -> Result<()> {
+        let item: ItemFn = parse_str(
+            r#"
+            #[gen_stub_pyfunction]
+            #[pyfunction]
+            #[gen_stub(override_type(type_repr="typing.Never", imports=("typing")))]
+            fn say_hello_forever<'a>(
+                #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+                cb: Bound<'a, PyAny>,
+            ) -> PyResult<()> {
+                loop {
+                    cb.call1(("Hello!",))?;
+                }
+            }
+            "#,
+        )?;
+        let fn_attrs = parse_gen_stub_attrs(&item.attrs)?;
+        assert_eq!(fn_attrs.len(), 1);
+        if let StubGenAttr::OverrideType(expr) = &fn_attrs[0] {
+            assert_eq!(
+                *expr,
+                OverrideTypeAttribute {
+                    type_repr: "typing.Never".into(),
+                    imports: HashSet::from(["typing".into()])
+                }
+            );
+        } else {
+            panic!("attr should be OverrideType");
+        };
+        if let syn::FnArg::Typed(PatType { attrs, .. }) = &item.sig.inputs[0] {
+            let arg_attrs = parse_gen_stub_attrs(&attrs)?;
+            assert_eq!(arg_attrs.len(), 1);
+            if let StubGenAttr::OverrideType(expr) = &arg_attrs[0] {
+                assert_eq!(
+                    *expr,
+                    OverrideTypeAttribute {
+                        type_repr: "collections.abc.Callable[[str]]".into(),
+                        imports: HashSet::from(["collections.abc".into()])
+                    }
+                );
+            } else {
+                panic!("attr should be OverrideType");
+            };
+        }
         Ok(())
     }
 }
