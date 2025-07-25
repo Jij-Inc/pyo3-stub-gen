@@ -262,7 +262,9 @@ fn fn_override_type<'a>(
 }
 #[gen_stub_pyclass]
 #[pyclass]
-struct OverrideType {}
+struct OverrideType {
+    num: isize,
+}
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -272,6 +274,21 @@ impl OverrideType {
         Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
             "I'm an error!",
         ))
+    }
+
+    #[getter]
+    #[gen_stub(override_type(type_repr="int", imports=()))]
+    fn get_num(&self) -> PyResult<Py<PyAny>> {
+        Python::with_gil(|py| self.num.into_py_any(py))
+    }
+
+    #[setter]
+    fn set_num(
+        &mut self,
+        #[gen_stub(override_type(type_repr="str", imports=()))] value: Py<PyAny>,
+    ) -> PyResult<()> {
+        self.num = Python::with_gil(|py| value.extract::<String>(py))?.parse::<isize>()?;
+        Ok(())
     }
 }
 
