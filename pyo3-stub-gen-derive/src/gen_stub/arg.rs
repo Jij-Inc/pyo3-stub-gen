@@ -3,6 +3,8 @@ use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
 };
 
+use crate::gen_stub::{attr::parse_gen_stub_override_type, util::TypeOrOverride};
+
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
     let mut args = Vec::new();
     for (n, arg) in iter.into_iter().enumerate() {
@@ -10,7 +12,22 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             continue;
         }
         let arg = ArgInfo::try_from(arg)?;
-        if let Type::Path(TypePath { path, .. }) = &arg.r#type {
+        if let ArgInfo {
+            r#type:
+                TypeOrOverride::RustType {
+                    r#type: Type::Path(TypePath { path, .. }),
+                },
+            ..
+        }
+        | ArgInfo {
+            r#type:
+                TypeOrOverride::OverrideType {
+                    r#type: Type::Path(TypePath { path, .. }),
+                    ..
+                },
+            ..
+        } = &arg
+        {
             let last = path.segments.last().unwrap();
             if last.ident == "Python" {
                 continue;
@@ -34,23 +51,41 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
     Ok(args)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArgInfo {
-    pub name: String,
-    pub r#type: Type,
+    pub(crate) name: String,
+    pub(crate) r#type: TypeOrOverride,
 }
 
 impl TryFrom<FnArg> for ArgInfo {
     type Error = syn::Error;
     fn try_from(value: FnArg) -> Result<Self> {
         let span = value.span();
-        if let FnArg::Typed(PatType { pat, ty, .. }) = value {
+        if let FnArg::Typed(PatType { pat, ty, attrs, .. }) = value {
             if let syn::Pat::Ident(mut ident) = *pat {
                 ident.mutability = None;
                 let name = ident.to_token_stream().to_string();
-                return Ok(Self { name, r#type: *ty });
+                if let Some(attr) = parse_gen_stub_override_type(&attrs)? {
+                    return Ok(Self {
+                        name,
+                        r#type: TypeOrOverride::OverrideType {
+                            r#type: (*ty).clone(),
+                            type_repr: attr.type_repr,
+                            imports: attr.imports,
+                        },
+                    });
+                }
+                Ok(Self {
+                    name,
+                    r#type: TypeOrOverride::RustType {
+                        r#type: (*ty).clone(),
+                    },
+                })
+            } else {
+                Err(syn::Error::new(span, "Expected identifier pattern"))
             }
+        } else {
+            Err(syn::Error::new(span, "Expected typed argument"))
         }
-        Err(syn::Error::new(span, "Expected typed argument"))
     }
 }
