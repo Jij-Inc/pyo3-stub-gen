@@ -285,7 +285,7 @@ impl OverrideType {
     }
 
     #[getter]
-    #[gen_stub(override_return_type(type_repr="int"))]
+    #[gen_stub(override_return_type(type_repr = "int"))]
     fn get_num(&self) -> PyResult<Py<PyAny>> {
         Python::with_gil(|py| self.num.into_py_any(py))
     }
@@ -293,7 +293,7 @@ impl OverrideType {
     #[setter]
     fn set_num(
         &mut self,
-        #[gen_stub(override_type(type_repr="str"))] value: Py<PyAny>,
+        #[gen_stub(override_type(type_repr = "str"))] value: Py<PyAny>,
     ) -> PyResult<()> {
         self.num = Python::with_gil(|py| value.extract::<String>(py))?.parse::<isize>()?;
         Ok(())
