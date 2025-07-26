@@ -1,6 +1,7 @@
 use quote::ToTokens;
 use syn::{
     spanned::Spanned, FnArg, GenericArgument, PatType, PathArguments, Result, Type, TypePath,
+    TypeReference,
 };
 
 use crate::gen_stub::{attr::parse_gen_stub_override_type, util::TypeOrOverride};
@@ -12,22 +13,30 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             continue;
         }
         let arg = ArgInfo::try_from(arg)?;
-        if let ArgInfo {
-            r#type:
-                TypeOrOverride::RustType {
-                    r#type: Type::Path(TypePath { path, .. }),
-                },
+        let (ArgInfo {
+            r#type: TypeOrOverride::RustType { r#type },
             ..
         }
         | ArgInfo {
-            r#type:
-                TypeOrOverride::OverrideType {
-                    r#type: Type::Path(TypePath { path, .. }),
-                    ..
-                },
+            r#type: TypeOrOverride::OverrideType { r#type, .. },
             ..
-        } = &arg
-        {
+        }) = &arg;
+        // Regard the first argument with `&Bound<'_, PyType>`
+        if let Type::Reference(TypeReference { elem, .. }) = &r#type {
+            if let Type::Path(TypePath { path, .. }) = elem.as_ref() {
+                let last = path.segments.last().unwrap();
+                if n == 0 && last.ident == "Bound" {
+                    if let PathArguments::AngleBracketed(args, ..) = &last.arguments {
+                        if let Some(last_type) = args.args.last() {
+                            if last_type.to_token_stream().to_string() == "PyType" {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if let Type::Path(TypePath { path, .. }) = &r#type {
             let last = path.segments.last().unwrap();
             if last.ident == "Python" {
                 continue;
@@ -75,17 +84,21 @@ impl TryFrom<FnArg> for ArgInfo {
                         },
                     });
                 }
-                Ok(Self {
+                return Ok(Self {
                     name,
                     r#type: TypeOrOverride::RustType {
                         r#type: (*ty).clone(),
                     },
-                })
-            } else {
-                Err(syn::Error::new(span, "Expected identifier pattern"))
+                });
             }
-        } else {
-            Err(syn::Error::new(span, "Expected typed argument"))
+
+            if let syn::Pat::Wild(_) = *pat {
+                return Ok(Self {
+                    name: "_".to_owned(),
+                    r#type: TypeOrOverride::RustType { r#type: *ty },
+                });
+            }
         }
+        Err(syn::Error::new(span, "Expected typed argument"))
     }
 }
