@@ -6,7 +6,7 @@ use syn::{
     Attribute, GenericArgument, PathArguments, PathSegment, Result, ReturnType, Type, TypePath,
 };
 
-use crate::gen_stub::attr::parse_gen_stub_override_type;
+use crate::gen_stub::attr::parse_gen_stub_override_return_type;
 
 pub fn quote_option<T: ToTokens>(a: &Option<T>) -> TokenStream2 {
     if let Some(a) = a {
@@ -68,7 +68,7 @@ pub fn extract_return_type(
     };
     let mut ret = ret.clone();
     remove_lifetime(&mut ret);
-    if let Some(attr) = parse_gen_stub_override_type(attrs)? {
+    if let Some(attr) = parse_gen_stub_override_return_type(attrs)? {
         return Ok(Some(TypeOrOverride::OverrideType {
             r#type: ret.clone(),
             type_repr: attr.type_repr,

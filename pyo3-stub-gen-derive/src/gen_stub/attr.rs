@@ -208,7 +208,18 @@ pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
 }
 
 pub fn parse_gen_stub_override_type(attrs: &[Attribute]) -> Result<Option<OverrideTypeAttribute>> {
-    for attr in parse_gen_stub_attrs(attrs)? {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Argument, None)? {
+        if let StubGenAttr::OverrideType(attr) = attr {
+            return Ok(Some(attr));
+        }
+    }
+    Ok(None)
+}
+
+pub fn parse_gen_stub_override_return_type(
+    attrs: &[Attribute],
+) -> Result<Option<OverrideTypeAttribute>> {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Function, None)? {
         if let StubGenAttr::OverrideType(attr) = attr {
             return Ok(Some(attr));
         }
@@ -217,7 +228,11 @@ pub fn parse_gen_stub_override_type(attrs: &[Attribute]) -> Result<Option<Overri
 }
 
 pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
-    for attr in parse_gen_stub_attrs(attrs)? {
+    for attr in parse_gen_stub_attrs(
+        attrs,
+        AttributeLocation::Field,
+        Some(&[&"override_return_type"]),
+    )? {
         if let StubGenAttr::Default(default) = attr {
             return Ok(Some(default));
         }
@@ -225,42 +240,101 @@ pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
     Ok(None)
 }
 pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
-    let skip = parse_gen_stub_attrs(attrs)?
-        .iter()
-        .any(|attr| matches!(attr, StubGenAttr::Skip));
+    let skip = parse_gen_stub_attrs(
+        attrs,
+        AttributeLocation::Field,
+        Some(&[&"override_return_type"]),
+    )?
+    .iter()
+    .any(|attr| matches!(attr, StubGenAttr::Skip));
     Ok(skip)
 }
-fn parse_gen_stub_attrs(attrs: &[Attribute]) -> Result<Vec<StubGenAttr>> {
+fn parse_gen_stub_attrs(
+    attrs: &[Attribute],
+    location: AttributeLocation,
+    ignored_idents: Option<&[&str]>,
+) -> Result<Vec<StubGenAttr>> {
     let mut out = Vec::new();
     for attr in attrs {
-        let mut new = parse_gen_stub_attr(attr)?;
+        let mut new = parse_gen_stub_attr(attr, location, ignored_idents.unwrap_or(&[]))?;
         out.append(&mut new);
     }
     Ok(out)
 }
 
-fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
+fn parse_gen_stub_attr(
+    attr: &Attribute,
+    location: AttributeLocation,
+    ignored_idents: &[&str],
+) -> Result<Vec<StubGenAttr>> {
     let mut gen_stub_attrs = Vec::new();
     let path = attr.path();
     if path.is_ident("gen_stub") {
         attr.parse_args_with(|input: ParseStream| {
             while !input.is_empty() {
                 let ident: Ident = input.parse()?;
-                #[allow(clippy::collapsible_else_if)]
-                if ident == "override_type" {
+                let ignored_ident = ignored_idents
+                    .iter()
+                    .any(|other| *other == ident.to_string());
+                if (ident == "override_type"
+                    && (location == AttributeLocation::Argument || ignored_ident))
+                    || (ident == "override_return_type"
+                        && (location == AttributeLocation::Function || ignored_ident))
+                {
                     let content;
                     parenthesized!(content in input);
                     let override_attr: OverrideTypeAttribute = content.parse()?;
                     gen_stub_attrs.push(StubGenAttr::OverrideType(override_attr));
-                } else if ident == "skip" {
+                } else if ident == "skip" && (location == AttributeLocation::Field || ignored_ident)
+                {
                     gen_stub_attrs.push(StubGenAttr::Skip);
-                } else if ident == "default" && input.peek(Token![=]) {
+                } else if ident == "default"
+                    && input.peek(Token![=])
+                    && (location == AttributeLocation::Field || ignored_ident)
+                {
                     input.parse::<Token![=]>()?;
                     gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
+                } else if ident == "override_type" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("`override_type(...)` is only valid in argument position"),
+                    ));
+                } else if ident == "override_return_type" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("`override_return_type(...)` is only valid in function position"),
+                    ));
+                } else if ident == "skip" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("`skip` is only valid in field position"),
+                    ));
+                } else if ident == "default" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("`default=xxx` is only valid in field position"),
+                    ));
+                } else if location == AttributeLocation::Argument {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupported keyword `{ident}`, valid is `override_type(...)`"),
+                    ));
+                } else if location == AttributeLocation::Field {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupported keyword `{ident}`, valid is `default=xxx` or `skip`"),
+                    ));
+                } else if location == AttributeLocation::Function {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!(
+                            "Unsupported keyword `{ident}`, valid is `override_return_type(...)`"
+                        ),
+                    ));
                 } else {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("Unsupport keyword `{ident}`, valid is `default=xxx`, skip or override_type(...)"),
+                        format!("Unsupported keyword `{ident}`"),
                     ));
                 }
                 if input.peek(Token![,]) {
@@ -273,6 +347,13 @@ fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
         })?;
     }
     Ok(gen_stub_attrs)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) enum AttributeLocation {
+    Argument,
+    Field,
+    Function,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -408,7 +489,7 @@ mod test {
             "#,
         )?;
         let fields: Vec<_> = item.fields.into_iter().collect();
-        let field0_attrs = parse_gen_stub_attrs(&fields[0].attrs)?;
+        let field0_attrs = parse_gen_stub_attrs(&fields[0].attrs, AttributeLocation::Field, None)?;
         if let StubGenAttr::Default(expr) = &field0_attrs[0] {
             assert_eq!(
                 expr.to_token_stream().to_string(),
@@ -418,9 +499,9 @@ mod test {
             panic!("attr should be Default");
         };
         assert_eq!(&StubGenAttr::Skip, &field0_attrs[1]);
-        let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs)?;
+        let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs, AttributeLocation::Field, None)?;
         assert_eq!(vec![StubGenAttr::Skip], field1_attrs);
-        let field2_attrs = parse_gen_stub_attrs(&fields[2].attrs)?;
+        let field2_attrs = parse_gen_stub_attrs(&fields[2].attrs, AttributeLocation::Field, None)?;
         if let StubGenAttr::Default(expr) = &field2_attrs[0] {
             assert_eq!(expr.to_token_stream().to_string(), "1 + 2");
         } else {
@@ -445,7 +526,7 @@ mod test {
             }
             "#,
         )?;
-        let fn_attrs = parse_gen_stub_attrs(&item.attrs)?;
+        let fn_attrs = parse_gen_stub_attrs(&item.attrs, AttributeLocation::Function, None)?;
         assert_eq!(fn_attrs.len(), 1);
         if let StubGenAttr::OverrideType(expr) = &fn_attrs[0] {
             assert_eq!(
@@ -459,7 +540,7 @@ mod test {
             panic!("attr should be OverrideType");
         };
         if let syn::FnArg::Typed(PatType { attrs, .. }) = &item.sig.inputs[0] {
-            let arg_attrs = parse_gen_stub_attrs(&attrs)?;
+            let arg_attrs = parse_gen_stub_attrs(&attrs, AttributeLocation::Argument, None)?;
             assert_eq!(arg_attrs.len(), 1);
             if let StubGenAttr::OverrideType(expr) = &arg_attrs[0] {
                 assert_eq!(

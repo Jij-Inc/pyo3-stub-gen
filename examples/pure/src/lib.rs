@@ -252,7 +252,7 @@ fn default_value(num: Number) -> Number {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-#[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
 fn fn_override_type<'a>(
     #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
     cb: Bound<'a, PyAny>,
@@ -269,7 +269,7 @@ struct OverrideType {
 #[gen_stub_pymethods]
 #[pymethods]
 impl OverrideType {
-    #[gen_stub(override_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
+    #[gen_stub(override_return_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
     fn error(&self) -> PyResult<()> {
         Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
             "I'm an error!",
@@ -277,7 +277,7 @@ impl OverrideType {
     }
 
     #[getter]
-    #[gen_stub(override_type(type_repr="int"))]
+    #[gen_stub(override_return_type(type_repr="int"))]
     fn get_num(&self) -> PyResult<Py<PyAny>> {
         Python::with_gil(|py| self.num.into_py_any(py))
     }
