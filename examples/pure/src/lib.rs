@@ -82,6 +82,14 @@ impl A {
     fn NUM2() -> usize {
         2
     }
+    #[classmethod]
+    fn classmethod_test1(cls: &Bound<'_, PyType>) {
+        _ = cls;
+    }
+
+    #[classmethod]
+    fn classmethod_test2(_: &Bound<'_, PyType>) {}
+
     fn show_x(&self) {
         println!("x = {}", self.x);
     }
