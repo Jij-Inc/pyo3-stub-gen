@@ -125,9 +125,12 @@ impl StubInfoBuilder {
     }
 
     fn add_function(&mut self, info: &PyFunctionInfo) {
-        self.get_module(info.module)
+        let target = self
+            .get_module(info.module)
             .function
-            .insert(info.name, FunctionDef::from(info));
+            .entry(info.name)
+            .or_default();
+        target.push(FunctionDef::from(info));
     }
 
     fn add_error(&mut self, info: &PyErrorInfo) {
@@ -171,7 +174,8 @@ impl StubInfoBuilder {
                     });
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    let entries = entry.methods.entry(method.name.to_string()).or_default();
+                    entries.push(MethodDef::from(method));
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
