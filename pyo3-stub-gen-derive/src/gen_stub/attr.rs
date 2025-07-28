@@ -231,7 +231,7 @@ pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
     for attr in parse_gen_stub_attrs(
         attrs,
         AttributeLocation::Field,
-        Some(&[&"override_return_type"]),
+        Some(&["override_return_type"]),
     )? {
         if let StubGenAttr::Default(default) = attr {
             return Ok(Some(default));
@@ -243,7 +243,7 @@ pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
     let skip = parse_gen_stub_attrs(
         attrs,
         AttributeLocation::Field,
-        Some(&[&"override_return_type"]),
+        Some(&["override_return_type"]),
     )?
     .iter()
     .any(|attr| matches!(attr, StubGenAttr::Skip));
@@ -275,7 +275,7 @@ fn parse_gen_stub_attr(
                 let ident: Ident = input.parse()?;
                 let ignored_ident = ignored_idents
                     .iter()
-                    .any(|other| *other == ident.to_string());
+                    .any(|other| ident == other);
                 if (ident == "override_type"
                     && (location == AttributeLocation::Argument || ignored_ident))
                     || (ident == "override_return_type"
@@ -297,22 +297,22 @@ fn parse_gen_stub_attr(
                 } else if ident == "override_type" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("`override_type(...)` is only valid in argument position"),
+                        "`override_type(...)` is only valid in argument position".to_string(),
                     ));
                 } else if ident == "override_return_type" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("`override_return_type(...)` is only valid in function position"),
+                        "`override_return_type(...)` is only valid in function position".to_string(),
                     ));
                 } else if ident == "skip" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("`skip` is only valid in field position"),
+                        "`skip` is only valid in field position".to_string(),
                     ));
                 } else if ident == "default" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("`default=xxx` is only valid in field position"),
+                        "`default=xxx` is only valid in field position".to_string(),
                     ));
                 } else if location == AttributeLocation::Argument {
                     return Err(syn::Error::new(
