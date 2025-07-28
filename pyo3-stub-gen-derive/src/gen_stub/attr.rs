@@ -515,7 +515,7 @@ mod test {
             r#"
             #[gen_stub_pyfunction]
             #[pyfunction]
-            #[gen_stub(override_type(type_repr="typing.Never", imports=("typing")))]
+            #[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
             fn say_hello_forever<'a>(
                 #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
                 cb: Bound<'a, PyAny>,
