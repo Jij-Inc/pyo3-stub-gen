@@ -228,11 +228,7 @@ pub fn parse_gen_stub_override_return_type(
 }
 
 pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
-    for attr in parse_gen_stub_attrs(
-        attrs,
-        AttributeLocation::Field,
-        Some(&["override_return_type"]),
-    )? {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Function, None)? {
         if let StubGenAttr::Default(default) = attr {
             return Ok(Some(default));
         }
@@ -243,7 +239,7 @@ pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
     let skip = parse_gen_stub_attrs(
         attrs,
         AttributeLocation::Field,
-        Some(&["override_return_type"]),
+        Some(&["override_return_type", "default"]),
     )?
     .iter()
     .any(|attr| matches!(attr, StubGenAttr::Skip));
@@ -288,7 +284,7 @@ fn parse_gen_stub_attr(
                     gen_stub_attrs.push(StubGenAttr::Skip);
                 } else if ident == "default"
                     && input.peek(Token![=])
-                    && (location == AttributeLocation::Field || ignored_ident)
+                    && (location == AttributeLocation::Field || location == AttributeLocation::Function || ignored_ident)
                 {
                     input.parse::<Token![=]>()?;
                     gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
@@ -311,7 +307,7 @@ fn parse_gen_stub_attr(
                 } else if ident == "default" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        "`default=xxx` is only valid in field position".to_string(),
+                        "`default=xxx` is only valid in field or function position".to_string(),
                     ));
                 } else if location == AttributeLocation::Argument {
                     return Err(syn::Error::new(
@@ -327,7 +323,7 @@ fn parse_gen_stub_attr(
                     return Err(syn::Error::new(
                         ident.span(),
                         format!(
-                            "Unsupported keyword `{ident}`, valid is `override_return_type(...)`"
+                            "Unsupported keyword `{ident}`, valid is `default=xxx` or `override_return_type(...)`"
                         ),
                     ));
                 } else {
