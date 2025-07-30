@@ -273,9 +273,7 @@ fn parse_gen_stub_attr(
         attr.parse_args_with(|input: ParseStream| {
             while !input.is_empty() {
                 let ident: Ident = input.parse()?;
-                let ignored_ident = ignored_idents
-                    .iter()
-                    .any(|other| ident == other);
+                let ignored_ident = ignored_idents.iter().any(|other| ident == other);
                 if (ident == "override_type"
                     && (location == AttributeLocation::Argument || ignored_ident))
                     || (ident == "override_return_type"
@@ -302,7 +300,8 @@ fn parse_gen_stub_attr(
                 } else if ident == "override_return_type" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        "`override_return_type(...)` is only valid in function position".to_string(),
+                        "`override_return_type(...)` is only valid in function position"
+                            .to_string(),
                     ));
                 } else if ident == "skip" {
                     return Err(syn::Error::new(
@@ -540,7 +539,7 @@ mod test {
             panic!("attr should be OverrideType");
         };
         if let syn::FnArg::Typed(PatType { attrs, .. }) = &item.sig.inputs[0] {
-            let arg_attrs = parse_gen_stub_attrs(&attrs, AttributeLocation::Argument, None)?;
+            let arg_attrs = parse_gen_stub_attrs(attrs, AttributeLocation::Argument, None)?;
             assert_eq!(arg_attrs.len(), 1);
             if let StubGenAttr::OverrideType(expr) = &arg_attrs[0] {
                 assert_eq!(
