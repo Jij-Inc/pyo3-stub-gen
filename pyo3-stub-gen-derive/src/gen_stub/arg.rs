@@ -4,6 +4,8 @@ use syn::{
     TypeReference,
 };
 
+use crate::gen_stub::{attr::parse_gen_stub_override_type, util::TypeOrOverride};
+
 pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>> {
     let mut args = Vec::new();
     for (n, arg) in iter.into_iter().enumerate() {
@@ -11,8 +13,16 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             continue;
         }
         let arg = ArgInfo::try_from(arg)?;
+        let (ArgInfo {
+            r#type: TypeOrOverride::RustType { r#type },
+            ..
+        }
+        | ArgInfo {
+            r#type: TypeOrOverride::OverrideType { r#type, .. },
+            ..
+        }) = &arg;
         // Regard the first argument with `&Bound<'_, PyType>`
-        if let Type::Reference(TypeReference { elem, .. }) = &arg.r#type {
+        if let Type::Reference(TypeReference { elem, .. }) = &r#type {
             if let Type::Path(TypePath { path, .. }) = elem.as_ref() {
                 let last = path.segments.last().unwrap();
                 if n == 0 && last.ident == "Bound" {
@@ -26,7 +36,7 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
                 }
             }
         }
-        if let Type::Path(TypePath { path, .. }) = &arg.r#type {
+        if let Type::Path(TypePath { path, .. }) = &r#type {
             let last = path.segments.last().unwrap();
             if last.ident == "Python" {
                 continue;
@@ -50,26 +60,42 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
     Ok(args)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArgInfo {
-    pub name: String,
-    pub r#type: Type,
+    pub(crate) name: String,
+    pub(crate) r#type: TypeOrOverride,
 }
 
 impl TryFrom<FnArg> for ArgInfo {
     type Error = syn::Error;
     fn try_from(value: FnArg) -> Result<Self> {
         let span = value.span();
-        if let FnArg::Typed(PatType { pat, ty, .. }) = value {
+        if let FnArg::Typed(PatType { pat, ty, attrs, .. }) = value {
             if let syn::Pat::Ident(mut ident) = *pat {
                 ident.mutability = None;
                 let name = ident.to_token_stream().to_string();
-                return Ok(Self { name, r#type: *ty });
+                if let Some(attr) = parse_gen_stub_override_type(&attrs)? {
+                    return Ok(Self {
+                        name,
+                        r#type: TypeOrOverride::OverrideType {
+                            r#type: (*ty).clone(),
+                            type_repr: attr.type_repr,
+                            imports: attr.imports,
+                        },
+                    });
+                }
+                return Ok(Self {
+                    name,
+                    r#type: TypeOrOverride::RustType {
+                        r#type: (*ty).clone(),
+                    },
+                });
             }
+
             if let syn::Pat::Wild(_) = *pat {
                 return Ok(Self {
                     name: "_".to_owned(),
-                    r#type: *ty,
+                    r#type: TypeOrOverride::RustType { r#type: *ty },
                 });
             }
         }

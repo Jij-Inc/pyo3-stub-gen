@@ -2,10 +2,12 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import collections.abc
 import datetime
 import os
 import pathlib
 import typing
+import typing_extensions
 from enum import Enum
 
 MY_CONSTANT: builtins.int
@@ -103,6 +105,13 @@ class NumberComplex:
         def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
     
     ...
+
+class OverrideType:
+    @property
+    def num(self) -> int: ...
+    @num.setter
+    def num(self, value: str) -> None: ...
+    def error(self) -> typing_extensions.Never: ...
 
 class Shape1:
     r"""
@@ -203,6 +212,8 @@ def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[bui
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
 def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
 
 @typing.overload
 def overload_example_1(x:builtins.int) -> builtins.int: ...
