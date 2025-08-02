@@ -1,17 +1,21 @@
-use crate::gen_stub::{attr::parse_gen_stub_default, extract_documents};
+use crate::gen_stub::{
+    attr::{parse_gen_stub_default, parse_gen_stub_override_type, OverrideTypeAttribute},
+    extract_documents,
+    util::TypeOrOverride,
+};
 
-use super::{escape_return_type, parse_pyo3_attrs, Attr};
+use super::{extract_return_type, parse_pyo3_attrs, Attr};
 
 use crate::gen_stub::arg::ArgInfo;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::{Attribute, Error, Expr, Field, FnArg, ImplItemConst, ImplItemFn, Result, Type};
+use syn::{Attribute, Error, Expr, Field, FnArg, ImplItemConst, ImplItemFn, Result};
 
 #[derive(Debug, Clone)]
 pub struct MemberInfo {
     doc: String,
     name: String,
-    r#type: Type,
+    r#type: TypeOrOverride,
     default: Option<Expr>,
 }
 
@@ -49,8 +53,8 @@ impl MemberInfo {
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
-        let attrs = parse_pyo3_attrs(attrs)?;
-        for attr in attrs {
+        let pyo3_attrs = parse_pyo3_attrs(attrs)?;
+        for attr in pyo3_attrs {
             if let Attr::Getter(name) = attr {
                 let fn_name = sig.ident.to_string();
                 let fn_getter_name = match fn_name.strip_prefix("get_") {
@@ -60,7 +64,8 @@ impl MemberInfo {
                 return Ok(MemberInfo {
                     doc,
                     name: name.unwrap_or(fn_getter_name),
-                    r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
+                    r#type: extract_return_type(&sig.output, attrs)?
+                        .expect("Getter must return a type"),
                     default,
                 });
             }
@@ -72,28 +77,40 @@ impl MemberInfo {
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
-        let attrs = parse_pyo3_attrs(attrs)?;
-        for attr in attrs {
+        let pyo3_attrs = parse_pyo3_attrs(attrs)?;
+        for attr in pyo3_attrs {
             if let Attr::Setter(name) = attr {
                 let fn_name = sig.ident.to_string();
                 let fn_setter_name = match fn_name.strip_prefix("set_") {
                     Some(s) => s.to_owned(),
                     None => fn_name,
                 };
+                let r#type = sig
+                    .inputs
+                    .get(1)
+                    .ok_or(syn::Error::new_spanned(&item, "Setter must input a type"))
+                    .and_then(|arg| {
+                        if let FnArg::Typed(t) = arg {
+                            Ok(match parse_gen_stub_override_type(&t.attrs)? {
+                                Some(OverrideTypeAttribute { type_repr, imports }) => {
+                                    TypeOrOverride::OverrideType {
+                                        r#type: *t.ty.clone(),
+                                        type_repr,
+                                        imports,
+                                    }
+                                }
+                                _ => TypeOrOverride::RustType {
+                                    r#type: *t.ty.clone(),
+                                },
+                            })
+                        } else {
+                            Err(syn::Error::new_spanned(&item, "Setter must input a type"))
+                        }
+                    })?;
                 return Ok(MemberInfo {
                     doc,
                     name: name.unwrap_or(fn_setter_name),
-                    r#type: sig
-                        .inputs
-                        .get(1)
-                        .and_then(|arg| {
-                            if let FnArg::Typed(t) = arg {
-                                Some(*t.ty.clone())
-                            } else {
-                                None
-                            }
-                        })
-                        .expect("Setter must input a type"),
+                    r#type,
                     default,
                 });
             }
@@ -108,7 +125,7 @@ impl MemberInfo {
         Ok(MemberInfo {
             doc,
             name: sig.ident.to_string(),
-            r#type: escape_return_type(&sig.output).expect("Getter must return a type"),
+            r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
         })
     }
@@ -125,7 +142,7 @@ impl MemberInfo {
         Ok(MemberInfo {
             doc,
             name: ident.to_string(),
-            r#type: ty,
+            r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
         })
     }
@@ -147,7 +164,7 @@ impl TryFrom<Field> for MemberInfo {
         let default = parse_gen_stub_default(&attrs)?;
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
-            r#type: ty,
+            r#type: TypeOrOverride::RustType { r#type: ty },
             doc,
             default,
         })
@@ -158,7 +175,7 @@ impl ToTokens for MemberInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self {
             name,
-            r#type: ty,
+            r#type,
             doc,
             default,
         } = self;
@@ -170,6 +187,8 @@ impl ToTokens for MemberInfo {
                         "None".to_string()
                     }
                 } else {
+                    let (TypeOrOverride::RustType { r#type: ty }
+                    | TypeOrOverride::OverrideType { r#type: ty, .. }) = r#type;
                     quote! {
                         ::pyo3::prepare_freethreaded_python();
                         ::pyo3::Python::with_gil(|py| -> String {
@@ -187,14 +206,29 @@ impl ToTokens for MemberInfo {
                     &DEFAULT
                 })}
             });
-        tokens.append_all(quote! {
-            ::pyo3_stub_gen::type_info::MemberInfo {
-                name: #name,
-                r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
-                doc: #doc,
-                default: #default,
+        match r#type {
+            TypeOrOverride::RustType { r#type: ty } => tokens.append_all(quote! {
+                ::pyo3_stub_gen::type_info::MemberInfo {
+                    name: #name,
+                    r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: #doc,
+                    default: #default,
+                }
+            }),
+            TypeOrOverride::OverrideType {
+                type_repr, imports, ..
+            } => {
+                let imports = imports.iter().collect::<Vec<&String>>();
+                tokens.append_all(quote! {
+                    ::pyo3_stub_gen::type_info::MemberInfo {
+                        name: #name,
+                        r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                        doc: #doc,
+                        default: #default,
+                    }
+                })
             }
-        })
+        }
     }
 }
 
