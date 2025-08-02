@@ -27,6 +27,7 @@ pub struct MethodInfo {
     r#return: Option<TypeOrOverride>,
     doc: String,
     r#type: MethodType,
+    is_async: bool,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -113,6 +114,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             r#return,
             doc,
             r#type: method_type,
+            is_async: sig.asyncness.is_some(),
         })
     }
 }
@@ -126,6 +128,7 @@ impl ToTokens for MethodInfo {
             sig,
             doc,
             r#type,
+            is_async,
         } = self;
         let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
@@ -158,7 +161,8 @@ impl ToTokens for MethodInfo {
                 args: #args_with_sig,
                 r#return: #ret_tt,
                 doc: #doc,
-                r#type: #type_tt
+                r#type: #type_tt,
+                is_async: #is_async,
             }
         })
     }

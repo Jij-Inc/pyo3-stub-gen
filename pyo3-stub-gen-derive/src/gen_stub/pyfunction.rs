@@ -19,6 +19,7 @@ pub struct PyFunctionInfo {
     sig: Option<Signature>,
     doc: String,
     module: Option<String>,
+    is_async: bool,
 }
 
 struct ModuleAttr {
@@ -71,6 +72,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             name,
             doc,
             module: None,
+            is_async: item.sig.asyncness.is_some(),
         })
     }
 }
@@ -84,6 +86,7 @@ impl ToTokens for PyFunctionInfo {
             doc,
             sig,
             module,
+            is_async,
         } = self;
         let ret_tt = if let Some(ret) = ret {
             match ret {
@@ -113,6 +116,7 @@ impl ToTokens for PyFunctionInfo {
                 r#return: #ret_tt,
                 doc: #doc,
                 module: #module_tt,
+                is_async: #is_async,
             }
         })
     }

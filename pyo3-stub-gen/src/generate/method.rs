@@ -11,6 +11,7 @@ pub struct MethodDef {
     pub r#return: TypeInfo,
     pub doc: &'static str,
     pub r#type: MethodType,
+    pub is_async: bool,
 }
 
 impl Import for MethodDef {
@@ -31,6 +32,7 @@ impl From<&MethodInfo> for MethodDef {
             r#return: (info.r#return)(),
             doc: info.doc,
             r#type: info.r#type,
+            is_async: info.is_async,
         }
     }
 }
@@ -39,21 +41,22 @@ impl fmt::Display for MethodDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         let mut needs_comma = false;
+        let async_ = if self.is_async { "async " } else { "" };
         match self.r#type {
             MethodType::Static => {
                 writeln!(f, "{indent}@staticmethod")?;
-                write!(f, "{indent}def {}(", self.name)?;
+                write!(f, "{indent}{async_}def {}(", self.name)?;
             }
             MethodType::Class | MethodType::New => {
                 if self.r#type == MethodType::Class {
                     // new is a classmethod without the decorator
                     writeln!(f, "{indent}@classmethod")?;
                 }
-                write!(f, "{indent}def {}(cls", self.name)?;
+                write!(f, "{indent}{async_}def {}(cls", self.name)?;
                 needs_comma = true;
             }
             MethodType::Instance => {
-                write!(f, "{indent}def {}(self", self.name)?;
+                write!(f, "{indent}{async_}def {}(self", self.name)?;
                 needs_comma = true;
             }
         }

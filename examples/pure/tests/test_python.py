@@ -1,9 +1,11 @@
 from pure import (
     sum,
+    create_a,
     create_dict,
     read_dict,
     echo_path,
     ahash_dict,
+    async_num,
     NumberComplex,
     Shape1,
     Shape2,
@@ -144,3 +146,10 @@ def test_overload_incrementer_2():
 
     assert incr.increment_2(1.5) == 3.5
     assert incr.increment_2(1) == 3
+
+
+@pytest.mark.asyncio
+async def test_async():
+    assert await async_num() == 123
+    a = create_a(1337)
+    assert await a.async_get_x() == 1337
