@@ -11,6 +11,6 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - uv run --with pytest-asyncio pytest
+      - uv run pytest
       - uv run pyright
       - uvx ruff check
