@@ -1,8 +1,8 @@
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    arg::parse_args, extract_documents, extract_return_type, parse_pyo3_attrs, ArgInfo,
-    ArgsWithSignature, Attr, Signature,
+    arg::parse_args, extract_documents, extract_deprecated, extract_return_type, parse_pyo3_attrs, ArgInfo,
+    ArgsWithSignature, Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -28,6 +28,7 @@ pub struct MethodInfo {
     doc: String,
     r#type: MethodType,
     is_async: bool,
+    deprecated: Option<DeprecatedInfo>,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -87,6 +88,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
     fn try_from(item: ImplItemFn) -> Result<Self> {
         let ImplItemFn { attrs, sig, .. } = item;
         let doc = extract_documents(&attrs).join("\n");
+        let deprecated = extract_deprecated(&attrs);
         let pyo3_attrs = parse_pyo3_attrs(&attrs)?;
         let mut method_name = None;
         let mut text_sig = Signature::overriding_operator(&sig);
@@ -115,6 +117,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             doc,
             r#type: method_type,
             is_async: sig.asyncness.is_some(),
+            deprecated,
         })
     }
 }
@@ -129,6 +132,7 @@ impl ToTokens for MethodInfo {
             doc,
             r#type,
             is_async,
+            deprecated,
         } = self;
         let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
@@ -155,6 +159,7 @@ impl ToTokens for MethodInfo {
             MethodType::Class => quote! { ::pyo3_stub_gen::type_info::MethodType::Class },
             MethodType::New => quote! { ::pyo3_stub_gen::type_info::MethodType::New },
         };
+        let deprecated_tt = deprecated.as_ref().map(|d| quote! { Some(#d) }).unwrap_or_else(|| quote! { None });
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
@@ -163,6 +168,7 @@ impl ToTokens for MethodInfo {
                 doc: #doc,
                 r#type: #type_tt,
                 is_async: #is_async,
+                deprecated: #deprecated_tt,
             }
         })
     }

@@ -346,6 +346,7 @@ submit! {
         module: None,
         doc: "",
         is_async: false,
+        deprecated: None,
     }
 }
 /// Second example: all hints manually `submit!`ed via macro.
@@ -373,6 +374,7 @@ submit! {
         module: None,
         doc: "Increments float by 1",
         is_async: false,
+        deprecated: None,
     }
 }
 
@@ -388,6 +390,7 @@ submit! {
         module: None,
         doc: "Increments integer by 1",
         is_async: false,
+        deprecated: None,
     }
 }
 
@@ -430,6 +433,7 @@ submit! {
                 r#return: || i64::type_output(),
                 doc: "And this is for the second comment",
                 is_async: false,
+                deprecated: None,
             }
         ],
     }
@@ -473,6 +477,7 @@ submit! {
                 r#return: || i64::type_output(),
                 doc: "increment_2 for integers, submitted by hands",
                 is_async: false,
+                deprecated: None,
             },
             MethodInfo {
                 name: "__new__",
@@ -481,6 +486,7 @@ submit! {
                 r#return: || Incrementer2::type_output(),
                 doc: "Constructor for Incrementer2",
                 is_async: false,
+                deprecated: None,
             },
             MethodInfo {
                 name: "increment_2",
@@ -495,6 +501,7 @@ submit! {
                 r#return: || f64::type_output(),
                 doc: "increment_2 for floats, submitted by hands",
                 is_async: false,
+                deprecated: None,
             },
         ],
     }

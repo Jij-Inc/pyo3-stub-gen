@@ -8,8 +8,8 @@ use syn::{
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    extract_documents, extract_return_type, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
-    ArgsWithSignature, Attr, Signature,
+    extract_documents, extract_deprecated, extract_return_type, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
+    ArgsWithSignature, Attr, DeprecatedInfo, Signature,
 };
 
 pub struct PyFunctionInfo {
@@ -20,6 +20,7 @@ pub struct PyFunctionInfo {
     doc: String,
     module: Option<String>,
     is_async: bool,
+    deprecated: Option<DeprecatedInfo>,
 }
 
 struct ModuleAttr {
@@ -53,6 +54,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
     type Error = Error;
     fn try_from(item: ItemFn) -> Result<Self> {
         let doc = extract_documents(&item.attrs).join("\n");
+        let deprecated = extract_deprecated(&item.attrs);
         let args = parse_args(item.sig.inputs)?;
         let r#return = extract_return_type(&item.sig.output, &item.attrs)?;
         let mut name = None;
@@ -73,6 +75,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             doc,
             module: None,
             is_async: item.sig.asyncness.is_some(),
+            deprecated,
         })
     }
 }
@@ -87,6 +90,7 @@ impl ToTokens for PyFunctionInfo {
             sig,
             module,
             is_async,
+            deprecated,
         } = self;
         let ret_tt = if let Some(ret) = ret {
             match ret {
@@ -108,6 +112,7 @@ impl ToTokens for PyFunctionInfo {
         };
         // let sig_tt = quote_option(sig);
         let module_tt = quote_option(module);
+        let deprecated_tt = deprecated.as_ref().map(|d| quote! { Some(#d) }).unwrap_or_else(|| quote! { None });
         let args_with_sig = ArgsWithSignature { args, sig };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
@@ -117,6 +122,7 @@ impl ToTokens for PyFunctionInfo {
                 doc: #doc,
                 module: #module_tt,
                 is_async: #is_async,
+                deprecated: #deprecated_tt,
             }
         })
     }
