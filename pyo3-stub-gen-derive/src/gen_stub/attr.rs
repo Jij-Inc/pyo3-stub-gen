@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use super::{RenamingRule, Signature};
-use proc_macro2::{TokenTree, TokenStream as TokenStream2};
+use proc_macro2::{TokenStream as TokenStream2, TokenTree};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parenthesized,
@@ -48,7 +48,7 @@ pub fn extract_deprecated(attrs: &[Attribute]) -> Option<DeprecatedInfo> {
             if let Ok(list) = attr.meta.require_list() {
                 let mut since = None;
                 let mut note = None;
-                
+
                 list.parse_nested_meta(|meta| {
                     if meta.path.is_ident("since") {
                         let value = meta.value()?;
@@ -60,8 +60,9 @@ pub fn extract_deprecated(attrs: &[Attribute]) -> Option<DeprecatedInfo> {
                         note = Some(lit.value());
                     }
                     Ok(())
-                }).ok()?;
-                
+                })
+                .ok()?;
+
                 return Some(DeprecatedInfo { since, note });
             }
         }
@@ -89,8 +90,16 @@ pub struct DeprecatedInfo {
 
 impl ToTokens for DeprecatedInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let since = self.since.as_ref().map(|s| quote! { Some(#s) }).unwrap_or_else(|| quote! { None });
-        let note = self.note.as_ref().map(|n| quote! { Some(#n) }).unwrap_or_else(|| quote! { None });
+        let since = self
+            .since
+            .as_ref()
+            .map(|s| quote! { Some(#s) })
+            .unwrap_or_else(|| quote! { None });
+        let note = self
+            .note
+            .as_ref()
+            .map(|n| quote! { Some(#n) })
+            .unwrap_or_else(|| quote! { None });
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::DeprecatedInfo {
                 since: #since,

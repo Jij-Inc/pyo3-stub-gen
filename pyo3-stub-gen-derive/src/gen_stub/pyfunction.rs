@@ -8,8 +8,8 @@ use syn::{
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    extract_documents, extract_deprecated, extract_return_type, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
-    ArgsWithSignature, Attr, DeprecatedInfo, Signature,
+    extract_deprecated, extract_documents, extract_return_type, parse_args, parse_pyo3_attrs,
+    quote_option, ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
 };
 
 pub struct PyFunctionInfo {
@@ -112,7 +112,10 @@ impl ToTokens for PyFunctionInfo {
         };
         // let sig_tt = quote_option(sig);
         let module_tt = quote_option(module);
-        let deprecated_tt = deprecated.as_ref().map(|d| quote! { Some(#d) }).unwrap_or_else(|| quote! { None });
+        let deprecated_tt = deprecated
+            .as_ref()
+            .map(|d| quote! { Some(#d) })
+            .unwrap_or_else(|| quote! { None });
         let args_with_sig = ArgsWithSignature { args, sig };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {

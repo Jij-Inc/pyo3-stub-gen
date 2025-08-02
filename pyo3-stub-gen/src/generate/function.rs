@@ -57,7 +57,7 @@ impl fmt::Display for FunctionDef {
             }
             writeln!(f, ")")?;
         }
-        
+
         let async_ = if self.is_async { "async " } else { "" };
         write!(f, "{async_}def {}(", self.name)?;
         for (i, arg) in self.args.iter().enumerate() {

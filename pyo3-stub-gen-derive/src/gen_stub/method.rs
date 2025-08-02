@@ -1,8 +1,8 @@
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    arg::parse_args, extract_documents, extract_deprecated, extract_return_type, parse_pyo3_attrs, ArgInfo,
-    ArgsWithSignature, Attr, DeprecatedInfo, Signature,
+    arg::parse_args, extract_deprecated, extract_documents, extract_return_type, parse_pyo3_attrs,
+    ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -159,7 +159,10 @@ impl ToTokens for MethodInfo {
             MethodType::Class => quote! { ::pyo3_stub_gen::type_info::MethodType::Class },
             MethodType::New => quote! { ::pyo3_stub_gen::type_info::MethodType::New },
         };
-        let deprecated_tt = deprecated.as_ref().map(|d| quote! { Some(#d) }).unwrap_or_else(|| quote! { None });
+        let deprecated_tt = deprecated
+            .as_ref()
+            .map(|d| quote! { Some(#d) })
+            .unwrap_or_else(|| quote! { None });
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,

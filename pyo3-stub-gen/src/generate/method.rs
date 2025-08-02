@@ -48,7 +48,7 @@ impl fmt::Display for MethodDef {
         let indent = indent();
         let mut needs_comma = false;
         let async_ = if self.is_async { "async " } else { "" };
-        
+
         // Add deprecated decorator if present
         if let Some(deprecated) = &self.deprecated {
             write!(f, "{indent}@typing_extensions.deprecated(")?;
@@ -65,7 +65,7 @@ impl fmt::Display for MethodDef {
             }
             writeln!(f, ")")?;
         }
-        
+
         match self.r#type {
             MethodType::Static => {
                 writeln!(f, "{indent}@staticmethod")?;
