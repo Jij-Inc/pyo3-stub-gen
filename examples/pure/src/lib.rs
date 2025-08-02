@@ -107,7 +107,7 @@ impl A {
     #[gen_stub(skip)]
     fn need_skip(&self) {}
 
-    #[deprecated(since = "1.0", note = "This method is deprecated")]
+    #[deprecated(since = "1.0.0", note = "This method is deprecated")]
     fn deprecated_method(&self) {
         println!("This method is deprecated");
     }
@@ -269,7 +269,7 @@ async fn async_num() -> i32 {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-#[deprecated(since = "1.0", note = "This function is deprecated")]
+#[deprecated(since = "1.0.0", note = "This function is deprecated")]
 fn deprecated_function() {
     println!("This function is deprecated");
 }
