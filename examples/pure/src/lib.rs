@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
@@ -104,6 +106,11 @@ impl A {
 
     #[gen_stub(skip)]
     fn need_skip(&self) {}
+
+    #[deprecated(since = "1.0", note = "This method is deprecated")]
+    fn deprecated_method(&self) {
+        println!("This method is deprecated");
+    }
 }
 
 #[gen_stub_pyfunction]
@@ -258,6 +265,13 @@ module_variable!("pure", "MY_CONSTANT", usize);
 #[pyfunction]
 async fn async_num() -> i32 {
     123
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[deprecated(since = "1.0", note = "This function is deprecated")]
+fn deprecated_function() {
+    println!("This function is deprecated");
 }
 
 // Test if non-any PyObject Target can be a default value
@@ -511,6 +525,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(async_num, m)?)?;
+    m.add_function(wrap_pyfunction!(deprecated_function, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
