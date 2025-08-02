@@ -1,8 +1,13 @@
+use std::collections::HashSet;
+
 use super::{RenamingRule, Signature};
 use proc_macro2::TokenTree;
 use quote::ToTokens;
 use syn::{
-    parse::ParseStream, Attribute, Expr, ExprLit, Ident, Lit, Meta, MetaList, Result, Token, Type,
+    parenthesized,
+    parse::{Parse, ParseStream},
+    punctuated::Punctuated,
+    Attribute, Expr, ExprLit, Ident, Lit, LitStr, Meta, MetaList, Result, Token, Type,
 };
 
 pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
@@ -194,14 +199,36 @@ pub enum StubGenAttr {
     Default(Expr),
     /// Skip a function in #[pymethods]
     Skip,
+    /// Override the python type for a function argument or return type
+    OverrideType(OverrideTypeAttribute),
 }
 
 pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
     attrs.retain(|attr| !attr.path().is_ident("gen_stub"));
 }
 
+pub fn parse_gen_stub_override_type(attrs: &[Attribute]) -> Result<Option<OverrideTypeAttribute>> {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Argument, None)? {
+        if let StubGenAttr::OverrideType(attr) = attr {
+            return Ok(Some(attr));
+        }
+    }
+    Ok(None)
+}
+
+pub fn parse_gen_stub_override_return_type(
+    attrs: &[Attribute],
+) -> Result<Option<OverrideTypeAttribute>> {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Function, None)? {
+        if let StubGenAttr::OverrideType(attr) = attr {
+            return Ok(Some(attr));
+        }
+    }
+    Ok(None)
+}
+
 pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
-    for attr in parse_gen_stub_attrs(attrs)? {
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Function, None)? {
         if let StubGenAttr::Default(default) = attr {
             return Ok(Some(default));
         }
@@ -209,47 +236,101 @@ pub fn parse_gen_stub_default(attrs: &[Attribute]) -> Result<Option<Expr>> {
     Ok(None)
 }
 pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
-    let skip = parse_gen_stub_attrs(attrs)?
-        .iter()
-        .any(|attr| matches!(attr, StubGenAttr::Skip));
+    let skip = parse_gen_stub_attrs(
+        attrs,
+        AttributeLocation::Field,
+        Some(&["override_return_type", "default"]),
+    )?
+    .iter()
+    .any(|attr| matches!(attr, StubGenAttr::Skip));
     Ok(skip)
 }
-fn parse_gen_stub_attrs(attrs: &[Attribute]) -> Result<Vec<StubGenAttr>> {
+fn parse_gen_stub_attrs(
+    attrs: &[Attribute],
+    location: AttributeLocation,
+    ignored_idents: Option<&[&str]>,
+) -> Result<Vec<StubGenAttr>> {
     let mut out = Vec::new();
     for attr in attrs {
-        let mut new = parse_gen_stub_attr(attr)?;
+        let mut new = parse_gen_stub_attr(attr, location, ignored_idents.unwrap_or(&[]))?;
         out.append(&mut new);
     }
     Ok(out)
 }
 
-fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
+fn parse_gen_stub_attr(
+    attr: &Attribute,
+    location: AttributeLocation,
+    ignored_idents: &[&str],
+) -> Result<Vec<StubGenAttr>> {
     let mut gen_stub_attrs = Vec::new();
     let path = attr.path();
     if path.is_ident("gen_stub") {
         attr.parse_args_with(|input: ParseStream| {
             while !input.is_empty() {
                 let ident: Ident = input.parse()?;
-                #[allow(clippy::collapsible_else_if)]
-                if input.peek(Token![=]) {
+                let ignored_ident = ignored_idents.iter().any(|other| ident == other);
+                if (ident == "override_type"
+                    && (location == AttributeLocation::Argument || ignored_ident))
+                    || (ident == "override_return_type"
+                        && (location == AttributeLocation::Function || ignored_ident))
+                {
+                    let content;
+                    parenthesized!(content in input);
+                    let override_attr: OverrideTypeAttribute = content.parse()?;
+                    gen_stub_attrs.push(StubGenAttr::OverrideType(override_attr));
+                } else if ident == "skip" && (location == AttributeLocation::Field || ignored_ident)
+                {
+                    gen_stub_attrs.push(StubGenAttr::Skip);
+                } else if ident == "default"
+                    && input.peek(Token![=])
+                    && (location == AttributeLocation::Field || location == AttributeLocation::Function || ignored_ident)
+                {
                     input.parse::<Token![=]>()?;
-                    if ident == "default" {
-                        gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
-                    } else {
-                        return Err(syn::Error::new(
-                            ident.span(),
-                            format!("Unsupport keyword `{ident}`, valid is `default=xxx`"),
-                        ));
-                    }
+                    gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
+                } else if ident == "override_type" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`override_type(...)` is only valid in argument position".to_string(),
+                    ));
+                } else if ident == "override_return_type" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`override_return_type(...)` is only valid in function position"
+                            .to_string(),
+                    ));
+                } else if ident == "skip" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`skip` is only valid in field position".to_string(),
+                    ));
+                } else if ident == "default" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`default=xxx` is only valid in field or function position".to_string(),
+                    ));
+                } else if location == AttributeLocation::Argument {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupported keyword `{ident}`, valid is `override_type(...)`"),
+                    ));
+                } else if location == AttributeLocation::Field {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupported keyword `{ident}`, valid is `default=xxx` or `skip`"),
+                    ));
+                } else if location == AttributeLocation::Function {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!(
+                            "Unsupported keyword `{ident}`, valid is `default=xxx` or `override_return_type(...)`"
+                        ),
+                    ));
                 } else {
-                    if ident == "skip" {
-                        gen_stub_attrs.push(StubGenAttr::Skip);
-                    } else {
-                        return Err(syn::Error::new(
-                            ident.span(),
-                            format!("Unsupport keyword `{ident}`, valid is `skip`"),
-                        ));
-                    }
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Unsupported keyword `{ident}`"),
+                    ));
                 }
                 if input.peek(Token![,]) {
                     input.parse::<Token![,]>()?;
@@ -263,10 +344,67 @@ fn parse_gen_stub_attr(attr: &Attribute) -> Result<Vec<StubGenAttr>> {
     Ok(gen_stub_attrs)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) enum AttributeLocation {
+    Argument,
+    Field,
+    Function,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct OverrideTypeAttribute {
+    pub(crate) type_repr: String,
+    pub(crate) imports: HashSet<String>,
+}
+
+mod kw {
+    syn::custom_keyword!(type_repr);
+    syn::custom_keyword!(imports);
+    syn::custom_keyword!(override_type);
+}
+
+impl Parse for OverrideTypeAttribute {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut type_repr = None;
+        let mut imports = HashSet::new();
+
+        while !input.is_empty() {
+            let lookahead = input.lookahead1();
+
+            if lookahead.peek(kw::type_repr) {
+                input.parse::<kw::type_repr>()?;
+                input.parse::<Token![=]>()?;
+                type_repr = Some(input.parse::<LitStr>()?);
+            } else if lookahead.peek(kw::imports) {
+                input.parse::<kw::imports>()?;
+                input.parse::<Token![=]>()?;
+
+                let content;
+                parenthesized!(content in input);
+                let parsed_imports = Punctuated::<LitStr, Token![,]>::parse_terminated(&content)?;
+                imports = parsed_imports.into_iter().collect();
+            } else {
+                return Err(lookahead.error());
+            }
+
+            if !input.is_empty() {
+                input.parse::<Token![,]>()?;
+            }
+        }
+
+        Ok(OverrideTypeAttribute {
+            type_repr: type_repr
+                .ok_or_else(|| input.error("missing type_repr"))?
+                .value(),
+            imports: imports.iter().map(|i| i.value()).collect(),
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use syn::{parse_str, Fields, ItemStruct};
+    use syn::{parse_str, Fields, ItemFn, ItemStruct, PatType};
 
     #[test]
     fn test_parse_pyo3_attr() -> Result<()> {
@@ -332,7 +470,7 @@ mod test {
         Ok(())
     }
     #[test]
-    fn test_parse_gen_stub_attr() -> Result<()> {
+    fn test_parse_gen_stub_field_attr() -> Result<()> {
         let item: ItemStruct = parse_str(
             r#"
             pub struct PyPlaceholder {
@@ -346,24 +484,71 @@ mod test {
             "#,
         )?;
         let fields: Vec<_> = item.fields.into_iter().collect();
-        let field0_attrs = parse_gen_stub_attrs(&fields[0].attrs)?;
+        let field0_attrs = parse_gen_stub_attrs(&fields[0].attrs, AttributeLocation::Field, None)?;
         if let StubGenAttr::Default(expr) = &field0_attrs[0] {
             assert_eq!(
                 expr.to_token_stream().to_string(),
                 "String :: from (\"foo\")"
             );
         } else {
-            panic!("attr shoubd be Default");
+            panic!("attr should be Default");
         };
         assert_eq!(&StubGenAttr::Skip, &field0_attrs[1]);
-        let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs)?;
+        let field1_attrs = parse_gen_stub_attrs(&fields[1].attrs, AttributeLocation::Field, None)?;
         assert_eq!(vec![StubGenAttr::Skip], field1_attrs);
-        let field2_attrs = parse_gen_stub_attrs(&fields[2].attrs)?;
+        let field2_attrs = parse_gen_stub_attrs(&fields[2].attrs, AttributeLocation::Field, None)?;
         if let StubGenAttr::Default(expr) = &field2_attrs[0] {
             assert_eq!(expr.to_token_stream().to_string(), "1 + 2");
         } else {
-            panic!("attr shoubd be Default");
+            panic!("attr should be Default");
         };
+        Ok(())
+    }
+    #[test]
+    fn test_parse_gen_stub_override_type_attr() -> Result<()> {
+        let item: ItemFn = parse_str(
+            r#"
+            #[gen_stub_pyfunction]
+            #[pyfunction]
+            #[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
+            fn say_hello_forever<'a>(
+                #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+                cb: Bound<'a, PyAny>,
+            ) -> PyResult<()> {
+                loop {
+                    cb.call1(("Hello!",))?;
+                }
+            }
+            "#,
+        )?;
+        let fn_attrs = parse_gen_stub_attrs(&item.attrs, AttributeLocation::Function, None)?;
+        assert_eq!(fn_attrs.len(), 1);
+        if let StubGenAttr::OverrideType(expr) = &fn_attrs[0] {
+            assert_eq!(
+                *expr,
+                OverrideTypeAttribute {
+                    type_repr: "typing.Never".into(),
+                    imports: HashSet::from(["typing".into()])
+                }
+            );
+        } else {
+            panic!("attr should be OverrideType");
+        };
+        if let syn::FnArg::Typed(PatType { attrs, .. }) = &item.sig.inputs[0] {
+            let arg_attrs = parse_gen_stub_attrs(attrs, AttributeLocation::Argument, None)?;
+            assert_eq!(arg_attrs.len(), 1);
+            if let StubGenAttr::OverrideType(expr) = &arg_attrs[0] {
+                assert_eq!(
+                    *expr,
+                    OverrideTypeAttribute {
+                        type_repr: "collections.abc.Callable[[str]]".into(),
+                        imports: HashSet::from(["collections.abc".into()])
+                    }
+                );
+            } else {
+                panic!("attr should be OverrideType");
+            };
+        }
         Ok(())
     }
 }

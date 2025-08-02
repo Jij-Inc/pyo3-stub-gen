@@ -258,6 +258,48 @@ fn default_value(num: Number) -> Number {
     num
 }
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+fn fn_override_type<'a>(
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+    cb: Bound<'a, PyAny>,
+) -> PyResult<Bound<'a, PyAny>> {
+    cb.call1(("Hello!",))?;
+    Ok(cb)
+}
+#[gen_stub_pyclass]
+#[pyclass]
+struct OverrideType {
+    num: isize,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl OverrideType {
+    #[gen_stub(override_return_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
+    fn error(&self) -> PyResult<()> {
+        Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+            "I'm an error!",
+        ))
+    }
+
+    #[getter]
+    #[gen_stub(override_return_type(type_repr = "int"))]
+    fn get_num(&self) -> PyResult<Py<PyAny>> {
+        Python::with_gil(|py| self.num.into_py_any(py))
+    }
+
+    #[setter]
+    fn set_num(
+        &mut self,
+        #[gen_stub(override_type(type_repr = "str"))] value: Py<PyAny>,
+    ) -> PyResult<()> {
+        self.num = Python::with_gil(|py| value.extract::<String>(py))?.parse::<isize>()?;
+        Ok(())
+    }
+}
+
 // Test for `@overload` decorator generation
 
 /// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
@@ -442,6 +484,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Shape2>()?;
     m.add_class::<Incrementer>()?;
     m.add_class::<Incrementer2>()?;
+    m.add_class::<OverrideType>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -451,6 +494,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     Ok(())

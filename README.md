@@ -172,6 +172,25 @@ impl A {
 }
 ```
 
+### `#[gen_stub(override_type(type_repr=xx, imports=(xx)))]` and `#[gen_stub(override_return_type(type_repr=xx, imports=(xx)))]`
+Override the type for function arguments or return type in .pyi file. e.g.
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
+fn say_hello_forever<'a>(
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+    cb: Bound<'a, PyAny>,
+) -> PyResult<()> {
+    loop {
+        cb.call1(("Hello!",))?;
+    }
+}
+```
+
 # Contribution
 To be written.
 
