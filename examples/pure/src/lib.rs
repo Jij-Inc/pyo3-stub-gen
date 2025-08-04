@@ -78,6 +78,11 @@ impl A {
     /// class attribute NUM1
     #[classattr]
     const NUM1: usize = 2;
+    
+    /// deprecated class attribute NUM3
+    #[deprecated(since = "1.0.0", note = "This constant is deprecated")]
+    #[classattr]
+    const NUM3: usize = 3;
     /// class attribute NUM2
     #[expect(non_snake_case)]
     #[classattr]
@@ -86,6 +91,12 @@ impl A {
     }
     #[classmethod]
     fn classmethod_test1(cls: &Bound<'_, PyType>) {
+        _ = cls;
+    }
+
+    #[deprecated(since = "1.0.0", note = "This classmethod is deprecated")]
+    #[classmethod]
+    fn deprecated_classmethod(cls: &Bound<'_, PyType>) {
         _ = cls;
     }
 
@@ -116,6 +127,18 @@ impl A {
     #[getter]
     fn deprecated_getter(&self) -> usize {
         self.x
+    }
+
+    #[deprecated(since = "1.0.0", note = "This setter is deprecated")]
+    #[setter]
+    fn deprecated_setter(&mut self, value: usize) {
+        self.x = value;
+    }
+
+    #[deprecated(since = "1.0.0", note = "This staticmethod is deprecated")]
+    #[staticmethod]
+    fn deprecated_staticmethod() -> usize {
+        42
     }
 }
 
