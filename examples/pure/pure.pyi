@@ -16,6 +16,10 @@ class A:
     r"""
     class attribute NUM1
     """
+    NUM3: builtins.int = 3
+    r"""
+    deprecated class attribute NUM3 (will show warning)
+    """
     NUM2: builtins.int
     r"""
     class attribute NUM2

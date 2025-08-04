@@ -59,7 +59,7 @@ struct A {
     #[gen_stub(default = A::default().x)]
     #[pyo3(get, set)]
     x: usize,
-    
+
     #[pyo3(get)]
     y: usize,
 }
@@ -81,6 +81,11 @@ impl A {
     /// class attribute NUM1
     #[classattr]
     const NUM1: usize = 2;
+
+    /// deprecated class attribute NUM3 (will show warning)
+    #[deprecated(since = "1.0.0", note = "This constant is deprecated")]
+    #[classattr]
+    const NUM3: usize = 3;
     /// class attribute NUM2
     #[expect(non_snake_case)]
     #[classattr]

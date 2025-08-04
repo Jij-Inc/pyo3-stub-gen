@@ -41,6 +41,15 @@ impl From<&MemberInfo> for MemberDef {
 impl fmt::Display for MemberDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
+        // Constants cannot have deprecated decorators in Python syntax
+        // Log a warning if deprecated is present but will be ignored
+        if let Some(_deprecated) = &self.deprecated {
+            log::warn!(
+                "Ignoring #[deprecated] on constant '{}': Python constants cannot have decorators. \
+                Consider using a function instead if deprecation is needed.",
+                self.name
+            );
+        }
         write!(f, "{indent}{}: {}", self.name, self.r#type)?;
         if let Some(default) = self.default {
             write!(f, " = {default}")?;

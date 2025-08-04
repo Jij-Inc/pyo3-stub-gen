@@ -148,7 +148,7 @@ impl MemberInfo {
             name: ident.to_string(),
             r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
-            deprecated: None, // Constants don't have deprecated
+            deprecated: crate::gen_stub::attr::extract_deprecated(&attrs),
         })
     }
 }
