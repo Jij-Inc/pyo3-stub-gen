@@ -59,11 +59,14 @@ struct A {
     #[gen_stub(default = A::default().x)]
     #[pyo3(get, set)]
     x: usize,
+    
+    #[pyo3(get)]
+    y: usize,
 }
 
 impl Default for A {
     fn default() -> Self {
-        Self { x: 2 }
+        Self { x: 2, y: 10 }
     }
 }
 
@@ -73,16 +76,11 @@ impl A {
     /// This is a constructor of :class:`A`.
     #[new]
     fn new(x: usize) -> Self {
-        Self { x }
+        Self { x, y: 10 }
     }
     /// class attribute NUM1
     #[classattr]
     const NUM1: usize = 2;
-    
-    /// deprecated class attribute NUM3
-    #[deprecated(since = "1.0.0", note = "This constant is deprecated")]
-    #[classattr]
-    const NUM3: usize = 3;
     /// class attribute NUM2
     #[expect(non_snake_case)]
     #[classattr]
@@ -131,8 +129,8 @@ impl A {
 
     #[deprecated(since = "1.0.0", note = "This setter is deprecated")]
     #[setter]
-    fn deprecated_setter(&mut self, value: usize) {
-        self.x = value;
+    fn set_y(&mut self, value: usize) {
+        self.y = value;
     }
 
     #[deprecated(since = "1.0.0", note = "This staticmethod is deprecated")]
@@ -146,7 +144,7 @@ impl A {
 #[pyfunction]
 #[pyo3(signature = (x = 2))]
 fn create_a(x: usize) -> A {
-    A { x }
+    A { x, y: 10 }
 }
 
 #[gen_stub_pyclass]

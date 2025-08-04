@@ -16,10 +16,6 @@ class A:
     r"""
     class attribute NUM1
     """
-    NUM3: builtins.int = 3
-    r"""
-    deprecated class attribute NUM3
-    """
     NUM2: builtins.int
     r"""
     class attribute NUM2
@@ -31,6 +27,8 @@ class A:
         default = 2
         ```
         """
+    @property
+    def y(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
@@ -42,8 +40,8 @@ class A:
         ```
         """
     @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
-    @deprecated_setter.setter
-    def deprecated_setter(self, value: builtins.int) -> None: ...
+    @y.setter
+    def y(self, value: builtins.int) -> None: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
