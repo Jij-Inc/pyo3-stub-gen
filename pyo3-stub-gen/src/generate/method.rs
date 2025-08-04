@@ -51,19 +51,7 @@ impl fmt::Display for MethodDef {
 
         // Add deprecated decorator if present
         if let Some(deprecated) = &self.deprecated {
-            write!(f, "{indent}@typing_extensions.deprecated(")?;
-            if let Some(since) = deprecated.since {
-                write!(f, "\"since={since}")?;
-                if let Some(note) = deprecated.note {
-                    write!(f, ", {note}")?;
-                }
-                write!(f, "\"")?;
-            } else if let Some(note) = deprecated.note {
-                write!(f, "\"{note}\"")?;
-            } else {
-                write!(f, "\"\"")?;
-            }
-            writeln!(f, ")")?;
+            writeln!(f, "{indent}{deprecated}")?;
         }
 
         match self.r#type {

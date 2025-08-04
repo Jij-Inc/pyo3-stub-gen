@@ -43,19 +43,7 @@ impl fmt::Display for FunctionDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Add deprecated decorator if present
         if let Some(deprecated) = &self.deprecated {
-            write!(f, "@typing_extensions.deprecated(")?;
-            if let Some(since) = deprecated.since {
-                write!(f, "\"since={since}")?;
-                if let Some(note) = deprecated.note {
-                    write!(f, ", {note}")?;
-                }
-                write!(f, "\"")?;
-            } else if let Some(note) = deprecated.note {
-                write!(f, "\"{note}\"")?;
-            } else {
-                write!(f, "\"\"")?;
-            }
-            writeln!(f, ")")?;
+            writeln!(f, "{deprecated}")?;
         }
 
         let async_ = if self.is_async { "async " } else { "" };

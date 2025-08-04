@@ -2,6 +2,7 @@
 
 mod arg;
 mod class;
+mod deprecated;
 mod docstring;
 mod enum_;
 mod error;
