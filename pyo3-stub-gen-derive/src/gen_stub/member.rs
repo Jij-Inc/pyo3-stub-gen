@@ -17,6 +17,7 @@ pub struct MemberInfo {
     name: String,
     r#type: TypeOrOverride,
     default: Option<Expr>,
+    deprecated: Option<crate::gen_stub::attr::DeprecatedInfo>,
 }
 
 impl MemberInfo {
@@ -67,6 +68,7 @@ impl MemberInfo {
                     r#type: extract_return_type(&sig.output, attrs)?
                         .expect("Getter must return a type"),
                     default,
+                    deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
                 });
             }
         }
@@ -112,6 +114,7 @@ impl MemberInfo {
                     name: name.unwrap_or(fn_setter_name),
                     r#type,
                     default,
+                    deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
                 });
             }
         }
@@ -127,6 +130,7 @@ impl MemberInfo {
             name: sig.ident.to_string(),
             r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
+            deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
         })
     }
     pub fn new_classattr_const(item: ImplItemConst) -> Result<Self> {
@@ -144,6 +148,7 @@ impl MemberInfo {
             name: ident.to_string(),
             r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
+            deprecated: None,  // Constants don't have deprecated
         })
     }
 }
@@ -162,11 +167,13 @@ impl TryFrom<Field> for MemberInfo {
         }
         let doc = extract_documents(&attrs).join("\n");
         let default = parse_gen_stub_default(&attrs)?;
+        let deprecated = crate::gen_stub::attr::extract_deprecated(&attrs);
         Ok(Self {
             name: field_name.unwrap_or(ident.unwrap().to_string()),
             r#type: TypeOrOverride::RustType { r#type: ty },
             doc,
             default,
+            deprecated,
         })
     }
 }
@@ -178,6 +185,7 @@ impl ToTokens for MemberInfo {
             r#type,
             doc,
             default,
+            deprecated,
         } = self;
         let default = default
             .as_ref()
@@ -206,6 +214,14 @@ impl ToTokens for MemberInfo {
                     &DEFAULT
                 })}
             });
+        let deprecated_info = deprecated.as_ref().map(|deprecated| {
+            quote! {
+                Some(::pyo3_stub_gen::type_info::DeprecatedInfo {
+                    since: #deprecated.since,
+                    note: #deprecated.note,
+                })
+            }
+        }).unwrap_or_else(|| quote! { None });
         match r#type {
             TypeOrOverride::RustType { r#type: ty } => tokens.append_all(quote! {
                 ::pyo3_stub_gen::type_info::MemberInfo {
@@ -213,6 +229,7 @@ impl ToTokens for MemberInfo {
                     r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
                     doc: #doc,
                     default: #default,
+                    deprecated: #deprecated_info,
                 }
             }),
             TypeOrOverride::OverrideType {
@@ -225,6 +242,7 @@ impl ToTokens for MemberInfo {
                         r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
                         doc: #doc,
                         default: #default,
+                        deprecated: #deprecated_info,
                     }
                 })
             }

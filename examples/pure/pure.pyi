@@ -27,6 +27,7 @@ class A:
         default = 2
         ```
         """
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
     @x.setter

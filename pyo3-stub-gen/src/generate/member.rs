@@ -12,11 +12,17 @@ pub struct MemberDef {
     pub r#type: TypeInfo,
     pub doc: &'static str,
     pub default: Option<&'static str>,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 impl Import for MemberDef {
     fn import(&self) -> HashSet<ModuleRef> {
-        self.r#type.import.clone()
+        let mut import = self.r#type.import.clone();
+        // Add typing_extensions import if deprecated
+        if self.deprecated.is_some() {
+            import.insert("typing_extensions".into());
+        }
+        import
     }
 }
 
@@ -27,6 +33,7 @@ impl From<&MemberInfo> for MemberDef {
             r#type: (info.r#type)(),
             doc: info.doc,
             default: info.default.map(|s| s.as_str()),
+            deprecated: info.deprecated.clone(),
         }
     }
 }
@@ -50,6 +57,10 @@ pub struct SetterDisplay<'a>(pub &'a MemberDef);
 impl fmt::Display for GetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
+        // Add deprecated decorator if present
+        if let Some(deprecated) = &self.0.deprecated {
+            writeln!(f, "{indent}{deprecated}")?;
+        }
         write!(
             f,
             "{indent}@property\n{indent}def {}(self) -> {}:",
@@ -80,6 +91,10 @@ impl fmt::Display for GetterDisplay<'_> {
 impl fmt::Display for SetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
+        // Add deprecated decorator if present
+        if let Some(deprecated) = &self.0.deprecated {
+            writeln!(f, "{indent}{deprecated}")?;
+        }
         write!(
             f,
             "{indent}@{}.setter\n{indent}def {}(self, value: {}) -> None:",
