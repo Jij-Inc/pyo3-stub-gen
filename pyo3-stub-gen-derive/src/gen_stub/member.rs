@@ -148,7 +148,7 @@ impl MemberInfo {
             name: ident.to_string(),
             r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
-            deprecated: None,  // Constants don't have deprecated
+            deprecated: None, // Constants don't have deprecated
         })
     }
 }
@@ -214,14 +214,17 @@ impl ToTokens for MemberInfo {
                     &DEFAULT
                 })}
             });
-        let deprecated_info = deprecated.as_ref().map(|deprecated| {
-            quote! {
-                Some(::pyo3_stub_gen::type_info::DeprecatedInfo {
-                    since: #deprecated.since,
-                    note: #deprecated.note,
-                })
-            }
-        }).unwrap_or_else(|| quote! { None });
+        let deprecated_info = deprecated
+            .as_ref()
+            .map(|deprecated| {
+                quote! {
+                    Some(::pyo3_stub_gen::type_info::DeprecatedInfo {
+                        since: #deprecated.since,
+                        note: #deprecated.note,
+                    })
+                }
+            })
+            .unwrap_or_else(|| quote! { None });
         match r#type {
             TypeOrOverride::RustType { r#type: ty } => tokens.append_all(quote! {
                 ::pyo3_stub_gen::type_info::MemberInfo {
