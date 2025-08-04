@@ -4,13 +4,12 @@ use std::fmt;
 impl fmt::Display for DeprecatedInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "@typing_extensions.deprecated(")?;
-        
         match (&self.since, &self.note) {
             (Some(since), Some(note)) => {
-                write!(f, "\"since={since}, {note}\"")?;
+                write!(f, "\"[Since {since}] {note}\"")?;
             }
             (Some(since), None) => {
-                write!(f, "\"since={since}\"")?;
+                write!(f, "\"[Since {since}]\"")?;
             }
             (None, Some(note)) => {
                 write!(f, "\"{note}\"")?;
@@ -19,7 +18,7 @@ impl fmt::Display for DeprecatedInfo {
                 write!(f, "\"\"")?;
             }
         }
-        
+
         write!(f, ")")
     }
 }
