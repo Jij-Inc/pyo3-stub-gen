@@ -155,6 +155,7 @@ impl StubInfoBuilder {
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
                         default: attr.default.map(|s| s.as_str()),
+                        deprecated: attr.deprecated.clone(),
                     });
                 }
                 for getter in info.getters {
@@ -163,6 +164,7 @@ impl StubInfoBuilder {
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
                         default: getter.default.map(|s| s.as_str()),
+                        deprecated: getter.deprecated.clone(),
                     });
                 }
                 for setter in info.setters {
@@ -171,6 +173,7 @@ impl StubInfoBuilder {
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
                         default: setter.default.map(|s| s.as_str()),
+                        deprecated: setter.deprecated.clone(),
                     });
                 }
                 for method in info.methods {
@@ -185,6 +188,7 @@ impl StubInfoBuilder {
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
                         default: attr.default.map(|s| s.as_str()),
+                        deprecated: attr.deprecated.clone(),
                     });
                 }
                 for getter in info.getters {
@@ -193,6 +197,7 @@ impl StubInfoBuilder {
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
                         default: getter.default.map(|s| s.as_str()),
+                        deprecated: getter.deprecated.clone(),
                     });
                 }
                 for setter in info.setters {
@@ -201,6 +206,7 @@ impl StubInfoBuilder {
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
                         default: setter.default.map(|s| s.as_str()),
+                        deprecated: setter.deprecated.clone(),
                     });
                 }
                 for method in info.methods {
