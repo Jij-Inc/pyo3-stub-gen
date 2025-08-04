@@ -27,6 +27,8 @@ class A:
         default = 2
         ```
         """
+    @property
+    def deprecated_getter(self) -> builtins.int: ...
     @x.setter
     def x(self, value: builtins.int) -> None:
         r"""

@@ -111,6 +111,12 @@ impl A {
     fn deprecated_method(&self) {
         println!("This method is deprecated");
     }
+
+    #[deprecated(since = "1.0.0", note = "This method is deprecated")]
+    #[getter]
+    fn deprecated_getter(&self) -> usize {
+        self.x
+    }
 }
 
 #[gen_stub_pyfunction]
