@@ -16,6 +16,10 @@ class A:
     r"""
     class attribute NUM1
     """
+    NUM3: builtins.int = 3
+    r"""
+    deprecated class attribute NUM3 (will show warning)
+    """
     NUM2: builtins.int
     r"""
     class attribute NUM2
@@ -27,6 +31,11 @@ class A:
         default = 2
         ```
         """
+    @property
+    def y(self) -> builtins.int: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    @property
+    def deprecated_getter(self) -> builtins.int: ...
     @x.setter
     def x(self, value: builtins.int) -> None:
         r"""
@@ -34,12 +43,18 @@ class A:
         default = 2
         ```
         """
+    @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
+    @y.setter
+    def y(self, value: builtins.int) -> None: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
         """
     @classmethod
     def classmethod_test1(cls) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This classmethod is deprecated")
+    @classmethod
+    def deprecated_classmethod(cls) -> None: ...
     @classmethod
     def classmethod_test2(cls) -> None: ...
     def show_x(self) -> None: ...
@@ -47,6 +62,9 @@ class A:
     async def async_get_x(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     def deprecated_method(self) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This staticmethod is deprecated")
+    @staticmethod
+    def deprecated_staticmethod() -> builtins.int: ...
 
 class B(A):
     ...

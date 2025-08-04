@@ -101,6 +101,7 @@ pub struct MemberInfo {
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
     pub default: Option<&'static std::sync::LazyLock<String>>,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 /// Info of `#[pymethod]`
