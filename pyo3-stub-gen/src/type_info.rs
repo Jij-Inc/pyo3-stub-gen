@@ -24,6 +24,13 @@
 use crate::{PyStubType, TypeInfo};
 use std::any::TypeId;
 
+/// Information about deprecated items
+#[derive(Debug, Clone, PartialEq)]
+pub struct DeprecatedInfo {
+    pub since: Option<&'static str>,
+    pub note: Option<&'static str>,
+}
+
 /// Work around for `CompareOp` for `__richcmp__` argument,
 /// which does not implements `FromPyObject`
 pub fn compare_op_type_input() -> TypeInfo {
@@ -84,6 +91,7 @@ pub struct MethodInfo {
     pub doc: &'static str,
     pub r#type: MethodType,
     pub is_async: bool,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -194,6 +202,7 @@ pub struct PyFunctionInfo {
     pub doc: &'static str,
     pub module: Option<&'static str>,
     pub is_async: bool,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 inventory::collect!(PyFunctionInfo);

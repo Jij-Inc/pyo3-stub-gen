@@ -12,6 +12,7 @@ pub struct MethodDef {
     pub doc: &'static str,
     pub r#type: MethodType,
     pub is_async: bool,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 impl Import for MethodDef {
@@ -19,6 +20,10 @@ impl Import for MethodDef {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());
+        }
+        // Add typing_extensions import if deprecated
+        if self.deprecated.is_some() {
+            import.insert("typing_extensions".into());
         }
         import
     }
@@ -33,6 +38,7 @@ impl From<&MethodInfo> for MethodDef {
             doc: info.doc,
             r#type: info.r#type,
             is_async: info.is_async,
+            deprecated: info.deprecated.clone(),
         }
     }
 }
@@ -42,6 +48,12 @@ impl fmt::Display for MethodDef {
         let indent = indent();
         let mut needs_comma = false;
         let async_ = if self.is_async { "async " } else { "" };
+
+        // Add deprecated decorator if present
+        if let Some(deprecated) = &self.deprecated {
+            writeln!(f, "{indent}{deprecated}")?;
+        }
+
         match self.r#type {
             MethodType::Static => {
                 writeln!(f, "{indent}@staticmethod")?;

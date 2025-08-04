@@ -133,6 +133,7 @@
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     r#type: MethodType::Instance,
+//!     deprecated: None,
 //!     is_async: false,
 //! };
 //!
