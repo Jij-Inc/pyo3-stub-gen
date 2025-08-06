@@ -241,6 +241,16 @@ def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: .
 
 def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
 
+def func_with_kwargs(**kwargs) -> builtins.bool:
+    r"""
+    Takes a variable number of keyword arguments and do nothing
+    """
+
+def func_with_star_arg(*args) -> builtins.str:
+    r"""
+    Takes a variable number of arguments and returns their string representation.
+    """
+
 @typing.overload
 def overload_example_1(x:builtins.int) -> builtins.int: ...
 
