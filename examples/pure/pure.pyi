@@ -243,7 +243,7 @@ def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Call
 
 def func_with_kwargs(**kwargs) -> builtins.bool:
     r"""
-    Takes a variable number of keyword arguments and do nothing
+    Takes a variable number of keyword arguments and does nothing
     """
 
 def func_with_star_arg(*args) -> builtins.str:

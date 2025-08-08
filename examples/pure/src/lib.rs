@@ -549,7 +549,7 @@ fn func_with_star_arg(args: &Bound<PyTuple>) -> String {
     args.to_string()
 }
 
-/// Takes a variable number of keyword arguments and do nothing
+/// Takes a variable number of keyword arguments and does nothing
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (**kwargs))]
