@@ -539,6 +539,24 @@ submit! {
     }
 }
 
+// These are the tests to test the treatment of `*args` and `**kwargs` in functions
+
+/// Takes a variable number of arguments and returns their string representation.
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (*args))]
+fn func_with_star_arg(args: &Bound<PyTuple>) -> String {
+    args.to_string()
+}
+
+/// Takes a variable number of keyword arguments and does nothing
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (**kwargs))]
+fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
+    kwargs.is_some()
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
@@ -569,6 +587,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    // Test-cases for `*args` and `**kwargs`
+    m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
     Ok(())
 }
 

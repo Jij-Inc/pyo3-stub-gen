@@ -191,7 +191,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
                         }}),
                         Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
@@ -199,7 +199,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                             ::pyo3_stub_gen::type_info::ArgInfo {
                                 name: #name,
                                 r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
-                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
                             }})
                         },
                         None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
@@ -212,7 +212,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
                             r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
                         }}),
                         Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
                             let imports = imports.iter().collect::<Vec<&String>>();
@@ -220,7 +220,7 @@ impl ToTokens for ArgsWithSignature<'_> {
                             ::pyo3_stub_gen::type_info::ArgInfo {
                                 name: #name,
                                 r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
-                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
                             }})
                         },
                         None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
