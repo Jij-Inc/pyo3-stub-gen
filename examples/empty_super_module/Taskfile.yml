@@ -13,6 +13,6 @@ tasks:
   test:
     deps: [stub-gen]
     cmds:
-      - cd python && uv run pytest ../tests/
-      - cd python && uv run pyright ../tests/
-      - cd python && uvx ruff check ../tests/
+      - uv run pytest
+      - uv run pyright
+      - uvx ruff check
