@@ -6,11 +6,11 @@ edition.workspace = true
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[[bin]]
-name = "stub_gen"
-path = "src/bin/stub_gen.rs"
-
 [dependencies]
 env_logger.workspace = true
 pyo3.workspace = true
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+
+[[bin]]
+name = "stub_gen"
+doc = false
