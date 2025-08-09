@@ -1,6 +1,8 @@
+use crate::gen_stub::util::TypeOrOverride;
+
 use super::{
-    arg::parse_args, escape_return_type, extract_documents, parse_pyo3_attrs, ArgInfo,
-    ArgsWithSignature, Attr, Signature,
+    arg::parse_args, extract_deprecated, extract_documents, extract_return_type, parse_pyo3_attrs,
+    ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -22,9 +24,11 @@ pub struct MethodInfo {
     name: String,
     args: Vec<ArgInfo>,
     sig: Option<Signature>,
-    r#return: Option<Type>,
+    r#return: Option<TypeOrOverride>,
     doc: String,
     r#type: MethodType,
+    is_async: bool,
+    deprecated: Option<DeprecatedInfo>,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -52,10 +56,28 @@ fn replace_inner(ty: &mut Type, self_: &Type) {
 
 impl MethodInfo {
     pub fn replace_self(&mut self, self_: &Type) {
-        for arg in &mut self.args {
-            replace_inner(&mut arg.r#type, self_);
+        for mut arg in &mut self.args {
+            let (ArgInfo {
+                r#type:
+                    TypeOrOverride::RustType {
+                        r#type: ref mut ty, ..
+                    },
+                ..
+            }
+            | ArgInfo {
+                r#type:
+                    TypeOrOverride::OverrideType {
+                        r#type: ref mut ty, ..
+                    },
+                ..
+            }) = &mut arg;
+            replace_inner(ty, self_);
         }
-        if let Some(ret) = self.r#return.as_mut() {
+        if let Some(
+            TypeOrOverride::RustType { r#type: ret }
+            | TypeOrOverride::OverrideType { r#type: ret, .. },
+        ) = self.r#return.as_mut()
+        {
             replace_inner(ret, self_);
         }
     }
@@ -66,11 +88,12 @@ impl TryFrom<ImplItemFn> for MethodInfo {
     fn try_from(item: ImplItemFn) -> Result<Self> {
         let ImplItemFn { attrs, sig, .. } = item;
         let doc = extract_documents(&attrs).join("\n");
-        let attrs = parse_pyo3_attrs(&attrs)?;
+        let deprecated = extract_deprecated(&attrs);
+        let pyo3_attrs = parse_pyo3_attrs(&attrs)?;
         let mut method_name = None;
         let mut text_sig = Signature::overriding_operator(&sig);
         let mut method_type = MethodType::Instance;
-        for attr in attrs {
+        for attr in pyo3_attrs {
             match attr {
                 Attr::Name(name) => method_name = Some(name),
                 Attr::Signature(text_sig_) => text_sig = Some(text_sig_),
@@ -85,7 +108,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
         } else {
             method_name.unwrap_or(sig.ident.to_string())
         };
-        let r#return = escape_return_type(&sig.output);
+        let r#return = extract_return_type(&sig.output, &attrs)?;
         Ok(MethodInfo {
             name,
             sig: text_sig,
@@ -93,6 +116,8 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             r#return,
             doc,
             r#type: method_type,
+            is_async: sig.asyncness.is_some(),
+            deprecated,
         })
     }
 }
@@ -106,10 +131,25 @@ impl ToTokens for MethodInfo {
             sig,
             doc,
             r#type,
+            is_async,
+            deprecated,
         } = self;
         let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
-            quote! { <#ret as pyo3_stub_gen::PyStubType>::type_output }
+            match ret {
+                TypeOrOverride::RustType { r#type } => {
+                    let ty = r#type.clone();
+                    quote! { <#ty as pyo3_stub_gen::PyStubType>::type_output }
+                }
+                TypeOrOverride::OverrideType {
+                    type_repr, imports, ..
+                } => {
+                    let imports = imports.iter().collect::<Vec<&String>>();
+                    quote! {
+                        || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) }
+                    }
+                }
+            }
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
@@ -119,13 +159,19 @@ impl ToTokens for MethodInfo {
             MethodType::Class => quote! { ::pyo3_stub_gen::type_info::MethodType::Class },
             MethodType::New => quote! { ::pyo3_stub_gen::type_info::MethodType::New },
         };
+        let deprecated_tt = deprecated
+            .as_ref()
+            .map(|d| quote! { Some(#d) })
+            .unwrap_or_else(|| quote! { None });
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
                 args: #args_with_sig,
                 r#return: #ret_tt,
                 doc: #doc,
-                r#type: #type_tt
+                r#type: #type_tt,
+                is_async: #is_async,
+                deprecated: #deprecated_tt,
             }
         })
     }

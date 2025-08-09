@@ -115,9 +115,9 @@ checksum = "46c5e41b57b8bba42a04676d81cb89e9ee8e859a1a66f80a5a72e1cb76b34d43"
 
 [[package]]
 name = "cc"
-version = "1.2.30"
+version = "1.2.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deec109607ca693028562ed836a5f1c4b8bd77755c4e132fc5ce11b0b6211ae7"
+checksum = "c3a42d84bb6b69d3a8b3eaacf0d88f179e1929695e1ad012b6cf64d9caaa5fd2"
 dependencies = [
  "shlex",
 ]
@@ -174,7 +174,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "empty_super_module"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -394,7 +394,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -403,7 +403,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -412,7 +412,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub_multiple"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -506,9 +506,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.35"
+version = "0.2.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "061c1221631e079b26479d25bbf2275bfe5917ae8419cd7e34f13bfc2aa7539a"
+checksum = "ff24dfcda44452b9816fff4cd4227e1bb73ff5a2f1bc1105aa92fb8565ce44d2"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -525,7 +525,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "ahash",
  "env_logger",
@@ -597,7 +597,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "anyhow",
  "chrono",
@@ -618,7 +618,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.11.0"
+version = "0.12.3"
 dependencies = [
  "heck",
  "insta",
@@ -782,6 +782,14 @@ dependencies = [
  "quote",
  "syn",
  "test-case-core",
+]
+
+[[package]]
+name = "test-dash-package"
+version = "0.12.3"
+dependencies = [
+ "pyo3",
+ "pyo3-stub-gen",
 ]
 
 [[package]]

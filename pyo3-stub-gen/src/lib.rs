@@ -42,12 +42,14 @@
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Name docstring",
 //!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Description docstring",
 //!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!         ],
 //!
@@ -133,6 +135,8 @@
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     r#type: MethodType::Instance,
+//!     deprecated: None,
+//!     is_async: false,
 //! };
 //!
 //! assert_eq!(
@@ -199,5 +203,5 @@ macro_rules! module_variable {
     };
 }
 
-#[doc = include_str!("../../README.md")]
+#[doc = include_str!("../README.md")]
 mod readme {}

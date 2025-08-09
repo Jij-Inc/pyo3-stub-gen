@@ -120,7 +120,7 @@ mod test {
             "#,
         )?;
         let out = PyComplexEnumInfo::try_from(input)?.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r#"
+        insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyComplexEnumInfo {
             pyclass_name: "Placeholder",
             enum_id: std::any::TypeId::of::<PyPlaceholder>,
@@ -133,6 +133,7 @@ mod test {
                             r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
                             doc: "",
                             default: None,
+                            deprecated: None,
                         },
                     ],
                     module: None,
@@ -154,12 +155,14 @@ mod test {
                             r#type: <i32 as ::pyo3_stub_gen::PyStubType>::type_output,
                             doc: "",
                             default: None,
+                            deprecated: None,
                         },
                         ::pyo3_stub_gen::type_info::MemberInfo {
                             name: "_1",
                             r#type: <f64 as ::pyo3_stub_gen::PyStubType>::type_output,
                             doc: "",
                             default: None,
+                            deprecated: None,
                         },
                     ],
                     module: None,
@@ -198,6 +201,7 @@ mod test {
                             r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
                             doc: "",
                             default: None,
+                            deprecated: None,
                         },
                     ],
                     module: None,
@@ -223,7 +227,7 @@ mod test {
             module: Some("my_module"),
             doc: "",
         }
-        "#);
+        "###);
         Ok(())
     }
 

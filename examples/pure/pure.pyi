@@ -2,10 +2,12 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import collections.abc
 import datetime
 import os
 import pathlib
 import typing
+import typing_extensions
 from enum import Enum
 
 MY_CONSTANT: builtins.int
@@ -13,6 +15,10 @@ class A:
     NUM1: builtins.int = 2
     r"""
     class attribute NUM1
+    """
+    NUM3: builtins.int = 3
+    r"""
+    deprecated class attribute NUM3 (will show warning)
     """
     NUM2: builtins.int
     r"""
@@ -25,6 +31,11 @@ class A:
         default = 2
         ```
         """
+    @property
+    def y(self) -> builtins.int: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    @property
+    def deprecated_getter(self) -> builtins.int: ...
     @x.setter
     def x(self, value: builtins.int) -> None:
         r"""
@@ -32,15 +43,60 @@ class A:
         default = 2
         ```
         """
+    @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
+    @y.setter
+    def y(self, value: builtins.int) -> None: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
         """
+    @classmethod
+    def classmethod_test1(cls) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This classmethod is deprecated")
+    @classmethod
+    def deprecated_classmethod(cls) -> None: ...
+    @classmethod
+    def classmethod_test2(cls) -> None: ...
     def show_x(self) -> None: ...
     def ref_test(self, x:dict) -> dict: ...
+    async def async_get_x(self) -> builtins.int: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    def deprecated_method(self) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This staticmethod is deprecated")
+    @staticmethod
+    def deprecated_staticmethod() -> builtins.int: ...
 
 class B(A):
     ...
+
+class Incrementer:
+    @typing.overload
+    def increment_1(self, x:builtins.int) -> builtins.int:
+        r"""
+        And this is for the second comment
+        """
+    @typing.overload
+    def increment_1(self, x:builtins.float) -> builtins.float:
+        r"""
+        This is the original doc comment
+        """
+    def new(self) -> Incrementer: ...
+
+class Incrementer2:
+    @typing.overload
+    def increment_2(self, x:builtins.int) -> builtins.int:
+        r"""
+        increment_2 for integers, submitted by hands
+        """
+    @typing.overload
+    def increment_2(self, x:builtins.float) -> builtins.float:
+        r"""
+        increment_2 for floats, submitted by hands
+        """
+    def __new__(cls) -> Incrementer2:
+        r"""
+        Constructor for Incrementer2
+        """
 
 class MyDate(datetime.date):
     ...
@@ -70,6 +126,13 @@ class NumberComplex:
         def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
     
     ...
+
+class OverrideType:
+    @property
+    def num(self) -> int: ...
+    @num.setter
+    def num(self, value: str) -> None: ...
+    def error(self) -> typing_extensions.Never: ...
 
 class Shape1:
     r"""
@@ -163,13 +226,52 @@ class NumberRenameAll(Enum):
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
+async def async_num() -> builtins.int: ...
+
 def create_a(x:builtins.int=2) -> A: ...
 
 def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
+@typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
+def deprecated_function() -> None: ...
+
 def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
+
+def func_with_kwargs(**kwargs) -> builtins.bool:
+    r"""
+    Takes a variable number of keyword arguments and does nothing
+    """
+
+def func_with_star_arg(*args) -> builtins.str:
+    r"""
+    Takes a variable number of arguments and returns their string representation.
+    """
+
+@typing.overload
+def overload_example_1(x:builtins.int) -> builtins.int: ...
+
+@typing.overload
+def overload_example_1(x:builtins.float) -> builtins.float:
+    r"""
+    First example: One generated with ordinary `#[gen_stub_pyfunction]`,
+    and then manually with `submit!` macro.
+    """
+
+@typing.overload
+def overload_example_2(x:builtins.int) -> builtins.int:
+    r"""
+    Increments integer by 1
+    """
+
+@typing.overload
+def overload_example_2(x:builtins.float) -> builtins.float:
+    r"""
+    Increments float by 1
+    """
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 
