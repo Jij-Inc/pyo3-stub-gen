@@ -33,7 +33,7 @@ fn deep_nested_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     let deep = PyModule::new(py, "deep")?;
     let nested = PyModule::new(py, "nested")?;
     let module = PyModule::new(py, "module")?;
-    
+
     module.add_function(wrap_pyfunction!(deep_function, &module)?)?;
     nested.add_submodule(&module)?;
     deep.add_submodule(&nested)?;
