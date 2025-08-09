@@ -1,15 +1,15 @@
 [package]
 name = "empty_super_module"
-version.workspace = true
 edition.workspace = true
+version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 env_logger.workspace = true
-pyo3.workspace = true
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+pyo3.workspace = true
 
 [[bin]]
 name = "stub_gen"
