@@ -123,6 +123,10 @@ pub enum Attr {
     Signature(Signature),
     RenameAll(RenamingRule),
     Extends(Type),
+    
+    // Comparison attributes for pyclass
+    Eq,
+    Ord,
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -189,6 +193,12 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         }
                         if ident == "set_all" {
                             pyo3_attrs.push(Attr::SetAll);
+                        }
+                        if ident == "eq" {
+                            pyo3_attrs.push(Attr::Eq);
+                        }
+                        if ident == "ord" {
+                            pyo3_attrs.push(Attr::Ord);
                         }
                     }
                     [Ident(ident), Punct(_), Literal(lit)] => {

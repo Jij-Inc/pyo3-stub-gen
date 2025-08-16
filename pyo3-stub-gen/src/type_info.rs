@@ -138,6 +138,10 @@ pub struct PyClassInfo {
     pub setters: &'static [MemberInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
     pub bases: &'static [fn() -> TypeInfo],
+    /// Whether the class has eq attribute
+    pub has_eq: bool,
+    /// Whether the class has ord attribute
+    pub has_ord: bool,
 }
 
 inventory::collect!(PyClassInfo);

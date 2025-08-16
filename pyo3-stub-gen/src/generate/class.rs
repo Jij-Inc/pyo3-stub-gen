@@ -109,6 +109,60 @@ impl From<&PyClassInfo> for ClassDef {
         }
     }
 }
+impl ClassDef {
+    /// Add comparison methods based on eq/ord flags
+    pub fn add_comparison_methods(&mut self, has_eq: bool, has_ord: bool) {
+        if has_eq {
+            self.add_eq_method();
+        }
+        if has_ord {
+            self.add_ord_methods();
+        }
+    }
+
+    fn add_eq_method(&mut self) {
+        let method = MethodDef {
+            name: "__eq__",
+            args: vec![Arg {
+                name: "other",
+                r#type: TypeInfo::builtin("object"),
+                signature: None,
+            }],
+            r#return: TypeInfo::builtin("bool"),
+            doc: "Return self==value.",
+            r#type: MethodType::Instance,
+            is_async: false,
+            deprecated: None,
+        };
+        self.methods.entry("__eq__".to_string()).or_default().push(method);
+    }
+
+    fn add_ord_methods(&mut self) {
+        let ord_methods = [
+            ("__lt__", "Return self<value."),
+            ("__le__", "Return self<=value."),
+            ("__gt__", "Return self>value."),
+            ("__ge__", "Return self>=value."),
+        ];
+
+        for (name, doc) in &ord_methods {
+            let method = MethodDef {
+                name,
+                args: vec![Arg {
+                    name: "other",
+                    r#type: TypeInfo::builtin("object"),
+                    signature: None,
+                }],
+                r#return: TypeInfo::builtin("bool"),
+                doc,
+                r#type: MethodType::Instance,
+                is_async: false,
+                deprecated: None,
+            };
+            self.methods.entry(name.to_string()).or_default().push(method);
+        }
+    }
+}
 
 impl fmt::Display for ClassDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

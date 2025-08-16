@@ -75,27 +75,27 @@ class ComparableStruct:
     """
     @property
     def value(self) -> builtins.int: ...
-    def __new__(cls, value:builtins.int) -> ComparableStruct: ...
-    def __eq__(self, other:typing.Any) -> builtins.bool:
+    def __eq__(self, other:builtins.object) -> builtins.bool:
         r"""
         Return self==value.
         """
-    def __lt__(self, other:typing.Any) -> builtins.bool:
+    def __lt__(self, other:builtins.object) -> builtins.bool:
         r"""
         Return self<value.
         """
-    def __le__(self, other:typing.Any) -> builtins.bool:
+    def __le__(self, other:builtins.object) -> builtins.bool:
         r"""
         Return self<=value.
         """
-    def __gt__(self, other:typing.Any) -> builtins.bool:
+    def __gt__(self, other:builtins.object) -> builtins.bool:
         r"""
         Return self>value.
         """
-    def __ge__(self, other:typing.Any) -> builtins.bool:
+    def __ge__(self, other:builtins.object) -> builtins.bool:
         r"""
         Return self>=value.
         """
+    def __new__(cls, value:builtins.int) -> ComparableStruct: ...
 
 class Incrementer:
     @typing.overload

@@ -11,6 +11,8 @@ pub struct PyClassInfo {
     setters: Vec<MemberInfo>,
     doc: String,
     bases: Vec<Type>,
+    has_eq: bool,
+    has_ord: bool,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -44,6 +46,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut is_get_all = false;
         let mut is_set_all = false;
         let mut bases = Vec::new();
+        let mut has_eq = false;
+        let mut has_ord = false;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -53,6 +57,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 Attr::GetAll => is_get_all = true,
                 Attr::SetAll => is_set_all = true,
                 Attr::Extends(typ) => bases.push(typ),
+                Attr::Eq => has_eq = true,
+                Attr::Ord => has_ord = true,
                 _ => {}
             }
         }
@@ -67,7 +73,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 setters.push(MemberInfo::try_from(field)?)
             }
         }
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs).join("\\n");
         Ok(Self {
             struct_type,
             pyclass_name,
@@ -76,6 +82,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             module,
             doc,
             bases,
+            has_eq,
+            has_ord,
         })
     }
 }
@@ -90,6 +98,8 @@ impl ToTokens for PyClassInfo {
             doc,
             module,
             bases,
+            has_eq,
+            has_ord,
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
@@ -101,10 +111,14 @@ impl ToTokens for PyClassInfo {
                 module: #module,
                 doc: #doc,
                 bases: &[ #( <#bases as ::pyo3_stub_gen::PyStubType>::type_output ),* ],
+                has_eq: #has_eq,
+                has_ord: #has_ord,
             }
         })
     }
 }
+
+
 
 // `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
 // it's only designed to receive user's setting.
