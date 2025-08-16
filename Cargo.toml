@@ -36,7 +36,7 @@ maplit = "1.0.2"
 num-complex = "0.4.6"
 numpy = ">= 0.24.0"
 prettyplease = "0.2.36"
-proc-macro2 = "1.0.95"
+proc-macro2 = "1.0.96"
 pyo3 = ">= 0.24.0"
 quote = "1.0.40"
 serde = { version = "1.0.219", features = ["derive"] }
