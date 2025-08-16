@@ -129,7 +129,7 @@ impl ClassDef {
                 signature: None,
             }],
             r#return: TypeInfo::builtin("bool"),
-            doc: "Return self==value.",
+            doc: "",
             r#type: MethodType::Instance,
             is_async: false,
             deprecated: None,
@@ -141,14 +141,9 @@ impl ClassDef {
     }
 
     fn add_ord_methods(&mut self) {
-        let ord_methods = [
-            ("__lt__", "Return self<value."),
-            ("__le__", "Return self<=value."),
-            ("__gt__", "Return self>value."),
-            ("__ge__", "Return self>=value."),
-        ];
+        let ord_methods = ["__lt__", "__le__", "__gt__", "__ge__"];
 
-        for (name, doc) in &ord_methods {
+        for name in &ord_methods {
             let method = MethodDef {
                 name,
                 args: vec![Arg {
@@ -157,7 +152,7 @@ impl ClassDef {
                     signature: None,
                 }],
                 r#return: TypeInfo::builtin("bool"),
-                doc,
+                doc: "",
                 r#type: MethodType::Instance,
                 is_async: false,
                 deprecated: None,
