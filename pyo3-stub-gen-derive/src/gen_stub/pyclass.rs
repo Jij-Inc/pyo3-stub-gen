@@ -73,7 +73,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 setters.push(MemberInfo::try_from(field)?)
             }
         }
-        let doc = extract_documents(&attrs).join("\\n");
+        let doc = extract_documents(&attrs).join("\n");
         Ok(Self {
             struct_type,
             pyclass_name,

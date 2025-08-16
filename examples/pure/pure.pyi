@@ -119,7 +119,9 @@ class MyError(builtins.RuntimeError):
 
 class NotIntError(builtins.TypeError):
     r"""
-    A manual custom exception case\n\nBased on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
+    A manual custom exception case
+    
+    Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
     """
     def __new__(cls, item:typing.Any) -> NotIntError: ...
     def __str__(self) -> builtins.str: ...
