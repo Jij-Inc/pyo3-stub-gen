@@ -1,5 +1,12 @@
 use pyo3::exceptions::*;
 
+/// Wrapper of [pyo3::create_exception] macro to create a custom exception with [crate::PyStubType] support.
+///
+/// Note
+/// -----
+/// [pyo3::create_exception!] macro creates a new exception type as [pyo3::PyErr],
+/// which does not implement [pyo3::PyClass] trait. So it is not a "class" in PyO3 sense,
+/// but we create a [crate::type_info::PyClassInfo] since it will be treated as a class eventually in Python side.
 #[macro_export]
 macro_rules! create_exception {
     ($module: expr, $name: ident, $base: ty) => {
