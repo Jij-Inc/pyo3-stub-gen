@@ -96,7 +96,7 @@ impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
-        Self {
+        let mut new = Self {
             name: info.pyclass_name,
             doc: info.doc,
             attrs: Vec::new(),
@@ -106,20 +106,17 @@ impl From<&PyClassInfo> for ClassDef {
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
             match_args: None,
+        };
+        if info.has_eq {
+            new.add_eq_method();
         }
+        if info.has_ord {
+            new.add_ord_methods();
+        }
+        new
     }
 }
 impl ClassDef {
-    /// Add comparison methods based on eq/ord flags
-    pub fn add_comparison_methods(&mut self, has_eq: bool, has_ord: bool) {
-        if has_eq {
-            self.add_eq_method();
-        }
-        if has_ord {
-            self.add_ord_methods();
-        }
-    }
-
     fn add_eq_method(&mut self) {
         let method = MethodDef {
             name: "__eq__",
