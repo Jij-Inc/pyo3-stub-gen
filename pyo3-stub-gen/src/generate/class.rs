@@ -96,7 +96,7 @@ impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
-        Self {
+        let mut new = Self {
             name: info.pyclass_name,
             doc: info.doc,
             attrs: Vec::new(),
@@ -106,6 +106,58 @@ impl From<&PyClassInfo> for ClassDef {
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
             match_args: None,
+        };
+        if info.has_eq {
+            new.add_eq_method();
+        }
+        if info.has_ord {
+            new.add_ord_methods();
+        }
+        new
+    }
+}
+impl ClassDef {
+    fn add_eq_method(&mut self) {
+        let method = MethodDef {
+            name: "__eq__",
+            args: vec![Arg {
+                name: "other",
+                r#type: TypeInfo::builtin("object"),
+                signature: None,
+            }],
+            r#return: TypeInfo::builtin("bool"),
+            doc: "",
+            r#type: MethodType::Instance,
+            is_async: false,
+            deprecated: None,
+        };
+        self.methods
+            .entry("__eq__".to_string())
+            .or_default()
+            .push(method);
+    }
+
+    fn add_ord_methods(&mut self) {
+        let ord_methods = ["__lt__", "__le__", "__gt__", "__ge__"];
+
+        for name in &ord_methods {
+            let method = MethodDef {
+                name,
+                args: vec![Arg {
+                    name: "other",
+                    r#type: TypeInfo::builtin("object"),
+                    signature: None,
+                }],
+                r#return: TypeInfo::builtin("bool"),
+                doc: "",
+                r#type: MethodType::Instance,
+                is_async: false,
+                deprecated: None,
+            };
+            self.methods
+                .entry(name.to_string())
+                .or_default()
+                .push(method);
         }
     }
 }

@@ -37,6 +37,8 @@
 //!         setters: &[],
 //!         doc: "",
 //!         bases: &[],
+//!         has_eq: false,
+//!         has_ord: false,
 //!     }
 //! }
 //! ```

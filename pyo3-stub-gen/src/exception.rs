@@ -31,6 +31,8 @@ macro_rules! create_exception {
                 module: Some(stringify!($module)),
                 doc: $doc,
                 bases: &[|| <$base as $crate::PyStubType>::type_output()],
+                has_eq: false,
+                has_ord: false,
             }
         }
     };

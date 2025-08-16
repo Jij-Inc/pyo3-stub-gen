@@ -59,6 +59,10 @@
 //!
 //!         // Base classes
 //!         bases: &[],
+//!
+//!         // Decorated with `#[pyclass(eq, ord)]`
+//!         has_eq: false,
+//!         has_ord: false,
 //!     }
 //! }
 //! ```
