@@ -9,7 +9,7 @@ use pyo3_stub_gen::{create_exception, derive::*};
 // Use `create_exception!` to create a custom exception
 create_exception!(pure, MyError, PyRuntimeError);
 
-/// An manual custom exception case
+/// A manual custom exception case
 ///
 /// Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
 #[gen_stub_pyclass]
