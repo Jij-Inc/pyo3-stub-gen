@@ -537,6 +537,24 @@ submit! {
 
 // These are the tests to test the treatment of `*args` and `**kwargs` in functions
 
+/// Test struct for eq and ord comparison methods
+#[gen_stub_pyclass]
+#[pyclass(eq, ord)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct ComparableStruct {
+    #[pyo3(get)]
+    pub value: i32,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl ComparableStruct {
+    #[new]
+    fn new(value: i32) -> Self {
+        Self { value }
+    }
+}
+
 /// Takes a variable number of arguments and returns their string representation.
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -568,6 +586,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Incrementer>()?;
     m.add_class::<Incrementer2>()?;
     m.add_class::<OverrideType>()?;
+    m.add_class::<ComparableStruct>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;

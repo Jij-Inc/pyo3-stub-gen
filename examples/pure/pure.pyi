@@ -69,6 +69,34 @@ class A:
 class B(A):
     ...
 
+class ComparableStruct:
+    r"""
+    Test struct for eq and ord comparison methods
+    """
+    @property
+    def value(self) -> builtins.int: ...
+    def __new__(cls, value:builtins.int) -> ComparableStruct: ...
+    def __eq__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Return self==value.
+        """
+    def __lt__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Return self<value.
+        """
+    def __le__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Return self<=value.
+        """
+    def __gt__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Return self>value.
+        """
+    def __ge__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Return self>=value.
+        """
+
 class Incrementer:
     @typing.overload
     def increment_1(self, x:builtins.int) -> builtins.int:
@@ -106,9 +134,7 @@ class MyError(builtins.RuntimeError):
 
 class NotIntError(builtins.TypeError):
     r"""
-    A manual custom exception case
-    
-    Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
+    A manual custom exception case\n\nBased on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
     """
     def __new__(cls, item:typing.Any) -> NotIntError: ...
     def __str__(self) -> builtins.str: ...

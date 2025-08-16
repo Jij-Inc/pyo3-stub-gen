@@ -9,6 +9,7 @@ from pure import (
     NumberComplex,
     Shape1,
     Shape2,
+    ComparableStruct,
 )
 import pytest
 import pathlib
@@ -153,3 +154,36 @@ async def test_async():
     assert await async_num() == 123
     a = create_a(1337)
     assert await a.async_get_x() == 1337
+
+
+def test_comparable_struct_comparison_methods():
+    """Test that comparison methods work correctly for pyclass(eq, ord).
+    This verifies that issue #233 has been fixed."""
+    
+    # Create test instances
+    a = ComparableStruct(5)
+    b = ComparableStruct(10)
+    c = ComparableStruct(5)
+    
+    # Test equality (__eq__)
+    assert a == c
+    assert not (a == b)
+    assert a != b
+    assert not (a != c)
+    
+    # Test ordering (__lt__, __le__, __gt__, __ge__)
+    assert a < b
+    assert not (b < a)
+    assert not (a < c)
+    
+    assert a <= b
+    assert a <= c
+    assert not (b <= a)
+    
+    assert b > a
+    assert not (a > b)
+    assert not (a > c)
+    
+    assert b >= a
+    assert a >= c
+    assert not (a >= b)
