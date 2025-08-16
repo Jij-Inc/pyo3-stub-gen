@@ -108,10 +108,10 @@ impl StubInfoBuilder {
 
     fn add_class(&mut self, info: &PyClassInfo) {
         let mut class_def = ClassDef::from(info);
-        
+
         // Add comparison methods if eq/ord attributes are present
         class_def.add_comparison_methods(info.has_eq, info.has_ord);
-        
+
         self.get_module(info.module)
             .class
             .insert((info.struct_id)(), class_def);

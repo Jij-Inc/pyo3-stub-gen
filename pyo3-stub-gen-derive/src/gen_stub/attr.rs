@@ -123,7 +123,7 @@ pub enum Attr {
     Signature(Signature),
     RenameAll(RenamingRule),
     Extends(Type),
-    
+
     // Comparison attributes for pyclass
     Eq,
     Ord,

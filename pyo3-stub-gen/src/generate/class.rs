@@ -134,7 +134,10 @@ impl ClassDef {
             is_async: false,
             deprecated: None,
         };
-        self.methods.entry("__eq__".to_string()).or_default().push(method);
+        self.methods
+            .entry("__eq__".to_string())
+            .or_default()
+            .push(method);
     }
 
     fn add_ord_methods(&mut self) {
@@ -159,7 +162,10 @@ impl ClassDef {
                 is_async: false,
                 deprecated: None,
             };
-            self.methods.entry(name.to_string()).or_default().push(method);
+            self.methods
+                .entry(name.to_string())
+                .or_default()
+                .push(method);
         }
     }
 }

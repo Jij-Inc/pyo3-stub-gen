@@ -118,8 +118,6 @@ impl ToTokens for PyClassInfo {
     }
 }
 
-
-
 // `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
 // it's only designed to receive user's setting.
 // We need to remove all `#[gen_stub(xxx)]` before print the item_struct back
@@ -186,6 +184,8 @@ mod test {
             module: Some("my_module"),
             doc: "",
             bases: &[],
+            has_eq: false,
+            has_ord: false,
         }
         "###);
         Ok(())
