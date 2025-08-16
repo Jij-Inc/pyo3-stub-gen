@@ -1,17 +1,15 @@
 #![allow(deprecated)]
 
+mod custom_exceptions;
+use custom_exceptions::*;
+
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{
-    exceptions::{PyRuntimeError, PyTypeError},
-    prelude::*,
-    types::*,
-    IntoPyObjectExt,
-};
+use pyo3::{exceptions::PyTypeError, prelude::*, types::*, IntoPyObjectExt, PyObject};
 use pyo3_stub_gen::{
-    create_exception, define_stub_info_gatherer,
+    define_stub_info_gatherer,
     derive::*,
     generate::MethodType,
     inventory::submit,
@@ -181,8 +179,6 @@ impl pyo3_stub_gen::PyStubType for C {
         usize::type_output()
     }
 }
-
-create_exception!(pure, MyError, PyRuntimeError);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -560,7 +556,6 @@ fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
@@ -590,6 +585,10 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     // Test-cases for `*args` and `**kwargs`
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
+
+    // Test case for custom exceptions
+    m.add("MyError", m.py().get_type::<MyError>())?;
+    m.add_class::<NotIntError>()?;
     Ok(())
 }
 

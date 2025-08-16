@@ -9,3 +9,6 @@ requires-python = ">=3.10"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]

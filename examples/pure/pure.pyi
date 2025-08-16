@@ -101,6 +101,26 @@ class Incrementer2:
 class MyDate(datetime.date):
     ...
 
+class MyError(builtins.RuntimeError):
+    ...
+
+class NotIntError(builtins.TypeError):
+    r"""
+    A manual custom exception case
+    
+    Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
+    """
+    def __new__(cls, item:typing.Any) -> NotIntError: ...
+    def __str__(self) -> builtins.str: ...
+    def trivial_number(self) -> builtins.int:
+        r"""
+        A trivial number
+        """
+    def item_is_str(self) -> builtins.bool:
+        r"""
+        Checks if the item is a string
+        """
+
 class NumberComplex:
     class FLOAT(NumberComplex):
         r"""
@@ -286,6 +306,4 @@ def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
     """
-
-class MyError(RuntimeError): ...
 

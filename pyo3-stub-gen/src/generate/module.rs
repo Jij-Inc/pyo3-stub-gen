@@ -12,7 +12,6 @@ pub struct Module {
     pub class: BTreeMap<TypeId, ClassDef>,
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, Vec<FunctionDef>>,
-    pub error: BTreeMap<&'static str, ErrorDef>,
     pub variables: BTreeMap<&'static str, VariableDef>,
     pub name: String,
     pub default_module_name: String,
@@ -75,9 +74,6 @@ impl fmt::Display for Module {
                 }
                 write!(f, "{function}")?;
             }
-        }
-        for error in self.error.values() {
-            writeln!(f, "{error}")?;
         }
         Ok(())
     }

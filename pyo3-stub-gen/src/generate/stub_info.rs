@@ -133,12 +133,6 @@ impl StubInfoBuilder {
         target.push(FunctionDef::from(info));
     }
 
-    fn add_error(&mut self, info: &PyErrorInfo) {
-        self.get_module(Some(info.module))
-            .error
-            .insert(info.name, ErrorDef::from(info));
-    }
-
     fn add_variable(&mut self, info: &PyVariableInfo) {
         self.get_module(Some(info.module))
             .variables
@@ -230,9 +224,6 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<PyFunctionInfo> {
             self.add_function(info);
-        }
-        for info in inventory::iter::<PyErrorInfo> {
-            self.add_error(info);
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
