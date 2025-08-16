@@ -209,15 +209,6 @@ pub struct PyFunctionInfo {
 inventory::collect!(PyFunctionInfo);
 
 #[derive(Debug)]
-pub struct PyErrorInfo {
-    pub name: &'static str,
-    pub module: &'static str,
-    pub base: fn() -> &'static str,
-}
-
-inventory::collect!(PyErrorInfo);
-
-#[derive(Debug)]
 pub struct PyVariableInfo {
     pub name: &'static str,
     pub module: &'static str,
