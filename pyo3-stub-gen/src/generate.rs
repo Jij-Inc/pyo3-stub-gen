@@ -10,6 +10,7 @@ mod member;
 mod method;
 mod module;
 mod stub_info;
+mod union;
 mod variable;
 mod variant_methods;
 
@@ -21,6 +22,7 @@ pub use member::*;
 pub use method::*;
 pub use module::*;
 pub use stub_info::*;
+pub use union::*;
 pub use variable::*;
 
 use crate::stub_type::ModuleRef;
