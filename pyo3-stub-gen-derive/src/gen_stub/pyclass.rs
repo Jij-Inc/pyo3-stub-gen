@@ -65,7 +65,6 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 Attr::Ord => has_ord = true,
                 Attr::Hash => has_hash = true,
                 Attr::Str => has_str = true,
-                Attr::Frozen => {} // Frozen doesn't affect stub generation
                 _ => {}
             }
         }

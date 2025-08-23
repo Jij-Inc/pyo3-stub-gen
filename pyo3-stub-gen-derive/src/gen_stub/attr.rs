@@ -129,7 +129,6 @@ pub enum Attr {
     Ord,
     Hash,
     Str,
-    Frozen,
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -209,9 +208,7 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         if ident == "str" {
                             pyo3_attrs.push(Attr::Str);
                         }
-                        if ident == "frozen" {
-                            pyo3_attrs.push(Attr::Frozen);
-                        }
+                        // frozen is required by PyO3 when using hash, but doesn't affect stub generation
                     }
                     [Ident(ident), Punct(_), Literal(lit)] => {
                         if ident == "name" {
