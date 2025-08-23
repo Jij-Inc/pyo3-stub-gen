@@ -142,6 +142,10 @@ pub struct PyClassInfo {
     pub has_eq: bool,
     /// Whether the class has ord attribute
     pub has_ord: bool,
+    /// Whether the class has hash attribute
+    pub has_hash: bool,
+    /// Whether the class has str attribute
+    pub has_str: bool,
 }
 
 inventory::collect!(PyClassInfo);

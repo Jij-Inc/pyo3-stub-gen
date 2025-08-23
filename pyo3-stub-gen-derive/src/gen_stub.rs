@@ -39,6 +39,8 @@
 //!         bases: &[],
 //!         has_eq: false,
 //!         has_ord: false,
+//!         has_hash: false,
+//!         has_str: false,
 //!     }
 //! }
 //! ```

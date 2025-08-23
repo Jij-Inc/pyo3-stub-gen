@@ -63,6 +63,9 @@
 //!         // Decorated with `#[pyclass(eq, ord)]`
 //!         has_eq: false,
 //!         has_ord: false,
+//!         // Decorated with `#[pyclass(hash, str)]`
+//!         has_hash: false,
+//!         has_str: false,
 //!     }
 //! }
 //! ```
