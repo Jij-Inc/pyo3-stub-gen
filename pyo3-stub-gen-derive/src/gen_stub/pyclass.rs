@@ -13,6 +13,8 @@ pub struct PyClassInfo {
     bases: Vec<Type>,
     has_eq: bool,
     has_ord: bool,
+    has_hash: bool,
+    has_str: bool,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -48,6 +50,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut bases = Vec::new();
         let mut has_eq = false;
         let mut has_ord = false;
+        let mut has_hash = false;
+        let mut has_str = false;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -59,6 +63,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 Attr::Extends(typ) => bases.push(typ),
                 Attr::Eq => has_eq = true,
                 Attr::Ord => has_ord = true,
+                Attr::Hash => has_hash = true,
+                Attr::Str => has_str = true,
                 _ => {}
             }
         }
@@ -84,6 +90,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             bases,
             has_eq,
             has_ord,
+            has_hash,
+            has_str,
         })
     }
 }
@@ -100,6 +108,8 @@ impl ToTokens for PyClassInfo {
             bases,
             has_eq,
             has_ord,
+            has_hash,
+            has_str,
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
@@ -113,6 +123,8 @@ impl ToTokens for PyClassInfo {
                 bases: &[ #( <#bases as ::pyo3_stub_gen::PyStubType>::type_output ),* ],
                 has_eq: #has_eq,
                 has_ord: #has_ord,
+                has_hash: #has_hash,
+                has_str: #has_str,
             }
         })
     }
@@ -186,6 +198,8 @@ mod test {
             bases: &[],
             has_eq: false,
             has_ord: false,
+            has_hash: false,
+            has_str: false,
         }
         "###);
         Ok(())

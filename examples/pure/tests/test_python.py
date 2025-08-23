@@ -10,6 +10,7 @@ from pure import (
     Shape1,
     Shape2,
     ComparableStruct,
+    HashableStruct,
 )
 import pytest
 import pathlib
@@ -187,3 +188,26 @@ def test_comparable_struct_comparison_methods():
     assert b >= a
     assert a >= c
     assert not (a >= b)
+
+
+def test_hashable_struct_hash_str_methods():
+    """Test that the HashableStruct has hash and str methods"""
+    obj1 = HashableStruct("test")
+    obj2 = HashableStruct("test")
+    obj3 = HashableStruct("other")
+
+    # Test equality (required for hash)
+    assert obj1 == obj2
+    assert obj1 != obj3
+
+    # Test hash
+    assert hash(obj1) == hash(obj2)
+    # Different objects might have the same hash, but equal objects must have the same hash
+
+    # Test str
+    assert str(obj1) == "HashableStruct(test)"
+    assert str(obj3) == "HashableStruct(other)"
+
+    # Test that it can be used in a set (requires hash)
+    s = {obj1, obj2, obj3}
+    assert len(s) == 2  # obj1 and obj2 are equal, so only 2 unique items

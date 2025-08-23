@@ -33,6 +33,8 @@ macro_rules! create_exception {
                 bases: &[|| <$base as $crate::PyStubType>::type_output()],
                 has_eq: false,
                 has_ord: false,
+                has_hash: false,
+                has_str: false,
             }
         }
     };

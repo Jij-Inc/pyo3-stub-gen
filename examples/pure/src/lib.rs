@@ -555,6 +555,30 @@ impl ComparableStruct {
     }
 }
 
+/// Test struct for hash and str methods
+#[gen_stub_pyclass]
+#[pyclass(eq, hash, frozen, str)]
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub struct HashableStruct {
+    #[pyo3(get)]
+    pub name: String,
+}
+
+impl std::fmt::Display for HashableStruct {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "HashableStruct({})", self.name)
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl HashableStruct {
+    #[new]
+    fn new(name: String) -> Self {
+        Self { name }
+    }
+}
+
 /// Takes a variable number of arguments and returns their string representation.
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -587,6 +611,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Incrementer2>()?;
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
+    m.add_class::<HashableStruct>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
