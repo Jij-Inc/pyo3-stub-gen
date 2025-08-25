@@ -20,6 +20,7 @@ num-complex.workspace = true
 numpy = { workspace = true, optional = true }
 either = { workspace = true, optional = true }
 pyo3.workspace = true
+rust_decimal = { workspace = true, optional = true }
 serde.workspace = true
 toml.workspace = true
 
@@ -35,3 +36,4 @@ default = ["numpy", "either", "infer_signature"]
 numpy = ["dep:numpy"]
 either = ["dep:either"]
 infer_signature = []
+rust_decimal = ["dep:rust_decimal"]
