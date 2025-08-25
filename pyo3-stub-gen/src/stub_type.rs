@@ -8,6 +8,9 @@ mod numpy;
 #[cfg(feature = "either")]
 mod either;
 
+#[cfg(feature = "rust_decimal")]
+mod rust_decimal;
+
 use maplit::hashset;
 use std::{collections::HashSet, fmt, ops};
 

@@ -4,6 +4,7 @@
 import builtins
 import collections.abc
 import datetime
+import decimal
 import os
 import pathlib
 import typing
@@ -81,6 +82,11 @@ class ComparableStruct:
     def __gt__(self, other:builtins.object) -> builtins.bool: ...
     def __ge__(self, other:builtins.object) -> builtins.bool: ...
     def __new__(cls, value:builtins.int) -> ComparableStruct: ...
+
+class DecimalHolder:
+    @property
+    def value(self) -> decimal.Decimal: ...
+    def __new__(cls, value:decimal.Decimal) -> DecimalHolder: ...
 
 class HashableStruct:
     r"""
@@ -281,6 +287,11 @@ class NumberRenameAll(Enum):
     Float variant
     """
     INTEGER = ...
+
+def add_decimals(a:decimal.Decimal, b:decimal.Decimal) -> decimal.Decimal:
+    r"""
+    Add two decimal numbers with high precision
+    """
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
