@@ -6,6 +6,7 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
         || any.is_instance_of::<PyBool>()
         || any.is_instance_of::<PyInt>()
         || any.is_instance_of::<PyFloat>()
+        || any.is_instance_of::<PyComplex>()
         || any.is_none()
     {
         return true;
