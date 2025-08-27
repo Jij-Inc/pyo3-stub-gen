@@ -639,7 +639,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
 
     // Test cases for type: ignore functionality
     m.add_function(wrap_pyfunction!(test_type_ignore_specific, m)?)?;
-    m.add_function(wrap_pyfunction!(test_type_ignore_empty, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_all, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_pyright, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_custom, m)?)?;
 
@@ -660,11 +660,11 @@ fn test_type_ignore_specific() -> i32 {
     42
 }
 
-/// Test function with empty type: ignore (should generate warning)
+/// Test function with type: ignore (without equals for catch-all)
 #[gen_stub_pyfunction]
-#[gen_stub(type_ignore = [])]
+#[gen_stub(type_ignore)]
 #[pyfunction]
-fn test_type_ignore_empty() -> i32 {
+fn test_type_ignore_all() -> i32 {
     42
 }
 
@@ -703,9 +703,9 @@ impl TypeIgnoreTest {
         value * 2
     }
 
-    /// Test method with empty type: ignore
-    #[gen_stub(type_ignore = [])]
-    fn test_method_empty_ignore(&self) -> i32 {
+    /// Test method with type: ignore (without equals for catch-all)
+    #[gen_stub(type_ignore)]
+    fn test_method_all_ignore(&self) -> i32 {
         42
     }
 }

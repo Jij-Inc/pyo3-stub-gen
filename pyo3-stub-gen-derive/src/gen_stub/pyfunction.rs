@@ -8,7 +8,7 @@ use syn::{
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    extract_deprecated, extract_documents, extract_return_type, parse_args,
+    attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type, parse_args,
     parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option, ArgInfo, ArgsWithSignature, Attr,
     DeprecatedInfo, Signature,
 };
@@ -22,7 +22,7 @@ pub struct PyFunctionInfo {
     module: Option<String>,
     is_async: bool,
     deprecated: Option<DeprecatedInfo>,
-    type_ignored: Option<Vec<String>>,
+    type_ignored: Option<IgnoreTarget>,
 }
 
 struct ModuleAttr {
@@ -121,9 +121,20 @@ impl ToTokens for PyFunctionInfo {
             .as_ref()
             .map(|d| quote! { Some(#d) })
             .unwrap_or_else(|| quote! { None });
-        let type_ignored_tt = if let Some(rules) = type_ignored {
-            let rules_vec: Vec<_> = rules.iter().map(|r| r.as_str()).collect();
-            quote! { Some(&[#(#rules_vec),*] as &[&str]) }
+        let type_ignored_tt = if let Some(target) = type_ignored {
+            match target {
+                IgnoreTarget::All => {
+                    quote! { Some(::pyo3_stub_gen::type_info::IgnoreTarget::All) }
+                }
+                IgnoreTarget::SpecifiedLits(rules) => {
+                    let rule_strs: Vec<String> = rules.iter().map(|lit| lit.value()).collect();
+                    quote! {
+                        Some(::pyo3_stub_gen::type_info::IgnoreTarget::Specified(
+                            &[#(#rule_strs),*] as &[&str]
+                        ))
+                    }
+                }
+            }
         } else {
             quote! { None }
         };

@@ -255,9 +255,9 @@ class TypeIgnoreTest:
         r"""
         Test method with type: ignore for specific rules
         """
-    def test_method_empty_ignore(self) -> builtins.int:  # type: ignore
+    def test_method_all_ignore(self) -> builtins.int:  # type: ignore
         r"""
-        Test method with empty type: ignore
+        Test method with type: ignore (without equals for catch-all)
         """
 
 class Number(Enum):
@@ -345,14 +345,14 @@ def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     Returns the sum of two numbers as a string.
     """
 
+def test_type_ignore_all() -> builtins.int:  # type: ignore
+    r"""
+    Test function with type: ignore (without equals for catch-all)
+    """
+
 def test_type_ignore_custom() -> builtins.int:  # type: ignore[custom-rule,attr-defined]
     r"""
     Test function with custom (unknown) rule
-    """
-
-def test_type_ignore_empty() -> builtins.int:  # type: ignore
-    r"""
-    Test function with empty type: ignore (should generate warning)
     """
 
 def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTypeIssues,reportReturnType]

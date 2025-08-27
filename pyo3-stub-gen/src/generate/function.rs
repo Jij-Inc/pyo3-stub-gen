@@ -11,7 +11,7 @@ pub struct FunctionDef {
     pub doc: &'static str,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
-    pub type_ignored: Option<Vec<RuleName>>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 impl Import for FunctionDef {
@@ -37,9 +37,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
             doc: info.doc,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
-            type_ignored: info
-                .type_ignored
-                .map(|rules| rules.iter().map(|r| r.parse().unwrap()).collect()),
+            type_ignored: info.type_ignored,
         }
     }
 }
@@ -62,12 +60,18 @@ impl fmt::Display for FunctionDef {
         write!(f, ") -> {}:", self.r#return)?;
 
         // Add type: ignore comment if needed
-        if let Some(rules) = &self.type_ignored {
-            if rules.is_empty() {
-                write!(f, "  # type: ignore")?;
-            } else {
-                let rules_str = rules.iter().join(",");
-                write!(f, "  # type: ignore[{}]", rules_str)?;
+        if let Some(target) = &self.type_ignored {
+            match target {
+                IgnoreTarget::All => {
+                    write!(f, "  # type: ignore")?;
+                }
+                IgnoreTarget::Specified(rules) => {
+                    let rules_str = rules
+                        .iter()
+                        .map(|r| r.parse::<RuleName>().unwrap())
+                        .join(",");
+                    write!(f, "  # type: ignore[{}]", rules_str)?;
+                }
             }
         }
 
