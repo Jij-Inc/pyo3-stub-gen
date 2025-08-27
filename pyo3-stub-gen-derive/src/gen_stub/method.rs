@@ -169,11 +169,8 @@ impl ToTokens for MethodInfo {
             .map(|d| quote! { Some(#d) })
             .unwrap_or_else(|| quote! { None });
         let type_ignored_tt = if let Some(rules) = type_ignored {
-                Diagnostic::spanned(
-                    name.span(),
-                    proc_macro2::Level::Warning,
-                    "It is strongly recommended to explicitly specify the rules to be ignored",
-                ).emit();
+            if rules.is_empty() {
+                eprintln!("Warning: It is strongly recommended to explicitly specify the rules to be ignored");
             }
             let rules_vec: Vec<_> = rules.iter().map(|r| r.as_str()).collect();
             quote! { Some(&[#(#rules_vec),*] as &[&str]) }
