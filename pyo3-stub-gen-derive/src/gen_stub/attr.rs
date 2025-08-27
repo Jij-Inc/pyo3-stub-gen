@@ -13,7 +13,7 @@ use syn::{
 /// Represents the target of type ignore comments during parsing
 #[derive(Debug, Clone, PartialEq)]
 pub enum IgnoreTarget {
-    /// Ignore all type checking errors (# type: ignore)
+    /// Ignore all type checking errors `(# type: ignore)`
     All,
     /// Ignore specific type checking rules (stored as LitStr during parsing)
     SpecifiedLits(Vec<LitStr>),

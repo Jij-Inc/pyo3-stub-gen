@@ -27,9 +27,9 @@ use std::any::TypeId;
 /// Represents the target of type ignore comments
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum IgnoreTarget {
-    /// Ignore all type checking errors (# type: ignore)
+    /// Ignore all type checking errors `(# type: ignore)`
     All,
-    /// Ignore specific type checking rules (# type: ignore[rule1,rule2])
+    /// Ignore specific type checking rules `(# type: ignore[rule1,rule2])`
     Specified(&'static [&'static str]),
 }
 
