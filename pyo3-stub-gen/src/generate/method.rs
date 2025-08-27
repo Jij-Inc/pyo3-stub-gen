@@ -84,12 +84,10 @@ impl fmt::Display for MethodDef {
         }
         write!(f, ") -> {}:", self.r#return)?;
 
-        // Add type: ignore comment if needed
-        if let Some(target) = &self.type_ignored {
+        // Calculate type: ignore comment once
+        let type_ignore_comment = if let Some(target) = &self.type_ignored {
             match target {
-                IgnoreTarget::All => {
-                    write!(f, "  # type: ignore")?;
-                }
+                IgnoreTarget::All => Some("  # type: ignore".to_string()),
                 IgnoreTarget::Specified(rules) => {
                     let rules_str = rules
                         .iter()
@@ -101,18 +99,29 @@ impl fmt::Display for MethodDef {
                             result
                         })
                         .join(",");
-                    write!(f, "  # type: ignore[{}]", rules_str)?;
+                    Some(format!("  # type: ignore[{}]", rules_str))
                 }
             }
-        }
+        } else {
+            None
+        };
 
         let doc = self.doc;
         if !doc.is_empty() {
+            // Add type: ignore comment for methods with docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{}", comment)?;
+            }
             writeln!(f)?;
             let double_indent = format!("{indent}{indent}");
             docstring::write_docstring(f, self.doc, &double_indent)?;
         } else {
-            writeln!(f, " ...")?;
+            write!(f, " ...")?;
+            // Add type: ignore comment for methods without docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{}", comment)?;
+            }
+            writeln!(f)?;
         }
         Ok(())
     }

@@ -642,6 +642,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(test_type_ignore_all, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_pyright, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_custom, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_all, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_specific, m)?)?;
 
     // Test case for custom exceptions
     m.add("MyError", m.py().get_type::<MyError>())?;
@@ -681,6 +683,24 @@ fn test_type_ignore_pyright() -> i32 {
 #[gen_stub(type_ignore = ["custom-rule", "attr-defined"])]
 #[pyfunction]
 fn test_type_ignore_custom() -> i32 {
+    42
+}
+
+// NOTE: Doc-comment MUST NOT be added to the next function,
+// as it tests if `type_ignore` without no doccomment is handled correctly;
+// i.e. it emits comment after `...`, not before.
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore)]
+#[pyfunction]
+fn test_type_ignore_no_comment_all() -> i32 {
+    42
+}
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore=["arg-type", "reportIncompatibleMethodOverride"])]
+#[pyfunction]
+fn test_type_ignore_no_comment_specific() -> i32 {
     42
 }
 
