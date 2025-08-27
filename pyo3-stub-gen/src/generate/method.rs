@@ -1,4 +1,5 @@
-use crate::{generate::*, type_info::*, TypeInfo};
+use crate::{generate::*, type_check_rule::RuleName, type_info::*, TypeInfo};
+use itertools::Itertools;
 use std::{collections::HashSet, fmt};
 
 pub use crate::type_info::MethodType;
@@ -13,6 +14,7 @@ pub struct MethodDef {
     pub r#type: MethodType,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<Vec<RuleName>>,
 }
 
 impl Import for MethodDef {
@@ -39,6 +41,9 @@ impl From<&MethodInfo> for MethodDef {
             r#type: info.r#type,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
+            type_ignored: info.type_ignored.map(|rules| {
+                rules.iter().map(|r| RuleName::from_str(r)).collect()
+            }),
         }
     }
 }
@@ -80,6 +85,16 @@ impl fmt::Display for MethodDef {
             needs_comma = true;
         }
         write!(f, ") -> {}:", self.r#return)?;
+        
+        // Add type: ignore comment if needed
+        if let Some(rules) = &self.type_ignored {
+            if rules.is_empty() {
+                write!(f, "  # type: ignore")?;
+            } else {
+                let rules_str = rules.iter().join(",");
+                write!(f, "  # type: ignore[{}]", rules_str)?;
+            }
+        }
 
         let doc = self.doc;
         if !doc.is_empty() {

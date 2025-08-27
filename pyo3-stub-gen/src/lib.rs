@@ -172,6 +172,7 @@ pub mod exception;
 pub mod generate;
 pub mod pyproject;
 mod stub_type;
+pub mod type_check_rule;
 pub mod type_info;
 pub mod util;
 

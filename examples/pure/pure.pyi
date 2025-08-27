@@ -246,6 +246,20 @@ class Shape2:
     
     ...
 
+class TypeIgnoreTest:
+    r"""
+    Test class for method type: ignore functionality
+    """
+    def new(self) -> TypeIgnoreTest: ...
+    def test_method_ignore(self, value:builtins.int) -> builtins.int:  # type: ignore[union-attr,return-value]
+        r"""
+        Test method with type: ignore for specific rules
+        """
+    def test_method_empty_ignore(self) -> builtins.int:  # type: ignore
+        r"""
+        Test method with empty type: ignore
+        """
+
 class Number(Enum):
     FLOAT = ...
     INTEGER = ...
@@ -329,5 +343,25 @@ def str_len(x:builtins.str) -> builtins.int:
 def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
+    """
+
+def test_type_ignore_custom() -> builtins.int:  # type: ignore[custom-rule,attr-defined]
+    r"""
+    Test function with custom (unknown) rule
+    """
+
+def test_type_ignore_empty() -> builtins.int:  # type: ignore
+    r"""
+    Test function with empty type: ignore (should generate warning)
+    """
+
+def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTypeIssues,reportReturnType]
+    r"""
+    Test function with Pyright diagnostic rules
+    """
+
+def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return-value]
+    r"""
+    Test function with type: ignore for specific rules
     """
 

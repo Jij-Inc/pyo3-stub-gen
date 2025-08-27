@@ -136,6 +136,7 @@ impl ClassDef {
             r#type: MethodType::Instance,
             is_async: false,
             deprecated: None,
+            type_ignored: None,
         };
         self.methods
             .entry("__eq__".to_string())
@@ -159,6 +160,7 @@ impl ClassDef {
                 r#type: MethodType::Instance,
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             };
             self.methods
                 .entry(name.to_string())
@@ -176,6 +178,7 @@ impl ClassDef {
             r#type: MethodType::Instance,
             is_async: false,
             deprecated: None,
+            type_ignored: None,
         };
         self.methods
             .entry("__hash__".to_string())
@@ -192,6 +195,7 @@ impl ClassDef {
             r#type: MethodType::Instance,
             is_async: false,
             deprecated: None,
+            type_ignored: None,
         };
         self.methods
             .entry("__str__".to_string())
