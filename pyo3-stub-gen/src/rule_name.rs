@@ -517,7 +517,9 @@ impl fmt::Display for RuleName {
             Self::ReportInconsistentConstructor => write!(f, "reportInconsistentConstructor"),
             Self::ReportOverlappingOverload => write!(f, "reportOverlappingOverload"),
             Self::ReportMissingSuperCall => write!(f, "reportMissingSuperCall"),
-            Self::ReportUninitializedInstanceVariable => write!(f, "reportUninitializedInstanceVariable"),
+            Self::ReportUninitializedInstanceVariable => {
+                write!(f, "reportUninitializedInstanceVariable")
+            }
             Self::ReportCallInDefaultInitializer => write!(f, "reportCallInDefaultInitializer"),
             Self::ReportAssertAlwaysTrue => write!(f, "reportAssertAlwaysTrue"),
             Self::ReportSelfClsParameterName => write!(f, "reportSelfClsParameterName"),
