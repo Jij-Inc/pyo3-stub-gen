@@ -355,6 +355,10 @@ def test_type_ignore_custom() -> builtins.int:  # type: ignore[custom-rule,attr-
     Test function with custom (unknown) rule
     """
 
+def test_type_ignore_no_comment_all() -> builtins.int: ...  # type: ignore
+
+def test_type_ignore_no_comment_specific() -> builtins.int: ...  # type: ignore[arg-type,reportIncompatibleMethodOverride]
+
 def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTypeIssues,reportReturnType]
     r"""
     Test function with Pyright diagnostic rules
