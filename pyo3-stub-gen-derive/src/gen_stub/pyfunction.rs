@@ -122,8 +122,12 @@ impl ToTokens for PyFunctionInfo {
             .map(|d| quote! { Some(#d) })
             .unwrap_or_else(|| quote! { None });
         let type_ignored_tt = if let Some(rules) = type_ignored {
-            if rules.is_empty() {
-                eprintln!("Warning: It is strongly recommended to explicitly specify the rules to be ignored");
+                tokens.append_all(
+                    syn::Error::new_spanned(
+                        &type_ignored,
+                        "It is strongly recommended to explicitly specify the rules to be ignored"
+                    ).to_compile_error()
+                );
             }
             let rules_vec: Vec<_> = rules.iter().map(|r| r.as_str()).collect();
             quote! { Some(&[#(#rules_vec),*] as &[&str]) }
