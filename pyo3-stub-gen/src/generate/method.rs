@@ -1,4 +1,4 @@
-use crate::{generate::*, type_check_rule::RuleName, type_info::*, TypeInfo};
+use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
 use itertools::Itertools;
 use std::{collections::HashSet, fmt};
 

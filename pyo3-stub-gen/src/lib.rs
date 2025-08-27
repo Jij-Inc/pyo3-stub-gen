@@ -144,6 +144,7 @@
 //!     r#type: MethodType::Instance,
 //!     deprecated: None,
 //!     is_async: false,
+//!     type_ignored: None,
 //! };
 //!
 //! assert_eq!(
