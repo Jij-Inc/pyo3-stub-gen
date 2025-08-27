@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{fmt, str::FromStr};
+use std::{convert::Infallible, fmt, str::FromStr};
 
 /// Type checker rule names for MyPy error codes and Pyright diagnostic rules
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -172,7 +172,7 @@ pub enum RuleName {
 }
 
 impl FromStr for RuleName {
-    type Err = ();
+    type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let result = match s {
