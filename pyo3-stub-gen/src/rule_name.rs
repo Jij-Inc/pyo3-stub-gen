@@ -81,7 +81,7 @@ pub enum RuleName {
     ExplicitAny,
     ExhaustiveMatch,
 
-    // Pyright diagnostic rules from https://microsoft.github.io/pyright/#/configuration?id=type-check-diagnostics-settings
+    // Pyright diagnostic rules from https://microsoft.github.io/pyright/#/configuration?id=type-check-rule-overrides
     ReportGeneralTypeIssues,
     ReportPropertyTypeMismatch,
     ReportFunctionMemberAccess,
@@ -151,6 +151,21 @@ pub enum RuleName {
     ReportShadowedImports,
     ReportImplicitStringConcatenation,
     ReportDeprecated,
+    ReportNoOverloadImplementation,
+    ReportTypeCommentUsage,
+    ReportConstantRedefinition,
+    ReportInconsistentConstructor,
+    ReportOverlappingOverload,
+    ReportMissingSuperCall,
+    ReportUninitializedInstanceVariable,
+    ReportCallInDefaultInitializer,
+    ReportAssertAlwaysTrue,
+    ReportSelfClsParameterName,
+    ReportUnhashable,
+    ReportUnusedCallResult,
+    ReportUnusedExcept,
+    ReportUnusedExpression,
+    ReportUnreachable,
 
     /// Custom rule name escape hatch for rules not in the enum
     Custom(String),
@@ -308,6 +323,21 @@ impl FromStr for RuleName {
             "reportShadowedImports" => Self::ReportShadowedImports,
             "reportImplicitStringConcatenation" => Self::ReportImplicitStringConcatenation,
             "reportDeprecated" => Self::ReportDeprecated,
+            "reportNoOverloadImplementation" => Self::ReportNoOverloadImplementation,
+            "reportTypeCommentUsage" => Self::ReportTypeCommentUsage,
+            "reportConstantRedefinition" => Self::ReportConstantRedefinition,
+            "reportInconsistentConstructor" => Self::ReportInconsistentConstructor,
+            "reportOverlappingOverload" => Self::ReportOverlappingOverload,
+            "reportMissingSuperCall" => Self::ReportMissingSuperCall,
+            "reportUninitializedInstanceVariable" => Self::ReportUninitializedInstanceVariable,
+            "reportCallInDefaultInitializer" => Self::ReportCallInDefaultInitializer,
+            "reportAssertAlwaysTrue" => Self::ReportAssertAlwaysTrue,
+            "reportSelfClsParameterName" => Self::ReportSelfClsParameterName,
+            "reportUnhashable" => Self::ReportUnhashable,
+            "reportUnusedCallResult" => Self::ReportUnusedCallResult,
+            "reportUnusedExcept" => Self::ReportUnusedExcept,
+            "reportUnusedExpression" => Self::ReportUnusedExpression,
+            "reportUnreachable" => Self::ReportUnreachable,
 
             // Fall back to custom
             other => Self::Custom(other.to_string()),
@@ -481,6 +511,21 @@ impl fmt::Display for RuleName {
                 write!(f, "reportImplicitStringConcatenation")
             }
             Self::ReportDeprecated => write!(f, "reportDeprecated"),
+            Self::ReportNoOverloadImplementation => write!(f, "reportNoOverloadImplementation"),
+            Self::ReportTypeCommentUsage => write!(f, "reportTypeCommentUsage"),
+            Self::ReportConstantRedefinition => write!(f, "reportConstantRedefinition"),
+            Self::ReportInconsistentConstructor => write!(f, "reportInconsistentConstructor"),
+            Self::ReportOverlappingOverload => write!(f, "reportOverlappingOverload"),
+            Self::ReportMissingSuperCall => write!(f, "reportMissingSuperCall"),
+            Self::ReportUninitializedInstanceVariable => write!(f, "reportUninitializedInstanceVariable"),
+            Self::ReportCallInDefaultInitializer => write!(f, "reportCallInDefaultInitializer"),
+            Self::ReportAssertAlwaysTrue => write!(f, "reportAssertAlwaysTrue"),
+            Self::ReportSelfClsParameterName => write!(f, "reportSelfClsParameterName"),
+            Self::ReportUnhashable => write!(f, "reportUnhashable"),
+            Self::ReportUnusedCallResult => write!(f, "reportUnusedCallResult"),
+            Self::ReportUnusedExcept => write!(f, "reportUnusedExcept"),
+            Self::ReportUnusedExpression => write!(f, "reportUnusedExpression"),
+            Self::ReportUnreachable => write!(f, "reportUnreachable"),
 
             Self::Custom(s) => write!(f, "{}", s),
         }
