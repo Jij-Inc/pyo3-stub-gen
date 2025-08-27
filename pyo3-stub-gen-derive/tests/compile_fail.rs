@@ -1,5 +1,5 @@
 #[test]
-fn ui() {
+fn failing_cases() {
     let t = trybuild::TestCases::new();
-    t.compile_fail("tests/ui/*.rs");
+    t.compile_fail("tests/failing_cases/*.rs");
 }
