@@ -170,7 +170,9 @@ impl ToTokens for MethodInfo {
             .unwrap_or_else(|| quote! { None });
         let type_ignored_tt = if let Some(rules) = type_ignored {
             if rules.is_empty() {
-                eprintln!("Warning: It is strongly recommended to explicitly specify the rules to be ignored");
+                eprintln!(
+                    r#"Warning: The 'gen_stub(type_ignore)' attribute was provided with an empty rule list, which means ignore all rules. Please specify at least one rule to ignore. For example: #[gen_stub(type_ignored = ["reportIncompatibleMethodOverride"])]"#
+                );
             }
             let rules_vec: Vec<_> = rules.iter().map(|r| r.as_str()).collect();
             quote! { Some(&[#(#rules_vec),*] as &[&str]) }
