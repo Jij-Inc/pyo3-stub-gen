@@ -68,7 +68,13 @@ impl fmt::Display for FunctionDef {
                 IgnoreTarget::Specified(rules) => {
                     let rules_str = rules
                         .iter()
-                        .map(|r| r.parse::<RuleName>().unwrap())
+                        .map(|r| {
+                            let result = r.parse::<RuleName>().unwrap();
+                            if let RuleName::Custom(custom) = &result {
+                                log::warn!("Unknown custom rule name '{custom}' used in type ignore. Ensure this is intended.");
+                            }
+                            result
+                        })
                         .join(",");
                     write!(f, "  # type: ignore[{}]", rules_str)?;
                 }
