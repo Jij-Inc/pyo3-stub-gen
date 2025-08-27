@@ -87,9 +87,7 @@ impl fmt::Display for MethodDef {
         // Calculate type: ignore comment once
         let type_ignore_comment = if let Some(target) = &self.type_ignored {
             match target {
-                IgnoreTarget::All => {
-                    Some("  # type: ignore".to_string())
-                }
+                IgnoreTarget::All => Some("  # type: ignore".to_string()),
                 IgnoreTarget::Specified(rules) => {
                     let rules_str = rules
                         .iter()
