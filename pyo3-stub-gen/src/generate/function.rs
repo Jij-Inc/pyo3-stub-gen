@@ -1,4 +1,5 @@
-use crate::{generate::*, type_info::*, TypeInfo};
+use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
+use itertools::Itertools;
 use std::fmt;
 
 /// Definition of a Python function.
@@ -10,6 +11,7 @@ pub struct FunctionDef {
     pub doc: &'static str,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 impl Import for FunctionDef {
@@ -35,6 +37,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
             doc: info.doc,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
+            type_ignored: info.type_ignored,
         }
     }
 }
@@ -55,6 +58,28 @@ impl fmt::Display for FunctionDef {
             }
         }
         write!(f, ") -> {}:", self.r#return)?;
+
+        // Add type: ignore comment if needed
+        if let Some(target) = &self.type_ignored {
+            match target {
+                IgnoreTarget::All => {
+                    write!(f, "  # type: ignore")?;
+                }
+                IgnoreTarget::Specified(rules) => {
+                    let rules_str = rules
+                        .iter()
+                        .map(|r| {
+                            let result = r.parse::<RuleName>().unwrap();
+                            if let RuleName::Custom(custom) = &result {
+                                log::warn!("Unknown custom rule name '{custom}' used in type ignore. Ensure this is intended.");
+                            }
+                            result
+                        })
+                        .join(",");
+                    write!(f, "  # type: ignore[{}]", rules_str)?;
+                }
+            }
+        }
 
         let doc = self.doc;
         if !doc.is_empty() {

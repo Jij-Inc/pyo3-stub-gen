@@ -17,3 +17,4 @@ dist/
 
 # Taskfile
 .task/
+.claude/settings.local.json
