@@ -1,0 +1,13 @@
+error: type_ignore with empty array is not allowed. Use type_ignore without equals for catch-all, or specify rules in the array.
+ --> tests/ui/type_ignore_empty_array.rs:6:12
+  |
+6 | #[gen_stub(type_ignore=[])]
+  |            ^^^^^^^^^^^
+
+warning: unused import: `pyo3::prelude::*`
+ --> tests/ui/type_ignore_empty_array.rs:1:5
+  |
+1 | use pyo3::prelude::*;
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
