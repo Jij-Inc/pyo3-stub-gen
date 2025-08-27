@@ -8,8 +8,9 @@ use syn::{
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    extract_deprecated, extract_documents, extract_return_type, parse_args, parse_gen_stub_type_ignore,
-    parse_pyo3_attrs, quote_option, ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
+    extract_deprecated, extract_documents, extract_return_type, parse_args,
+    parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option, ArgInfo, ArgsWithSignature, Attr,
+    DeprecatedInfo, Signature,
 };
 
 pub struct PyFunctionInfo {

@@ -1,8 +1,9 @@
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    arg::parse_args, extract_deprecated, extract_documents, extract_return_type, parse_gen_stub_type_ignore,
-    parse_pyo3_attrs, ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
+    arg::parse_args, extract_deprecated, extract_documents, extract_return_type,
+    parse_gen_stub_type_ignore, parse_pyo3_attrs, ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo,
+    Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;

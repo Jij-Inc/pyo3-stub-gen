@@ -646,7 +646,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     // Test case for custom exceptions
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add_class::<NotIntError>()?;
-    
+
     // Test class for type: ignore functionality
     m.add_class::<TypeIgnoreTest>()?;
     Ok(())

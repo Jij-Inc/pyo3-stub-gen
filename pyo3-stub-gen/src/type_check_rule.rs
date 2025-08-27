@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 /// Type checker rule names for MyPy error codes and Pyright diagnostic rules
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,7 +56,7 @@ pub enum RuleName {
     TypedDictReadonlyMutated,
     NarrowedTypeNotSubtype,
     Misc,
-    
+
     // MyPy optional error codes from https://mypy.readthedocs.io/en/stable/error_code_list2.html
     TypeArg,
     NoUntypedDef,
@@ -80,7 +80,7 @@ pub enum RuleName {
     UnimportedReveal,
     ExplicitAny,
     ExhaustiveMatch,
-    
+
     // Pyright diagnostic rules from https://microsoft.github.io/pyright/#/configuration?id=type-check-diagnostics-settings
     ReportGeneralTypeIssues,
     ReportPropertyTypeMismatch,
@@ -151,15 +151,16 @@ pub enum RuleName {
     ReportShadowedImports,
     ReportImplicitStringConcatenation,
     ReportDeprecated,
-    
+
     /// Custom rule name escape hatch for rules not in the enum
     Custom(String),
 }
 
-impl RuleName {
-    /// Parse a rule name from a string
-    pub fn from_str(s: &str) -> Self {
-        match s {
+impl FromStr for RuleName {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let result = match s {
             // MyPy error codes
             "attr-defined" => Self::AttrDefined,
             "union-attr" => Self::UnionAttr,
@@ -212,7 +213,7 @@ impl RuleName {
             "typeddict-readonly-mutated" => Self::TypedDictReadonlyMutated,
             "narrowed-type-not-subtype" => Self::NarrowedTypeNotSubtype,
             "misc" => Self::Misc,
-            
+
             // MyPy optional codes
             "type-arg" => Self::TypeArg,
             "no-untyped-def" => Self::NoUntypedDef,
@@ -236,7 +237,7 @@ impl RuleName {
             "unimported-reveal" => Self::UnimportedReveal,
             "explicit-any" => Self::ExplicitAny,
             "exhaustive-match" => Self::ExhaustiveMatch,
-            
+
             // Pyright diagnostic rules
             "reportGeneralTypeIssues" => Self::ReportGeneralTypeIssues,
             "reportPropertyTypeMismatch" => Self::ReportPropertyTypeMismatch,
@@ -307,12 +308,15 @@ impl RuleName {
             "reportShadowedImports" => Self::ReportShadowedImports,
             "reportImplicitStringConcatenation" => Self::ReportImplicitStringConcatenation,
             "reportDeprecated" => Self::ReportDeprecated,
-            
+
             // Fall back to custom
             other => Self::Custom(other.to_string()),
-        }
+        };
+        Ok(result)
     }
-    
+}
+
+impl RuleName {
     /// Check if this is a known rule (not custom)
     pub fn is_known(&self) -> bool {
         !matches!(self, Self::Custom(_))
@@ -374,7 +378,7 @@ impl fmt::Display for RuleName {
             Self::TypedDictReadonlyMutated => write!(f, "typeddict-readonly-mutated"),
             Self::NarrowedTypeNotSubtype => write!(f, "narrowed-type-not-subtype"),
             Self::Misc => write!(f, "misc"),
-            
+
             // MyPy optional codes
             Self::TypeArg => write!(f, "type-arg"),
             Self::NoUntypedDef => write!(f, "no-untyped-def"),
@@ -398,7 +402,7 @@ impl fmt::Display for RuleName {
             Self::UnimportedReveal => write!(f, "unimported-reveal"),
             Self::ExplicitAny => write!(f, "explicit-any"),
             Self::ExhaustiveMatch => write!(f, "exhaustive-match"),
-            
+
             // Pyright rules - use the original names
             Self::ReportGeneralTypeIssues => write!(f, "reportGeneralTypeIssues"),
             Self::ReportPropertyTypeMismatch => write!(f, "reportPropertyTypeMismatch"),
@@ -448,15 +452,21 @@ impl fmt::Display for RuleName {
             Self::ReportUnnecessaryComparison => write!(f, "reportUnnecessaryComparison"),
             Self::ReportUnnecessaryContains => write!(f, "reportUnnecessaryContains"),
             Self::ReportUnnecessaryIsInstance => write!(f, "reportUnnecessaryIsInstance"),
-            Self::ReportUnnecessaryTypeIgnoreComment => write!(f, "reportUnnecessaryTypeIgnoreComment"),
+            Self::ReportUnnecessaryTypeIgnoreComment => {
+                write!(f, "reportUnnecessaryTypeIgnoreComment")
+            }
             Self::ReportUnsupportedDunderAll => write!(f, "reportUnsupportedDunderAll"),
             Self::ReportUntypedBaseClass => write!(f, "reportUntypedBaseClass"),
             Self::ReportUntypedClassDecorator => write!(f, "reportUntypedClassDecorator"),
             Self::ReportUntypedFunctionDecorator => write!(f, "reportUntypedFunctionDecorator"),
             Self::ReportUntypedNamedTuple => write!(f, "reportUntypedNamedTuple"),
             Self::ReportIncompatibleMethodOverride => write!(f, "reportIncompatibleMethodOverride"),
-            Self::ReportIncompatibleVariableOverride => write!(f, "reportIncompatibleVariableOverride"),
-            Self::ReportInvalidStringEscapeSequence => write!(f, "reportInvalidStringEscapeSequence"),
+            Self::ReportIncompatibleVariableOverride => {
+                write!(f, "reportIncompatibleVariableOverride")
+            }
+            Self::ReportInvalidStringEscapeSequence => {
+                write!(f, "reportInvalidStringEscapeSequence")
+            }
             Self::ReportMissingCallArgument => write!(f, "reportMissingCallArgument"),
             Self::ReportUnboundVariable => write!(f, "reportUnboundVariable"),
             Self::ReportPossiblyUnboundVariable => write!(f, "reportPossiblyUnboundVariable"),
@@ -467,9 +477,11 @@ impl fmt::Display for RuleName {
             Self::ReportAwaitNotAsync => write!(f, "reportAwaitNotAsync"),
             Self::ReportMatchNotExhaustive => write!(f, "reportMatchNotExhaustive"),
             Self::ReportShadowedImports => write!(f, "reportShadowedImports"),
-            Self::ReportImplicitStringConcatenation => write!(f, "reportImplicitStringConcatenation"),
+            Self::ReportImplicitStringConcatenation => {
+                write!(f, "reportImplicitStringConcatenation")
+            }
             Self::ReportDeprecated => write!(f, "reportDeprecated"),
-            
+
             Self::Custom(s) => write!(f, "{}", s),
         }
     }
@@ -481,24 +493,39 @@ mod tests {
 
     #[test]
     fn test_mypy_error_codes() {
-        assert_eq!(RuleName::from_str("attr-defined"), RuleName::AttrDefined);
+        assert_eq!(
+            "attr-defined".parse::<RuleName>().unwrap(),
+            RuleName::AttrDefined
+        );
         assert_eq!(RuleName::AttrDefined.to_string(), "attr-defined");
-        
-        assert_eq!(RuleName::from_str("union-attr"), RuleName::UnionAttr);
+
+        assert_eq!(
+            "union-attr".parse::<RuleName>().unwrap(),
+            RuleName::UnionAttr
+        );
         assert_eq!(RuleName::UnionAttr.to_string(), "union-attr");
     }
 
     #[test]
     fn test_pyright_rules() {
-        assert_eq!(RuleName::from_str("reportGeneralTypeIssues"), RuleName::ReportGeneralTypeIssues);
-        assert_eq!(RuleName::ReportGeneralTypeIssues.to_string(), "reportGeneralTypeIssues");
+        assert_eq!(
+            "reportGeneralTypeIssues".parse::<RuleName>().unwrap(),
+            RuleName::ReportGeneralTypeIssues
+        );
+        assert_eq!(
+            RuleName::ReportGeneralTypeIssues.to_string(),
+            "reportGeneralTypeIssues"
+        );
     }
 
     #[test]
     fn test_custom_rule() {
-        assert_eq!(RuleName::from_str("unknown-rule"), RuleName::Custom("unknown-rule".to_string()));
+        assert_eq!(
+            "unknown-rule".parse::<RuleName>().unwrap(),
+            RuleName::Custom("unknown-rule".to_string())
+        );
         assert_eq!(RuleName::Custom("custom".to_string()).to_string(), "custom");
-        assert!(RuleName::from_str("attr-defined").is_known());
-        assert!(!RuleName::from_str("unknown-rule").is_known());
+        assert!("attr-defined".parse::<RuleName>().unwrap().is_known());
+        assert!(!"unknown-rule".parse::<RuleName>().unwrap().is_known());
     }
 }

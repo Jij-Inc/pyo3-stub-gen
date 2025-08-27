@@ -37,9 +37,9 @@ impl From<&PyFunctionInfo> for FunctionDef {
             doc: info.doc,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
-            type_ignored: info.type_ignored.map(|rules| {
-                rules.iter().map(|r| RuleName::from_str(r)).collect()
-            }),
+            type_ignored: info
+                .type_ignored
+                .map(|rules| rules.iter().map(|r| r.parse().unwrap()).collect()),
         }
     }
 }
@@ -60,7 +60,7 @@ impl fmt::Display for FunctionDef {
             }
         }
         write!(f, ") -> {}:", self.r#return)?;
-        
+
         // Add type: ignore comment if needed
         if let Some(rules) = &self.type_ignored {
             if rules.is_empty() {
