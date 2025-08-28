@@ -156,6 +156,14 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
     })
 }
 
+pub fn pymethods_prune(item: TokenStream2) -> Result<TokenStream2> {
+    let mut item_impl = parse2::<ItemImpl>(item)?;
+    pymethods::prune_attrs(&mut item_impl);
+    Ok(quote! {
+        #item_impl
+    })
+}
+
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item_fn = parse2::<ItemFn>(item)?;
     let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;

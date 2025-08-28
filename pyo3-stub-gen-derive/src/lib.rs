@@ -88,6 +88,24 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
         .into()
 }
 
+/// Remove `#[gen_stub(...)]` from method blocks.
+///
+/// ```
+/// #[pyo3_stub_gen_derive::gen_stub_pymethods_prune]
+/// impl A {
+///     #[gen_stub(override_return_type(type_repr="int")]
+///     fn f(&self) -> u32 {
+///        todo!()
+///     }
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn gen_stub_pymethods_prune(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pymethods_prune(item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
+
 /// Embed metadata for Python stub file generation for `#[pyfunction]` macro
 ///
 /// ```
