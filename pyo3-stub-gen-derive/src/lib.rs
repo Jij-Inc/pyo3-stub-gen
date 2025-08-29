@@ -119,8 +119,8 @@ pub fn gen_stub_pyfunction(attr: TokenStream, item: TokenStream) -> TokenStream 
 
 /// Do nothing but remove all `#[gen_stub(xxx)]` for `pyclass`, `pymethods`, and `pyfunction`.
 ///
-/// It is useful to use `#[gen_stub(xxx)]` under feature-gating stub-gen. 
-/// 
+/// It is useful to use `#[gen_stub(xxx)]` under feature-gating stub-gen.
+///
 /// E.g., only generate .pyi when `stub-gen` feature is turned-on:
 /// ```ignore
 /// #[cfg_attr(feature = "stub-gen", pyo3_stub_gen_derive::gen_stub_pymethods)]
