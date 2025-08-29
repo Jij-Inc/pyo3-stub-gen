@@ -116,3 +116,26 @@ pub fn gen_stub_pyfunction(attr: TokenStream, item: TokenStream) -> TokenStream 
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
+
+/// Do nothing but remove all `#[gen_stub(xxx)]` for `pyclass`, `pymethods`, and `pyfunction`.
+///
+/// It is useful to use `#[gen_stub(xxx)]` under feature-gating stub-gen.
+///
+/// ```
+/// #[cfg_attr(feature = "stub-gen", pyo3_stub_gen::derive::gen_stub_pymethods)]
+/// #[cfg_attr(not(feature = "stub-gen"), pyo3_stub_gen::derive::remove_gen_stub)]
+/// #[pymethods]
+/// impl A {
+///     #[gen_stub(override_return_type(type_repr="typing_extensions.Self", imports=("typing_extensions")))]
+///     #[new]
+///     pub fn new() -> Self {
+///         Self::default()
+///     }
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn remove_gen_stub(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::prune_gen_stub(item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
