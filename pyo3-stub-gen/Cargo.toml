@@ -31,6 +31,7 @@ path = "../pyo3-stub-gen-derive"
 test-case.workspace = true
 
 [features]
-default = ["numpy", "either"]
+default = ["numpy", "either", "infer_signature"]
 numpy = ["dep:numpy"]
 either = ["dep:either"]
+infer_signature = []
