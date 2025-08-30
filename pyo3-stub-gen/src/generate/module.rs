@@ -11,6 +11,7 @@ use std::{
 pub struct Module {
     pub class: BTreeMap<TypeId, ClassDef>,
     pub enum_: BTreeMap<TypeId, EnumDef>,
+    pub type_union: BTreeMap<TypeId, TypeUnionDef>,
     pub function: BTreeMap<&'static str, Vec<FunctionDef>>,
     pub variables: BTreeMap<&'static str, VariableDef>,
     pub name: String,
@@ -65,6 +66,9 @@ impl fmt::Display for Module {
         }
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
             write!(f, "{enum_}")?;
+        }
+        for type_union in self.type_union.values().sorted_by_key(|class| class.name) {
+            write!(f, "{type_union}")?;
         }
         for functions in self.function.values() {
             let overloaded = functions.len() > 1;
