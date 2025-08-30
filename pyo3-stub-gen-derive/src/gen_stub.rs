@@ -171,3 +171,18 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
         }
     })
 }
+
+pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
+    fn prune_attrs<T: syn::parse::Parse + quote::ToTokens>(
+        item: &TokenStream2,
+        fn_prune_attrs: fn(&mut T),
+    ) -> Result<TokenStream2> {
+        parse2::<T>(item.clone()).map(|mut item| {
+            fn_prune_attrs(&mut item);
+            quote! { #item }
+        })
+    }
+    prune_attrs::<ItemStruct>(&item, pyclass::prune_attrs)
+        .or_else(|_| prune_attrs::<ItemImpl>(&item, pymethods::prune_attrs))
+        .or_else(|_| prune_attrs::<ItemFn>(&item, pyfunction::prune_attrs))
+}
