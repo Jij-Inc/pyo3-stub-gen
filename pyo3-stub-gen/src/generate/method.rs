@@ -99,7 +99,7 @@ impl fmt::Display for MethodDef {
                             result
                         })
                         .join(",");
-                    Some(format!("  # type: ignore[{}]", rules_str))
+                    Some(format!("  # type: ignore[{rules_str}]"))
                 }
             }
         } else {
@@ -110,7 +110,7 @@ impl fmt::Display for MethodDef {
         if !doc.is_empty() {
             // Add type: ignore comment for methods with docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
             let double_indent = format!("{indent}{indent}");
@@ -119,7 +119,7 @@ impl fmt::Display for MethodDef {
             write!(f, " ...")?;
             // Add type: ignore comment for methods without docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
         }

@@ -60,9 +60,7 @@ pub struct ArgInfo {
 #[derive(Debug, Clone)]
 pub enum SignatureArg {
     Ident,
-    Assign {
-        default: &'static std::sync::LazyLock<String>,
-    },
+    Assign { default: fn() -> String },
     Star,
     Args,
     Keywords,
@@ -73,9 +71,9 @@ impl PartialEq for SignatureArg {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Assign { default: l_default }, Self::Assign { default: r_default }) => {
-                let l_default: &String = l_default;
-                let r_default: &String = r_default;
-                l_default.eq(r_default)
+                let l_default = l_default();
+                let r_default = r_default();
+                l_default.eq(&r_default)
             }
             _ => core::mem::discriminant(self) == core::mem::discriminant(other),
         }
@@ -110,7 +108,7 @@ pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
-    pub default: Option<&'static std::sync::LazyLock<String>>,
+    pub default: Option<fn() -> String>,
     pub deprecated: Option<DeprecatedInfo>,
 }
 
@@ -232,6 +230,15 @@ pub struct PyVariableInfo {
     pub name: &'static str,
     pub module: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub default: Option<fn() -> String>,
 }
 
 inventory::collect!(PyVariableInfo);
+
+#[derive(Debug)]
+pub struct ModuleDocInfo {
+    pub module: &'static str,
+    pub doc: fn() -> String,
+}
+
+inventory::collect!(ModuleDocInfo);

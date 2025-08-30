@@ -179,12 +179,11 @@ mod test {
                             r#type: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign {
                                 default: {
-                                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(||
-                                    {
+                                    fn _fmt() -> String {
                                         let v: f64 = 1.0;
                                         ::pyo3_stub_gen::util::fmt_py_obj(v)
-                                    });
-                                    &DEFAULT
+                                    }
+                                    _fmt
                                 },
                             }),
                         },
