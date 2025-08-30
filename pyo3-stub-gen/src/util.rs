@@ -52,6 +52,7 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
     Ok(globals)
 }
 
+#[cfg_attr(not(feature = "infer_signature"), allow(unused_variables))]
 pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     #[cfg(feature = "infer_signature")]
     {
@@ -73,7 +74,7 @@ pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "infer_signature"))]
 mod test {
     use super::*;
     #[pyclass]
