@@ -125,11 +125,8 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 }
                             } else {
                                 quote! {
-                                ::pyo3::prepare_freethreaded_python();
-                                ::pyo3::Python::with_gil(|py| -> String {
-                                    let v: #r#type = #value;
-                                    ::pyo3_stub_gen::util::fmt_py_obj(py, v)
-                                })
+                                let v: #r#type = #value;
+                                ::pyo3_stub_gen::util::fmt_py_obj(v)
                                 }
                             };
                             Ok(quote! {
@@ -154,11 +151,8 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 }
                             } else {
                                 quote! {
-                                ::pyo3::prepare_freethreaded_python();
-                                ::pyo3::Python::with_gil(|py| -> String {
-                                    let v: #r#type = #value;
-                                    ::pyo3_stub_gen::util::fmt_py_obj(py, v)
-                                })
+                                let v: #r#type = #value;
+                                ::pyo3_stub_gen::util::fmt_py_obj(v)
                                 }
                             };
                             Ok(quote! {

@@ -122,3 +122,5 @@ The project provides mappings between Rust and Python types:
 - `/stub_type/pyo3.rs` - PyO3-specific types
 
 Manual type specification is supported for edge cases where automatic translation fails.
+
+- When you think you are done with your change, use `task stub-gen` to update stub files and inspect the content.

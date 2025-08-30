@@ -24,6 +24,15 @@
 use crate::{PyStubType, TypeInfo};
 use std::any::TypeId;
 
+/// Represents the target of type ignore comments
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum IgnoreTarget {
+    /// Ignore all type checking errors `(# type: ignore)`
+    All,
+    /// Ignore specific type checking rules `(# type: ignore[rule1,rule2])`
+    Specified(&'static [&'static str]),
+}
+
 /// Information about deprecated items
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeprecatedInfo {
@@ -92,6 +101,7 @@ pub struct MethodInfo {
     pub r#type: MethodType,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -212,6 +222,7 @@ pub struct PyFunctionInfo {
     pub module: Option<&'static str>,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 inventory::collect!(PyFunctionInfo);

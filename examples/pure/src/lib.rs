@@ -375,6 +375,7 @@ submit! {
         doc: "",
         is_async: false,
         deprecated: None,
+        type_ignored: None,
     }
 }
 /// Second example: all hints manually `submit!`ed via macro.
@@ -403,6 +404,7 @@ submit! {
         doc: "Increments float by 1",
         is_async: false,
         deprecated: None,
+        type_ignored: None,
     }
 }
 
@@ -419,6 +421,7 @@ submit! {
         doc: "Increments integer by 1",
         is_async: false,
         deprecated: None,
+        type_ignored: None,
     }
 }
 
@@ -462,6 +465,7 @@ submit! {
                 doc: "And this is for the second comment",
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             }
         ],
     }
@@ -506,6 +510,7 @@ submit! {
                 doc: "increment_2 for integers, submitted by hands",
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             },
             MethodInfo {
                 name: "__new__",
@@ -515,6 +520,7 @@ submit! {
                 doc: "Constructor for Incrementer2",
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             },
             MethodInfo {
                 name: "increment_2",
@@ -530,6 +536,7 @@ submit! {
                 doc: "increment_2 for floats, submitted by hands",
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             },
         ],
     }
@@ -630,10 +637,97 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
 
+    // Test cases for type: ignore functionality
+    m.add_function(wrap_pyfunction!(test_type_ignore_specific, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_all, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_pyright, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_custom, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_all, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_specific, m)?)?;
+
     // Test case for custom exceptions
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add_class::<NotIntError>()?;
+
+    // Test class for type: ignore functionality
+    m.add_class::<TypeIgnoreTest>()?;
     Ok(())
+}
+
+/// Test function with type: ignore for specific rules
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["arg-type", "return-value"])]
+#[pyfunction]
+fn test_type_ignore_specific() -> i32 {
+    42
+}
+
+/// Test function with type: ignore (without equals for catch-all)
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore)]
+#[pyfunction]
+fn test_type_ignore_all() -> i32 {
+    42
+}
+
+/// Test function with Pyright diagnostic rules
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["reportGeneralTypeIssues", "reportReturnType"])]
+#[pyfunction]
+fn test_type_ignore_pyright() -> i32 {
+    42
+}
+
+/// Test function with custom (unknown) rule
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["custom-rule", "attr-defined"])]
+#[pyfunction]
+fn test_type_ignore_custom() -> i32 {
+    42
+}
+
+// NOTE: Doc-comment MUST NOT be added to the next function,
+// as it tests if `type_ignore` without no doccomment is handled correctly;
+// i.e. it emits comment after `...`, not before.
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore)]
+#[pyfunction]
+fn test_type_ignore_no_comment_all() -> i32 {
+    42
+}
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore=["arg-type", "reportIncompatibleMethodOverride"])]
+#[pyfunction]
+fn test_type_ignore_no_comment_specific() -> i32 {
+    42
+}
+
+/// Test class for method type: ignore functionality
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct TypeIgnoreTest {}
+
+#[pymethods]
+#[gen_stub_pymethods]
+impl TypeIgnoreTest {
+    #[new]
+    fn new() -> Self {
+        Self {}
+    }
+
+    /// Test method with type: ignore for specific rules
+    #[gen_stub(type_ignore = ["union-attr", "return-value"])]
+    fn test_method_ignore(&self, value: i32) -> i32 {
+        value * 2
+    }
+
+    /// Test method with type: ignore (without equals for catch-all)
+    #[gen_stub(type_ignore)]
+    fn test_method_all_ignore(&self) -> i32 {
+        42
+    }
 }
 
 define_stub_info_gatherer!(stub_info);
