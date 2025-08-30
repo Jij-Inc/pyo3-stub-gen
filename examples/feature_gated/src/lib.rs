@@ -1,3 +1,5 @@
+mod gen_stub_default;
+
 use pyo3::prelude::*;
 
 /// Formats the sum of two numbers as string.
@@ -11,6 +13,7 @@ fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
 #[pymodule]
 fn feature_gated(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+    m.add_class::<gen_stub_default::A>()?;
     Ok(())
 }
 

@@ -1,6 +1,6 @@
 [package]
-name = "feature-gated"
-description = "Example for feature-gated stub generation"
+name = "feature_gated"
+description = "Example for feature_gated stub generation"
 edition.workspace = true
 version.workspace = true
 
@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 ahash.workspace = true
 env_logger.workspace = true
-pyo3-stub-gen = { path = "../../pyo3-stub-gen", optional = true } # feature-gated
+pyo3-stub-gen = { path = "../../pyo3-stub-gen", optional = true } # feature_gated
 pyo3.workspace = true
 pyo3.features = ["experimental-async"]
 
