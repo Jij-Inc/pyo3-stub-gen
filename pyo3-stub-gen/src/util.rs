@@ -52,18 +52,29 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
     Ok(globals)
 }
 
-pub fn fmt_py_obj<'py, T: pyo3::IntoPyObjectExt<'py>>(py: Python<'py>, obj: T) -> String {
-    if let Ok(any) = obj.into_bound_py_any(py) {
-        if all_builtin_types(&any) || valid_external_repr(&any).is_some_and(|valid| valid) {
-            if let Ok(py_str) = any.repr() {
-                return py_str.to_string();
+#[cfg_attr(not(feature = "infer_signature"), allow(unused_variables))]
+pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
+    #[cfg(feature = "infer_signature")]
+    {
+        pyo3::prepare_freethreaded_python();
+        pyo3::Python::with_gil(|py| -> String {
+            if let Ok(any) = obj.into_bound_py_any(py) {
+                if all_builtin_types(&any) || valid_external_repr(&any).is_some_and(|valid| valid) {
+                    if let Ok(py_str) = any.repr() {
+                        return py_str.to_string();
+                    }
+                }
             }
-        }
+            "...".to_owned()
+        })
     }
-    "...".to_owned()
+    #[cfg(not(feature = "infer_signature"))]
+    {
+        "...".to_owned()
+    }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "infer_signature"))]
 mod test {
     use super::*;
     #[pyclass]
@@ -72,61 +83,58 @@ mod test {
     #[test]
     fn test_fmt_dict() {
         pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::with_gil(|py| {
             let dict = PyDict::new(py);
             _ = dict.set_item("k1", "v1");
             _ = dict.set_item("k2", 2);
-            assert_eq!("{'k1': 'v1', 'k2': 2}", fmt_py_obj(py, &dict));
+            assert_eq!("{'k1': 'v1', 'k2': 2}", fmt_py_obj(dict.as_unbound()));
             // class A variable can not be formatted
             _ = dict.set_item("k3", A {});
-            assert_eq!("...", fmt_py_obj(py, &dict));
+            assert_eq!("...", fmt_py_obj(dict.as_unbound()));
         })
     }
     #[test]
     fn test_fmt_list() {
         pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::with_gil(|py| {
             let list = PyList::new(py, [1, 2]).unwrap();
-            assert_eq!("[1, 2]", fmt_py_obj(py, &list));
+            assert_eq!("[1, 2]", fmt_py_obj(list.as_unbound()));
             // class A variable can not be formatted
             let list = PyList::new(py, [A {}, A {}]).unwrap();
-            assert_eq!("...", fmt_py_obj(py, &list));
+            assert_eq!("...", fmt_py_obj(list.as_unbound()));
         })
     }
     #[test]
     fn test_fmt_tuple() {
         pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::with_gil(|py| {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
-            assert_eq!("(1, 2)", fmt_py_obj(py, tuple));
+            assert_eq!("(1, 2)", fmt_py_obj(tuple.as_unbound()));
             let tuple = PyTuple::new(py, [1]).unwrap();
-            assert_eq!("(1,)", fmt_py_obj(py, tuple));
+            assert_eq!("(1,)", fmt_py_obj(tuple.as_unbound()));
             // class A variable can not be formatted
             let tuple = PyTuple::new(py, [A {}]).unwrap();
-            assert_eq!("...", fmt_py_obj(py, tuple));
+            assert_eq!("...", fmt_py_obj(tuple.as_unbound()));
         })
     }
     #[test]
     fn test_fmt_other() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
-            // str
-            assert_eq!("'123'", fmt_py_obj(py, "123"));
-            assert_eq!("\"don't\"", fmt_py_obj(py, "don't"));
-            assert_eq!("'str\\\\'", fmt_py_obj(py, "str\\"));
-            // bool
-            assert_eq!("True", fmt_py_obj(py, true));
-            assert_eq!("False", fmt_py_obj(py, false));
-            // int
-            assert_eq!("123", fmt_py_obj(py, 123));
-            // float
-            assert_eq!("1.23", fmt_py_obj(py, 1.23));
-            // None
-            let none: Option<usize> = None;
-            assert_eq!("None", fmt_py_obj(py, none));
-            // class A variable can not be formatted
-            assert_eq!("...", fmt_py_obj(py, A {}));
-        })
+        // str
+        assert_eq!("'123'", fmt_py_obj("123"));
+        assert_eq!("\"don't\"", fmt_py_obj("don't"));
+        assert_eq!("'str\\\\'", fmt_py_obj("str\\"));
+        // bool
+        assert_eq!("True", fmt_py_obj(true));
+        assert_eq!("False", fmt_py_obj(false));
+        // int
+        assert_eq!("123", fmt_py_obj(123));
+        // float
+        assert_eq!("1.23", fmt_py_obj(1.23));
+        // None
+        let none: Option<usize> = None;
+        assert_eq!("None", fmt_py_obj(none));
+        // class A variable can not be formatted
+        assert_eq!("...", fmt_py_obj(A {}));
     }
     #[test]
     fn test_fmt_enum() {
@@ -136,9 +144,6 @@ mod test {
             Float,
             Integer,
         }
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
-            assert_eq!("Number.Float", fmt_py_obj(py, Number::Float));
-        });
+        assert_eq!("Number.Float", fmt_py_obj(Number::Float));
     }
 }
