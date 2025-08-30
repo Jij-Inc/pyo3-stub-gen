@@ -254,12 +254,8 @@ macro_rules! module_variable {
                 r#type: <$ty as $crate::PyStubType>::type_output,
                 default: Some({
                     fn _fmt() -> String {
-                        if $value.to_string() == "None" {
-                            "None".to_string()
-                        } else {
-                            let v: $ty = $value;
-                            $crate::util::fmt_py_obj(v)
-                        }
+                        let v: $ty = $value;
+                        $crate::util::fmt_py_obj(v)
                     }
                     _fmt
                 }),
