@@ -63,6 +63,9 @@
 //!         // Decorated with `#[pyclass(eq, ord)]`
 //!         has_eq: false,
 //!         has_ord: false,
+//!         // Decorated with `#[pyclass(hash, str)]`
+//!         has_hash: false,
+//!         has_str: false,
 //!     }
 //! }
 //! ```
@@ -141,6 +144,7 @@
 //!     r#type: MethodType::Instance,
 //!     deprecated: None,
 //!     is_async: false,
+//!     type_ignored: None,
 //! };
 //!
 //! assert_eq!(
@@ -168,6 +172,7 @@ pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 pub mod exception;
 pub mod generate;
 pub mod pyproject;
+pub mod rule_name;
 mod stub_type;
 pub mod type_info;
 pub mod util;

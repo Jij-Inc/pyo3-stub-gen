@@ -113,6 +113,12 @@ impl From<&PyClassInfo> for ClassDef {
         if info.has_ord {
             new.add_ord_methods();
         }
+        if info.has_hash {
+            new.add_hash_method();
+        }
+        if info.has_str {
+            new.add_str_method();
+        }
         new
     }
 }
@@ -130,6 +136,7 @@ impl ClassDef {
             r#type: MethodType::Instance,
             is_async: false,
             deprecated: None,
+            type_ignored: None,
         };
         self.methods
             .entry("__eq__".to_string())
@@ -153,12 +160,47 @@ impl ClassDef {
                 r#type: MethodType::Instance,
                 is_async: false,
                 deprecated: None,
+                type_ignored: None,
             };
             self.methods
                 .entry(name.to_string())
                 .or_default()
                 .push(method);
         }
+    }
+
+    fn add_hash_method(&mut self) {
+        let method = MethodDef {
+            name: "__hash__",
+            args: vec![],
+            r#return: TypeInfo::builtin("int"),
+            doc: "",
+            r#type: MethodType::Instance,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+        };
+        self.methods
+            .entry("__hash__".to_string())
+            .or_default()
+            .push(method);
+    }
+
+    fn add_str_method(&mut self) {
+        let method = MethodDef {
+            name: "__str__",
+            args: vec![],
+            r#return: TypeInfo::builtin("str"),
+            doc: "",
+            r#type: MethodType::Instance,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+        };
+        self.methods
+            .entry("__str__".to_string())
+            .or_default()
+            .push(method);
     }
 }
 

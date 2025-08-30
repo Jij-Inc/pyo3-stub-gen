@@ -198,11 +198,8 @@ impl ToTokens for MemberInfo {
                     let (TypeOrOverride::RustType { r#type: ty }
                     | TypeOrOverride::OverrideType { r#type: ty, .. }) = r#type;
                     quote! {
-                        ::pyo3::prepare_freethreaded_python();
-                        ::pyo3::Python::with_gil(|py| -> String {
-                            let v: #ty = #value;
-                            ::pyo3_stub_gen::util::fmt_py_obj(py, v)
-                        })
+                    let v: #ty = #value;
+                    ::pyo3_stub_gen::util::fmt_py_obj(v)
                     }
                 }
             })

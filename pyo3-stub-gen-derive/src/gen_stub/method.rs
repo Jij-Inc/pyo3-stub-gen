@@ -1,8 +1,9 @@
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    arg::parse_args, extract_deprecated, extract_documents, extract_return_type, parse_pyo3_attrs,
-    ArgInfo, ArgsWithSignature, Attr, DeprecatedInfo, Signature,
+    arg::parse_args, attr::IgnoreTarget, extract_deprecated, extract_documents,
+    extract_return_type, parse_gen_stub_type_ignore, parse_pyo3_attrs, ArgInfo, ArgsWithSignature,
+    Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -29,6 +30,7 @@ pub struct MethodInfo {
     r#type: MethodType,
     is_async: bool,
     deprecated: Option<DeprecatedInfo>,
+    type_ignored: Option<IgnoreTarget>,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -89,6 +91,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
         let ImplItemFn { attrs, sig, .. } = item;
         let doc = extract_documents(&attrs).join("\n");
         let deprecated = extract_deprecated(&attrs);
+        let type_ignored = parse_gen_stub_type_ignore(&attrs)?;
         let pyo3_attrs = parse_pyo3_attrs(&attrs)?;
         let mut method_name = None;
         let mut text_sig = Signature::overriding_operator(&sig);
@@ -118,6 +121,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             r#type: method_type,
             is_async: sig.asyncness.is_some(),
             deprecated,
+            type_ignored,
         })
     }
 }
@@ -133,6 +137,7 @@ impl ToTokens for MethodInfo {
             r#type,
             is_async,
             deprecated,
+            type_ignored,
         } = self;
         let args_with_sig = ArgsWithSignature { args, sig };
         let ret_tt = if let Some(ret) = ret {
@@ -163,6 +168,23 @@ impl ToTokens for MethodInfo {
             .as_ref()
             .map(|d| quote! { Some(#d) })
             .unwrap_or_else(|| quote! { None });
+        let type_ignored_tt = if let Some(target) = type_ignored {
+            match target {
+                IgnoreTarget::All => {
+                    quote! { Some(::pyo3_stub_gen::type_info::IgnoreTarget::All) }
+                }
+                IgnoreTarget::SpecifiedLits(rules) => {
+                    let rule_strs: Vec<String> = rules.iter().map(|lit| lit.value()).collect();
+                    quote! {
+                        Some(::pyo3_stub_gen::type_info::IgnoreTarget::Specified(
+                            &[#(#rule_strs),*] as &[&str]
+                        ))
+                    }
+                }
+            }
+        } else {
+            quote! { None }
+        };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
@@ -172,6 +194,7 @@ impl ToTokens for MethodInfo {
                 r#type: #type_tt,
                 is_async: #is_async,
                 deprecated: #deprecated_tt,
+                type_ignored: #type_ignored_tt,
             }
         })
     }

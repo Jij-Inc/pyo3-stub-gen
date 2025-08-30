@@ -1,4 +1,5 @@
-use crate::{generate::*, type_info::*, TypeInfo};
+use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
+use itertools::Itertools;
 use std::{collections::HashSet, fmt};
 
 pub use crate::type_info::MethodType;
@@ -13,6 +14,7 @@ pub struct MethodDef {
     pub r#type: MethodType,
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 impl Import for MethodDef {
@@ -39,6 +41,7 @@ impl From<&MethodInfo> for MethodDef {
             r#type: info.r#type,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
+            type_ignored: info.type_ignored,
         }
     }
 }
@@ -81,13 +84,44 @@ impl fmt::Display for MethodDef {
         }
         write!(f, ") -> {}:", self.r#return)?;
 
+        // Calculate type: ignore comment once
+        let type_ignore_comment = if let Some(target) = &self.type_ignored {
+            match target {
+                IgnoreTarget::All => Some("  # type: ignore".to_string()),
+                IgnoreTarget::Specified(rules) => {
+                    let rules_str = rules
+                        .iter()
+                        .map(|r| {
+                            let result = r.parse::<RuleName>().unwrap();
+                            if let RuleName::Custom(custom) = &result {
+                                log::warn!("Unknown custom rule name '{custom}' used in type ignore. Ensure this is intended.");
+                            }
+                            result
+                        })
+                        .join(",");
+                    Some(format!("  # type: ignore[{}]", rules_str))
+                }
+            }
+        } else {
+            None
+        };
+
         let doc = self.doc;
         if !doc.is_empty() {
+            // Add type: ignore comment for methods with docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{}", comment)?;
+            }
             writeln!(f)?;
             let double_indent = format!("{indent}{indent}");
             docstring::write_docstring(f, self.doc, &double_indent)?;
         } else {
-            writeln!(f, " ...")?;
+            write!(f, " ...")?;
+            // Add type: ignore comment for methods without docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{}", comment)?;
+            }
+            writeln!(f)?;
         }
         Ok(())
     }

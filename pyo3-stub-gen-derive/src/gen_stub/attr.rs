@@ -10,6 +10,15 @@ use syn::{
     Attribute, Expr, ExprLit, Ident, Lit, LitStr, Meta, MetaList, Result, Token, Type,
 };
 
+/// Represents the target of type ignore comments during parsing
+#[derive(Debug, Clone, PartialEq)]
+pub enum IgnoreTarget {
+    /// Ignore all type checking errors `(# type: ignore)`
+    All,
+    /// Ignore specific type checking rules (stored as LitStr during parsing)
+    SpecifiedLits(Vec<LitStr>),
+}
+
 pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
     let mut docs = Vec::new();
     for attr in attrs {
@@ -124,9 +133,11 @@ pub enum Attr {
     RenameAll(RenamingRule),
     Extends(Type),
 
-    // Comparison attributes for pyclass
+    // Comparison and special method attributes for pyclass
     Eq,
     Ord,
+    Hash,
+    Str,
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -200,6 +211,13 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         if ident == "ord" {
                             pyo3_attrs.push(Attr::Ord);
                         }
+                        if ident == "hash" {
+                            pyo3_attrs.push(Attr::Hash);
+                        }
+                        if ident == "str" {
+                            pyo3_attrs.push(Attr::Str);
+                        }
+                        // frozen is required by PyO3 when using hash, but doesn't affect stub generation
                     }
                     [Ident(ident), Punct(_), Literal(lit)] => {
                         if ident == "name" {
@@ -267,6 +285,8 @@ pub enum StubGenAttr {
     Skip,
     /// Override the python type for a function argument or return type
     OverrideType(OverrideTypeAttribute),
+    /// Type checker rules to ignore for this function/method
+    TypeIgnore(IgnoreTarget),
 }
 
 pub fn prune_attrs(attrs: &mut Vec<Attribute>) {
@@ -311,6 +331,23 @@ pub fn parse_gen_stub_skip(attrs: &[Attribute]) -> Result<bool> {
     .any(|attr| matches!(attr, StubGenAttr::Skip));
     Ok(skip)
 }
+
+pub fn parse_gen_stub_type_ignore(attrs: &[Attribute]) -> Result<Option<IgnoreTarget>> {
+    // Try Function location first (for regular functions)
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Function, None)? {
+        if let StubGenAttr::TypeIgnore(target) = attr {
+            return Ok(Some(target));
+        }
+    }
+    // Try Field location (for methods in #[pymethods] blocks)
+    for attr in parse_gen_stub_attrs(attrs, AttributeLocation::Field, None)? {
+        if let StubGenAttr::TypeIgnore(target) = attr {
+            return Ok(Some(target));
+        }
+    }
+    Ok(None)
+}
+
 fn parse_gen_stub_attrs(
     attrs: &[Attribute],
     location: AttributeLocation,
@@ -339,7 +376,7 @@ fn parse_gen_stub_attr(
                 if (ident == "override_type"
                     && (location == AttributeLocation::Argument || ignored_ident))
                     || (ident == "override_return_type"
-                        && (location == AttributeLocation::Function || ignored_ident))
+                        && (location == AttributeLocation::Function || location == AttributeLocation::Field || ignored_ident))
                 {
                     let content;
                     parenthesized!(content in input);
@@ -354,6 +391,34 @@ fn parse_gen_stub_attr(
                 {
                     input.parse::<Token![=]>()?;
                     gen_stub_attrs.push(StubGenAttr::Default(input.parse()?));
+                } else if ident == "type_ignore"
+                    && (location == AttributeLocation::Function || location == AttributeLocation::Field || ignored_ident)
+                {
+                    // Handle two cases:
+                    // 1. type_ignore (without equals) -> IgnoreTarget::All
+                    // 2. type_ignore = [...] -> IgnoreTarget::Specified(rules)
+                    if input.peek(Token![=]) {
+                        input.parse::<Token![=]>()?;
+                        // Parse array of rule names
+                        let content;
+                        syn::bracketed!(content in input);
+                        let rules = Punctuated::<LitStr, Token![,]>::parse_terminated(&content)?;
+
+                        // Validate: empty Specified should be an error
+                        if rules.is_empty() {
+                            return Err(syn::Error::new(
+                                ident.span(),
+                                "type_ignore with empty array is not allowed. Use type_ignore without equals for catch-all, or specify rules in the array."
+                            ));
+                        }
+
+                        // Store the rules as LitStr for now, will be converted to strings during code generation
+                        let rule_lits: Vec<LitStr> = rules.into_iter().collect();
+                        gen_stub_attrs.push(StubGenAttr::TypeIgnore(IgnoreTarget::SpecifiedLits(rule_lits)));
+                    } else {
+                        // No equals sign means catch-all
+                        gen_stub_attrs.push(StubGenAttr::TypeIgnore(IgnoreTarget::All));
+                    }
                 } else if ident == "override_type" {
                     return Err(syn::Error::new(
                         ident.span(),
@@ -362,7 +427,7 @@ fn parse_gen_stub_attr(
                 } else if ident == "override_return_type" {
                     return Err(syn::Error::new(
                         ident.span(),
-                        "`override_return_type(...)` is only valid in function position"
+                        "`override_return_type(...)` is only valid in function or method position"
                             .to_string(),
                     ));
                 } else if ident == "skip" {
@@ -375,6 +440,11 @@ fn parse_gen_stub_attr(
                         ident.span(),
                         "`default=xxx` is only valid in field or function position".to_string(),
                     ));
+                } else if ident == "type_ignore" {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`type_ignore` or `type_ignore=[...]` is only valid in function or method position".to_string(),
+                    ));
                 } else if location == AttributeLocation::Argument {
                     return Err(syn::Error::new(
                         ident.span(),
@@ -383,13 +453,13 @@ fn parse_gen_stub_attr(
                 } else if location == AttributeLocation::Field {
                     return Err(syn::Error::new(
                         ident.span(),
-                        format!("Unsupported keyword `{ident}`, valid is `default=xxx` or `skip`"),
+                        format!("Unsupported keyword `{ident}`, valid is `default=xxx`, `skip`, `override_return_type(...)`, `type_ignore`, or `type_ignore=[...]`"),
                     ));
                 } else if location == AttributeLocation::Function {
                     return Err(syn::Error::new(
                         ident.span(),
                         format!(
-                            "Unsupported keyword `{ident}`, valid is `default=xxx` or `override_return_type(...)`"
+                            "Unsupported keyword `{ident}`, valid is `default=xxx`, `override_return_type(...)`, `type_ignore`, or `type_ignore=[...]`"
                         ),
                     ));
                 } else {
