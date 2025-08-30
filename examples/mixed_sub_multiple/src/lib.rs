@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
+use pyo3_stub_gen::{define_stub_info_gatherer, derive::*, module_doc};
 
 #[gen_stub_pyfunction(module = "mixed_sub_multiple.main_mod.mod_a")]
 #[pyfunction(name = "greet_a")]
@@ -27,6 +27,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+module_doc!("mixed_sub_multiple.main_mod.mod_a", "Document for mod_a",);
 #[pymodule]
 fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
@@ -36,6 +37,7 @@ fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+module_doc!("mixed_sub_multiple.main_mod.mod_b", "Document for mod_b",);
 #[pymodule]
 fn mod_b(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
