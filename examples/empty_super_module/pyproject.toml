@@ -1,0 +1,16 @@
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "empty_super_module"
+version = "0.1"
+requires-python = ">=3.10"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "empty_super_module.main_mod"
+python-source = "python"
+
+[tool.pyo3-stub-gen]
+module = "empty_super_module"
