@@ -253,15 +253,15 @@ macro_rules! module_variable {
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
                 default: Some({
-                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                    fn _fmt() -> String {
                         if $value.to_string() == "None" {
                             "None".to_string()
                         } else {
                             let v: $ty = $value;
                             $crate::util::fmt_py_obj(v)
                         }
-                    });
-                    &DEFAULT
+                    }
+                    _fmt
                 }),
             }
         }

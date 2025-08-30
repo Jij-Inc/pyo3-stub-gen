@@ -135,10 +135,10 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                                 signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
                                     default: {
-                                        static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                                        fn _fmt() -> String {
                                             #default
-                                        });
-                                        &DEFAULT
+                                        }
+                                        _fmt
                                     }
                                 }),
                             }})
@@ -161,10 +161,10 @@ impl ToTokens for ArgsWithSignature<'_> {
                                 r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
                                 signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
                                     default: {
-                                        static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                                        fn _fmt() -> String {
                                             #default
-                                        });
-                                        &DEFAULT
+                                        }
+                                        _fmt
                                     }
                                 }),
                             }})

@@ -152,7 +152,7 @@ impl StubInfoBuilder {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
-                        default: attr.default.map(|s| s.as_str()),
+                        default: attr.default.map(|fmt| fmt()),
                         deprecated: attr.deprecated.clone(),
                     });
                 }
@@ -161,7 +161,7 @@ impl StubInfoBuilder {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
-                        default: getter.default.map(|s| s.as_str()),
+                        default: getter.default.map(|fmt| fmt()),
                         deprecated: getter.deprecated.clone(),
                     });
                 }
@@ -170,7 +170,7 @@ impl StubInfoBuilder {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
-                        default: setter.default.map(|s| s.as_str()),
+                        default: setter.default.map(|fmt| fmt()),
                         deprecated: setter.deprecated.clone(),
                     });
                 }
@@ -185,7 +185,7 @@ impl StubInfoBuilder {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
-                        default: attr.default.map(|s| s.as_str()),
+                        default: attr.default.map(|fmt| fmt()),
                         deprecated: attr.deprecated.clone(),
                     });
                 }
@@ -194,7 +194,7 @@ impl StubInfoBuilder {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
-                        default: getter.default.map(|s| s.as_str()),
+                        default: getter.default.map(|fmt| fmt()),
                         deprecated: getter.deprecated.clone(),
                     });
                 }
@@ -203,7 +203,7 @@ impl StubInfoBuilder {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
-                        default: setter.default.map(|s| s.as_str()),
+                        default: setter.default.map(|fmt| fmt()),
                         deprecated: setter.deprecated.clone(),
                     });
                 }

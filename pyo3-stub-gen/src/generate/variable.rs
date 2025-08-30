@@ -6,7 +6,7 @@ use crate::{type_info::PyVariableInfo, TypeInfo};
 pub struct VariableDef {
     pub name: &'static str,
     pub type_: TypeInfo,
-    pub default: Option<&'static str>,
+    pub default: Option<String>,
 }
 
 impl From<&PyVariableInfo> for VariableDef {
@@ -14,7 +14,7 @@ impl From<&PyVariableInfo> for VariableDef {
         Self {
             name: info.name,
             type_: (info.r#type)(),
-            default: info.default.map(|s| s.as_str()),
+            default: info.default.map(|fmt| fmt()),
         }
     }
 }
@@ -22,7 +22,7 @@ impl From<&PyVariableInfo> for VariableDef {
 impl fmt::Display for VariableDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}: {}", self.name, self.type_)?;
-        if let Some(default) = self.default {
+        if let Some(default) = &self.default {
             write!(f, " = {default}")?;
         }
         Ok(())
