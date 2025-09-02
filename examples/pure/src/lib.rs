@@ -590,6 +590,16 @@ impl HashableStruct {
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (*args))]
+fn func_with_star_arg_typed(
+    #[gen_stub(override_type(type_repr = "str"))] args: &Bound<PyTuple>,
+) -> String {
+    args.to_string()
+}
+
+/// Takes a variable number of arguments and returns their string representation.
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (*args))]
 fn func_with_star_arg(args: &Bound<PyTuple>) -> String {
     args.to_string()
 }
@@ -635,6 +645,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     // Test-cases for `*args` and `**kwargs`
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(func_with_star_arg_typed, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
 
     // Test cases for type: ignore functionality

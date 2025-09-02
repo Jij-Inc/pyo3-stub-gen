@@ -34,7 +34,7 @@ impl fmt::Display for Arg {
                     write!(f, "{}:{}={}", self.name, self.r#type, default)
                 }
                 SignatureArg::Star => write!(f, "*"),
-                SignatureArg::Args => write!(f, "*{}", self.name),
+                SignatureArg::Args => write!(f, "*{}:{}", self.name, self.r#type),
                 SignatureArg::Keywords => write!(f, "**{}", self.name),
             }
         } else {
