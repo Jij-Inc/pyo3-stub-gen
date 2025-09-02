@@ -418,6 +418,11 @@ def func_with_star_arg(*args: tuple) -> builtins.str:
     Takes a variable number of arguments and returns their string representation.
     """
 
+def func_with_star_arg_typed(*args: str) -> builtins.str:
+    r"""
+    Takes a variable number of arguments and returns their string representation.
+    """
+
 @typing.overload
 def overload_example_1(x: int) -> int: ...
 
