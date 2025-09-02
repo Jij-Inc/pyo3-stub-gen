@@ -304,7 +304,12 @@ def func_with_kwargs(**kwargs) -> builtins.bool:
     Takes a variable number of keyword arguments and does nothing
     """
 
-def func_with_star_arg(*args) -> builtins.str:
+def func_with_star_arg(*args:tuple) -> builtins.str:
+    r"""
+    Takes a variable number of arguments and returns their string representation.
+    """
+
+def func_with_star_arg_typed(*args:str) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
     """
