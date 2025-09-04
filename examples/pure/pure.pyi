@@ -12,7 +12,7 @@ from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
-    NUM1: builtins.int = 2
+    NUM: builtins.int = 2
     r"""
     class attribute NUM1
     """
@@ -31,11 +31,6 @@ class A:
         default = 2
         ```
         """
-    @property
-    def y(self) -> builtins.int: ...
-    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
-    @property
-    def deprecated_getter(self) -> builtins.int: ...
     @x.setter
     def x(self, value: builtins.int) -> None:
         r"""
@@ -43,9 +38,14 @@ class A:
         default = 2
         ```
         """
+    @property
+    def y(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
     @y.setter
     def y(self, value: builtins.int) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    @property
+    def deprecated_getter(self) -> builtins.int: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
