@@ -42,5 +42,5 @@ quote = "1.0.40"
 serde = { version = "1.0.219", features = ["derive"] }
 syn = "2.0.106"
 test-case = "3.3.1"
-toml = "0.8.21"
+toml = "0.9.5"
 trybuild = "1.0.101"

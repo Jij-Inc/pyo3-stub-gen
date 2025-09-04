@@ -15,6 +15,9 @@ Python stub file (`*.pyi`) generator for [PyO3] with [maturin] projects.
 [pyo3-stub-gen]: ./pyo3-stub-gen/
 [pyo3-stub-gen-derive]: ./pyo3-stub-gen-derive/
 
+> [!NOTE]
+> Minimum supported Python version is 3.10. Do not enable 3.9 or older in PyO3 setting.
+
 # Design
 Our goal is to create a stub file `*.pyi` from Rust code, however,
 automated complete translation is impossible due to the difference between Rust and Python type systems and the limitation of proc-macro.
