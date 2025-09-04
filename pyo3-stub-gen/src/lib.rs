@@ -199,6 +199,41 @@ macro_rules! define_stub_info_gatherer {
     };
 }
 
+/// Add module-level documention using interpolation of runtime expressions.
+/// The first argument `module_doc!` receives is the full module name;
+/// the second and followings are a format string, same to `format!`.
+/// ```rust
+/// pyo3_stub_gen::module_doc!(
+///   "module.name",
+///   "Document for {} v{} ...",
+///   env!("CARGO_PKG_NAME"),
+///   env!("CARGO_PKG_VERSION")
+/// );
+/// ```
+#[macro_export]
+macro_rules! module_doc {
+    ($module:literal, $($fmt:tt)+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ModuleDocInfo {
+                module: $module,
+                doc: {
+                    fn _fmt() -> String {
+                        ::std::format!($($fmt)+)
+                    }
+                    _fmt
+                }
+            }
+        }
+    };
+}
+
+/// Add module-level variable, the first argument `module_variable!` receives is the full module name;
+/// the second argument is the name of the variable, the third argument is the type of the variable,
+/// and (optional) the fourth argument is the default value of the variable.
+/// ```rust
+/// pyo3_stub_gen::module_variable!("module.name", "CONSTANT1", usize);
+/// pyo3_stub_gen::module_variable!("module.name", "CONSTANT2", usize, 123);
+/// ```
 #[macro_export]
 macro_rules! module_variable {
     ($module:expr, $name:expr, $ty:ty) => {
@@ -207,6 +242,23 @@ macro_rules! module_variable {
                 name: $name,
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
+                default: None,
+            }
+        }
+    };
+    ($module:expr, $name:expr, $ty:ty, $value:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyVariableInfo{
+                name: $name,
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                default: Some({
+                    fn _fmt() -> String {
+                        let v: $ty = $value;
+                        $crate::util::fmt_py_obj(v)
+                    }
+                    _fmt
+                }),
             }
         }
     };
