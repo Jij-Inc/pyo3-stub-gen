@@ -12,7 +12,7 @@ from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
-    NUM1: builtins.int = 2
+    NUM: builtins.int = 2
     r"""
     class attribute NUM1
     """
