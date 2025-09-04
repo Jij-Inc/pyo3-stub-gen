@@ -38,6 +38,7 @@ numpy = ">= 0.24.0"
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.101"
 pyo3 = ">= 0.24.0"
+rust_decimal = { version = "1.15", default-features = false }
 quote = "1.0.40"
 serde = { version = "1.0.219", features = ["derive"] }
 syn = "2.0.106"
