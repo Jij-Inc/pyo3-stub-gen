@@ -126,7 +126,7 @@ impl MemberInfo {
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         let mut name = sig.ident.to_string();
-        for attr in parse_pyo3_attrs(&attrs)? {
+        for attr in parse_pyo3_attrs(attrs)? {
             if let Attr::Name(_name) = attr {
                 name = _name;
             }
