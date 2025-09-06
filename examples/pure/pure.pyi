@@ -2,41 +2,278 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import collections.abc
 import datetime
 import os
 import pathlib
 import typing
+import typing_extensions
 from enum import Enum
 
 MY_CONSTANT: builtins.int
 class A:
-    x: builtins.int
+    NUM1: builtins.int = 2
+    r"""
+    class attribute NUM1
+    """
+    NUM3: builtins.int = 3
+    r"""
+    deprecated class attribute NUM3 (will show warning)
+    """
+    NUM2: builtins.int
+    r"""
+    class attribute NUM2
+    """
+    @property
+    def x(self) -> builtins.int:
+        r"""
+        ```python
+        default = 2
+        ```
+        """
+    @property
+    def y(self) -> builtins.int: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    @property
+    def deprecated_getter(self) -> builtins.int: ...
+    @x.setter
+    def x(self, value: builtins.int) -> None:
+        r"""
+        ```python
+        default = 2
+        ```
+        """
+    @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
+    @y.setter
+    def y(self, value: builtins.int) -> None: ...
     def __new__(cls, x:builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
         """
+    @classmethod
+    def classmethod_test1(cls) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This classmethod is deprecated")
+    @classmethod
+    def deprecated_classmethod(cls) -> None: ...
+    @classmethod
+    def classmethod_test2(cls) -> None: ...
     def show_x(self) -> None: ...
     def ref_test(self, x:dict) -> dict: ...
+    async def async_get_x(self) -> builtins.int: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
+    def deprecated_method(self) -> None: ...
+    @typing_extensions.deprecated("[Since 1.0.0] This staticmethod is deprecated")
+    @staticmethod
+    def deprecated_staticmethod() -> builtins.int: ...
 
 class B(A):
     ...
 
+class ComparableStruct:
+    r"""
+    Test struct for eq and ord comparison methods
+    """
+    @property
+    def value(self) -> builtins.int: ...
+    def __eq__(self, other:builtins.object) -> builtins.bool: ...
+    def __lt__(self, other:builtins.object) -> builtins.bool: ...
+    def __le__(self, other:builtins.object) -> builtins.bool: ...
+    def __gt__(self, other:builtins.object) -> builtins.bool: ...
+    def __ge__(self, other:builtins.object) -> builtins.bool: ...
+    def __new__(cls, value:builtins.int) -> ComparableStruct: ...
+
+class HashableStruct:
+    r"""
+    Test struct for hash and str methods
+    """
+    @property
+    def name(self) -> builtins.str: ...
+    def __eq__(self, other:builtins.object) -> builtins.bool: ...
+    def __hash__(self) -> builtins.int: ...
+    def __str__(self) -> builtins.str: ...
+    def __new__(cls, name:builtins.str) -> HashableStruct: ...
+
+class Incrementer:
+    @typing.overload
+    def increment_1(self, x:builtins.int) -> builtins.int:
+        r"""
+        And this is for the second comment
+        """
+    @typing.overload
+    def increment_1(self, x:builtins.float) -> builtins.float:
+        r"""
+        This is the original doc comment
+        """
+    def new(self) -> Incrementer: ...
+
+class Incrementer2:
+    @typing.overload
+    def increment_2(self, x:builtins.int) -> builtins.int:
+        r"""
+        increment_2 for integers, submitted by hands
+        """
+    @typing.overload
+    def increment_2(self, x:builtins.float) -> builtins.float:
+        r"""
+        increment_2 for floats, submitted by hands
+        """
+    def __new__(cls) -> Incrementer2:
+        r"""
+        Constructor for Incrementer2
+        """
+
 class MyDate(datetime.date):
     ...
+
+class MyError(builtins.RuntimeError):
+    ...
+
+class NotIntError(builtins.TypeError):
+    r"""
+    A manual custom exception case
+    
+    Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
+    """
+    def __new__(cls, item:typing.Any) -> NotIntError: ...
+    def __str__(self) -> builtins.str: ...
+    def trivial_number(self) -> builtins.int:
+        r"""
+        A trivial number
+        """
+    def item_is_str(self) -> builtins.bool:
+        r"""
+        Checks if the item is a string
+        """
+
+class NumberComplex:
+    class FLOAT(NumberComplex):
+        r"""
+        Float variant
+        """
+        __match_args__ = ("_0",)
+        @property
+        def _0(self) -> builtins.float: ...
+        def __new__(cls, _0:builtins.float) -> NumberComplex.FLOAT: ...
+        def __len__(self) -> builtins.int: ...
+        def __getitem__(self, key:builtins.int) -> typing.Any: ...
+    
+    class INTEGER(NumberComplex):
+        r"""
+        Integer variant
+        """
+        __match_args__ = ("int",)
+        @property
+        def int(self) -> builtins.int:
+            r"""
+            The integer value
+            """
+        def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
+    
+    ...
+
+class OverrideType:
+    @property
+    def num(self) -> int: ...
+    @num.setter
+    def num(self, value: str) -> None: ...
+    def error(self) -> typing_extensions.Never: ...
+
+class Shape1:
+    r"""
+    Example from PyO3 documentation for complex enum
+    https://pyo3.rs/v0.25.1/class.html#complex-enums
+    """
+    class Circle(Shape1):
+        __match_args__ = ("radius",)
+        @property
+        def radius(self) -> builtins.float: ...
+        def __new__(cls, radius:builtins.float) -> Shape1.Circle: ...
+    
+    class Rectangle(Shape1):
+        __match_args__ = ("width", "height",)
+        @property
+        def width(self) -> builtins.float: ...
+        @property
+        def height(self) -> builtins.float: ...
+        def __new__(cls, width:builtins.float, height:builtins.float) -> Shape1.Rectangle: ...
+    
+    class RegularPolygon(Shape1):
+        __match_args__ = ("_0", "_1",)
+        @property
+        def _0(self) -> builtins.int: ...
+        @property
+        def _1(self) -> builtins.float: ...
+        def __new__(cls, _0:builtins.int, _1:builtins.float) -> Shape1.RegularPolygon: ...
+        def __len__(self) -> builtins.int: ...
+        def __getitem__(self, key:builtins.int) -> typing.Any: ...
+    
+    class Nothing(Shape1):
+        __match_args__ = ((),)
+        def __new__(cls) -> Shape1.Nothing: ...
+    
+    ...
+
+class Shape2:
+    r"""
+    Example from PyO3 documentation for complex enum
+    https://pyo3.rs/v0.25.1/class.html#complex-enums
+    """
+    class Circle(Shape2):
+        __match_args__ = ("radius",)
+        @property
+        def radius(self) -> builtins.float: ...
+        def __new__(cls, radius:builtins.float=1.0) -> Shape2.Circle: ...
+    
+    class Rectangle(Shape2):
+        __match_args__ = ("width", "height",)
+        @property
+        def width(self) -> builtins.float: ...
+        @property
+        def height(self) -> builtins.float: ...
+        def __new__(cls, *, width:builtins.float, height:builtins.float) -> Shape2.Rectangle: ...
+    
+    class RegularPolygon(Shape2):
+        __match_args__ = ("side_count", "radius",)
+        @property
+        def side_count(self) -> builtins.int: ...
+        @property
+        def radius(self) -> builtins.float: ...
+        def __new__(cls, side_count:builtins.int, radius:builtins.float=1.0) -> Shape2.RegularPolygon: ...
+    
+    class Nothing(Shape2):
+        __match_args__ = ((),)
+        def __new__(cls) -> Shape2.Nothing: ...
+    
+    ...
+
+class TypeIgnoreTest:
+    r"""
+    Test class for method type: ignore functionality
+    """
+    def new(self) -> TypeIgnoreTest: ...
+    def test_method_ignore(self, value:builtins.int) -> builtins.int:  # type: ignore[union-attr,return-value]
+        r"""
+        Test method with type: ignore for specific rules
+        """
+    def test_method_all_ignore(self) -> builtins.int:  # type: ignore
+        r"""
+        Test method with type: ignore (without equals for catch-all)
+        """
 
 class Number(Enum):
     FLOAT = ...
     INTEGER = ...
 
-    is_float: builtins.bool
-    r"""
-    Whether the number is a float.
-    """
-
-    is_integer: builtins.bool
-    r"""
-    Whether the number is an integer.
-    """
+    @property
+    def is_float(self) -> builtins.bool:
+        r"""
+        Whether the number is a float.
+        """
+    @property
+    def is_integer(self) -> builtins.bool:
+        r"""
+        Whether the number is an integer.
+        """
 
 class NumberRenameAll(Enum):
     FLOAT = ...
@@ -47,13 +284,52 @@ class NumberRenameAll(Enum):
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
+async def async_num() -> builtins.int: ...
+
 def create_a(x:builtins.int=2) -> A: ...
 
 def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
+@typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
+def deprecated_function() -> None: ...
+
 def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def fn_override_type(cb:collections.abc.Callable[[str]]) -> collections.abc.Callable[[str]]: ...
+
+def func_with_kwargs(**kwargs) -> builtins.bool:
+    r"""
+    Takes a variable number of keyword arguments and does nothing
+    """
+
+def func_with_star_arg(*args) -> builtins.str:
+    r"""
+    Takes a variable number of arguments and returns their string representation.
+    """
+
+@typing.overload
+def overload_example_1(x:builtins.int) -> builtins.int: ...
+
+@typing.overload
+def overload_example_1(x:builtins.float) -> builtins.float:
+    r"""
+    First example: One generated with ordinary `#[gen_stub_pyfunction]`,
+    and then manually with `submit!` macro.
+    """
+
+@typing.overload
+def overload_example_2(x:builtins.int) -> builtins.int:
+    r"""
+    Increments integer by 1
+    """
+
+@typing.overload
+def overload_example_2(x:builtins.float) -> builtins.float:
+    r"""
+    Increments float by 1
+    """
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 
@@ -69,5 +345,27 @@ def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     Returns the sum of two numbers as a string.
     """
 
-class MyError(RuntimeError): ...
+def test_type_ignore_all() -> builtins.int:  # type: ignore
+    r"""
+    Test function with type: ignore (without equals for catch-all)
+    """
+
+def test_type_ignore_custom() -> builtins.int:  # type: ignore[custom-rule,attr-defined]
+    r"""
+    Test function with custom (unknown) rule
+    """
+
+def test_type_ignore_no_comment_all() -> builtins.int: ...  # type: ignore
+
+def test_type_ignore_no_comment_specific() -> builtins.int: ...  # type: ignore[arg-type,reportIncompatibleMethodOverride]
+
+def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTypeIssues,reportReturnType]
+    r"""
+    Test function with Pyright diagnostic rules
+    """
+
+def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return-value]
+    r"""
+    Test function with type: ignore for specific rules
+    """
 

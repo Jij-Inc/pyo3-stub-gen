@@ -1,16 +1,20 @@
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemStruct, Result, Type};
-
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
 
 pub struct PyClassInfo {
     pyclass_name: String,
     struct_type: Type,
     module: Option<String>,
-    members: Vec<MemberInfo>,
+    getters: Vec<MemberInfo>,
+    setters: Vec<MemberInfo>,
     doc: String,
     bases: Vec<Type>,
+    has_eq: bool,
+    has_ord: bool,
+    has_hash: bool,
+    has_str: bool,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -42,7 +46,12 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut pyclass_name = None;
         let mut module = None;
         let mut is_get_all = false;
+        let mut is_set_all = false;
         let mut bases = Vec::new();
+        let mut has_eq = false;
+        let mut has_ord = false;
+        let mut has_hash = false;
+        let mut has_str = false;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -50,25 +59,39 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                     module = Some(name);
                 }
                 Attr::GetAll => is_get_all = true,
+                Attr::SetAll => is_set_all = true,
                 Attr::Extends(typ) => bases.push(typ),
+                Attr::Eq => has_eq = true,
+                Attr::Ord => has_ord = true,
+                Attr::Hash => has_hash = true,
+                Attr::Str => has_str = true,
                 _ => {}
             }
         }
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.to_string());
-        let mut members = Vec::new();
+        let mut getters = Vec::new();
+        let mut setters = Vec::new();
         for field in fields {
-            if is_get_all || MemberInfo::is_candidate_field(&field)? {
-                members.push(MemberInfo::try_from(field)?)
+            if is_get_all || MemberInfo::is_get(&field)? {
+                getters.push(MemberInfo::try_from(field.clone())?)
+            }
+            if is_set_all || MemberInfo::is_set(&field)? {
+                setters.push(MemberInfo::try_from(field)?)
             }
         }
         let doc = extract_documents(&attrs).join("\n");
         Ok(Self {
             struct_type,
             pyclass_name,
-            members,
+            getters,
+            setters,
             module,
             doc,
             bases,
+            has_eq,
+            has_ord,
+            has_hash,
+            has_str,
         })
     }
 }
@@ -78,22 +101,42 @@ impl ToTokens for PyClassInfo {
         let Self {
             pyclass_name,
             struct_type,
-            members,
+            getters,
+            setters,
             doc,
             module,
             bases,
+            has_eq,
+            has_ord,
+            has_hash,
+            has_str,
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyClassInfo {
                 pyclass_name: #pyclass_name,
                 struct_id: std::any::TypeId::of::<#struct_type>,
-                members: &[ #( #members),* ],
+                getters: &[ #( #getters),* ],
+                setters: &[ #( #setters),* ],
                 module: #module,
                 doc: #doc,
                 bases: &[ #( <#bases as ::pyo3_stub_gen::PyStubType>::type_output ),* ],
+                has_eq: #has_eq,
+                has_ord: #has_ord,
+                has_hash: #has_hash,
+                has_str: #has_str,
             }
         })
+    }
+}
+
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_struct back
+pub fn prune_attrs(item_struct: &mut ItemStruct) {
+    super::attr::prune_attrs(&mut item_struct.attrs);
+    for field in item_struct.fields.iter_mut() {
+        super::attr::prune_attrs(&mut field.attrs);
     }
 }
 
@@ -126,26 +169,37 @@ mod test {
         ::pyo3_stub_gen::type_info::PyClassInfo {
             pyclass_name: "Placeholder",
             struct_id: std::any::TypeId::of::<PyPlaceholder>,
-            members: &[
+            getters: &[
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "name",
                     r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
                     doc: "",
+                    default: None,
+                    deprecated: None,
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "ndim",
                     r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
                     doc: "",
+                    default: None,
+                    deprecated: None,
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "description",
                     r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
                     doc: "",
+                    default: None,
+                    deprecated: None,
                 },
             ],
+            setters: &[],
             module: Some("my_module"),
             doc: "",
             bases: &[],
+            has_eq: false,
+            has_ord: false,
+            has_hash: false,
+            has_str: false,
         }
         "###);
         Ok(())

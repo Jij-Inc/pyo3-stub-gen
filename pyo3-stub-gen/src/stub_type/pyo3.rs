@@ -68,6 +68,7 @@ macro_rules! impl_builtin {
 
 impl_builtin!(PyInt, "int");
 impl_builtin!(PyFloat, "float");
+impl_builtin!(PyComplex, "complex");
 impl_builtin!(PyList, "list");
 impl_builtin!(PyTuple, "tuple");
 impl_builtin!(PySlice, "slice");

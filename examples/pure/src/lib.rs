@@ -1,9 +1,22 @@
+#![allow(deprecated)]
+
+mod custom_exceptions;
+use custom_exceptions::*;
+
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{exceptions::PyRuntimeError, prelude::*, types::*};
-use pyo3_stub_gen::{create_exception, define_stub_info_gatherer, derive::*, module_variable};
+use pyo3::{exceptions::PyTypeError, prelude::*, types::*, IntoPyObjectExt, PyObject};
+use pyo3_stub_gen::{
+    define_stub_info_gatherer,
+    derive::*,
+    generate::MethodType,
+    inventory::submit,
+    module_variable,
+    type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
+    PyStubType,
+};
 use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
@@ -18,7 +31,7 @@ fn sum(v: Vec<u32>) -> u32 {
 fn read_dict(dict: HashMap<usize, HashMap<usize, usize>>) {
     for (k, v) in dict {
         for (k2, v2) in v {
-            println!("{} {} {}", k, k2, v2);
+            println!("{k} {k2} {v2}");
         }
     }
 }
@@ -41,8 +54,18 @@ struct MyDate;
 #[pyclass(subclass)]
 #[derive(Debug)]
 struct A {
+    #[gen_stub(default = A::default().x)]
     #[pyo3(get, set)]
     x: usize,
+
+    #[pyo3(get)]
+    y: usize,
+}
+
+impl Default for A {
+    fn default() -> Self {
+        Self { x: 2, y: 10 }
+    }
 }
 
 #[gen_stub_pymethods]
@@ -51,8 +74,35 @@ impl A {
     /// This is a constructor of :class:`A`.
     #[new]
     fn new(x: usize) -> Self {
-        Self { x }
+        Self { x, y: 10 }
     }
+    /// class attribute NUM1
+    #[classattr]
+    const NUM1: usize = 2;
+
+    /// deprecated class attribute NUM3 (will show warning)
+    #[deprecated(since = "1.0.0", note = "This constant is deprecated")]
+    #[classattr]
+    const NUM3: usize = 3;
+    /// class attribute NUM2
+    #[expect(non_snake_case)]
+    #[classattr]
+    fn NUM2() -> usize {
+        2
+    }
+    #[classmethod]
+    fn classmethod_test1(cls: &Bound<'_, PyType>) {
+        _ = cls;
+    }
+
+    #[deprecated(since = "1.0.0", note = "This classmethod is deprecated")]
+    #[classmethod]
+    fn deprecated_classmethod(cls: &Bound<'_, PyType>) {
+        _ = cls;
+    }
+
+    #[classmethod]
+    fn classmethod_test2(_: &Bound<'_, PyType>) {}
 
     fn show_x(&self) {
         println!("x = {}", self.x);
@@ -61,13 +111,43 @@ impl A {
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
+
+    async fn async_get_x(&self) -> usize {
+        self.x
+    }
+
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
+
+    #[deprecated(since = "1.0.0", note = "This method is deprecated")]
+    fn deprecated_method(&self) {
+        println!("This method is deprecated");
+    }
+
+    #[deprecated(since = "1.0.0", note = "This method is deprecated")]
+    #[getter]
+    fn deprecated_getter(&self) -> usize {
+        self.x
+    }
+
+    #[deprecated(since = "1.0.0", note = "This setter is deprecated")]
+    #[setter]
+    fn set_y(&mut self, value: usize) {
+        self.y = value;
+    }
+
+    #[deprecated(since = "1.0.0", note = "This staticmethod is deprecated")]
+    #[staticmethod]
+    fn deprecated_staticmethod() -> usize {
+        42
+    }
 }
 
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (x = 2))]
 fn create_a(x: usize) -> A {
-    A { x }
+    A { x, y: 10 }
 }
 
 #[gen_stub_pyclass]
@@ -99,8 +179,6 @@ impl pyo3_stub_gen::PyStubType for C {
         usize::type_output()
     }
 }
-
-create_exception!(pure, MyError, PyRuntimeError);
 
 /// Returns the length of the string.
 #[gen_stub_pyfunction]
@@ -145,6 +223,54 @@ pub enum NumberRenameAll {
     Integer,
 }
 
+#[gen_stub_pyclass_complex_enum]
+#[pyclass]
+#[pyo3(rename_all = "UPPERCASE")]
+#[derive(Debug, Clone)]
+pub enum NumberComplex {
+    /// Float variant
+    Float(f64),
+    /// Integer variant
+    #[pyo3(constructor = (int=2))]
+    Integer {
+        /// The integer value
+        int: i32,
+    },
+}
+
+/// Example from PyO3 documentation for complex enum
+/// https://pyo3.rs/v0.25.1/class.html#complex-enums
+#[gen_stub_pyclass_complex_enum]
+#[pyclass]
+enum Shape1 {
+    Circle { radius: f64 },
+    Rectangle { width: f64, height: f64 },
+    RegularPolygon(u32, f64),
+    Nothing {},
+}
+
+/// Example from PyO3 documentation for complex enum
+/// https://pyo3.rs/v0.25.1/class.html#complex-enums
+#[gen_stub_pyclass_complex_enum]
+#[pyclass]
+enum Shape2 {
+    #[pyo3(constructor = (radius=1.0))]
+    Circle {
+        radius: f64,
+    },
+    #[pyo3(constructor = (*, width, height))]
+    Rectangle {
+        width: f64,
+        height: f64,
+    },
+    #[pyo3(constructor = (side_count, radius=1.0))]
+    RegularPolygon {
+        side_count: u32,
+        radius: f64,
+    },
+    Nothing {},
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Number {
@@ -163,6 +289,19 @@ impl Number {
 
 module_variable!("pure", "MY_CONSTANT", usize);
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+async fn async_num() -> i32 {
+    123
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[deprecated(since = "1.0.0", note = "This function is deprecated")]
+fn deprecated_function() {
+    println!("This function is deprecated");
+}
+
 // Test if non-any PyObject Target can be a default value
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -171,16 +310,315 @@ fn default_value(num: Number) -> Number {
     num
 }
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+fn fn_override_type<'a>(
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+    cb: Bound<'a, PyAny>,
+) -> PyResult<Bound<'a, PyAny>> {
+    cb.call1(("Hello!",))?;
+    Ok(cb)
+}
+#[gen_stub_pyclass]
+#[pyclass]
+struct OverrideType {
+    num: isize,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl OverrideType {
+    #[gen_stub(override_return_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
+    fn error(&self) -> PyResult<()> {
+        Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
+            "I'm an error!",
+        ))
+    }
+
+    #[getter]
+    #[gen_stub(override_return_type(type_repr = "int"))]
+    fn get_num(&self) -> PyResult<Py<PyAny>> {
+        Python::with_gil(|py| self.num.into_py_any(py))
+    }
+
+    #[setter]
+    fn set_num(
+        &mut self,
+        #[gen_stub(override_type(type_repr = "str"))] value: Py<PyAny>,
+    ) -> PyResult<()> {
+        self.num = Python::with_gil(|py| value.extract::<String>(py))?.parse::<isize>()?;
+        Ok(())
+    }
+}
+
+// Test for `@overload` decorator generation
+
+/// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
+/// and then manually with `submit!` macro.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn overload_example_1(x: f64) -> f64 {
+    x + 1.0
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_1",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || i64::type_input(),
+        }],
+        r#return: || i64::type_output(),
+        module: None,
+        doc: "",
+        is_async: false,
+        deprecated: None,
+        type_ignored: None,
+    }
+}
+/// Second example: all hints manually `submit!`ed via macro.
+#[pyfunction]
+fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+    let py = ob.py();
+    if let Ok(f) = ob.extract::<f64>() {
+        (f + 1.0).into_py_any(py)
+    } else if let Ok(i) = ob.extract::<i64>() {
+        (i + 1).into_py_any(py)
+    } else {
+        Err(PyTypeError::new_err("Invalid type, expected float or int"))
+    }
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_2",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || f64::type_input(),
+        }],
+        r#return: || f64::type_output(),
+        module: None,
+        doc: "Increments float by 1",
+        is_async: false,
+        deprecated: None,
+        type_ignored: None,
+    }
+}
+
+submit! {
+    PyFunctionInfo {
+        name: "overload_example_2",
+        args: &[ArgInfo{
+            name: "x",
+            signature: None,
+            r#type: || i64::type_input(),
+        }],
+        r#return: || i64::type_output(),
+        module: None,
+        doc: "Increments integer by 1",
+        is_async: false,
+        deprecated: None,
+        type_ignored: None,
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer {}
+
+#[pymethods]
+#[gen_stub_pymethods]
+impl Incrementer {
+    #[new]
+    fn new() -> Self {
+        Incrementer {}
+    }
+
+    /// This is the original doc comment
+    fn increment_1(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+
+submit! {
+    PyMethodsInfo {
+        struct_id: std::any::TypeId::of::<Incrementer>,
+        attrs: &[],
+        getters: &[],
+        setters: &[],
+        methods: &[
+            MethodInfo {
+                name: "increment_1",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || i64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || i64::type_output(),
+                doc: "And this is for the second comment",
+                is_async: false,
+                deprecated: None,
+                type_ignored: None,
+            }
+        ],
+    }
+}
+
+// Next, without gen_stub_pymethods and all submitted manually
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer2 {}
+
+#[pymethods]
+impl Incrementer2 {
+    #[new]
+    fn new() -> Self {
+        Incrementer2 {}
+    }
+
+    fn increment_2(&self, x: f64) -> f64 {
+        x + 2.0
+    }
+}
+
+submit! {
+    PyMethodsInfo {
+        struct_id: std::any::TypeId::of::<Incrementer2>,
+        attrs: &[],
+        getters: &[],
+        setters: &[],
+        methods: &[
+            MethodInfo {
+                name: "increment_2",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || i64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || i64::type_output(),
+                doc: "increment_2 for integers, submitted by hands",
+                is_async: false,
+                deprecated: None,
+                type_ignored: None,
+            },
+            MethodInfo {
+                name: "__new__",
+                args: &[],
+                r#type: MethodType::New,
+                r#return: || Incrementer2::type_output(),
+                doc: "Constructor for Incrementer2",
+                is_async: false,
+                deprecated: None,
+                type_ignored: None,
+            },
+            MethodInfo {
+                name: "increment_2",
+                args: &[
+                    ArgInfo {
+                        name: "x",
+                        signature: None,
+                        r#type: || f64::type_input(),
+                    },
+                ],
+                r#type: MethodType::Instance,
+                r#return: || f64::type_output(),
+                doc: "increment_2 for floats, submitted by hands",
+                is_async: false,
+                deprecated: None,
+                type_ignored: None,
+            },
+        ],
+    }
+}
+
+// These are the tests to test the treatment of `*args` and `**kwargs` in functions
+
+/// Test struct for eq and ord comparison methods
+#[gen_stub_pyclass]
+#[pyclass(eq, ord)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct ComparableStruct {
+    #[pyo3(get)]
+    pub value: i32,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl ComparableStruct {
+    #[new]
+    fn new(value: i32) -> Self {
+        Self { value }
+    }
+}
+
+/// Test struct for hash and str methods
+#[gen_stub_pyclass]
+#[pyclass(eq, hash, frozen, str)]
+#[derive(Debug, Clone, Hash, PartialEq)]
+pub struct HashableStruct {
+    #[pyo3(get)]
+    pub name: String,
+}
+
+impl std::fmt::Display for HashableStruct {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "HashableStruct({})", self.name)
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl HashableStruct {
+    #[new]
+    fn new(name: String) -> Self {
+        Self { name }
+    }
+}
+
+/// Takes a variable number of arguments and returns their string representation.
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (*args))]
+fn func_with_star_arg(args: &Bound<PyTuple>) -> String {
+    args.to_string()
+}
+
+/// Takes a variable number of keyword arguments and does nothing
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (**kwargs))]
+fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
+    kwargs.is_some()
+}
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add("MyError", m.py().get_type::<MyError>())?;
     m.add("MY_CONSTANT", 19937)?;
-    m.add_class::<MyDate>()?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
+    m.add_class::<MyDate>()?;
     m.add_class::<Number>()?;
     m.add_class::<NumberRenameAll>()?;
+    m.add_class::<NumberComplex>()?;
+    m.add_class::<Shape1>()?;
+    m.add_class::<Shape2>()?;
+    m.add_class::<Incrementer>()?;
+    m.add_class::<Incrementer2>()?;
+    m.add_class::<OverrideType>()?;
+    m.add_class::<ComparableStruct>()?;
+    m.add_class::<HashableStruct>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -189,8 +627,107 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
     m.add_function(wrap_pyfunction!(ahash_dict, m)?)?;
+    m.add_function(wrap_pyfunction!(async_num, m)?)?;
+    m.add_function(wrap_pyfunction!(deprecated_function, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
+    m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
+    m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    // Test-cases for `*args` and `**kwargs`
+    m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
+
+    // Test cases for type: ignore functionality
+    m.add_function(wrap_pyfunction!(test_type_ignore_specific, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_all, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_pyright, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_custom, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_all, m)?)?;
+    m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_specific, m)?)?;
+
+    // Test case for custom exceptions
+    m.add("MyError", m.py().get_type::<MyError>())?;
+    m.add_class::<NotIntError>()?;
+
+    // Test class for type: ignore functionality
+    m.add_class::<TypeIgnoreTest>()?;
     Ok(())
+}
+
+/// Test function with type: ignore for specific rules
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["arg-type", "return-value"])]
+#[pyfunction]
+fn test_type_ignore_specific() -> i32 {
+    42
+}
+
+/// Test function with type: ignore (without equals for catch-all)
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore)]
+#[pyfunction]
+fn test_type_ignore_all() -> i32 {
+    42
+}
+
+/// Test function with Pyright diagnostic rules
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["reportGeneralTypeIssues", "reportReturnType"])]
+#[pyfunction]
+fn test_type_ignore_pyright() -> i32 {
+    42
+}
+
+/// Test function with custom (unknown) rule
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore = ["custom-rule", "attr-defined"])]
+#[pyfunction]
+fn test_type_ignore_custom() -> i32 {
+    42
+}
+
+// NOTE: Doc-comment MUST NOT be added to the next function,
+// as it tests if `type_ignore` without no doccomment is handled correctly;
+// i.e. it emits comment after `...`, not before.
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore)]
+#[pyfunction]
+fn test_type_ignore_no_comment_all() -> i32 {
+    42
+}
+
+#[gen_stub_pyfunction]
+#[gen_stub(type_ignore=["arg-type", "reportIncompatibleMethodOverride"])]
+#[pyfunction]
+fn test_type_ignore_no_comment_specific() -> i32 {
+    42
+}
+
+/// Test class for method type: ignore functionality
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct TypeIgnoreTest {}
+
+#[pymethods]
+#[gen_stub_pymethods]
+impl TypeIgnoreTest {
+    #[new]
+    fn new() -> Self {
+        Self {}
+    }
+
+    /// Test method with type: ignore for specific rules
+    #[gen_stub(type_ignore = ["union-attr", "return-value"])]
+    fn test_method_ignore(&self, value: i32) -> i32 {
+        value * 2
+    }
+
+    /// Test method with type: ignore (without equals for catch-all)
+    #[gen_stub(type_ignore)]
+    fn test_method_all_ignore(&self) -> i32 {
+        42
+    }
 }
 
 define_stub_info_gatherer!(stub_info);

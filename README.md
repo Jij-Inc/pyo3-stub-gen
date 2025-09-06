@@ -15,6 +15,9 @@ Python stub file (`*.pyi`) generator for [PyO3] with [maturin] projects.
 [pyo3-stub-gen]: ./pyo3-stub-gen/
 [pyo3-stub-gen-derive]: ./pyo3-stub-gen-derive/
 
+> [!NOTE]
+> Minimum supported Python version is 3.10. Do not enable 3.9 or older in PyO3 setting.
+
 # Design
 Our goal is to create a stub file `*.pyi` from Rust code, however,
 automated complete translation is impossible due to the difference between Rust and Python type systems and the limitation of proc-macro.
@@ -95,7 +98,7 @@ define_stub_info_gatherer!(stub_info);
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
 
-```rust
+```rust:ignore
 use pyo3_stub_gen::Result;
 
 fn main() -> Result<()> {
@@ -120,6 +123,76 @@ cargo run --bin stub_gen
 ```
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
+
+## Advanced: `#[gen_stub(xxx)]` Attributes
+### `#[gen_stub(default=xx)]`
+
+For getters, setters, and classattr functions, you can specify the default value of it. e.g.
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct A {
+    #[pyo3(get,set)]
+    #[gen_stub(default = A::default().x)]
+    x: usize,
+    y: usize,
+}
+
+impl Default for A {
+    fn default() -> Self {
+        A { x: 0, y: 0 }
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl A {
+    #[gen_stub(default = A::default().y)]
+    fn get_y(&self) -> usize {
+        self.y
+    }
+}
+```
+
+### `#[gen_stub(skip)]`
+For classattrs or functions in pymethods, ignore it in .pyi file. e.g.
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct A;
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl A {
+    #[gen_stub(skip)]
+    fn need_skip(&self) {}
+}
+```
+
+### `#[gen_stub(override_type(type_repr=xx, imports=(xx)))]` and `#[gen_stub(override_return_type(type_repr=xx, imports=(xx)))]`
+Override the type for function arguments or return type in .pyi file. e.g.
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
+fn say_hello_forever<'a>(
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+    cb: Bound<'a, PyAny>,
+) -> PyResult<()> {
+    loop {
+        cb.call1(("Hello!",))?;
+    }
+}
+```
 
 # Contribution
 To be written.

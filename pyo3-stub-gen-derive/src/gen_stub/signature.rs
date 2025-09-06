@@ -6,10 +6,10 @@ use syn::{
     parenthesized,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token, Expr, Ident, Result, Token, Type,
+    token, Expr, Ident, Result, Token,
 };
 
-use crate::gen_stub::remove_lifetime;
+use crate::gen_stub::{remove_lifetime, util::TypeOrOverride};
 
 use super::ArgInfo;
 
@@ -69,87 +69,155 @@ pub struct ArgsWithSignature<'a> {
 
 impl ToTokens for ArgsWithSignature<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let arg_infos: Vec<TokenStream2> = if let Some(sig) = self.sig {
+        let arg_infos_res: Result<Vec<TokenStream2>> = if let Some(sig) = self.sig {
             // record all Type information from rust's args
-            let args_map: HashMap<String, Type> = self
+            let args_map: HashMap<String, ArgInfo> = self
                 .args
                 .iter()
-                .map(|arg| {
-                    let mut ty = arg.r#type.clone();
-                    remove_lifetime(&mut ty);
-                    (arg.name.clone(), ty)
+                .map(|arg| match arg {
+                    ArgInfo {
+                        name,
+                        r#type: TypeOrOverride::RustType { r#type },
+                    } => {
+                        let mut ty = r#type.clone();
+                        remove_lifetime(&mut ty);
+                        (
+                            name.clone(),
+                            ArgInfo {
+                                name: name.clone(),
+                                r#type: TypeOrOverride::RustType { r#type: ty },
+                            },
+                        )
+                    }
+                    arg @ ArgInfo { name, .. } => (name.clone(), arg.clone()),
                 })
                 .collect();
             sig.args.iter().map(|sig_arg| match sig_arg {
                 SignatureArg::Ident(ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    match args_map.get(&name) {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
-                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
-                        }
+                        }}),
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
+                            let imports = imports.iter().collect::<Vec<&String>>();
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                            }})
+                        },
+                        None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 }
                 SignatureArg::Assign(ident, _eq, value) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    let default = if value.to_token_stream().to_string() == "None" {
-                        quote! {
-                            "None".to_string()
-                        }
-                    } else {
-                        quote! {
-                            ::pyo3::prepare_freethreaded_python();
-                            ::pyo3::Python::with_gil(|py| -> String {
-                                let v: #ty = #value;
-                                ::pyo3_stub_gen::util::fmt_py_obj(py, v)
-                            })
-                        }
-                    };
-                    quote! {
-                        ::pyo3_stub_gen::type_info::ArgInfo {
-                            name: #name,
-                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
-                                default: {
-                                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
-                                        #default
-                                    });
-                                    &DEFAULT
+
+                    match args_map.get(&name) {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => {
+                            let default = if value.to_token_stream().to_string() == "None" {
+                                quote! {
+                                "None".to_string()
                                 }
-                            }),
-                        }
+                            } else {
+                                quote! {
+                                let v: #r#type = #value;
+                                ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                }
+                            };
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
+                                    default: {
+                                        static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                                            #default
+                                        });
+                                        &DEFAULT
+                                    }
+                                }),
+                            }})
+                        },
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, r#type }}) => {
+                            let imports = imports.iter().collect::<Vec<&String>>();
+                            let default = if value.to_token_stream().to_string() == "None" {
+                                quote! {
+                                "None".to_string()
+                                }
+                            } else {
+                                quote! {
+                                let v: #r#type = #value;
+                                ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                }
+                            };
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign{
+                                    default: {
+                                        static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                                            #default
+                                        });
+                                        &DEFAULT
+                                    }
+                                }),
+                            }})
+                        },
+                        None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 },
-                SignatureArg::Star(_) => quote! {
+                SignatureArg::Star(_) =>Ok(quote! {
                     ::pyo3_stub_gen::type_info::ArgInfo {
                         name: "",
                         r#type: <() as ::pyo3_stub_gen::PyStubType>::type_input,
                         signature: Some(pyo3_stub_gen::type_info::SignatureArg::Star),
-                    }
-                },
+                }}),
                 SignatureArg::Args(_, ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    match args_map.get(&name) {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
-                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
-                        }
+                        }}),
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
+                            let imports = imports.iter().collect::<Vec<&String>>();
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Args),
+                            }})
+                        },
+                        None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 },
                 SignatureArg::Keywords(_, _, ident) => {
                     let name = ident.to_string();
-                    let ty = args_map.get(&name).unwrap();
-                    quote! {
+                    match args_map.get(&name) {
+                        Some(ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } }) => Ok(quote! {
                         ::pyo3_stub_gen::type_info::ArgInfo {
                             name: #name,
-                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                            r#type: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                             signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
-                        }
+                        }}),
+                        Some(ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }}) => {
+                            let imports = imports.iter().collect::<Vec<&String>>();
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                                signature: Some(pyo3_stub_gen::type_info::SignatureArg::Keywords),
+                            }})
+                        },
+                        None => Err(syn::Error::new(ident.span(), format!("can not find argument: {ident}")))
                     }
                 }
             }).collect()
@@ -157,20 +225,35 @@ impl ToTokens for ArgsWithSignature<'_> {
             self.args
                 .iter()
                 .map(|arg| {
-                    let mut ty = arg.r#type.clone();
-                    remove_lifetime(&mut ty);
-                    let name = &arg.name;
-                    quote! {
-                        ::pyo3_stub_gen::type_info::ArgInfo {
-                            name: #name,
-                            r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: None,
+                    match arg {
+                        ArgInfo { name, r#type: TypeOrOverride::RustType { r#type } } => {
+                            let mut ty = r#type.clone();
+                            remove_lifetime(&mut ty);
+                            Ok(quote! {
+                                ::pyo3_stub_gen::type_info::ArgInfo {
+                                    name: #name,
+                                    r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_input,
+                                    signature: None,
+                                }
+                            })
                         }
+                        ArgInfo { name, r#type: TypeOrOverride::OverrideType{ type_repr, imports, .. }} => {
+                            let imports = imports.iter().collect::<Vec<&String>>();
+                            Ok(quote! {
+                            ::pyo3_stub_gen::type_info::ArgInfo {
+                                name: #name,
+                                r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                                signature: None,
+                            }})
+                        },
                     }
                 })
                 .collect()
         };
-        tokens.append_all(quote! { &[ #(#arg_infos),* ] });
+        match arg_infos_res {
+            Ok(arg_infos) => tokens.append_all(quote! { &[ #(#arg_infos),* ] }),
+            Err(err) => tokens.extend(err.to_compile_error()),
+        }
     }
 }
 

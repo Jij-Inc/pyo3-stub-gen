@@ -24,6 +24,22 @@
 use crate::{PyStubType, TypeInfo};
 use std::any::TypeId;
 
+/// Represents the target of type ignore comments
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum IgnoreTarget {
+    /// Ignore all type checking errors `(# type: ignore)`
+    All,
+    /// Ignore specific type checking rules `(# type: ignore[rule1,rule2])`
+    Specified(&'static [&'static str]),
+}
+
+/// Information about deprecated items
+#[derive(Debug, Clone, PartialEq)]
+pub struct DeprecatedInfo {
+    pub since: Option<&'static str>,
+    pub note: Option<&'static str>,
+}
+
 /// Work around for `CompareOp` for `__richcmp__` argument,
 /// which does not implements `FromPyObject`
 pub fn compare_op_type_input() -> TypeInfo {
@@ -83,6 +99,9 @@ pub struct MethodInfo {
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub r#type: MethodType,
+    pub is_async: bool,
+    pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -91,6 +110,8 @@ pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
+    pub default: Option<&'static std::sync::LazyLock<String>>,
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 /// Info of `#[pymethod]`
@@ -98,8 +119,12 @@ pub struct MemberInfo {
 pub struct PyMethodsInfo {
     // The Rust struct type-id of `impl` block where `#[pymethod]` acts on
     pub struct_id: fn() -> TypeId,
+    /// Method/Const with `#[classattr]`
+    pub attrs: &'static [MemberInfo],
     /// Methods decorated with `#[getter]`
     pub getters: &'static [MemberInfo],
+    /// Methods decorated with `#[getter]`
+    pub setters: &'static [MemberInfo],
     /// Other usual methods
     pub methods: &'static [MethodInfo],
 }
@@ -117,13 +142,58 @@ pub struct PyClassInfo {
     pub module: Option<&'static str>,
     /// Docstring
     pub doc: &'static str,
-    /// static members by `#[pyo3(get, set)]`
-    pub members: &'static [MemberInfo],
+    /// static members by `#[pyo3(get)]`
+    pub getters: &'static [MemberInfo],
+    /// static members by `#[pyo3(set)]`
+    pub setters: &'static [MemberInfo],
     /// Base classes specified by `#[pyclass(extends = Type)]`
     pub bases: &'static [fn() -> TypeInfo],
+    /// Whether the class has eq attribute
+    pub has_eq: bool,
+    /// Whether the class has ord attribute
+    pub has_ord: bool,
+    /// Whether the class has hash attribute
+    pub has_hash: bool,
+    /// Whether the class has str attribute
+    pub has_str: bool,
 }
 
 inventory::collect!(PyClassInfo);
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum VariantForm {
+    Unit,
+    Tuple,
+    Struct,
+}
+
+/// Info of a `#[pyclass]` with a single variant of a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct VariantInfo {
+    pub pyclass_name: &'static str,
+    pub module: Option<&'static str>,
+    pub doc: &'static str,
+    pub fields: &'static [MemberInfo],
+    pub form: &'static VariantForm,
+    pub constr_args: &'static [ArgInfo],
+}
+
+/// Info of a `#[pyclass]` with a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct PyComplexEnumInfo {
+    // Rust struct type-id
+    pub enum_id: fn() -> TypeId,
+    // The name exposed to Python
+    pub pyclass_name: &'static str,
+    /// Module name specified by `#[pyclass(module = "foo.bar")]`
+    pub module: Option<&'static str>,
+    /// Docstring
+    pub doc: &'static str,
+    /// static members by `#[pyo3(get, set)]`
+    pub variants: &'static [VariantInfo],
+}
+
+inventory::collect!(PyComplexEnumInfo);
 
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]
@@ -150,18 +220,12 @@ pub struct PyFunctionInfo {
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub module: Option<&'static str>,
+    pub is_async: bool,
+    pub deprecated: Option<DeprecatedInfo>,
+    pub type_ignored: Option<IgnoreTarget>,
 }
 
 inventory::collect!(PyFunctionInfo);
-
-#[derive(Debug)]
-pub struct PyErrorInfo {
-    pub name: &'static str,
-    pub module: &'static str,
-    pub base: fn() -> &'static str,
-}
-
-inventory::collect!(PyErrorInfo);
 
 #[derive(Debug)]
 pub struct PyVariableInfo {

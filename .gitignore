@@ -14,3 +14,7 @@ __pycache__/
 *.so
 *.pyc
 dist/
+
+# Taskfile
+.task/
+.claude/settings.local.json

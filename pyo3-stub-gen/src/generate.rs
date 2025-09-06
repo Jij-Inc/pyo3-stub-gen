@@ -2,20 +2,20 @@
 
 mod arg;
 mod class;
+mod deprecated;
 mod docstring;
 mod enum_;
-mod error;
 mod function;
 mod member;
 mod method;
 mod module;
 mod stub_info;
 mod variable;
+mod variant_methods;
 
 pub use arg::*;
 pub use class::*;
 pub use enum_::*;
-pub use error::*;
 pub use function::*;
 pub use member::*;
 pub use method::*;

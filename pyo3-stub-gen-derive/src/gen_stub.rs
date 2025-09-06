@@ -11,25 +11,36 @@
 //!         pyclass_name: "Placeholder",
 //!         module: Some("my_module"),
 //!         struct_id: std::any::TypeId::of::<PyPlaceholder>,
-//!         members: &[
+//!         getters: &[
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "ndim",
 //!                 r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "",
+//!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!         ],
+//!         setters: &[],
 //!         doc: "",
 //!         bases: &[],
+//!         has_eq: false,
+//!         has_ord: false,
+//!         has_hash: false,
+//!         has_str: false,
 //!     }
 //! }
 //! ```
@@ -68,6 +79,7 @@ mod attr;
 mod member;
 mod method;
 mod pyclass;
+mod pyclass_complex_enum;
 mod pyclass_enum;
 mod pyfunction;
 mod pymethods;
@@ -75,12 +87,14 @@ mod renaming;
 mod signature;
 mod stub_type;
 mod util;
+mod variant;
 
 use arg::*;
 use attr::*;
 use member::*;
 use method::*;
 use pyclass::*;
+use pyclass_complex_enum::*;
 use pyclass_enum::*;
 use pyfunction::*;
 use pymethods::*;
@@ -94,10 +108,12 @@ use quote::quote;
 use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyClassInfo::try_from(parse2::<ItemStruct>(item.clone())?)?;
+    let mut item_struct = parse2::<ItemStruct>(item)?;
+    let inner = PyClassInfo::try_from(item_struct.clone())?;
     let derive_stub_type = StubType::from(&inner);
+    pyclass::prune_attrs(&mut item_struct);
     Ok(quote! {
-        #item
+        #item_struct
         #derive_stub_type
         pyo3_stub_gen::inventory::submit! {
             #inner
@@ -117,10 +133,24 @@ pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
     })
 }
 
-pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
-    let inner = PyMethodsInfo::try_from(parse2::<ItemImpl>(item.clone())?)?;
+pub fn pyclass_complex_enum(item: TokenStream2) -> Result<TokenStream2> {
+    let inner = PyComplexEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let derive_stub_type = StubType::from(&inner);
     Ok(quote! {
         #item
+        #derive_stub_type
+        pyo3_stub_gen::inventory::submit! {
+            #inner
+        }
+    })
+}
+
+pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
+    let mut item_impl = parse2::<ItemImpl>(item)?;
+    let inner = PyMethodsInfo::try_from(item_impl.clone())?;
+    pymethods::prune_attrs(&mut item_impl);
+    Ok(quote! {
+        #item_impl
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner
@@ -129,13 +159,30 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut inner = PyFunctionInfo::try_from(parse2::<ItemFn>(item.clone())?)?;
+    let mut item_fn = parse2::<ItemFn>(item)?;
+    let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
     inner.parse_attr(attr)?;
+    pyfunction::prune_attrs(&mut item_fn);
     Ok(quote! {
-        #item
+        #item_fn
         #[automatically_derived]
         pyo3_stub_gen::inventory::submit! {
             #inner
         }
     })
+}
+
+pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
+    fn prune_attrs<T: syn::parse::Parse + quote::ToTokens>(
+        item: &TokenStream2,
+        fn_prune_attrs: fn(&mut T),
+    ) -> Result<TokenStream2> {
+        parse2::<T>(item.clone()).map(|mut item| {
+            fn_prune_attrs(&mut item);
+            quote! { #item }
+        })
+    }
+    prune_attrs::<ItemStruct>(&item, pyclass::prune_attrs)
+        .or_else(|_| prune_attrs::<ItemImpl>(&item, pymethods::prune_attrs))
+        .or_else(|_| prune_attrs::<ItemFn>(&item, pyfunction::prune_attrs))
 }

@@ -45,6 +45,26 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
         .into()
 }
 
+/// Embed metadata for Python stub file generation for `#[pyclass]` macro with a complex enum
+///
+/// ```
+/// #[pyo3_stub_gen_derive::gen_stub_pyclass_complex_enum]
+/// #[pyo3::pyclass(module = "my_module", name = "DataType")]
+/// #[derive(Debug, Clone)]
+/// pub enum PyDataType {
+///     #[pyo3(name = "FLOAT")]
+///     Float{f: f64},
+///     #[pyo3(name = "INTEGER")]
+///     Integer(i64),
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn gen_stub_pyclass_complex_enum(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pyclass_complex_enum(item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
+
 /// Embed metadata for Python stub file generation for `#[pymethods]` macro
 ///
 /// ```
@@ -93,6 +113,40 @@ pub fn gen_stub_pymethods(_attr: TokenStream, item: TokenStream) -> TokenStream 
 #[proc_macro_attribute]
 pub fn gen_stub_pyfunction(attr: TokenStream, item: TokenStream) -> TokenStream {
     gen_stub::pyfunction(attr.into(), item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
+
+/// Do nothing but remove all `#[gen_stub(xxx)]` for `pyclass`, `pymethods`, and `pyfunction`.
+///
+/// It is useful to use `#[gen_stub(xxx)]` under feature-gating stub-gen.
+///
+/// E.g., only generate .pyi when `stub-gen` feature is turned-on:
+/// ```ignore
+/// #[cfg_attr(feature = "stub-gen", pyo3_stub_gen_derive::gen_stub_pymethods)]
+/// #[cfg_attr(not(feature = "stub-gen"), pyo3_stub_gen_derive::remove_gen_stub)]
+/// #[pymethods]
+/// impl A {
+///     #[gen_stub(override_return_type(type_repr="typing_extensions.Self", imports=("typing_extensions")))]
+///     #[new]
+///     pub fn new() -> Self {
+///         Self::default()
+///     }
+/// }
+/// #[cfg(feature = "stub-gen")]
+/// define_stub_info_gatherer!(stub_info);
+/// ```
+/// With Cargo.toml:
+/// ```toml
+/// [features]
+/// stub-gen = ["dep:pyo3-stub-gen"]
+/// [dependencies]
+/// pyo3-stub-gen = {version = "*", optional = true}
+/// pyo3-stub-gen-derive = "*"
+/// ```
+#[proc_macro_attribute]
+pub fn remove_gen_stub(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::prune_gen_stub(item.into())
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }

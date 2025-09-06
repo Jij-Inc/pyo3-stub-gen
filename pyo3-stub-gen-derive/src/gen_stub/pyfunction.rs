@@ -2,21 +2,27 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parse::{Parse, ParseStream},
-    Error, ItemFn, Result, Type,
+    Error, FnArg, ItemFn, Result,
 };
 
+use crate::gen_stub::util::TypeOrOverride;
+
 use super::{
-    escape_return_type, extract_documents, parse_args, parse_pyo3_attrs, quote_option, ArgInfo,
-    ArgsWithSignature, Attr, Signature,
+    attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type, parse_args,
+    parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option, ArgInfo, ArgsWithSignature, Attr,
+    DeprecatedInfo, Signature,
 };
 
 pub struct PyFunctionInfo {
     name: String,
     args: Vec<ArgInfo>,
-    r#return: Option<Type>,
+    r#return: Option<TypeOrOverride>,
     sig: Option<Signature>,
     doc: String,
     module: Option<String>,
+    is_async: bool,
+    deprecated: Option<DeprecatedInfo>,
+    type_ignored: Option<IgnoreTarget>,
 }
 
 struct ModuleAttr {
@@ -50,8 +56,10 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
     type Error = Error;
     fn try_from(item: ItemFn) -> Result<Self> {
         let doc = extract_documents(&item.attrs).join("\n");
+        let deprecated = extract_deprecated(&item.attrs);
+        let type_ignored = parse_gen_stub_type_ignore(&item.attrs)?;
         let args = parse_args(item.sig.inputs)?;
-        let r#return = escape_return_type(&item.sig.output);
+        let r#return = extract_return_type(&item.sig.output, &item.attrs)?;
         let mut name = None;
         let mut sig = None;
         for attr in parse_pyo3_attrs(&item.attrs)? {
@@ -69,6 +77,9 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             name,
             doc,
             module: None,
+            is_async: item.sig.asyncness.is_some(),
+            deprecated,
+            type_ignored,
         })
     }
 }
@@ -82,14 +93,51 @@ impl ToTokens for PyFunctionInfo {
             doc,
             sig,
             module,
+            is_async,
+            deprecated,
+            type_ignored,
         } = self;
         let ret_tt = if let Some(ret) = ret {
-            quote! { <#ret as pyo3_stub_gen::PyStubType>::type_output }
+            match ret {
+                TypeOrOverride::RustType { r#type } => {
+                    let ty = r#type.clone();
+                    quote! { <#ty as pyo3_stub_gen::PyStubType>::type_output }
+                }
+                TypeOrOverride::OverrideType {
+                    type_repr, imports, ..
+                } => {
+                    let imports = imports.iter().collect::<Vec<&String>>();
+                    quote! {
+                        || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) }
+                    }
+                }
+            }
         } else {
             quote! { ::pyo3_stub_gen::type_info::no_return_type_output }
         };
         // let sig_tt = quote_option(sig);
         let module_tt = quote_option(module);
+        let deprecated_tt = deprecated
+            .as_ref()
+            .map(|d| quote! { Some(#d) })
+            .unwrap_or_else(|| quote! { None });
+        let type_ignored_tt = if let Some(target) = type_ignored {
+            match target {
+                IgnoreTarget::All => {
+                    quote! { Some(::pyo3_stub_gen::type_info::IgnoreTarget::All) }
+                }
+                IgnoreTarget::SpecifiedLits(rules) => {
+                    let rule_strs: Vec<String> = rules.iter().map(|lit| lit.value()).collect();
+                    quote! {
+                        Some(::pyo3_stub_gen::type_info::IgnoreTarget::Specified(
+                            &[#(#rule_strs),*] as &[&str]
+                        ))
+                    }
+                }
+            }
+        } else {
+            quote! { None }
+        };
         let args_with_sig = ArgsWithSignature { args, sig };
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
@@ -98,7 +146,22 @@ impl ToTokens for PyFunctionInfo {
                 r#return: #ret_tt,
                 doc: #doc,
                 module: #module_tt,
+                is_async: #is_async,
+                deprecated: #deprecated_tt,
+                type_ignored: #type_ignored_tt,
             }
         })
+    }
+}
+
+// `#[gen_stub(xxx)]` is not a valid proc_macro_attribute
+// it's only designed to receive user's setting.
+// We need to remove all `#[gen_stub(xxx)]` before print the item_fn back
+pub fn prune_attrs(item_fn: &mut ItemFn) {
+    super::attr::prune_attrs(&mut item_fn.attrs);
+    for arg in item_fn.sig.inputs.iter_mut() {
+        if let FnArg::Typed(ref mut pat_type) = arg {
+            super::attr::prune_attrs(&mut pat_type.attrs);
+        }
     }
 }

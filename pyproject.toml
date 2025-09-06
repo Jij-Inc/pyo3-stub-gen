@@ -1,5 +1,11 @@
 [tool.uv.workspace]
-members = ["examples/*"]
+members = [
+    "examples/pure",
+    "examples/mixed",
+    "examples/mixed_sub",
+    "examples/mixed_sub_multiple",
+    "examples/test-dash-package",
+]
 
 [dependency-groups]
-dev = ["pyright>=1.1.400", "pytest>=8.3.5"]
+dev = ["pyright>=1.1.400", "pytest>=8.3.5", "pytest-asyncio>=1.1.0"]

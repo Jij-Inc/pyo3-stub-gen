@@ -36,23 +36,36 @@
 //!         // Python class name
 //!         pyclass_name: "MyClass",
 //!
-//!         members: &[
+//!         getters: &[
 //!             MemberInfo {
 //!                 name: "name",
 //!                 r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Name docstring",
+//!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!             MemberInfo {
 //!                 name: "description",
 //!                 r#type: <Option<String> as ::pyo3_stub_gen::PyStubType>::type_output,
 //!                 doc: "Description docstring",
+//!                 default: None,
+//!                 deprecated: None,
 //!             },
 //!         ],
+//!
+//!         setters: &[],
 //!
 //!         doc: "Docstring used in Python",
 //!
 //!         // Base classes
 //!         bases: &[],
+//!
+//!         // Decorated with `#[pyclass(eq, ord)]`
+//!         has_eq: false,
+//!         has_ord: false,
+//!         // Decorated with `#[pyclass(hash, str)]`
+//!         has_hash: false,
+//!         has_str: false,
 //!     }
 //! }
 //! ```
@@ -129,6 +142,9 @@
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     r#type: MethodType::Instance,
+//!     deprecated: None,
+//!     is_async: false,
+//!     type_ignored: None,
 //! };
 //!
 //! assert_eq!(
@@ -156,6 +172,7 @@ pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 pub mod exception;
 pub mod generate;
 pub mod pyproject;
+pub mod rule_name;
 mod stub_type;
 pub mod type_info;
 pub mod util;
@@ -194,3 +211,6 @@ macro_rules! module_variable {
         }
     };
 }
+
+#[doc = include_str!("../README.md")]
+mod readme {}

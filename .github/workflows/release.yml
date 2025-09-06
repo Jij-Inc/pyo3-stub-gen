@@ -9,23 +9,32 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC token exchange
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
 
       - name: cargo publish
         run: |
           cargo publish -p pyo3-stub-gen-derive
           cargo publish -p pyo3-stub-gen
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
   next_version:
     runs-on: ubuntu-latest
     needs: publish
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
 
       - name: Install cargo-edit
         run: cargo install cargo-edit

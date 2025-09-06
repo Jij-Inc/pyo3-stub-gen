@@ -30,7 +30,9 @@ impl StubInfo {
 
     pub fn generate(&self) -> Result<()> {
         for (name, module) in self.modules.iter() {
-            let path = name.replace(".", "/");
+            // Convert dashes to underscores for Python compatibility
+            let normalized_name = name.replace("-", "_");
+            let path = normalized_name.replace(".", "/");
             let dest = if module.submodules.is_empty() {
                 self.python_root.join(format!("{path}.pyi"))
             } else {
@@ -43,7 +45,7 @@ impl StubInfo {
             }
 
             let mut f = fs::File::create(&dest)?;
-            write!(f, "{}", module)?;
+            write!(f, "{module}")?;
             log::info!(
                 "Generate stub file of a module `{name}` at {dest}",
                 dest = dest.display()
@@ -110,6 +112,12 @@ impl StubInfoBuilder {
             .insert((info.struct_id)(), ClassDef::from(info));
     }
 
+    fn add_complex_enum(&mut self, info: &PyComplexEnumInfo) {
+        self.get_module(info.module)
+            .class
+            .insert((info.enum_id)(), ClassDef::from(info));
+    }
+
     fn add_enum(&mut self, info: &PyEnumInfo) {
         self.get_module(info.module)
             .enum_
@@ -117,15 +125,12 @@ impl StubInfoBuilder {
     }
 
     fn add_function(&mut self, info: &PyFunctionInfo) {
-        self.get_module(info.module)
+        let target = self
+            .get_module(info.module)
             .function
-            .insert(info.name, FunctionDef::from(info));
-    }
-
-    fn add_error(&mut self, info: &PyErrorInfo) {
-        self.get_module(Some(info.module))
-            .error
-            .insert(info.name, ErrorDef::from(info));
+            .entry(info.name)
+            .or_default();
+        target.push(FunctionDef::from(info));
     }
 
     fn add_variable(&mut self, info: &PyVariableInfo) {
@@ -138,23 +143,64 @@ impl StubInfoBuilder {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
             if let Some(entry) = module.class.get_mut(&struct_id) {
+                for attr in info.attrs {
+                    entry.attrs.push(MemberDef {
+                        name: attr.name,
+                        r#type: (attr.r#type)(),
+                        doc: attr.doc,
+                        default: attr.default.map(|s| s.as_str()),
+                        deprecated: attr.deprecated.clone(),
+                    });
+                }
                 for getter in info.getters {
-                    entry.members.push(MemberDef {
+                    entry.getters.push(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
+                        default: getter.default.map(|s| s.as_str()),
+                        deprecated: getter.deprecated.clone(),
+                    });
+                }
+                for setter in info.setters {
+                    entry.setters.push(MemberDef {
+                        name: setter.name,
+                        r#type: (setter.r#type)(),
+                        doc: setter.doc,
+                        default: setter.default.map(|s| s.as_str()),
+                        deprecated: setter.deprecated.clone(),
                     });
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    let entries = entry.methods.entry(method.name.to_string()).or_default();
+                    entries.push(MethodDef::from(method));
                 }
                 return;
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
+                for attr in info.attrs {
+                    entry.attrs.push(MemberDef {
+                        name: attr.name,
+                        r#type: (attr.r#type)(),
+                        doc: attr.doc,
+                        default: attr.default.map(|s| s.as_str()),
+                        deprecated: attr.deprecated.clone(),
+                    });
+                }
                 for getter in info.getters {
-                    entry.members.push(MemberDef {
+                    entry.getters.push(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
+                        default: getter.default.map(|s| s.as_str()),
+                        deprecated: getter.deprecated.clone(),
+                    });
+                }
+                for setter in info.setters {
+                    entry.setters.push(MemberDef {
+                        name: setter.name,
+                        r#type: (setter.r#type)(),
+                        doc: setter.doc,
+                        default: setter.default.map(|s| s.as_str()),
+                        deprecated: setter.deprecated.clone(),
                     });
                 }
                 for method in info.methods {
@@ -170,14 +216,14 @@ impl StubInfoBuilder {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
+        for info in inventory::iter::<PyComplexEnumInfo> {
+            self.add_complex_enum(info);
+        }
         for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);
         }
         for info in inventory::iter::<PyFunctionInfo> {
             self.add_function(info);
-        }
-        for info in inventory::iter::<PyErrorInfo> {
-            self.add_error(info);
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);

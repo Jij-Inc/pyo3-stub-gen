@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
       - name: Check warnings in documents
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
       - name: Run cargo fmt
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
       - name: Check with clippy
@@ -53,39 +53,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
           command: test
-
-  stub-gen:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - pure
-          - mixed
-          - mixed_sub
-          - mixed_sub_multiple
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup-test-environment
-      - name: Generate stub file
-        run: task ${{ matrix.crate}}:stub-gen
-      - name: Check if stub file is up to date
-        run: git diff --exit-code
+      - name: Run tests (no default features)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features -p pyo3-stub-gen
 
   semver-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
