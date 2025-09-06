@@ -3,6 +3,7 @@ members = [
     "examples/pure",
     "examples/mixed",
     "examples/mixed_sub",
+    "examples/mixed_sub_import_type",
     "examples/mixed_sub_multiple",
     "examples/test-dash-package",
 ]
