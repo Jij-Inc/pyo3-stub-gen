@@ -1,10 +1,10 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
-// Specify the module name explicitly
+// Classes that can be cross-referenced between modules (from mixed_sub_import_type)
 #[gen_stub_pyclass]
 #[pyclass(module = "mixed_sub.main_mod")]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct A {
     x: usize,
 }
@@ -23,11 +23,10 @@ fn create_a(x: usize) -> A {
     A { x }
 }
 
-// Do not specify the module name explicitly
-// This will be placed in the main module
+// Class without explicit module specification
 #[gen_stub_pyclass]
 #[pyclass]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct B {
     x: usize,
 }
@@ -46,28 +45,74 @@ fn create_b(x: usize) -> B {
     B { x }
 }
 
-// Class in submodule
+// Original functions from mixed_sub
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_a")]
+#[pyfunction(name = "greet_a")]
+pub fn greet_a() {
+    println!("Hello from mod_A!")
+}
+
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod")]
+#[pyfunction(name = "greet_main")]
+pub fn greet_main() {
+    println!("Hello from main_mod!")
+}
+
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_b")]
+#[pyfunction(name = "greet_b")]
+pub fn greet_b() {
+    println!("Hello from mod_B!")
+}
+
+// Class C in mod_a that references A and B (demonstrates cross-module type references)
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed_sub.main_mod.sub_mod")]
+#[pyclass(module = "mixed_sub.main_mod.mod_a")]
 #[derive(Debug)]
 struct C {
-    x: usize,
+    a: A,
+    b: B,
 }
 
 #[gen_stub_pymethods]
 #[pymethods]
 impl C {
     fn show_x(&self) {
+        println!("a.x:");
+        self.a.show_x();
+        println!("b.x:");
+        self.b.show_x();
+    }
+}
+
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_a")]
+#[pyfunction]
+fn create_c(a: A, b: B) -> C {
+    C { a, b }
+}
+
+// Simple class in mod_b (from mixed_sub)
+#[gen_stub_pyclass]
+#[pyclass(module = "mixed_sub.main_mod.mod_b")]
+#[derive(Debug)]
+struct D {
+    x: usize,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl D {
+    fn show_x(&self) {
         println!("x = {}", self.x);
     }
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.sub_mod")]
+#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_b")]
 #[pyfunction]
-fn create_c(x: usize) -> C {
-    C { x }
+fn create_d(x: usize) -> D {
+    D { x }
 }
 
+// Function in int submodule to test namespace collision
 #[gen_stub_pyfunction(module = "mixed_sub.main_mod.int")]
 #[pyfunction]
 fn dummy_int_fun(x: usize) -> usize {
@@ -76,25 +121,41 @@ fn dummy_int_fun(x: usize) -> usize {
 
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
+    // Add classes and functions to main module
     m.add_class::<A>()?;
     m.add_class::<B>()?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(create_b, m)?)?;
-    sub_mod(m)?;
+    m.add_function(wrap_pyfunction!(greet_main, m)?)?;
+
+    // Add submodules
+    mod_a(m)?;
+    mod_b(m)?;
     int_mod(m)?;
     Ok(())
 }
 
-fn sub_mod(parent: &Bound<PyModule>) -> PyResult<()> {
+fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
-    let sub = PyModule::new(py, "sub_mod")?;
+    let sub = PyModule::new(py, "mod_a")?;
     sub.add_class::<C>()?;
+    sub.add_function(wrap_pyfunction!(greet_a, &sub)?)?;
     sub.add_function(wrap_pyfunction!(create_c, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
 }
 
-/// A dummy module to pollute namespace with unqualified `int`
+fn mod_b(parent: &Bound<PyModule>) -> PyResult<()> {
+    let py = parent.py();
+    let sub = PyModule::new(py, "mod_b")?;
+    sub.add_class::<D>()?;
+    sub.add_function(wrap_pyfunction!(greet_b, &sub)?)?;
+    sub.add_function(wrap_pyfunction!(create_d, &sub)?)?;
+    parent.add_submodule(&sub)?;
+    Ok(())
+}
+
+/// A dummy module to test namespace collision with built-in 'int'
 fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     let py = parent.py();
     let sub = PyModule::new(py, "int")?;

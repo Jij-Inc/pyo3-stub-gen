@@ -23,7 +23,7 @@ pub use module::*;
 pub use stub_info::*;
 pub use variable::*;
 
-use crate::stub_type::ModuleRef;
+use crate::stub_type::ImportRef;
 use std::collections::HashSet;
 
 fn indent() -> &'static str {
@@ -31,5 +31,5 @@ fn indent() -> &'static str {
 }
 
 pub trait Import {
-    fn import(&self) -> HashSet<ModuleRef>;
+    fn import(&self) -> HashSet<ImportRef>;
 }

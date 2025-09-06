@@ -1,3 +1,4 @@
+use crate::stub_type::ImportRef;
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
 use itertools::Itertools;
 use std::fmt;
@@ -15,14 +16,14 @@ pub struct FunctionDef {
 }
 
 impl Import for FunctionDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());
         }
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
-            import.insert("typing_extensions".into());
+            import.insert(ImportRef::Module("typing_extensions".into()));
         }
         import
     }

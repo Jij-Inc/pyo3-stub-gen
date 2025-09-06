@@ -1,6 +1,7 @@
 use indexmap::IndexMap;
 
 use crate::generate::variant_methods::get_variant_methods;
+use crate::stub_type::ImportRef;
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{fmt, vec};
 
@@ -19,7 +20,7 @@ pub struct ClassDef {
 }
 
 impl Import for ClassDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = HashSet::new();
         for base in &self.bases {
             import.extend(base.import.clone());
@@ -36,7 +37,7 @@ impl Import for ClassDef {
         for method in self.methods.values() {
             if method.len() > 1 {
                 // for @typing.overload
-                import.insert("typing".into());
+                import.insert(ImportRef::Module("typing".into()));
             }
             for method in method {
                 import.extend(method.import());
