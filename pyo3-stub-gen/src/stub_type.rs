@@ -9,8 +9,8 @@ mod numpy;
 mod either;
 
 use maplit::hashset;
-use std::{collections::HashSet, fmt, ops};
 use std::cmp::Ordering;
+use std::{collections::HashSet, fmt, ops};
 
 /// Indicates what to import.
 /// Module: The purpose is to import the entire module(eg import builtins).
@@ -19,6 +19,12 @@ use std::cmp::Ordering;
 pub enum ImportRef {
     Module(ModuleRef),
     Type(TypeRef),
+}
+
+impl From<&str> for ImportRef {
+    fn from(value: &str) -> Self {
+        ImportRef::Module(value.into())
+    }
 }
 
 impl PartialOrd for ImportRef {
@@ -69,19 +75,21 @@ impl From<&str> for ModuleRef {
     }
 }
 
-
 /// Indicates the type of import(eg class enum).
 /// from module import type.
 /// name, type name. module, module name(which type defined).
- #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
-pub struct  TypeRef {
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
+pub struct TypeRef {
     pub module: ModuleRef,
     pub name: String,
 }
 
-impl  TypeRef  {
+impl TypeRef {
     pub fn new(module_ref: ModuleRef, name: String) -> Self {
-        Self{module: module_ref, name}
+        Self {
+            module: module_ref,
+            name,
+        }
     }
 }
 
@@ -194,7 +202,7 @@ impl TypeInfo {
     /// A type annotation of a type that must be imported.
     ///
     /// ```
-    /// Class A is defined in module A, referenced in module B. "from ModuleA import ClassA"
+    /// // Class A is defined in module A, referenced in module B. "from ModuleA import ClassA"
     /// pyo3_stub_gen::TypeInfo::with_type("ClassA", "ModuleA".into());
     /// ```
     pub fn with_type(type_name: &str, module: ModuleRef) -> Self {
