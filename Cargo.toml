@@ -4,7 +4,7 @@ members = [
   "pyo3-stub-gen-derive",
   "examples/pure",
   "examples/mixed",
-  "examples/mixed_sub_multiple",
+  "examples/mixed_sub",
   "examples/test-dash-package",
 ]
 resolver = "2"

@@ -88,7 +88,7 @@ provides-extras = ["test"]
 [[package]]
 name = "mixed-sub-multiple"
 version = "0.1"
-source = { editable = "examples/mixed_sub_multiple" }
+source = { editable = "examples/mixed_sub" }
 
 [[package]]
 name = "nodeenv"

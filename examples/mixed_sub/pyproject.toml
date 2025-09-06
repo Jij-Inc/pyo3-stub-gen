@@ -3,11 +3,11 @@ requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "mixed_sub_multiple"
+name = "mixed_sub"
 version = "0.1"
 requires-python = ">=3.10"
 
 [tool.maturin]
 python-source = "python"
-module-name = "mixed_sub_multiple.main_mod"
+module-name = "mixed_sub.main_mod"
 features = ["pyo3/extension-module"]

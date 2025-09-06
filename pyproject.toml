@@ -2,7 +2,7 @@
 members = [
     "examples/pure",
     "examples/mixed",
-    "examples/mixed_sub_multiple",
+    "examples/mixed_sub",
     "examples/test-dash-package",
 ]
 
