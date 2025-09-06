@@ -9,15 +9,9 @@ includes:
   mixed:
     taskfile: examples/mixed/Taskfile.yml
     dir: examples/mixed
-  mixed_sub:
-    taskfile: examples/mixed_sub/Taskfile.yml
-    dir: examples/mixed_sub
   mixed_sub_multiple:
     taskfile: examples/mixed_sub_multiple/Taskfile.yml
     dir: examples/mixed_sub_multiple
-  mixed_sub_import_type:
-    taskfile: examples/mixed_sub_import_type/Taskfile.yml
-    dir: examples/mixed_sub_import_type
   test-dash-package:
     taskfile: examples/test-dash-package/Taskfile.yml
     dir: examples/test-dash-package
