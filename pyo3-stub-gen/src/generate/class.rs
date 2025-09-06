@@ -1,8 +1,8 @@
 use indexmap::IndexMap;
 
 use crate::generate::variant_methods::get_variant_methods;
+use crate::stub_type::ImportRef;
 use crate::{generate::*, type_info::*, TypeInfo};
-use crate::stub_type::{ImportRef, ModuleRef};
 use std::{fmt, vec};
 
 /// Definition of a Python class.

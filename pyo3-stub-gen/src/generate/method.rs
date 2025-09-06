@@ -1,5 +1,5 @@
+use crate::stub_type::ImportRef;
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
-use crate::stub_type::{ImportRef, ModuleRef};
 use itertools::Itertools;
 use std::{collections::HashSet, fmt};
 

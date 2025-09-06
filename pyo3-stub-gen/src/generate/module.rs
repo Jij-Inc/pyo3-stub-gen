@@ -1,5 +1,5 @@
 use crate::generate::*;
-use crate::stub_type::{ImportRef, ModuleRef};
+use crate::stub_type::ImportRef;
 use itertools::Itertools;
 use std::{
     any::TypeId,
@@ -42,7 +42,7 @@ impl fmt::Display for Module {
         let mut type_ref_grouped: BTreeMap<String, Vec<String>> = BTreeMap::new();
         let imports = self.import();
         let any_overloaded = self.function.values().any(|functions| functions.len() > 1);
-        
+
         for common_ref in imports.into_iter().sorted() {
             match common_ref {
                 ImportRef::Module(module_ref) => {
@@ -66,15 +66,20 @@ impl fmt::Display for Module {
                 }
             }
         }
-        
+
         if any_overloaded {
             writeln!(f, "import typing")?;
         }
-        
+
         for (module_name, type_names) in type_ref_grouped {
             let mut sorted_type_names = type_names.clone();
             sorted_type_names.sort();
-            writeln!(f, "from {} import {}", module_name, sorted_type_names.join(", "))?;
+            writeln!(
+                f,
+                "from {} import {}",
+                module_name,
+                sorted_type_names.join(", ")
+            )?;
         }
         for submod in &self.submodules {
             writeln!(f, "from . import {submod}")?;

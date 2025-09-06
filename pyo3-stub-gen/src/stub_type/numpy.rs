@@ -1,4 +1,4 @@
-use super::{PyStubType, TypeInfo, ImportRef};
+use super::{ImportRef, PyStubType, TypeInfo};
 use maplit::hashset;
 use numpy::{
     ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
@@ -50,7 +50,10 @@ impl PyStubType for PyUntypedArray {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "numpy.typing.NDArray[typing.Any]".into(),
-            import: hashset![ImportRef::Module("numpy.typing".into()), ImportRef::Module("typing".into())],
+            import: hashset![
+                ImportRef::Module("numpy.typing".into()),
+                ImportRef::Module("typing".into())
+            ],
         }
     }
 }

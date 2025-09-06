@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::{ImportRef, ModuleRef, PyStubType, TypeInfo};
+use super::{ImportRef, PyStubType, TypeInfo};
 
 impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
     fn type_input() -> TypeInfo {
