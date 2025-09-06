@@ -1,4 +1,5 @@
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
+use crate::stub_type::{ImportRef, ModuleRef};
 use itertools::Itertools;
 use std::fmt;
 
@@ -22,7 +23,7 @@ impl Import for FunctionDef {
         }
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
-            import.insert("typing_extensions".into());
+            import.insert(ImportRef::Module("typing_extensions".into()));
         }
         import
     }

@@ -2,6 +2,7 @@ use indexmap::IndexMap;
 
 use crate::generate::variant_methods::get_variant_methods;
 use crate::{generate::*, type_info::*, TypeInfo};
+use crate::stub_type::{ImportRef, ModuleRef};
 use std::{fmt, vec};
 
 /// Definition of a Python class.
@@ -36,7 +37,7 @@ impl Import for ClassDef {
         for method in self.methods.values() {
             if method.len() > 1 {
                 // for @typing.overload
-                import.insert("typing".into());
+                import.insert(ImportRef::Module("typing".into()));
             }
             for method in method {
                 import.extend(method.import());
