@@ -22,15 +22,11 @@ tasks:
       - task: pure:stub-gen
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
-      - task: mixed_sub_import_type:stub-gen
-      - task: mixed_sub:stub-gen
       - task: test-dash-package:stub-gen
 
   test:
     cmds:
       - task: pure:test
       - task: mixed:test
-      - task: mixed_sub:test
-      - task: mixed_sub_import_type:test
       - task: mixed_sub:test
       - task: test-dash-package:test
