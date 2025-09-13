@@ -153,7 +153,11 @@ impl StubInfoBuilder {
                     });
                 }
                 for getter in info.getters {
-                    entry.getters.push(MemberDef {
+                    entry
+                        .getter_setters
+                        .entry(getter.name.to_string())
+                        .or_default()
+                        .0 = Some(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
@@ -162,7 +166,11 @@ impl StubInfoBuilder {
                     });
                 }
                 for setter in info.setters {
-                    entry.setters.push(MemberDef {
+                    entry
+                        .getter_setters
+                        .entry(setter.name.to_string())
+                        .or_default()
+                        .1 = Some(MemberDef {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,

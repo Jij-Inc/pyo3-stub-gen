@@ -86,6 +86,7 @@ impl A {
     }
     /// class attribute NUM1
     #[classattr]
+    #[pyo3(name = "NUM")]
     const NUM1: usize = 2;
 
     /// deprecated class attribute NUM3 (will show warning)
