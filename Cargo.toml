@@ -6,6 +6,7 @@ members = [
   "examples/mixed",
   "examples/mixed_sub",
   "examples/test-dash-package",
+  "examples/numpy_example",
 ]
 resolver = "2"
 

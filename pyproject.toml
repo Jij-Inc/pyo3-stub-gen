@@ -3,6 +3,7 @@ members = [
     "examples/pure",
     "examples/mixed",
     "examples/mixed_sub",
+    "examples/numpy_example",
     "examples/test-dash-package",
 ]
 
