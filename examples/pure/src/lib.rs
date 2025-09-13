@@ -3,6 +3,9 @@
 mod custom_exceptions;
 use custom_exceptions::*;
 
+mod numpy;
+use numpy::*;
+
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
@@ -651,6 +654,17 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
 
     // Test class for type: ignore functionality
     m.add_class::<TypeIgnoreTest>()?;
+
+    // NumPy functions
+    m.add_function(wrap_pyfunction!(sum_array_1d, m)?)?;
+    m.add_function(wrap_pyfunction!(create_zeros_1d, m)?)?;
+    m.add_function(wrap_pyfunction!(int_to_float, m)?)?;
+    m.add_function(wrap_pyfunction!(process_float32_array, m)?)?;
+    m.add_function(wrap_pyfunction!(sum_dynamic_array, m)?)?;
+    m.add_function(wrap_pyfunction!(optional_array_param, m)?)?;
+    m.add_function(wrap_pyfunction!(split_array, m)?)?;
+    m.add_function(wrap_pyfunction!(count_true, m)?)?;
+
     Ok(())
 }
 

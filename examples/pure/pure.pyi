@@ -4,6 +4,8 @@
 import builtins
 import collections.abc
 import datetime
+import numpy
+import numpy.typing
 import os
 import pathlib
 import typing
@@ -286,9 +288,19 @@ def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
 async def async_num() -> builtins.int: ...
 
+def count_true(array:numpy.typing.NDArray[numpy.bool]) -> builtins.int:
+    r"""
+    Count true values in boolean array
+    """
+
 def create_a(x:builtins.int=2) -> A: ...
 
 def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
+
+def create_zeros_1d(size:builtins.int) -> numpy.typing.NDArray[numpy.float64]:
+    r"""
+    Creates a new 1D NumPy array filled with zeros
+    """
 
 def default_value(num:Number=Number.FLOAT) -> Number: ...
 
@@ -307,6 +319,16 @@ def func_with_kwargs(**kwargs) -> builtins.bool:
 def func_with_star_arg(*args) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
+    """
+
+def int_to_float(array:numpy.typing.NDArray[numpy.int32]) -> numpy.typing.NDArray[numpy.float64]:
+    r"""
+    Convert integer array to float array
+    """
+
+def optional_array_param(array:typing.Optional[numpy.typing.NDArray[numpy.float64]]=None) -> builtins.str:
+    r"""
+    Optional array parameter
     """
 
 @typing.overload
@@ -333,7 +355,17 @@ def overload_example_2(x:builtins.float) -> builtins.float:
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 
+def process_float32_array(array:numpy.typing.NDArray[numpy.float32]) -> numpy.typing.NDArray[numpy.float32]:
+    r"""
+    Process float32 array
+    """
+
 def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
+
+def split_array(array:numpy.typing.NDArray[numpy.float64]) -> tuple[numpy.typing.NDArray[numpy.float64], numpy.typing.NDArray[numpy.float64]]:
+    r"""
+    Return multiple arrays
+    """
 
 def str_len(x:builtins.str) -> builtins.int:
     r"""
@@ -343,6 +375,16 @@ def str_len(x:builtins.str) -> builtins.int:
 def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
+    """
+
+def sum_array_1d(array:numpy.typing.NDArray[numpy.float64]) -> builtins.float:
+    r"""
+    Takes a 1D NumPy array and returns its sum
+    """
+
+def sum_dynamic_array(array:numpy.typing.NDArray[numpy.float64]) -> builtins.float:
+    r"""
+    Working with dynamic-dimensional arrays
     """
 
 def test_type_ignore_all() -> builtins.int:  # type: ignore

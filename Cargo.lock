@@ -533,6 +533,7 @@ version = "0.14.0"
 dependencies = [
  "ahash",
  "env_logger",
+ "numpy",
  "pyo3",
  "pyo3-stub-gen",
 ]
