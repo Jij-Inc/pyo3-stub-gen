@@ -139,6 +139,10 @@ impl StubInfoBuilder {
             .insert(info.name, VariableDef::from(info));
     }
 
+    fn add_module_doc(&mut self, info: &ModuleDocInfo) {
+        self.get_module(Some(info.module)).doc = (info.doc)();
+    }
+
     fn add_methods(&mut self, info: &PyMethodsInfo) {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
@@ -148,25 +152,33 @@ impl StubInfoBuilder {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
-                        default: attr.default.map(|s| s.as_str()),
+                        default: attr.default.map(|f| f()),
                         deprecated: attr.deprecated.clone(),
                     });
                 }
                 for getter in info.getters {
-                    entry.getters.push(MemberDef {
+                    entry
+                        .getter_setters
+                        .entry(getter.name.to_string())
+                        .or_default()
+                        .0 = Some(MemberDef {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
-                        default: getter.default.map(|s| s.as_str()),
+                        default: getter.default.map(|f| f()),
                         deprecated: getter.deprecated.clone(),
                     });
                 }
                 for setter in info.setters {
-                    entry.setters.push(MemberDef {
+                    entry
+                        .getter_setters
+                        .entry(setter.name.to_string())
+                        .or_default()
+                        .1 = Some(MemberDef {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
-                        default: setter.default.map(|s| s.as_str()),
+                        default: setter.default.map(|f| f()),
                         deprecated: setter.deprecated.clone(),
                     });
                 }
@@ -181,7 +193,7 @@ impl StubInfoBuilder {
                         name: attr.name,
                         r#type: (attr.r#type)(),
                         doc: attr.doc,
-                        default: attr.default.map(|s| s.as_str()),
+                        default: attr.default.map(|f| f()),
                         deprecated: attr.deprecated.clone(),
                     });
                 }
@@ -190,7 +202,7 @@ impl StubInfoBuilder {
                         name: getter.name,
                         r#type: (getter.r#type)(),
                         doc: getter.doc,
-                        default: getter.default.map(|s| s.as_str()),
+                        default: getter.default.map(|f| f()),
                         deprecated: getter.deprecated.clone(),
                     });
                 }
@@ -199,7 +211,7 @@ impl StubInfoBuilder {
                         name: setter.name,
                         r#type: (setter.r#type)(),
                         doc: setter.doc,
-                        default: setter.default.map(|s| s.as_str()),
+                        default: setter.default.map(|f| f()),
                         deprecated: setter.deprecated.clone(),
                     });
                 }
@@ -227,6 +239,9 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
+        }
+        for info in inventory::iter::<ModuleDocInfo> {
+            self.add_module_doc(info);
         }
         for info in inventory::iter::<PyMethodsInfo> {
             self.add_methods(info);

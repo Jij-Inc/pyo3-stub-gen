@@ -529,7 +529,7 @@ impl fmt::Display for RuleName {
             Self::ReportUnusedExpression => write!(f, "reportUnusedExpression"),
             Self::ReportUnreachable => write!(f, "reportUnreachable"),
 
-            Self::Custom(s) => write!(f, "{}", s),
+            Self::Custom(s) => write!(f, "{s}"),
         }
     }
 }

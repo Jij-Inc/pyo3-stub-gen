@@ -125,9 +125,15 @@ impl MemberInfo {
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
+        let mut name = sig.ident.to_string();
+        for attr in parse_pyo3_attrs(attrs)? {
+            if let Attr::Name(_name) = attr {
+                name = _name;
+            }
+        }
         Ok(MemberInfo {
             doc,
-            name: sig.ident.to_string(),
+            name,
             r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
@@ -143,9 +149,15 @@ impl MemberInfo {
             ..
         } = item;
         let doc = extract_documents(&attrs).join("\n");
+        let mut name = ident.to_string();
+        for attr in parse_pyo3_attrs(&attrs)? {
+            if let Attr::Name(_name) = attr {
+                name = _name;
+            }
+        }
         Ok(MemberInfo {
             doc,
-            name: ident.to_string(),
+            name,
             r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
             deprecated: crate::gen_stub::attr::extract_deprecated(&attrs),
@@ -205,10 +217,10 @@ impl ToTokens for MemberInfo {
             })
             .map_or(quote! {None}, |default| {
                 quote! {Some({
-                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                    fn _fmt() -> String {
                         #default
-                    });
-                    &DEFAULT
+                    }
+                    _fmt
                 })}
             });
         let deprecated_info = deprecated

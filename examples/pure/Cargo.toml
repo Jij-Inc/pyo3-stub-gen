@@ -11,9 +11,10 @@ crate-type = ["cdylib", "rlib"]
 ahash.workspace = true
 env_logger.workspace = true
 numpy.workspace = true
-pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+pyo3-stub-gen = { path = "../../pyo3-stub-gen", features = ["rust_decimal"] }
 pyo3.workspace = true
-pyo3.features = ["experimental-async"]
+pyo3.features = ["experimental-async", "rust_decimal"]
+rust_decimal.workspace = true
 
 [[bin]]
 name = "stub_gen"

@@ -16,10 +16,11 @@ use pyo3_stub_gen::{
     derive::*,
     generate::MethodType,
     inventory::submit,
-    module_variable,
+    module_doc, module_variable,
     type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
     PyStubType,
 };
+use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
@@ -47,6 +48,13 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
         dict.insert(i, (0..i).collect());
     }
     dict
+}
+
+/// Add two decimal numbers with high precision
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn add_decimals(a: Decimal, b: Decimal) -> Decimal {
+    a + b
 }
 
 #[gen_stub_pyclass]
@@ -81,6 +89,7 @@ impl A {
     }
     /// class attribute NUM1
     #[classattr]
+    #[pyo3(name = "NUM")]
     const NUM1: usize = 2;
 
     /// deprecated class attribute NUM3 (will show warning)
@@ -290,7 +299,24 @@ impl Number {
     }
 }
 
-module_variable!("pure", "MY_CONSTANT", usize);
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct DecimalHolder {
+    #[pyo3(get)]
+    value: Decimal,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl DecimalHolder {
+    #[new]
+    fn new(value: Decimal) -> Self {
+        Self { value }
+    }
+}
+
+module_variable!("pure", "MY_CONSTANT1", usize);
+module_variable!("pure", "MY_CONSTANT2", usize, 123);
 
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -605,10 +631,17 @@ fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
     kwargs.is_some()
 }
 
+module_doc!(
+    "pure",
+    "Document for {} v{} ...",
+    env!("CARGO_PKG_NAME"),
+    env!("CARGO_PKG_VERSION")
+);
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add("MY_CONSTANT", 19937)?;
+    m.add("MY_CONSTANT1", 19937)?;
+    m.add("MY_CONSTANT2", 123)?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
     m.add_class::<MyDate>()?;
@@ -622,6 +655,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;
+    m.add_class::<DecimalHolder>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -636,6 +670,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     // Test-cases for `*args` and `**kwargs`
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;

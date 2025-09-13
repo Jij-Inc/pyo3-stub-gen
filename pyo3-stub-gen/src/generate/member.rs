@@ -11,12 +11,12 @@ pub struct MemberDef {
     pub name: &'static str,
     pub r#type: TypeInfo,
     pub doc: &'static str,
-    pub default: Option<&'static str>,
+    pub default: Option<String>,
     pub deprecated: Option<DeprecatedInfo>,
 }
 
 impl Import for MemberDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#type.import.clone();
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
@@ -32,7 +32,7 @@ impl From<&MemberInfo> for MemberDef {
             name: info.name,
             r#type: (info.r#type)(),
             doc: info.doc,
-            default: info.default.map(|s| s.as_str()),
+            default: info.default.map(|f| f()),
             deprecated: info.deprecated.clone(),
         }
     }
@@ -51,7 +51,7 @@ impl fmt::Display for MemberDef {
             );
         }
         write!(f, "{indent}{}: {}", self.name, self.r#type)?;
-        if let Some(default) = self.default {
+        if let Some(default) = &self.default {
             write!(f, " = {default}")?;
         }
         writeln!(f)?;
@@ -75,7 +75,7 @@ impl fmt::Display for GetterDisplay<'_> {
             "{indent}@property\n{indent}def {}(self) -> {}:",
             self.0.name, self.0.r#type
         )?;
-        let doc = if let Some(default) = self.0.default {
+        let doc = if let Some(default) = &self.0.default {
             if default == "..." {
                 Cow::Borrowed(self.0.doc)
             } else {
@@ -109,7 +109,7 @@ impl fmt::Display for SetterDisplay<'_> {
             "{indent}@{}.setter\n{indent}def {}(self, value: {}) -> None:",
             self.0.name, self.0.name, self.0.r#type
         )?;
-        let doc = if let Some(default) = self.0.default {
+        let doc = if let Some(default) = &self.0.default {
             if default == "..." {
                 Cow::Borrowed(self.0.doc)
             } else {

@@ -1,3 +1,4 @@
+use crate::stub_type::ImportRef;
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
 use itertools::Itertools;
 use std::fmt;
@@ -15,7 +16,7 @@ pub struct FunctionDef {
 }
 
 impl Import for FunctionDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());
@@ -74,7 +75,7 @@ impl fmt::Display for FunctionDef {
                             result
                         })
                         .join(",");
-                    Some(format!("  # type: ignore[{}]", rules_str))
+                    Some(format!("  # type: ignore[{rules_str}]"))
                 }
             }
         } else {
@@ -85,7 +86,7 @@ impl fmt::Display for FunctionDef {
         if !doc.is_empty() {
             // Add type: ignore comment for functions with docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
             docstring::write_docstring(f, self.doc, indent())?;
@@ -93,7 +94,7 @@ impl fmt::Display for FunctionDef {
             write!(f, " ...")?;
             // Add type: ignore comment for functions without docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
         }

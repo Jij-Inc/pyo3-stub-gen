@@ -1,3 +1,4 @@
+use crate::stub_type::ImportRef;
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
 use itertools::Itertools;
 use std::{collections::HashSet, fmt};
@@ -18,7 +19,7 @@ pub struct MethodDef {
 }
 
 impl Import for MethodDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
         for arg in &self.args {
             import.extend(arg.import().into_iter());
@@ -99,7 +100,7 @@ impl fmt::Display for MethodDef {
                             result
                         })
                         .join(",");
-                    Some(format!("  # type: ignore[{}]", rules_str))
+                    Some(format!("  # type: ignore[{rules_str}]"))
                 }
             }
         } else {
@@ -110,7 +111,7 @@ impl fmt::Display for MethodDef {
         if !doc.is_empty() {
             // Add type: ignore comment for methods with docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
             let double_indent = format!("{indent}{indent}");
@@ -119,7 +120,7 @@ impl fmt::Display for MethodDef {
             write!(f, " ...")?;
             // Add type: ignore comment for methods without docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
         }
