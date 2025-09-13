@@ -199,13 +199,17 @@ impl TypeInfo {
         }
     }
 
-    /// A type annotation of a type that must be imported.
+    /// A type defined in the PyO3 module.
+    ///
+    /// - Types defined in the same module can be referenced without import.
+    ///   But when it is used in another submodule, it must be imported.
+    /// - For example, if `A` is defined in `submod1`, it can be used as `A` in `submod1`.
+    ///   In `submod2`, it must be imported as `from submod1 import A`.
     ///
     /// ```
-    /// // Class A is defined in module A, referenced in module B. "from ModuleA import ClassA"
-    /// pyo3_stub_gen::TypeInfo::with_type("ClassA", "ModuleA".into());
+    /// pyo3_stub_gen::TypeInfo::locally_defined("A", "submod1".into());
     /// ```
-    pub fn with_type(type_name: &str, module: ModuleRef) -> Self {
+    pub fn locally_defined(type_name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
         let type_ref = TypeRef::new(module, type_name.to_string());
         import.insert(ImportRef::Type(type_ref));
