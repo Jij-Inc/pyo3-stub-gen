@@ -12,9 +12,6 @@ includes:
   mixed_sub:
     taskfile: examples/mixed_sub/Taskfile.yml
     dir: examples/mixed_sub
-  mixed_sub_multiple:
-    taskfile: examples/mixed_sub_multiple/Taskfile.yml
-    dir: examples/mixed_sub_multiple
   test-dash-package:
     taskfile: examples/test-dash-package/Taskfile.yml
     dir: examples/test-dash-package
@@ -25,7 +22,6 @@ tasks:
       - task: pure:stub-gen
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
-      - task: mixed_sub_multiple:stub-gen
       - task: test-dash-package:stub-gen
 
   test:
@@ -33,5 +29,4 @@ tasks:
       - task: pure:test
       - task: mixed:test
       - task: mixed_sub:test
-      - task: mixed_sub_multiple:test
       - task: test-dash-package:test

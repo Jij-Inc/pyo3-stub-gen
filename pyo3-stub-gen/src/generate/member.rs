@@ -16,7 +16,7 @@ pub struct MemberDef {
 }
 
 impl Import for MemberDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#type.import.clone();
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {

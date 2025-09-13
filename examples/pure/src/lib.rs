@@ -17,6 +17,7 @@ use pyo3_stub_gen::{
     type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
     PyStubType,
 };
+use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
 
 /// Returns the sum of two numbers as a string.
@@ -44,6 +45,13 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
         dict.insert(i, (0..i).collect());
     }
     dict
+}
+
+/// Add two decimal numbers with high precision
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn add_decimals(a: Decimal, b: Decimal) -> Decimal {
+    a + b
 }
 
 #[gen_stub_pyclass]
@@ -285,6 +293,22 @@ impl Number {
     /// Whether the number is an integer.
     fn is_integer(&self) -> bool {
         matches!(self, Self::Integer)
+    }
+}
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct DecimalHolder {
+    #[pyo3(get)]
+    value: Decimal,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl DecimalHolder {
+    #[new]
+    fn new(value: Decimal) -> Self {
+        Self { value }
     }
 }
 
@@ -620,6 +644,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;
+    m.add_class::<DecimalHolder>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -634,6 +659,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     // Test-cases for `*args` and `**kwargs`
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;

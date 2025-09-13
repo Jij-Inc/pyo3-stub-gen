@@ -3,7 +3,8 @@
 
 import builtins
 from . import int
-from . import sub_mod
+from . import mod_a
+from . import mod_b
 
 class A:
     def show_x(self) -> None: ...
@@ -14,4 +15,6 @@ class B:
 def create_a(x:builtins.int) -> A: ...
 
 def create_b(x:builtins.int) -> B: ...
+
+def greet_main() -> None: ...
 
