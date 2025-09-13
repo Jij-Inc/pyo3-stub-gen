@@ -60,9 +60,7 @@ pub struct ArgInfo {
 #[derive(Debug, Clone)]
 pub enum SignatureArg {
     Ident,
-    Assign {
-        default: fn()->String,
-    },
+    Assign { default: fn() -> String },
     Star,
     Args,
     Keywords,
@@ -110,7 +108,7 @@ pub struct MemberInfo {
     pub name: &'static str,
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
-    pub default: Option<fn()->String>,
+    pub default: Option<fn() -> String>,
     pub deprecated: Option<DeprecatedInfo>,
 }
 

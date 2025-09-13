@@ -14,7 +14,7 @@ impl From<&PyVariableInfo> for VariableDef {
         Self {
             name: info.name,
             type_: (info.r#type)(),
-            default: info.default.map(|f|f())
+            default: info.default.map(|f| f()),
         }
     }
 }

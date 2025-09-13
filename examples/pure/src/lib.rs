@@ -9,7 +9,13 @@ mod readme {}
 use ahash::RandomState;
 use pyo3::{exceptions::PyTypeError, prelude::*, types::*, IntoPyObjectExt, PyObject};
 use pyo3_stub_gen::{
-    define_stub_info_gatherer, derive::*, generate::MethodType, inventory::submit, module_doc, module_variable, type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo}, PyStubType
+    define_stub_info_gatherer,
+    derive::*,
+    generate::MethodType,
+    inventory::submit,
+    module_doc, module_variable,
+    type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
+    PyStubType,
 };
 use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
