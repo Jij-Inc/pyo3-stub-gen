@@ -75,7 +75,7 @@ impl fmt::Display for FunctionDef {
                             result
                         })
                         .join(",");
-                    Some(format!("  # type: ignore[{}]", rules_str))
+                    Some(format!("  # type: ignore[{rules_str}]"))
                 }
             }
         } else {
@@ -86,7 +86,7 @@ impl fmt::Display for FunctionDef {
         if !doc.is_empty() {
             // Add type: ignore comment for functions with docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
             docstring::write_docstring(f, self.doc, indent())?;
@@ -94,7 +94,7 @@ impl fmt::Display for FunctionDef {
             write!(f, " ...")?;
             // Add type: ignore comment for functions without docstrings
             if let Some(comment) = &type_ignore_comment {
-                write!(f, "{}", comment)?;
+                write!(f, "{comment}")?;
             }
             writeln!(f)?;
         }
