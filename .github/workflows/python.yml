@@ -17,7 +17,6 @@ jobs:
           - pure
           - mixed
           - mixed_sub
-          - mixed_sub
           - test-dash-package
         python-version:
           - "3.10"
