@@ -1,7 +1,6 @@
 use indexmap::IndexMap;
 
 use crate::generate::variant_methods::get_variant_methods;
-use crate::stub_type::ImportRef;
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{fmt, vec};
 
@@ -37,7 +36,7 @@ impl Import for ClassDef {
         for method in self.methods.values() {
             if method.len() > 1 {
                 // for @typing.overload
-                import.insert(ImportRef::Module("typing".into()));
+                import.insert("typing".into());
             }
             for method in method {
                 import.extend(method.import());
