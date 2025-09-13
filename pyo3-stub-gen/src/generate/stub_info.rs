@@ -139,6 +139,10 @@ impl StubInfoBuilder {
             .insert(info.name, VariableDef::from(info));
     }
 
+    fn add_module_doc(&mut self, info: &ModuleDocInfo) {
+        self.get_module(Some(info.module)).doc = (info.doc)();
+    }
+
     fn add_methods(&mut self, info: &PyMethodsInfo) {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
@@ -235,6 +239,9 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
+        }
+        for info in inventory::iter::<ModuleDocInfo> {
+            self.add_module_doc(info);
         }
         for info in inventory::iter::<PyMethodsInfo> {
             self.add_methods(info);

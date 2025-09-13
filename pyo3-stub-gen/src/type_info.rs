@@ -232,6 +232,15 @@ pub struct PyVariableInfo {
     pub name: &'static str,
     pub module: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub default: Option<fn() -> String>,
 }
 
 inventory::collect!(PyVariableInfo);
+
+#[derive(Debug)]
+pub struct ModuleDocInfo {
+    pub module: &'static str,
+    pub doc: fn() -> String,
+}
+
+inventory::collect!(ModuleDocInfo);
