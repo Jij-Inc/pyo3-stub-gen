@@ -217,10 +217,10 @@ impl ToTokens for MemberInfo {
             })
             .map_or(quote! {None}, |default| {
                 quote! {Some({
-                    static DEFAULT: std::sync::LazyLock<String> = std::sync::LazyLock::new(|| {
+                    fn _fmt() -> String {
                         #default
-                    });
-                    &DEFAULT
+                    }
+                    _fmt
                 })}
             });
         let deprecated_info = deprecated

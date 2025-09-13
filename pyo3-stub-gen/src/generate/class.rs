@@ -109,7 +109,7 @@ impl From<&PyClassInfo> for ClassDef {
                 name: setter.name,
                 r#type: (setter.r#type)(),
                 doc: setter.doc,
-                default: setter.default.map(|s| s.as_str()),
+                default: setter.default.map(|f| f()),
                 deprecated: setter.deprecated.clone(),
             });
         }
