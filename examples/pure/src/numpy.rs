@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 //! NumPy integration examples for testing stub generation
 
 use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArrayDyn, PyUntypedArrayMethods};
@@ -72,7 +74,7 @@ pub fn split_array<'py>(
 
     if len % 2 != 0 {
         return Err(pyo3::exceptions::PyValueError::new_err(
-            "Array length must be even for splitting"
+            "Array length must be even for splitting",
         ));
     }
 
