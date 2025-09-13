@@ -8,7 +8,6 @@ import os
 import pathlib
 import typing
 import typing_extensions
-import typing
 from enum import Enum
 
 MY_CONSTANT: builtins.int

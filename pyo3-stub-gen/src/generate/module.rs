@@ -40,8 +40,11 @@ impl fmt::Display for Module {
         writeln!(f)?;
         let package_name = self.default_module_name.split('.').next().unwrap();
         let mut type_ref_grouped: BTreeMap<String, Vec<String>> = BTreeMap::new();
-        let imports = self.import();
+        let mut imports = self.import();
         let any_overloaded = self.function.values().any(|functions| functions.len() > 1);
+        if any_overloaded {
+            imports.insert(ImportRef::Module("typing".into()));
+        }
 
         for common_ref in imports.into_iter().sorted() {
             match common_ref {
@@ -65,10 +68,6 @@ impl fmt::Display for Module {
                     }
                 }
             }
-        }
-
-        if any_overloaded {
-            writeln!(f, "import typing")?;
         }
 
         for (module_name, type_names) in type_ref_grouped {
