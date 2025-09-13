@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
-        import.insert(ImportRef::Module("typing".into()));
+        import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
             import,
@@ -12,7 +12,7 @@ impl<T: PyStubType> PyStubType for Option<T> {
     }
     fn type_output() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_output();
-        import.insert(ImportRef::Module("typing".into()));
+        import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
             import,
@@ -41,7 +41,7 @@ impl<T: PyStubType, E> PyStubType for Result<T, E> {
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
-        import.insert(ImportRef::Module("typing".into()));
+        import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
             import,
@@ -55,7 +55,7 @@ impl<T: PyStubType> PyStubType for Vec<T> {
 impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
     fn type_input() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_input();
-        import.insert(ImportRef::Module("typing".into()));
+        import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
             import,
@@ -96,7 +96,7 @@ macro_rules! impl_map_inner {
                 import: value_import,
             } = Value::type_input();
             import.extend(value_import);
-            import.insert(ImportRef::Module("typing".into()));
+            import.insert("typing".into());
             TypeInfo {
                 name: format!("typing.Mapping[{}, {}]", key_name, value_name),
                 import,
@@ -112,7 +112,7 @@ macro_rules! impl_map_inner {
                 import: value_import,
             } = Value::type_output();
             import.extend(value_import);
-            import.insert(ImportRef::Module("builtins".into()));
+            import.insert("builtins".into());
             TypeInfo {
                 name: format!("builtins.dict[{}, {}]", key_name, value_name),
                 import,

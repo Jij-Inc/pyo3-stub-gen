@@ -1,4 +1,4 @@
-use super::{ImportRef, PyStubType, TypeInfo};
+use super::{PyStubType, TypeInfo};
 use maplit::hashset;
 use numpy::{
     ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
@@ -15,7 +15,7 @@ macro_rules! impl_numpy_scalar {
             fn type_() -> TypeInfo {
                 TypeInfo {
                     name: format!("numpy.{}", $name),
-                    import: hashset![ImportRef::Module("numpy".into())],
+                    import: hashset!["numpy".into()],
                 }
             }
         }
@@ -38,7 +38,7 @@ impl_numpy_scalar!(num_complex::Complex64, "complex128");
 impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
     fn type_output() -> TypeInfo {
         let TypeInfo { name, mut import } = T::type_();
-        import.insert(ImportRef::Module("numpy.typing".into()));
+        import.insert("numpy.typing".into());
         TypeInfo {
             name: format!("numpy.typing.NDArray[{name}]"),
             import,
@@ -50,10 +50,7 @@ impl PyStubType for PyUntypedArray {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "numpy.typing.NDArray[typing.Any]".into(),
-            import: hashset![
-                ImportRef::Module("numpy.typing".into()),
-                ImportRef::Module("typing".into())
-            ],
+            import: hashset!["numpy.typing".into(), "typing".into()],
         }
     }
 }
@@ -82,7 +79,7 @@ impl PyStubType for PyArrayDescr {
     fn type_output() -> TypeInfo {
         TypeInfo {
             name: "numpy.dtype".into(),
-            import: hashset![ImportRef::Module("numpy".into())],
+            import: hashset!["numpy".into()],
         }
     }
 }

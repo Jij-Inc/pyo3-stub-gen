@@ -23,7 +23,7 @@ impl Import for FunctionDef {
         }
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
-            import.insert(ImportRef::Module("typing_extensions".into()));
+            import.insert("typing_extensions".into());
         }
         import
     }
