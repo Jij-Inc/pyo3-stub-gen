@@ -10,8 +10,7 @@ pub struct ClassDef {
     pub name: &'static str,
     pub doc: &'static str,
     pub attrs: Vec<MemberDef>,
-    pub getters: Vec<MemberDef>,
-    pub setters: Vec<MemberDef>,
+    pub getter_setters: IndexMap<String, (Option<MemberDef>, Option<MemberDef>)>,
     pub methods: IndexMap<String, Vec<MethodDef>>,
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
@@ -19,7 +18,7 @@ pub struct ClassDef {
 }
 
 impl Import for ClassDef {
-    fn import(&self) -> HashSet<ModuleRef> {
+    fn import(&self) -> HashSet<ImportRef> {
         let mut import = HashSet::new();
         for base in &self.bases {
             import.extend(base.import.clone());
@@ -27,11 +26,13 @@ impl Import for ClassDef {
         for attr in &self.attrs {
             import.extend(attr.import());
         }
-        for getter in &self.getters {
-            import.extend(getter.import());
-        }
-        for setter in &self.setters {
-            import.extend(setter.import());
+        for (getter, setter) in self.getter_setters.values() {
+            if let Some(getter) = getter {
+                import.extend(getter.import());
+            }
+            if let Some(setter) = setter {
+                import.extend(setter.import());
+            }
         }
         for method in self.methods.values() {
             if method.len() > 1 {
@@ -57,8 +58,7 @@ impl From<&PyComplexEnumInfo> for ClassDef {
         let enum_info = Self {
             name: info.pyclass_name,
             doc: info.doc,
-            getters: Vec::new(),
-            setters: Vec::new(),
+            getter_setters: IndexMap::new(),
             methods: IndexMap::new(),
             classes: info
                 .variants
@@ -81,8 +81,11 @@ impl ClassDef {
         Self {
             name: info.pyclass_name,
             doc: info.doc,
-            getters: info.fields.iter().map(MemberDef::from).collect(),
-            setters: Vec::new(),
+            getter_setters: info
+                .fields
+                .iter()
+                .map(|info| (info.name.to_string(), (Some(MemberDef::from(info)), None)))
+                .collect(),
             methods,
             classes: Vec::new(),
             bases: vec![TypeInfo::unqualified(enum_info.pyclass_name)],
@@ -96,12 +99,25 @@ impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
+        let mut getter_setters: IndexMap<String, (Option<MemberDef>, Option<MemberDef>)> = info
+            .getters
+            .iter()
+            .map(|info| (info.name.to_string(), (Some(MemberDef::from(info)), None)))
+            .collect();
+        for setter in info.setters {
+            getter_setters.entry(setter.name.to_string()).or_default().1 = Some(MemberDef {
+                name: setter.name,
+                r#type: (setter.r#type)(),
+                doc: setter.doc,
+                default: setter.default.map(|s| s.as_str()),
+                deprecated: setter.deprecated.clone(),
+            });
+        }
         let mut new = Self {
             name: info.pyclass_name,
             doc: info.doc,
             attrs: Vec::new(),
-            setters: info.setters.iter().map(MemberDef::from).collect(),
-            getters: info.getters.iter().map(MemberDef::from).collect(),
+            getter_setters,
             methods: Default::default(),
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
@@ -234,11 +250,13 @@ impl fmt::Display for ClassDef {
         for attr in &self.attrs {
             attr.fmt(f)?;
         }
-        for getter in &self.getters {
-            GetterDisplay(getter).fmt(f)?;
-        }
-        for setter in &self.setters {
-            SetterDisplay(setter).fmt(f)?;
+        for (getter, setter) in self.getter_setters.values() {
+            if let Some(getter) = getter {
+                GetterDisplay(getter).fmt(f)?;
+            }
+            if let Some(setter) = setter {
+                SetterDisplay(setter).fmt(f)?;
+            }
         }
         for methods in self.methods.values() {
             let overloaded = methods.len() > 1;
@@ -255,11 +273,7 @@ impl fmt::Display for ClassDef {
                 writeln!(f, "{indent}{line}")?;
             }
         }
-        if self.attrs.is_empty()
-            && self.getters.is_empty()
-            && self.setters.is_empty()
-            && self.methods.is_empty()
-        {
+        if self.attrs.is_empty() && self.getter_setters.is_empty() && self.methods.is_empty() {
             writeln!(f, "{indent}...")?;
         }
         writeln!(f)?;

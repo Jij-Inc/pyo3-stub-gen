@@ -7,7 +7,6 @@ members = [
     "feature-gated",
     "mixed",
     "mixed-sub",
-    "mixed-sub-multiple",
     "pure",
     "test-dash-package",
 ]
@@ -68,11 +67,6 @@ source = { editable = "examples/mixed" }
 name = "mixed-sub"
 version = "0.1"
 source = { editable = "examples/mixed_sub" }
-
-[[package]]
-name = "mixed-sub-multiple"
-version = "0.1"
-source = { editable = "examples/mixed_sub_multiple" }
 
 [[package]]
 name = "nodeenv"
