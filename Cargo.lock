@@ -479,16 +479,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "numpy_example"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "numpy",
- "pyo3",
- "pyo3-stub-gen",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

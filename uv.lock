@@ -6,7 +6,6 @@ requires-python = ">=3.10"
 members = [
     "mixed",
     "mixed-sub",
-    "numpy-example",
     "pure",
     "test-dash-package",
 ]
@@ -134,17 +133,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/af/30/feba75f143bdc868a1cc3f44ccfa6c4b9ec522b36458e738cd00f67b573f/numpy-2.2.6-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ce47521a4754c8f4593837384bd3424880629f718d87c5d44f8ed763edd63543", size = 16643476, upload-time = "2025-05-17T21:45:11.871Z" },
     { url = "https://files.pythonhosted.org/packages/37/48/ac2a9584402fb6c0cd5b5d1a91dcf176b15760130dd386bbafdbfe3640bf/numpy-2.2.6-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:d042d24c90c41b54fd506da306759e06e568864df8ec17ccc17e9e884634fd00", size = 12812666, upload-time = "2025-05-17T21:45:31.426Z" },
 ]
-
-[[package]]
-name = "numpy-example"
-version = "0.1"
-source = { editable = "examples/numpy_example" }
-dependencies = [
-    { name = "numpy" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "numpy", specifier = ">=2.0.0,<3.0.0" }]
 
 [[package]]
 name = "packaging"

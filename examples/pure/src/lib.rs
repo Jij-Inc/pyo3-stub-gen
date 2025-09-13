@@ -699,6 +699,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(optional_array_param, m)?)?;
     m.add_function(wrap_pyfunction!(split_array, m)?)?;
     m.add_function(wrap_pyfunction!(count_true, m)?)?;
+    m.add_function(wrap_pyfunction!(np_allow_type_change, m)?)?;
+    m.add_function(wrap_pyfunction!(np_type_must_match, m)?)?;
 
     Ok(())
 }

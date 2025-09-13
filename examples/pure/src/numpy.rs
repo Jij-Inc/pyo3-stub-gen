@@ -2,7 +2,10 @@
 
 //! NumPy integration examples for testing stub generation
 
-use numpy::{PyArray1, PyReadonlyArray1, PyReadonlyArrayDyn, PyUntypedArrayMethods};
+use numpy::{
+    AllowTypeChange, PyArray1, PyArrayLike1, PyReadonlyArray1, PyReadonlyArrayDyn,
+    PyUntypedArrayMethods, TypeMustMatch,
+};
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::gen_stub_pyfunction;
 
@@ -93,4 +96,24 @@ pub fn split_array<'py>(
 #[pyfunction]
 pub fn count_true(array: PyReadonlyArray1<bool>) -> usize {
     array.as_array().iter().filter(|&&x| x).count()
+}
+
+/// PyArrayLike with AllowTypeChange - accepts any type that numpy.asarray accepts
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn np_allow_type_change<'py>(
+    py: Python<'py>,
+    x: PyArrayLike1<'py, f64, AllowTypeChange>,
+) -> Bound<'py, PyArray1<f64>> {
+    PyArray1::<f64>::from_array(py, &x.as_array())
+}
+
+/// PyArrayLike with TypeMustMatch - requires exact type match
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn np_type_must_match<'py>(
+    py: Python<'py>,
+    x: PyArrayLike1<'py, i16, TypeMustMatch>,
+) -> Bound<'py, PyArray1<i16>> {
+    PyArray1::<i16>::from_array(py, &x.as_array())
 }

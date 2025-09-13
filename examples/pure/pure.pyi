@@ -341,6 +341,16 @@ def int_to_float(array:numpy.typing.NDArray[numpy.int32]) -> numpy.typing.NDArra
     Convert integer array to float array
     """
 
+def np_allow_type_change(x:typing.Union[numpy.typing.NDArray[typing.Any],numpy.typing.NDArray[numpy.float64],typing.Tuple[typing.Any, ...],typing.List[typing.Any],]) -> numpy.typing.NDArray[numpy.float64]:
+    r"""
+    PyArrayLike with AllowTypeChange - accepts any type that numpy.asarray accepts
+    """
+
+def np_type_must_match(x:numpy.typing.NDArray[numpy.int16]) -> numpy.typing.NDArray[numpy.int16]:
+    r"""
+    PyArrayLike with TypeMustMatch - requires exact type match
+    """
+
 def optional_array_param(array:typing.Optional[numpy.typing.NDArray[numpy.float64]]=None) -> builtins.str:
     r"""
     Optional array parameter
