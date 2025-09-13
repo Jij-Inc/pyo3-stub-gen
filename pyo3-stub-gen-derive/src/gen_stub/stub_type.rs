@@ -21,7 +21,7 @@ impl ToTokens for StubType {
             #[automatically_derived]
             impl ::pyo3_stub_gen::PyStubType for #ty {
                 fn type_output() -> ::pyo3_stub_gen::TypeInfo {
-                    ::pyo3_stub_gen::TypeInfo::with_module(#name, #module_tt)
+                    ::pyo3_stub_gen::TypeInfo::locally_defined(#name, #module_tt)
                 }
             }
         })

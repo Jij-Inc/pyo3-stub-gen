@@ -421,15 +421,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mixed_sub_multiple"
-version = "0.14.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
-]
-
-[[package]]
 name = "ndarray"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
