@@ -13,3 +13,6 @@ features = ["pyo3/extension-module"]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
+
+[tool.pyright]
+ignore = ["tests/type_error_cases"]
