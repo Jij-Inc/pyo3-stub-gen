@@ -58,7 +58,7 @@ impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
 {
     fn type_output() -> TypeInfo {
         TypeInfo {
-            name: format!("numpy.typing.ArrayLike"),
+            name: "numpy.typing.ArrayLike".to_string(),
             import: hashset!["numpy.typing".into()],
         }
     }
@@ -68,7 +68,7 @@ impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
 {
     fn type_output() -> TypeInfo {
         TypeInfo {
-            name: format!("numpy.typing.ArrayLike"),
+            name: "numpy.typing.ArrayLike".to_string(),
             import: hashset!["numpy.typing".into()],
         }
     }
