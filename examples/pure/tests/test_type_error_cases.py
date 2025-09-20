@@ -24,10 +24,11 @@ class Diagnostic(BaseModel):
     range: FileRange
 
 
-def call_pyright(input: Path) -> List[tuple[str, Diagnostic]]:
+def call_pyright_error_case(input: Path) -> List[tuple[str, Diagnostic]]:
     result = subprocess.run(
         ["pyright", "--outputjson", input], capture_output=True, text=True
     )
+    assert result.returncode != 0, "Expected pyright to report type errors"
     output = json.loads(result.stdout)
     diagnostics = []
     for diag in output.get("generalDiagnostics", []):
@@ -46,7 +47,7 @@ def call_pyright(input: Path) -> List[tuple[str, Diagnostic]]:
 )
 def test_pyright_type_errors(error_case, snapshot):
     path = Path(__file__).parent / "type_error_cases" / error_case
-    diagnostics = call_pyright(path)
+    diagnostics = call_pyright_error_case(path)
     for message, meta in diagnostics:
         assert snapshot() == message
         assert snapshot("json") == meta.model_dump()
