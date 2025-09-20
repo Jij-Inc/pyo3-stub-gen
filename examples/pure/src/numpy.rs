@@ -75,7 +75,7 @@ pub fn split_array<'py>(
     let arr = array.as_array();
     let len = arr.len();
 
-    if len % 2 != 0 {
+    if !len.is_multiple_of(2) {
         return Err(pyo3::exceptions::PyValueError::new_err(
             "Array length must be even for splitting",
         ));
