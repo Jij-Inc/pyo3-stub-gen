@@ -121,4 +121,4 @@ def test_type_must_match_does_not_allow_type_change():
     with pytest.raises(TypeError):
         assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
     with pytest.raises(TypeError):
-         assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
+        assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore

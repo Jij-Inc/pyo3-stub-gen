@@ -2,6 +2,7 @@ import subprocess
 import json
 from pathlib import Path
 from typing import List
+import pytest
 from pydantic import BaseModel
 
 
@@ -37,8 +38,14 @@ def call_pyright(input: Path) -> List[tuple[str, Diagnostic]]:
     return diagnostics
 
 
-def test_pyright_type_errors(snapshot):
-    path = Path(__file__).parent / "type_error_cases" / "numpy_ndarray.py"
+@pytest.mark.parametrize(
+    "error_case",
+    [
+        "numpy_ndarray.py",
+    ],
+)
+def test_pyright_type_errors(error_case, snapshot):
+    path = Path(__file__).parent / "type_error_cases" / error_case
     diagnostics = call_pyright(path)
     for message, meta in diagnostics:
         assert snapshot() == message
