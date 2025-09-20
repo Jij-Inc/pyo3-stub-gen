@@ -24,9 +24,20 @@ class Diagnostic(BaseModel):
     range: FileRange
 
 
+ERROR_CASES_DIR = Path(__file__).parent / "type_error_cases"
+
+
 def call_pyright_error_case(input: Path) -> List[tuple[str, Diagnostic]]:
     result = subprocess.run(
-        ["pyright", "--outputjson", input], capture_output=True, text=True
+        [
+            "pyright",
+            "--outputjson",
+            "--project",  # override ignore settings in pyproject.toml
+            ERROR_CASES_DIR / "pyrightconfig.json",
+            input,
+        ],
+        capture_output=True,
+        text=True,
     )
     assert result.returncode != 0, "Expected pyright to report type errors"
     output = json.loads(result.stdout)
@@ -46,7 +57,7 @@ def call_pyright_error_case(input: Path) -> List[tuple[str, Diagnostic]]:
     ],
 )
 def test_pyright_type_errors(error_case, snapshot):
-    path = Path(__file__).parent / "type_error_cases" / error_case
+    path = ERROR_CASES_DIR / error_case
     diagnostics = call_pyright_error_case(path)
     for message, meta in diagnostics:
         assert snapshot() == message
