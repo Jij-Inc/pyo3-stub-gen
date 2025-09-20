@@ -341,12 +341,12 @@ def int_to_float(array:numpy.typing.NDArray[numpy.int32]) -> numpy.typing.NDArra
     Convert integer array to float array
     """
 
-def np_allow_type_change(x:typing.Union[numpy.typing.NDArray[typing.Any],numpy.typing.NDArray[numpy.float64],typing.Tuple[typing.Any, ...],typing.List[typing.Any],]) -> numpy.typing.NDArray[numpy.float64]:
+def np_allow_type_change(x:numpy.typing.ArrayLike) -> numpy.typing.NDArray[numpy.float64]:
     r"""
     PyArrayLike with AllowTypeChange - accepts any type that numpy.asarray accepts
     """
 
-def np_type_must_match(x:numpy.typing.NDArray[numpy.int16]) -> numpy.typing.NDArray[numpy.int16]:
+def np_type_must_match(x:numpy.typing.ArrayLike) -> numpy.typing.NDArray[numpy.int16]:
     r"""
     PyArrayLike with TypeMustMatch - requires exact type match
     """
