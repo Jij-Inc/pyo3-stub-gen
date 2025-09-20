@@ -148,7 +148,9 @@ def test_pyright_catches_errors_from_TypeMustMatch_functions():
     global _ERROR_LINES_BEGIN
     global _ERROR_LINES_END
 
-    result = subprocess.run(["pyright", __file__, "--outputjson"], stdout=subprocess.PIPE)
+    result = subprocess.run(
+        ["pyright", __file__, "--outputjson"], stdout=subprocess.PIPE
+    )
     assert result.returncode == 1, "Pyright expected to fail, but it passed."
     report = json.loads(result.stdout.decode())
 
@@ -158,12 +160,12 @@ def test_pyright_catches_errors_from_TypeMustMatch_functions():
         assert diag["rule"] == "reportArgumentType"
         start_line = diag["range"]["start"]["line"]
         end_line = diag["range"]["end"]["line"]
-        assert (
-            start_line > _ERROR_LINES_BEGIN
-        ), f"Expected start line {start_line} to be greater than {_ERROR_LINES_BEGIN} in {diag}"
-        assert (
-            end_line < _ERROR_LINES_END
-        ), f"Expected end line {end_line} to be less than {_ERROR_LINES_END} in {diag}"
+        assert start_line > _ERROR_LINES_BEGIN, (
+            f"Expected start line {start_line} to be greater than {_ERROR_LINES_BEGIN} in {diag}"
+        )
+        assert end_line < _ERROR_LINES_END, (
+            f"Expected end line {end_line} to be less than {_ERROR_LINES_END} in {diag}"
+        )
 
 
 if __name__ == "__main__":

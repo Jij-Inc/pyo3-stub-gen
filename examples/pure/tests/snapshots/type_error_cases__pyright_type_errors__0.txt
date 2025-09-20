@@ -1,0 +1,2 @@
+Argument of type "list[int]" cannot be assigned to parameter "x" of type "NDArray[int16]" in function "np_type_must_match"
+  "list[int]" is not assignable to "ndarray[_Shape, dtype[int16]]"

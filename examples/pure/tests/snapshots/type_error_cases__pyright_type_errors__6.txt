@@ -1,0 +1,2 @@
+Argument of type "tuple[Literal[1], Literal[2], Literal[131072]]" cannot be assigned to parameter "x" of type "NDArray[int16]" in function "np_type_must_match"
+  "tuple[Literal[1], Literal[2], Literal[131072]]" is not assignable to "ndarray[_Shape, dtype[int16]]"
