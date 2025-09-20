@@ -104,21 +104,19 @@ def test_type_must_match_does_not_allow_type_change():
     """Test np_type_must_match rejects type conversions."""
     expected_result = np.array([1, 2, 3], dtype=np.int16)
 
-    # ruff: noqa: F841
     python_int_list: list[int] = [1, 2, 131_072]
     np_int_array = np.array([1, 2, 131_072], dtype=np.int32)
     np_f32_array = np.array([1.0, 2.0, 131_072.0], dtype=np.float32)
     tuple_int_list: tuple[int, int, int] = (1, 2, 131_072)
     tuple_float_list: tuple[float, float, float] = (1.0, 2.0, 131_072.0)
-    # ruff: enable=F841
 
     with pytest.raises(TypeError):
         assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
     with pytest.raises(TypeError):
-        assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
+        assert_np_eq(pure.np_type_must_match(np_int_array), expected_result)  # type: ignore
     with pytest.raises(TypeError):
-        assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
+        assert_np_eq(pure.np_type_must_match(np_f32_array), expected_result)  # type: ignore
     with pytest.raises(TypeError):
-        assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
+        assert_np_eq(pure.np_type_must_match(tuple_int_list), expected_result)  # type: ignore
     with pytest.raises(TypeError):
-        assert_np_eq(pure.np_type_must_match(python_int_list), expected_result)  # type: ignore
+        assert_np_eq(pure.np_type_must_match(tuple_float_list), expected_result)  # type: ignore
