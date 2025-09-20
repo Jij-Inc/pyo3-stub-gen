@@ -22,7 +22,7 @@ readme = "README.md"
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.99"
-chrono = "0.4.40"
+chrono = "0.4.42"
 either = "1.15.0"
 env_logger = "0.11.8"
 heck = "0.5"
@@ -33,14 +33,14 @@ itertools = "0.13.0"
 log = "0.4.28"
 maplit = "1.0.2"
 num-complex = "0.4.6"
-numpy = ">= 0.24.0"
+numpy = ">= 0.26.0"
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.101"
-pyo3 = ">= 0.24.0"
-rust_decimal = { version = "1.15", default-features = false }
+pyo3 = ">= 0.26.0"
+rust_decimal = { version = "1.38", default-features = false }
 quote = "1.0.40"
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.223", features = ["derive"] }
 syn = "2.0.106"
 test-case = "3.3.1"
 toml = "0.9.5"
-trybuild = "1.0.101"
+trybuild = "1.0.111"
