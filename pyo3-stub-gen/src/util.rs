@@ -57,8 +57,8 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
 pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     #[cfg(feature = "infer_signature")]
     {
-        pyo3::prepare_freethreaded_python();
-        pyo3::Python::with_gil(|py| -> String {
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| -> String {
             if let Ok(any) = obj.into_bound_py_any(py) {
                 if all_builtin_types(&any) || valid_external_repr(&any).is_some_and(|valid| valid) {
                     if let Ok(py_str) = any.repr() {
@@ -83,8 +83,8 @@ mod test {
     struct A {}
     #[test]
     fn test_fmt_dict() {
-        pyo3::prepare_freethreaded_python();
-        pyo3::Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let dict = PyDict::new(py);
             _ = dict.set_item("k1", "v1");
             _ = dict.set_item("k2", 2);
@@ -96,8 +96,8 @@ mod test {
     }
     #[test]
     fn test_fmt_list() {
-        pyo3::prepare_freethreaded_python();
-        pyo3::Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let list = PyList::new(py, [1, 2]).unwrap();
             assert_eq!("[1, 2]", fmt_py_obj(list.as_unbound()));
             // class A variable can not be formatted
@@ -107,8 +107,8 @@ mod test {
     }
     #[test]
     fn test_fmt_tuple() {
-        pyo3::prepare_freethreaded_python();
-        pyo3::Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
             assert_eq!("(1, 2)", fmt_py_obj(tuple.as_unbound()));
             let tuple = PyTuple::new(py, [1]).unwrap();
