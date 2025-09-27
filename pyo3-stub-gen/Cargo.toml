@@ -19,6 +19,7 @@ maplit.workspace = true
 num-complex.workspace = true
 numpy = { workspace = true, optional = true }
 either = { workspace = true, optional = true }
+ordered-float = { workspace = true, optional = true }
 pyo3.workspace = true
 rust_decimal = { workspace = true, optional = true }
 serde.workspace = true
@@ -32,8 +33,9 @@ path = "../pyo3-stub-gen-derive"
 test-case.workspace = true
 
 [features]
-default = ["numpy", "either", "infer_signature"]
+default = ["numpy", "either", "infer_signature", "ordered-float"]
 numpy = ["dep:numpy"]
 either = ["dep:either"]
 infer_signature = []
+ordered-float = ["dep:ordered-float"]
 rust_decimal = ["dep:rust_decimal"]
