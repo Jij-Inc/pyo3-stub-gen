@@ -19,6 +19,11 @@ pub struct A {
 #[cfg_attr(not(feature = "stub-gen"), pyo3_stub_gen_derive::remove_gen_stub)]
 #[pymethods]
 impl A {
+    #[new]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     #[gen_stub(default = A::default().y)]
     pub fn get_y(&self) -> usize {
         self.y
