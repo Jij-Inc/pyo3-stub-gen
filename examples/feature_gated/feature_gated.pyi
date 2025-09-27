@@ -3,6 +3,23 @@
 
 import builtins
 
+class A:
+    @property
+    def x(self) -> builtins.int:
+        r"""
+        ```python
+        default = 0
+        ```
+        """
+    @x.setter
+    def x(self, value: builtins.int) -> None:
+        r"""
+        ```python
+        default = 0
+        ```
+        """
+    def get_y(self) -> builtins.int: ...
+
 def sum_as_string(a:builtins.int, b:builtins.int) -> builtins.str:
     r"""
     Formats the sum of two numbers as string.

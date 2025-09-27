@@ -9,11 +9,10 @@ version.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-ahash.workspace = true
-env_logger.workspace = true
-pyo3-stub-gen = { path = "../../pyo3-stub-gen", optional = true } # feature_gated
+env_logger = { workspace = true, optional = true }                # Used only for bin/stub_gen
+pyo3-stub-gen = { path = "../../pyo3-stub-gen", optional = true } # Feature gated dependency
+pyo3-stub-gen-derive = { path = "../../pyo3-stub-gen-derive" }    # This is always required for `#[remove_gen_stub]` macro
 pyo3.workspace = true
-pyo3.features = ["experimental-async"]
 
 [[bin]]
 name = "stub_gen"
@@ -21,4 +20,4 @@ doc = false
 required-features = ["stub-gen"]
 
 [features]
-stub-gen = ["pyo3-stub-gen"]
+stub-gen = ["pyo3-stub-gen", "env_logger"]
