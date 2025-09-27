@@ -15,6 +15,9 @@ includes:
   test-dash-package:
     taskfile: examples/test-dash-package/Taskfile.yml
     dir: examples/test-dash-package
+  feature_gated:
+    taskfile: examples/feature_gated/Taskfile.yml
+    dir: examples/feature_gated
 
 tasks:
   stub-gen:
@@ -23,6 +26,7 @@ tasks:
       - task: mixed:stub-gen
       - task: mixed_sub:stub-gen
       - task: test-dash-package:stub-gen
+      - task: feature_gated:stub-gen
 
   test:
     cmds:
@@ -30,3 +34,4 @@ tasks:
       - task: mixed:test
       - task: mixed_sub:test
       - task: test-dash-package:test
+      - task: feature_gated:test

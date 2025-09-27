@@ -4,6 +4,7 @@ members = [
     "examples/mixed",
     "examples/mixed_sub",
     "examples/test-dash-package",
+    "examples/feature_gated",
 ]
 
 [dependency-groups]
