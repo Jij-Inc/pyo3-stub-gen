@@ -2,7 +2,6 @@ import subprocess
 import json
 from pathlib import Path
 from typing import List
-import pytest
 from pydantic import BaseModel
 
 
@@ -50,15 +49,13 @@ def call_pyright_error_case(input: Path) -> List[tuple[str, Diagnostic]]:
     return diagnostics
 
 
-@pytest.mark.parametrize(
-    "error_case",
-    [
-        "numpy_ndarray.py",
-    ],
-)
-def test_pyright_type_errors(error_case, snapshot):
-    path = ERROR_CASES_DIR / error_case
-    diagnostics = call_pyright_error_case(path)
-    for message, meta in diagnostics:
-        assert snapshot() == message
-        assert snapshot("json") == meta.model_dump()
+def get_test_cases() -> List[Path]:
+    return [p for p in ERROR_CASES_DIR.iterdir() if p.suffix == ".py"]
+
+
+def test_pyright_type_errors(snapshot):
+    for case in [p for p in ERROR_CASES_DIR.iterdir() if p.suffix == ".py"]:
+        diagnostics = call_pyright_error_case(case)
+        for i, (message, meta) in enumerate(diagnostics):
+            assert snapshot(f"{case.stem}__{i}.txt") == message
+            assert snapshot(f"{case.stem}__{i}.json") == meta.model_dump()

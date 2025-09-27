@@ -1,0 +1,2 @@
+Argument of type "Literal[1]" cannot be assigned to parameter "v" of type "Sequence[int]" in function "sum"
+  "Literal[1]" is not assignable to "Sequence[int]"
