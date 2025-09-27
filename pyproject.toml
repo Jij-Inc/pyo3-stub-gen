@@ -7,4 +7,13 @@ members = [
 ]
 
 [dependency-groups]
-dev = ["pyright>=1.1.400", "pytest>=8.3.5", "pytest-asyncio>=1.1.0"]
+dev = [
+    "pydantic>=2.11.9",
+    "pyright>=1.1.400",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=1.1.0",
+    "pytest-insta>=0.3.0",
+]
+
+[tool.pyright]
+ignore = ["**/type_error_cases/*.py"]
