@@ -1,8 +1,8 @@
 use super::{PyStubType, TypeInfo};
 use maplit::hashset;
 use numpy::{
-    ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
-    PyUntypedArray,
+    ndarray::Dimension, AllowTypeChange, Element, PyArray, PyArrayDescr, PyArrayLike,
+    PyReadonlyArray, PyReadwriteArray, PyUntypedArray, TypeMustMatch,
 };
 
 trait NumPyScalar {
@@ -22,6 +22,7 @@ macro_rules! impl_numpy_scalar {
     };
 }
 
+impl_numpy_scalar!(bool, "bool");
 impl_numpy_scalar!(i8, "int8");
 impl_numpy_scalar!(i16, "int16");
 impl_numpy_scalar!(i32, "int32");
@@ -42,6 +43,33 @@ impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
         TypeInfo {
             name: format!("numpy.typing.NDArray[{name}]"),
             import,
+        }
+    }
+}
+
+/// Use loose type hint `numpy.typing.ArrayLike` for [`PyArrayLike<T, D, AllowTypeChange>`].
+///
+/// - Drops type information about dtype and shape since `numpy.typing.ArrayLike` cannot specify them.
+/// - We hope more specific types like `numpy.typing.ArrayLike[dtype, shape]`, but it is not supported in `numpy.typing`.
+///   We here keep the type hint very loose, and rely on runtime checks.
+///
+impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
+    for PyArrayLike<'_, T, D, AllowTypeChange>
+{
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "numpy.typing.ArrayLike".to_string(),
+            import: hashset!["numpy.typing".into()],
+        }
+    }
+}
+impl<T: NumPyScalar + numpy::Element, D: Dimension> PyStubType
+    for PyArrayLike<'_, T, D, TypeMustMatch>
+{
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "numpy.typing.ArrayLike".to_string(),
+            import: hashset!["numpy.typing".into()],
         }
     }
 }

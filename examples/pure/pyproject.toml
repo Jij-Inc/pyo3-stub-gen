@@ -6,9 +6,13 @@ build-backend = "maturin"
 name = "pure"
 version = "0.1"
 requires-python = ">=3.10"
+dependencies = ["numpy>=2.0.0"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
+
+[tool.pyright]
+ignore = ["tests/type_error_cases"]

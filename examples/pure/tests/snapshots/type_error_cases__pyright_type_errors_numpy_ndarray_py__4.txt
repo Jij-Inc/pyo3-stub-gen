@@ -1,0 +1,6 @@
+Argument of type "NDArray[floating[_32Bit]]" cannot be assigned to parameter "x" of type "NDArray[int16]" in function "np_type_must_match"
+  "ndarray[_Shape, dtype[floating[_32Bit]]]" is not assignable to "ndarray[_Shape, dtype[int16]]"
+    Type parameter "_DType_co@ndarray" is covariant, but "dtype[floating[_32Bit]]" is not a subtype of "dtype[int16]"
+      "dtype[floating[_32Bit]]" is not assignable to "dtype[int16]"
+        Type parameter "_SCT_co@dtype" is covariant, but "floating[_32Bit]" is not a subtype of "int16"
+          "floating[_32Bit]" is not assignable to "signedinteger[_16Bit]"
