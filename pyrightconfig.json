@@ -1,5 +1,0 @@
-{
-    "ignore": [
-        "**/type_error_cases/*.py"
-    ]
-}

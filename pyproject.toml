@@ -14,3 +14,6 @@ dev = [
     "pytest-asyncio>=1.1.0",
     "pytest-insta>=0.3.0",
 ]
+
+[tool.pyright]
+ignore = ["**/type_error_cases/*.py"]

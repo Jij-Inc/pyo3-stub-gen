@@ -12,5 +12,5 @@ tasks:
     desc: Run tests
     cmds:
       - uv run pytest
-      - uv run pyright -p {{.TASKFILE_DIR}}/../../pyrightconfig.json
+      - uv run pyright
       - uvx ruff check
