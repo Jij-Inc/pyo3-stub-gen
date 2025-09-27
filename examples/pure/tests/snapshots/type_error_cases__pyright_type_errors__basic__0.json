@@ -1,0 +1,14 @@
+{
+  "severity": "error",
+  "rule": "reportArgumentType",
+  "range": {
+    "start": {
+      "line": 2,
+      "character": 9
+    },
+    "end": {
+      "line": 2,
+      "character": 10
+    }
+  }
+}

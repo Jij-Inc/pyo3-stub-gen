@@ -65,6 +65,15 @@ impl_builtin!(Cow<'_, str>, "str");
 impl_builtin!(Cow<'_, OsStr>, "str");
 impl_builtin!(Cow<'_, [u8]>, "bytes");
 
+#[cfg(feature = "ordered-float")]
+mod impl_ordered_float {
+    use super::*;
+    impl_builtin!(ordered_float::NotNan<f32>, "float");
+    impl_builtin!(ordered_float::NotNan<f64>, "float");
+    impl_builtin!(ordered_float::OrderedFloat<f32>, "float");
+    impl_builtin!(ordered_float::OrderedFloat<f64>, "float");
+}
+
 impl PyStubType for PathBuf {
     fn type_output() -> TypeInfo {
         TypeInfo::with_module("pathlib.Path", "pathlib".into())

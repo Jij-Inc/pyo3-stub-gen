@@ -13,7 +13,7 @@ use pyo3_stub_gen::{
     derive::*,
     generate::MethodType,
     inventory::submit,
-    module_variable,
+    module_doc, module_variable,
     type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
     PyStubType,
 };
@@ -312,7 +312,8 @@ impl DecimalHolder {
     }
 }
 
-module_variable!("pure", "MY_CONSTANT", usize);
+module_variable!("pure", "MY_CONSTANT1", usize);
+module_variable!("pure", "MY_CONSTANT2", usize, 123);
 
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -364,7 +365,7 @@ impl OverrideType {
     #[getter]
     #[gen_stub(override_return_type(type_repr = "int"))]
     fn get_num(&self) -> PyResult<Py<PyAny>> {
-        Python::with_gil(|py| self.num.into_py_any(py))
+        Python::attach(|py| self.num.into_py_any(py))
     }
 
     #[setter]
@@ -372,7 +373,7 @@ impl OverrideType {
         &mut self,
         #[gen_stub(override_type(type_repr = "str"))] value: Py<PyAny>,
     ) -> PyResult<()> {
-        self.num = Python::with_gil(|py| value.extract::<String>(py))?.parse::<isize>()?;
+        self.num = Python::attach(|py| value.extract::<String>(py))?.parse::<isize>()?;
         Ok(())
     }
 }
@@ -627,10 +628,17 @@ fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
     kwargs.is_some()
 }
 
+module_doc!(
+    "pure",
+    "Document for {} v{} ...",
+    env!("CARGO_PKG_NAME"),
+    env!("CARGO_PKG_VERSION")
+);
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add("MY_CONSTANT", 19937)?;
+    m.add("MY_CONSTANT1", 19937)?;
+    m.add("MY_CONSTANT2", 123)?;
     m.add_class::<A>()?;
     m.add_class::<B>()?;
     m.add_class::<MyDate>()?;
