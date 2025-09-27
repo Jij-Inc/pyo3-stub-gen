@@ -18,6 +18,7 @@ class A:
         default = 0
         ```
         """
+    def __new__(cls) -> A: ...
     def get_y(self) -> builtins.int: ...
 
 def sum_as_string(a:builtins.int, b:builtins.int) -> builtins.str:
