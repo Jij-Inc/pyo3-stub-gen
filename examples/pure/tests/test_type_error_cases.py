@@ -49,10 +49,6 @@ def call_pyright_error_case(input: Path) -> List[tuple[str, Diagnostic]]:
     return diagnostics
 
 
-def get_test_cases() -> List[Path]:
-    return [p for p in ERROR_CASES_DIR.iterdir() if p.suffix == ".py"]
-
-
 def test_pyright_type_errors(snapshot):
     for case in [p for p in ERROR_CASES_DIR.iterdir() if p.suffix == ".py"]:
         diagnostics = call_pyright_error_case(case)
