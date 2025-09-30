@@ -167,7 +167,7 @@ impl TypeInfo {
         import.extend(import_v);
         import.insert("builtins".into());
         TypeInfo {
-            name: format!("builtins.set[{name_k}, {name_v}]"),
+            name: format!("builtins.dict[{name_k}, {name_v}]"),
             import,
         }
     }
@@ -322,6 +322,7 @@ mod test {
     #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
     #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
     #[test_case(indexmap::IndexSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "IndexSet_u32_input")]
+    #[test_case(TypeInfo::dict_of::<u32, String>(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "dict_of_u32_String")]
     fn test(tinfo: TypeInfo, name: &str, import: HashSet<ImportRef>) {
         assert_eq!(tinfo.name, name);
         if import.is_empty() {
