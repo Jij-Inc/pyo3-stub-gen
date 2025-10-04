@@ -100,14 +100,18 @@ impl fmt::Display for GetterDisplay<'_> {
 impl fmt::Display for SetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
-        // Add deprecated decorator if present
+        // Write setter decorator first, then deprecated decorator
+        write!(f, "{indent}@{}.setter", self.0.name)?;
         if let Some(deprecated) = &self.0.deprecated {
+            writeln!(f)?;
             writeln!(f, "{indent}{deprecated}")?;
+        } else {
+            writeln!(f)?;
         }
         write!(
             f,
-            "{indent}@{}.setter\n{indent}def {}(self, value: {}) -> None:",
-            self.0.name, self.0.name, self.0.r#type
+            "{indent}def {}(self, value: {}) -> None:",
+            self.0.name, self.0.r#type
         )?;
         let doc = if let Some(default) = &self.0.default {
             if default == "..." {

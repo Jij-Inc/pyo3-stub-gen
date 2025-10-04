@@ -45,8 +45,8 @@ class A:
         """
     @property
     def y(self) -> builtins.int: ...
-    @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
     @y.setter
+    @typing_extensions.deprecated("[Since 1.0.0] This setter is deprecated")
     def y(self, value: builtins.int) -> None: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
