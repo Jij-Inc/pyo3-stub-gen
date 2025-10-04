@@ -53,7 +53,7 @@ impl Import for EnumDef {
 impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "@typing.final")?;
-        writeln!(f, "class {}(Enum):", self.name)?;
+        writeln!(f, "class {}(enum.Enum):", self.name)?;
         let indent = indent();
         docstring::write_docstring(f, self.doc, indent)?;
         for (variant, variant_doc) in self.variants {

@@ -8,11 +8,11 @@ import builtins
 import collections.abc
 import datetime
 import decimal
+import enum
 import os
 import pathlib
 import typing
 import typing_extensions
-from enum import Enum
 
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
@@ -291,7 +291,7 @@ class TypeIgnoreTest:
         """
 
 @typing.final
-class Number(Enum):
+class Number(enum.Enum):
     FLOAT = ...
     INTEGER = ...
 
@@ -307,7 +307,7 @@ class Number(Enum):
         """
 
 @typing.final
-class NumberRenameAll(Enum):
+class NumberRenameAll(enum.Enum):
     FLOAT = ...
     r"""
     Float variant
