@@ -235,17 +235,16 @@ impl fmt::Display for ClassDef {
         docstring::write_docstring(f, doc, indent)?;
 
         if let Some(match_args) = &self.match_args {
-            let match_args_txt = if match_args.is_empty() {
-                "()".to_string()
+            if match_args.is_empty() {
+                writeln!(f, "{indent}__match_args__ = ()")?;
             } else {
-                match_args
+                let match_args_txt = match_args
                     .iter()
                     .map(|a| format!(r##""{a}""##))
                     .collect::<Vec<_>>()
-                    .join(", ")
-            };
-
-            writeln!(f, "{indent}__match_args__ = ({match_args_txt},)")?;
+                    .join(", ");
+                writeln!(f, "{indent}__match_args__ = ({match_args_txt},)")?;
+            }
         }
         for attr in &self.attrs {
             attr.fmt(f)?;

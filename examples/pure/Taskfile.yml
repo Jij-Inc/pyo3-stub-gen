@@ -14,3 +14,4 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
+      - uv run mypy --show-error-codes -p pure

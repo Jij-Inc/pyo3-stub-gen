@@ -3,6 +3,7 @@
 # This module tests pyo3-stub-gen correctly handles package names with dashes
 name = "test-dash-package"
 version = "0.1.0"
+requires-python = ">=3.10"
 
 [build-system]
 requires = ["maturin>=1"]
