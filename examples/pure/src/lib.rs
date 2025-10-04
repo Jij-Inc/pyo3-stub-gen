@@ -628,12 +628,8 @@ fn func_with_kwargs(kwargs: Option<&Bound<PyDict>>) -> bool {
     kwargs.is_some()
 }
 
-module_doc!(
-    "pure",
-    "Document for {} v{} ...",
-    env!("CARGO_PKG_NAME"),
-    env!("CARGO_PKG_VERSION")
-);
+module_doc!("pure", "Document for {} ...", env!("CARGO_PKG_NAME"));
+
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
