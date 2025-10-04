@@ -138,6 +138,7 @@ pub enum Attr {
     Ord,
     Hash,
     Str,
+    Subclass,
 
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
@@ -216,6 +217,9 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
                         }
                         if ident == "str" {
                             pyo3_attrs.push(Attr::Str);
+                        }
+                        if ident == "subclass" {
+                            pyo3_attrs.push(Attr::Subclass);
                         }
                         // frozen is required by PyO3 when using hash, but doesn't affect stub generation
                     }

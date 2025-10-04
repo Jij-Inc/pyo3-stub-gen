@@ -71,9 +71,11 @@ class A:
     @staticmethod
     def deprecated_staticmethod() -> builtins.int: ...
 
+@typing.final
 class B(A):
     ...
 
+@typing.final
 class ComparableStruct:
     r"""
     Test struct for eq and ord comparison methods
@@ -87,11 +89,13 @@ class ComparableStruct:
     def __ge__(self, other:builtins.object) -> builtins.bool: ...
     def __new__(cls, value:builtins.int) -> ComparableStruct: ...
 
+@typing.final
 class DecimalHolder:
     @property
     def value(self) -> decimal.Decimal: ...
     def __new__(cls, value:decimal.Decimal) -> DecimalHolder: ...
 
+@typing.final
 class HashableStruct:
     r"""
     Test struct for hash and str methods
@@ -103,6 +107,7 @@ class HashableStruct:
     def __str__(self) -> builtins.str: ...
     def __new__(cls, name:builtins.str) -> HashableStruct: ...
 
+@typing.final
 class Incrementer:
     @typing.overload
     def increment_1(self, x:builtins.int) -> builtins.int:
@@ -116,6 +121,7 @@ class Incrementer:
         """
     def new(self) -> Incrementer: ...
 
+@typing.final
 class Incrementer2:
     @typing.overload
     def increment_2(self, x:builtins.int) -> builtins.int:
@@ -132,12 +138,14 @@ class Incrementer2:
         Constructor for Incrementer2
         """
 
+@typing.final
 class MyDate(datetime.date):
     ...
 
 class MyError(builtins.RuntimeError):
     ...
 
+@typing.final
 class NotIntError(builtins.TypeError):
     r"""
     A manual custom exception case
@@ -156,6 +164,7 @@ class NotIntError(builtins.TypeError):
         """
 
 class NumberComplex:
+    @typing.final
     class FLOAT(NumberComplex):
         r"""
         Float variant
@@ -167,6 +176,7 @@ class NumberComplex:
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
     
+    @typing.final
     class INTEGER(NumberComplex):
         r"""
         Integer variant
@@ -181,6 +191,7 @@ class NumberComplex:
     
     ...
 
+@typing.final
 class OverrideType:
     @property
     def num(self) -> int: ...
@@ -193,12 +204,14 @@ class Shape1:
     Example from PyO3 documentation for complex enum
     https://pyo3.rs/v0.25.1/class.html#complex-enums
     """
+    @typing.final
     class Circle(Shape1):
         __match_args__ = ("radius",)
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius:builtins.float) -> Shape1.Circle: ...
     
+    @typing.final
     class Rectangle(Shape1):
         __match_args__ = ("width", "height",)
         @property
@@ -207,6 +220,7 @@ class Shape1:
         def height(self) -> builtins.float: ...
         def __new__(cls, width:builtins.float, height:builtins.float) -> Shape1.Rectangle: ...
     
+    @typing.final
     class RegularPolygon(Shape1):
         __match_args__ = ("_0", "_1",)
         @property
@@ -217,6 +231,7 @@ class Shape1:
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key:builtins.int) -> typing.Any: ...
     
+    @typing.final
     class Nothing(Shape1):
         __match_args__ = ()
         def __new__(cls) -> Shape1.Nothing: ...
@@ -228,12 +243,14 @@ class Shape2:
     Example from PyO3 documentation for complex enum
     https://pyo3.rs/v0.25.1/class.html#complex-enums
     """
+    @typing.final
     class Circle(Shape2):
         __match_args__ = ("radius",)
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius:builtins.float=1.0) -> Shape2.Circle: ...
     
+    @typing.final
     class Rectangle(Shape2):
         __match_args__ = ("width", "height",)
         @property
@@ -242,6 +259,7 @@ class Shape2:
         def height(self) -> builtins.float: ...
         def __new__(cls, *, width:builtins.float, height:builtins.float) -> Shape2.Rectangle: ...
     
+    @typing.final
     class RegularPolygon(Shape2):
         __match_args__ = ("side_count", "radius",)
         @property
@@ -250,12 +268,14 @@ class Shape2:
         def radius(self) -> builtins.float: ...
         def __new__(cls, side_count:builtins.int, radius:builtins.float=1.0) -> Shape2.RegularPolygon: ...
     
+    @typing.final
     class Nothing(Shape2):
         __match_args__ = ()
         def __new__(cls) -> Shape2.Nothing: ...
     
     ...
 
+@typing.final
 class TypeIgnoreTest:
     r"""
     Test class for method type: ignore functionality

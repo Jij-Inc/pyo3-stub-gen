@@ -2,7 +2,9 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import typing
 
+@typing.final
 class D:
     def show_x(self) -> None: ...
 
