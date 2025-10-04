@@ -101,12 +101,9 @@ impl fmt::Display for SetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         // Write setter decorator first, then deprecated decorator
-        write!(f, "{indent}@{}.setter", self.0.name)?;
+        writeln!(f, "{indent}@{}.setter", self.0.name)?;
         if let Some(deprecated) = &self.0.deprecated {
-            writeln!(f)?;
             writeln!(f, "{indent}{deprecated}")?;
-        } else {
-            writeln!(f)?;
         }
         write!(
             f,
