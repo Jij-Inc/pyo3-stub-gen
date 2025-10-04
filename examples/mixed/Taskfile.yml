@@ -15,3 +15,4 @@ tasks:
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes -p mixed.main_mod
+      - uv run stubtest mixed.main_mod --ignore-missing-stub

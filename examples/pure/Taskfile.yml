@@ -15,3 +15,4 @@ tasks:
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes -p pure
+      - uv run stubtest pure --ignore-missing-stub

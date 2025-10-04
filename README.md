@@ -194,6 +194,78 @@ fn say_hello_forever<'a>(
 }
 ```
 
+## Advanced: mypy.stubtest integration
+
+### What is stubtest?
+
+[mypy stubtest](https://mypy.readthedocs.io/en/stable/stubtest.html) is a tool that validates Python stub files (`.pyi`) against the actual runtime behavior of your module. It ensures that the type annotations in your stubs accurately reflect what's actually available at runtime.
+
+### Using stubtest with pyo3-stub-gen
+
+You can add stubtest to your test suite to validate the generated stub files:
+
+```bash
+uv run stubtest your_module_name --ignore-missing-stub
+```
+
+The `--ignore-missing-stub` flag is **required** for PyO3/maturin projects. Here's why:
+
+### Why `--ignore-missing-stub` is necessary
+
+#### The maturin module structure
+
+When maturin builds a pure Rust project, it creates the following structure:
+
+```
+your_package/
+├── __init__.py              # Re-exports from the native module
+├── __init__.pyi             # Generated stub file (your_package.pyi → __init__.pyi)
+└── your_package.cpython-*.so  # Native extension module
+```
+
+The `__init__.py` file typically contains:
+
+```python
+from .your_package import *
+```
+
+This re-exports everything from the native `.so` module. However, stubtest will try to find a stub file named `your_package.pyi` for the native module `.your_package`, which doesn't exist (and shouldn't exist, since all type information is already in `__init__.pyi`).
+
+#### The error without `--ignore-missing-stub`
+
+Without the flag, stubtest reports errors like:
+
+```
+error: your_package.your_package failed to find stubs
+```
+
+This is a false positive - the stub file exists as `__init__.pyi`, but stubtest is looking for a stub for the internal native module created by maturin.
+
+#### Solution
+
+Use `--ignore-missing-stub` to ignore missing stubs for internal native modules:
+
+```yaml
+# Taskfile.yml example
+test:
+  cmds:
+    - uv run pytest
+    - uv run pyright
+    - uv run mypy --show-error-codes -p your_package
+    - uv run stubtest your_package --ignore-missing-stub
+```
+
+This flag tells stubtest to ignore cases where a runtime module doesn't have a corresponding stub file, which is expected for the internal native modules that maturin creates as an implementation detail.
+
+### Known stubtest limitations
+
+Currently, pyo3-stub-gen does not generate some decorators that stubtest expects:
+
+- `@final` - PyO3 classes cannot be subclassed at runtime, but stubs don't mark them with `@final`
+- `@typing.disjoint_base` - Some PyO3 classes are disjoint bases at runtime, but stubs don't mark them
+
+These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright.
+
 # Contribution
 To be written.
 
