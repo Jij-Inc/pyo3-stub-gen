@@ -5,7 +5,6 @@ build-backend = "maturin"
 [project]
 name = "feature_gated"
 requires-python = ">=3.8"
-dependencies = ["mypy"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
