@@ -284,11 +284,14 @@ PyO3 classes are typically disjoint bases because they are implemented in Rust a
 When you create nested modules in PyO3:
 
 ```rust
+use pyo3::{prelude::*, wrap_pymodule};
+
 #[pymodule]
 fn main_mod(m: &Bound<'_, PyModule>) -> PyResult<()> {
     #[pymodule]
     fn submod(m: &Bound<'_, PyModule>) -> PyResult<()> {
         // ...
+        Ok(())
     }
     m.add_wrapped(wrap_pymodule!(submod))?;
     Ok(())
