@@ -338,9 +338,9 @@ fn default_value(num: Number) -> Number {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
 fn fn_override_type<'a>(
-    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
     cb: Bound<'a, PyAny>,
 ) -> PyResult<Bound<'a, PyAny>> {
     cb.call1(("Hello!",))?;
