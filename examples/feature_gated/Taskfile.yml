@@ -14,5 +14,5 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run --group dev mypy --show-error-codes feature_gated.pyi
-      - uv run --group dev python -m mypy.stubtest feature_gated --ignore-missing-stub
+      - uv run mypy --show-error-codes feature_gated.pyi
+      - uv run python -m mypy.stubtest feature_gated --ignore-missing-stub

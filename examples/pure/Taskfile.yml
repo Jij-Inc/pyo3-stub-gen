@@ -14,5 +14,5 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run --group dev mypy --show-error-codes pure.pyi
-      - uv run --group dev python -m mypy.stubtest pure --ignore-missing-stub
+      - uv run mypy --show-error-codes pure.pyi
+      - uv run python -m mypy.stubtest pure --ignore-missing-stub
