@@ -42,8 +42,10 @@ cargo run --bin stub_gen
 
 # Run Python tests and type checking
 uv run pytest
-uv run pyright  
+uv run pyright
 uvx ruff check
+uv run mypy --show-error-codes -p <module_name>
+uv run stubtest <module_name> --ignore-missing-stub --ignore-disjoint-bases
 ```
 
 ### Core Development
@@ -111,7 +113,14 @@ Each example includes comprehensive testing:
 - `pytest` - Python functionality tests
 - `pyright` - Static type checking validation
 - `ruff` - Python code linting
+- `mypy` - Type checking with mypy
+- `stubtest` - Validates stubs match runtime behavior (mypy.stubtest)
 - Tests verify that generated stubs provide correct type information
+
+### Stubtest Notes
+- Always use `--ignore-missing-stub` flag (maturin creates internal native modules without stubs)
+- Always use `--ignore-disjoint-bases` flag (PyO3 classes are disjoint bases at runtime)
+- Stubtest does not work with nested submodules due to PyO3's runtime attribute approach
 
 ## Type System
 
@@ -123,4 +132,9 @@ The project provides mappings between Rust and Python types:
 
 Manual type specification is supported for edge cases where automatic translation fails.
 
-- When you think you are done with your change, use `task stub-gen` to update stub files and inspect the content.
+## Important Notes
+
+- Python 3.10+ is the minimum supported version (do not enable 3.9 or older in PyO3 settings)
+- When you think you are done with your change, use `task stub-gen` to update stub files and inspect the content
+- The project uses the `inventory` crate for compile-time metadata collection across proc-macros
+- Stub files are automatically included in wheel packages by maturin
