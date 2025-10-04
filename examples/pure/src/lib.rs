@@ -456,8 +456,8 @@ submit! {
 #[gen_stub_pyclass]
 pub struct Incrementer {}
 
-#[pymethods]
 #[gen_stub_pymethods]
+#[pymethods]
 impl Incrementer {
     #[new]
     fn new() -> Self {
@@ -740,8 +740,8 @@ fn test_type_ignore_no_comment_specific() -> i32 {
 #[pyclass]
 pub struct TypeIgnoreTest {}
 
-#[pymethods]
 #[gen_stub_pymethods]
+#[pymethods]
 impl TypeIgnoreTest {
     #[new]
     fn new() -> Self {

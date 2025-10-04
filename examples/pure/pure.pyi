@@ -119,7 +119,7 @@ class Incrementer:
         r"""
         This is the original doc comment
         """
-    def new(self) -> Incrementer: ...
+    def __new__(cls) -> Incrementer: ...
 
 @typing.final
 class Incrementer2:
@@ -280,7 +280,7 @@ class TypeIgnoreTest:
     r"""
     Test class for method type: ignore functionality
     """
-    def new(self) -> TypeIgnoreTest: ...
+    def __new__(cls) -> TypeIgnoreTest: ...
     def test_method_ignore(self, value:builtins.int) -> builtins.int:  # type: ignore[union-attr,return-value]
         r"""
         Test method with type: ignore for specific rules
