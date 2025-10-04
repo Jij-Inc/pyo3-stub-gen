@@ -14,3 +14,5 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
+      - uv run mypy --show-error-codes test_dash_package.pyi
+      - uv run python -m mypy.stubtest test_dash_package --ignore-missing-stub
