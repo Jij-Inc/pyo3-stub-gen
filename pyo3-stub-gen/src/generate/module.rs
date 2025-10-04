@@ -27,6 +27,9 @@ impl Import for Module {
         for class in self.class.values() {
             imports.extend(class.import());
         }
+        for enum_ in self.enum_.values() {
+            imports.extend(enum_.import());
+        }
         for function in self.function.values().flatten() {
             imports.extend(function.import());
         }
@@ -81,9 +84,6 @@ impl fmt::Display for Module {
         }
         for submod in &self.submodules {
             writeln!(f, "from . import {submod}")?;
-        }
-        if !self.enum_.is_empty() {
-            writeln!(f, "from enum import Enum")?;
         }
         writeln!(f)?;
 

@@ -2,7 +2,9 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import typing
 
+@typing.final
 class A:
     @property
     def x(self) -> builtins.int:

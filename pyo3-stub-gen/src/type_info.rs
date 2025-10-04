@@ -154,6 +154,8 @@ pub struct PyClassInfo {
     pub has_hash: bool,
     /// Whether the class has str attribute
     pub has_str: bool,
+    /// Whether the class has subclass attribute `#[pyclass(subclass)]`
+    pub subclass: bool,
 }
 
 inventory::collect!(PyClassInfo);

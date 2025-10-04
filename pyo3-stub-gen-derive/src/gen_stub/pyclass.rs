@@ -15,6 +15,7 @@ pub struct PyClassInfo {
     has_ord: bool,
     has_hash: bool,
     has_str: bool,
+    subclass: bool,
 }
 
 impl From<&PyClassInfo> for StubType {
@@ -52,6 +53,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut has_ord = false;
         let mut has_hash = false;
         let mut has_str = false;
+        let mut subclass = false;
         for attr in parse_pyo3_attrs(&attrs)? {
             match attr {
                 Attr::Name(name) => pyclass_name = Some(name),
@@ -65,6 +67,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 Attr::Ord => has_ord = true,
                 Attr::Hash => has_hash = true,
                 Attr::Str => has_str = true,
+                Attr::Subclass => subclass = true,
                 _ => {}
             }
         }
@@ -92,6 +95,7 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             has_ord,
             has_hash,
             has_str,
+            subclass,
         })
     }
 }
@@ -110,6 +114,7 @@ impl ToTokens for PyClassInfo {
             has_ord,
             has_hash,
             has_str,
+            subclass,
         } = self;
         let module = quote_option(module);
         tokens.append_all(quote! {
@@ -125,6 +130,7 @@ impl ToTokens for PyClassInfo {
                 has_ord: #has_ord,
                 has_hash: #has_hash,
                 has_str: #has_str,
+                subclass: #subclass,
             }
         })
     }
@@ -200,6 +206,7 @@ mod test {
             has_ord: false,
             has_hash: false,
             has_str: false,
+            subclass: false,
         }
         "###);
         Ok(())

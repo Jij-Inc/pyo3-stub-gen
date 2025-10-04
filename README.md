@@ -194,6 +194,23 @@ fn say_hello_forever<'a>(
 }
 ```
 
+## Advanced: mypy.stubtest integration
+
+[mypy stubtest](https://mypy.readthedocs.io/en/stable/stubtest.html) validates that stub files match runtime behavior. You can add it to your test suite:
+
+```bash
+uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
+```
+
+### Required flags for PyO3/maturin projects
+
+- `--ignore-missing-stub` - Maturin creates internal native modules (`.so` files) that re-export to `__init__.py`. Stubtest looks for stubs for these internal modules, which don't exist (all types are in `__init__.pyi`). This flag prevents false positives.
+- `--ignore-disjoint-bases` - PyO3 classes are disjoint bases at runtime, but pyo3-stub-gen does not generate `@typing.disjoint_base` decorators.
+
+### Known limitation: nested submodules
+
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed_sub/Taskfile.yml` for an example.
+
 # Contribution
 To be written.
 

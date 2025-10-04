@@ -66,6 +66,8 @@
 //!         // Decorated with `#[pyclass(hash, str)]`
 //!         has_hash: false,
 //!         has_str: false,
+//!         // Decorated with `#[pyclass(subclass)]`
+//!         subclass: false,
 //!     }
 //! }
 //! ```

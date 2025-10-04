@@ -2,10 +2,13 @@
 # ruff: noqa: E501, F401
 
 import builtins
+import typing
 
+@typing.final
 class A:
     def show_x(self) -> None: ...
 
+@typing.final
 class B:
     def show_x(self) -> None: ...
 

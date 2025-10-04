@@ -15,11 +15,16 @@ pub struct ClassDef {
     pub bases: Vec<TypeInfo>,
     pub classes: Vec<ClassDef>,
     pub match_args: Option<Vec<String>>,
+    pub subclass: bool,
 }
 
 impl Import for ClassDef {
     fn import(&self) -> HashSet<ImportRef> {
         let mut import = HashSet::new();
+        if !self.subclass {
+            // for @typing.final
+            import.insert("typing".into());
+        }
         for base in &self.bases {
             import.extend(base.import.clone());
         }
@@ -68,6 +73,7 @@ impl From<&PyComplexEnumInfo> for ClassDef {
             bases: Vec::new(),
             match_args: None,
             attrs: Vec::new(),
+            subclass: true, // Complex enums can be subclassed by their variants
         };
 
         enum_info
@@ -91,6 +97,7 @@ impl ClassDef {
             bases: vec![TypeInfo::unqualified(enum_info.pyclass_name)],
             match_args: Some(info.fields.iter().map(|f| f.name.to_string()).collect()),
             attrs: Vec::new(),
+            subclass: false,
         }
     }
 }
@@ -122,6 +129,7 @@ impl From<&PyClassInfo> for ClassDef {
             classes: Vec::new(),
             bases: info.bases.iter().map(|f| f()).collect(),
             match_args: None,
+            subclass: info.subclass,
         };
         if info.has_eq {
             new.add_eq_method();
@@ -229,6 +237,9 @@ impl fmt::Display for ClassDef {
             .reduce(|acc, path| format!("{acc}, {path}"))
             .map(|bases| format!("({bases})"))
             .unwrap_or_default();
+        if !self.subclass {
+            writeln!(f, "@typing.final")?;
+        }
         writeln!(f, "class {}{}:", self.name, bases)?;
         let indent = indent();
         let doc = self.doc.trim();

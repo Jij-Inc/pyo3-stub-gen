@@ -27,9 +27,33 @@ impl From<&PyEnumInfo> for EnumDef {
     }
 }
 
+impl Import for EnumDef {
+    fn import(&self) -> HashSet<ImportRef> {
+        let mut import = HashSet::new();
+        // for @typing.final
+        import.insert("typing".into());
+        // for Enum base class
+        import.insert("enum".into());
+        for method in &self.methods {
+            import.extend(method.import());
+        }
+        for attr in &self.attrs {
+            import.extend(attr.import());
+        }
+        for getter in &self.getters {
+            import.extend(getter.import());
+        }
+        for setter in &self.setters {
+            import.extend(setter.import());
+        }
+        import
+    }
+}
+
 impl fmt::Display for EnumDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "class {}(Enum):", self.name)?;
+        writeln!(f, "@typing.final")?;
+        writeln!(f, "class {}(enum.Enum):", self.name)?;
         let indent = indent();
         docstring::write_docstring(f, self.doc, indent)?;
         for (variant, variant_doc) in self.variants {
