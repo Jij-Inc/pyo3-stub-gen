@@ -357,13 +357,13 @@ def overload_example_1(x:builtins.float) -> builtins.float:
     """
 
 @typing.overload
-def overload_example_2(x:builtins.int) -> builtins.int:
+def overload_example_2(ob:builtins.int) -> builtins.int:
     r"""
     Increments integer by 1
     """
 
 @typing.overload
-def overload_example_2(x:builtins.float) -> builtins.float:
+def overload_example_2(ob:builtins.float) -> builtins.float:
     r"""
     Increments float by 1
     """

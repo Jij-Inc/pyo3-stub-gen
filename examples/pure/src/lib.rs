@@ -421,7 +421,7 @@ submit! {
     PyFunctionInfo {
         name: "overload_example_2",
         args: &[ArgInfo{
-            name: "x",
+            name: "ob",
             signature: None,
             r#type: || f64::type_input(),
         }],
@@ -438,7 +438,7 @@ submit! {
     PyFunctionInfo {
         name: "overload_example_2",
         args: &[ArgInfo{
-            name: "x",
+            name: "ob",
             signature: None,
             r#type: || i64::type_input(),
         }],
