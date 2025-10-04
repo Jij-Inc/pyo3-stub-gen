@@ -196,130 +196,20 @@ fn say_hello_forever<'a>(
 
 ## Advanced: mypy.stubtest integration
 
-### What is stubtest?
-
-[mypy stubtest](https://mypy.readthedocs.io/en/stable/stubtest.html) is a tool that validates Python stub files (`.pyi`) against the actual runtime behavior of your module. It ensures that the type annotations in your stubs accurately reflect what's actually available at runtime.
-
-### Using stubtest with pyo3-stub-gen
-
-You can add stubtest to your test suite to validate the generated stub files:
+[mypy stubtest](https://mypy.readthedocs.io/en/stable/stubtest.html) validates that stub files match runtime behavior. You can add it to your test suite:
 
 ```bash
 uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 ```
 
-The following flags are **recommended** for PyO3/maturin projects:
-- `--ignore-missing-stub` - Ignore missing stubs for internal native modules (see details below)
-- `--ignore-disjoint-bases` - Ignore `@typing.disjoint_base` decorator requirements (currently not supported by pyo3-stub-gen)
+### Required flags for PyO3/maturin projects
 
-Here's why these flags are necessary:
+- `--ignore-missing-stub` - Maturin creates internal native modules (`.so` files) that re-export to `__init__.py`. Stubtest looks for stubs for these internal modules, which don't exist (all types are in `__init__.pyi`). This flag prevents false positives.
+- `--ignore-disjoint-bases` - PyO3 classes are disjoint bases at runtime, but pyo3-stub-gen does not generate `@typing.disjoint_base` decorators.
 
-### Why `--ignore-missing-stub` is necessary
+### Known limitation: nested submodules
 
-#### The maturin module structure
-
-When maturin builds a pure Rust project, it creates the following structure:
-
-```text
-your_package/
-├── __init__.py              # Re-exports from the native module
-├── __init__.pyi             # Generated stub file (your_package.pyi → __init__.pyi)
-└── your_package.cpython-*.so  # Native extension module
-```
-
-The `__init__.py` file typically contains:
-
-```python
-from .your_package import *
-```
-
-This re-exports everything from the native `.so` module. However, stubtest will try to find a stub file named `your_package.pyi` for the native module `.your_package`, which doesn't exist (and shouldn't exist, since all type information is already in `__init__.pyi`).
-
-#### The error without `--ignore-missing-stub`
-
-Without the flag, stubtest reports errors like:
-
-```text
-error: your_package.your_package failed to find stubs
-```
-
-This is a false positive - the stub file exists as `__init__.pyi`, but stubtest is looking for a stub for the internal native module created by maturin.
-
-#### Solution
-
-Use `--ignore-missing-stub` to ignore missing stubs for internal native modules:
-
-```yaml
-# Taskfile.yml example
-test:
-  cmds:
-    - uv run pytest
-    - uv run pyright
-    - uv run mypy --show-error-codes -p your_package
-    - uv run stubtest your_package --ignore-missing-stub --ignore-disjoint-bases
-```
-
-This flag tells stubtest to ignore cases where a runtime module doesn't have a corresponding stub file, which is expected for the internal native modules that maturin creates as an implementation detail.
-
-### Why `--ignore-disjoint-bases` is necessary
-
-#### What is `@typing.disjoint_base`?
-
-The `@typing.disjoint_base` decorator (introduced in [PEP 800](https://peps.python.org/pep-0800/)) marks classes that cannot be used together in multiple inheritance. For example, if class `A` and class `B` are both marked as `@disjoint_base`, then a class cannot inherit from both `A` and `B` simultaneously.
-
-PyO3 classes are typically disjoint bases because they are implemented in Rust and have incompatible internal layouts. However, pyo3-stub-gen currently does not generate the `@typing.disjoint_base` decorator in stub files.
-
-#### Current status and future plans
-
-**Current workaround**: Use `--ignore-disjoint-bases` to suppress these errors in stubtest.
-
-**Future plan**: We plan to add support for generating `@typing.disjoint_base` decorators in a future version of pyo3-stub-gen. Until then, please use the `--ignore-disjoint-bases` flag to avoid false positives in stubtest.
-
-### Known stubtest limitations
-
-#### PyO3 nested submodules
-
-**Stubtest does not work properly with PyO3 nested submodules** (created with nested `#[pymodule]` attributes).
-
-When you create nested modules in PyO3:
-
-```rust
-use pyo3::{prelude::*, wrap_pymodule};
-
-#[pymodule]
-fn main_mod(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    #[pymodule]
-    fn submod(m: &Bound<'_, PyModule>) -> PyResult<()> {
-        // ...
-        Ok(())
-    }
-    m.add_wrapped(wrap_pymodule!(submod))?;
-    Ok(())
-}
-```
-
-At runtime, `submod` exists as an **attribute** of `main_mod` (accessible via `main_mod.submod`), but it is **not a separate importable module** (you cannot `import package.main_mod.submod`).
-
-However, pyo3-stub-gen generates stub files in a directory structure:
-```text
-package/
-  main_mod/
-    __init__.pyi
-    submod.pyi        # Stubtest tries to import this as a module
-```
-
-Stubtest sees this file structure and attempts to `import package.main_mod.submod`, which fails because it's not a real submodule. This causes stubtest to skip validation of the entire submodule's contents.
-
-**Workaround**: For projects with nested submodules, **disable stubtest** for that package. Type checking with mypy/pyright still works correctly. See `examples/mixed_sub/Taskfile.yml` for an example.
-
-#### Missing decorators
-
-Currently, pyo3-stub-gen does not generate the following decorators that stubtest expects:
-
-- ✅ `@final` - **Now supported** (as of v0.14.2). PyO3 classes and enums are marked with `@final` since they cannot be subclassed at runtime.
-- `@typing.disjoint_base` - PyO3 classes are disjoint bases at runtime, but stubs don't mark them. Use `--ignore-disjoint-bases` to suppress these errors.
-
-These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright.
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed_sub/Taskfile.yml` for an example.
 
 # Contribution
 To be written.
