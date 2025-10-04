@@ -290,6 +290,7 @@ class TypeIgnoreTest:
         Test method with type: ignore (without equals for catch-all)
         """
 
+@typing.final
 class Number(Enum):
     FLOAT = ...
     INTEGER = ...
@@ -305,6 +306,7 @@ class Number(Enum):
         Whether the number is an integer.
         """
 
+@typing.final
 class NumberRenameAll(Enum):
     FLOAT = ...
     r"""
