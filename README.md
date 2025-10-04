@@ -205,10 +205,14 @@ fn say_hello_forever<'a>(
 You can add stubtest to your test suite to validate the generated stub files:
 
 ```bash
-uv run stubtest your_module_name --ignore-missing-stub
+uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 ```
 
-The `--ignore-missing-stub` flag is **required** for PyO3/maturin projects. Here's why:
+The following flags are **recommended** for PyO3/maturin projects:
+- `--ignore-missing-stub` - Ignore missing stubs for internal native modules (see details below)
+- `--ignore-disjoint-bases` - Ignore `@typing.disjoint_base` decorator requirements (currently not supported by pyo3-stub-gen)
+
+Here's why these flags are necessary:
 
 ### Why `--ignore-missing-stub` is necessary
 
@@ -252,19 +256,33 @@ test:
     - uv run pytest
     - uv run pyright
     - uv run mypy --show-error-codes -p your_package
-    - uv run stubtest your_package --ignore-missing-stub
+    - uv run stubtest your_package --ignore-missing-stub --ignore-disjoint-bases
 ```
 
 This flag tells stubtest to ignore cases where a runtime module doesn't have a corresponding stub file, which is expected for the internal native modules that maturin creates as an implementation detail.
 
+### Why `--ignore-disjoint-bases` is necessary
+
+#### What is `@typing.disjoint_base`?
+
+The `@typing.disjoint_base` decorator (introduced in [PEP 800](https://peps.python.org/pep-0800/)) marks classes that cannot be used together in multiple inheritance. For example, if class `A` and class `B` are both marked as `@disjoint_base`, then a class cannot inherit from both `A` and `B` simultaneously.
+
+PyO3 classes are typically disjoint bases because they are implemented in Rust and have incompatible internal layouts. However, pyo3-stub-gen currently does not generate the `@typing.disjoint_base` decorator in stub files.
+
+#### Current status and future plans
+
+**Current workaround**: Use `--ignore-disjoint-bases` to suppress these errors in stubtest.
+
+**Future plan**: We plan to add support for generating `@typing.disjoint_base` decorators in a future version of pyo3-stub-gen. Until then, please use the `--ignore-disjoint-bases` flag to avoid false positives in stubtest.
+
 ### Known stubtest limitations
 
-Currently, pyo3-stub-gen does not generate some decorators that stubtest expects:
+Currently, pyo3-stub-gen does not generate the following decorators that stubtest expects:
 
-- `@final` - PyO3 classes cannot be subclassed at runtime, but stubs don't mark them with `@final`
-- `@typing.disjoint_base` - Some PyO3 classes are disjoint bases at runtime, but stubs don't mark them
+- `@final` - PyO3 classes cannot be subclassed at runtime, but stubs don't mark them with `@final`. There is currently no stubtest flag to ignore this.
+- `@typing.disjoint_base` - PyO3 classes are disjoint bases at runtime, but stubs don't mark them. Use `--ignore-disjoint-bases` to suppress these errors.
 
-These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright.
+These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright. We plan to add support for these decorators in future versions.
 
 # Contribution
 To be written.
