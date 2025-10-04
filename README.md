@@ -220,7 +220,7 @@ Here's why these flags are necessary:
 
 When maturin builds a pure Rust project, it creates the following structure:
 
-```
+```text
 your_package/
 ├── __init__.py              # Re-exports from the native module
 ├── __init__.pyi             # Generated stub file (your_package.pyi → __init__.pyi)
@@ -239,7 +239,7 @@ This re-exports everything from the native `.so` module. However, stubtest will 
 
 Without the flag, stubtest reports errors like:
 
-```
+```text
 error: your_package.your_package failed to find stubs
 ```
 
@@ -277,12 +277,46 @@ PyO3 classes are typically disjoint bases because they are implemented in Rust a
 
 ### Known stubtest limitations
 
+#### PyO3 nested submodules
+
+**Stubtest does not work properly with PyO3 nested submodules** (created with nested `#[pymodule]` attributes).
+
+When you create nested modules in PyO3:
+
+```rust
+#[pymodule]
+fn main_mod(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    #[pymodule]
+    fn submod(m: &Bound<'_, PyModule>) -> PyResult<()> {
+        // ...
+    }
+    m.add_wrapped(wrap_pymodule!(submod))?;
+    Ok(())
+}
+```
+
+At runtime, `submod` exists as an **attribute** of `main_mod` (accessible via `main_mod.submod`), but it is **not a separate importable module** (you cannot `import package.main_mod.submod`).
+
+However, pyo3-stub-gen generates stub files in a directory structure:
+```text
+package/
+  main_mod/
+    __init__.pyi
+    submod.pyi        # Stubtest tries to import this as a module
+```
+
+Stubtest sees this file structure and attempts to `import package.main_mod.submod`, which fails because it's not a real submodule. This causes stubtest to skip validation of the entire submodule's contents.
+
+**Workaround**: For projects with nested submodules, **disable stubtest** for that package. Type checking with mypy/pyright still works correctly. See `examples/mixed_sub/Taskfile.yml` for an example.
+
+#### Missing decorators
+
 Currently, pyo3-stub-gen does not generate the following decorators that stubtest expects:
 
-- `@final` - PyO3 classes cannot be subclassed at runtime, but stubs don't mark them with `@final`. There is currently no stubtest flag to ignore this.
+- ✅ `@final` - **Now supported** (as of v0.14.2). PyO3 classes and enums are marked with `@final` since they cannot be subclassed at runtime.
 - `@typing.disjoint_base` - PyO3 classes are disjoint bases at runtime, but stubs don't mark them. Use `--ignore-disjoint-bases` to suppress these errors.
 
-These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright. We plan to add support for these decorators in future versions.
+These are cosmetic issues that don't affect the practical usability of the generated stubs for type checking with mypy or pyright.
 
 # Contribution
 To be written.
