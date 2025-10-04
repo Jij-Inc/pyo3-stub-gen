@@ -14,4 +14,4 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run mypy --show-error-codes test_dash_package.pyi
+      - uv run mypy --show-error-codes -p test_dash_package

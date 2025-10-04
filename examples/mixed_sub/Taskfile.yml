@@ -14,4 +14,4 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run mypy --show-error-codes python/mixed_sub/main_mod/__init__.pyi python/mixed_sub/main_mod/int.pyi python/mixed_sub/main_mod/mod_a.pyi python/mixed_sub/main_mod/mod_b.pyi
+      - uv run mypy --show-error-codes -p mixed_sub.main_mod

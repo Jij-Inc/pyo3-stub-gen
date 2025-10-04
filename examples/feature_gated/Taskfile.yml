@@ -14,4 +14,4 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run mypy --show-error-codes feature_gated.pyi
+      - uv run mypy --show-error-codes -p feature_gated
