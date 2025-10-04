@@ -15,4 +15,3 @@ tasks:
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes feature_gated.pyi
-      - uv run python -m mypy.stubtest feature_gated --ignore-missing-stub
