@@ -41,6 +41,7 @@
 //!         has_ord: false,
 //!         has_hash: false,
 //!         has_str: false,
+//!         subclass: false,
 //!     }
 //! }
 //! ```
