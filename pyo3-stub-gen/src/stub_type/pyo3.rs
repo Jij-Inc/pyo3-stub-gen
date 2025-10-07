@@ -66,6 +66,7 @@ macro_rules! impl_builtin {
     };
 }
 
+impl_builtin!(PyBool, "bool");
 impl_builtin!(PyInt, "int");
 impl_builtin!(PyFloat, "float");
 impl_builtin!(PyComplex, "complex");
