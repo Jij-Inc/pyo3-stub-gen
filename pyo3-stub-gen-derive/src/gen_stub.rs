@@ -77,6 +77,7 @@
 
 mod arg;
 mod attr;
+mod gen_from_python;
 mod member;
 mod method;
 mod pyclass;
@@ -92,6 +93,7 @@ mod variant;
 
 use arg::*;
 use attr::*;
+pub use gen_from_python::*;
 use member::*;
 use method::*;
 use pyclass::*;

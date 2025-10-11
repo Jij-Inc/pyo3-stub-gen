@@ -13,6 +13,8 @@ from pure import (
     HashableStruct,
     add_decimals,
     DecimalHolder,
+    fn_override_type,
+    fn_with_python_stub,
 )
 import pytest
 import pathlib
@@ -231,3 +233,21 @@ def test_decimal_holder():
     # Test creating a DecimalHolder
     holder = DecimalHolder(Decimal("123.45"))
     assert holder.value == Decimal("123.45")
+
+
+def test_fn_override_type():
+    """Test fn_override_type with callable argument"""
+    def callback(s: str) -> int:
+        return len(s)
+
+    result = fn_override_type(callback)
+    assert result == callback
+
+
+def test_fn_with_python_stub():
+    """Test fn_with_python_stub using gen_function_from_python! macro"""
+    def callback(s: str) -> int:
+        return len(s)
+
+    result = fn_with_python_stub(callback)
+    assert result == callback

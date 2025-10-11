@@ -11,6 +11,30 @@ pub fn fn_override_type<'a>(
     cb.call1(("Hello!",))?;
     Ok(cb)
 }
+
+// New example using gen_function_from_python!
+#[pyfunction]
+pub fn fn_with_python_stub<'a>(
+    callback: Bound<'a, PyAny>,
+) -> PyResult<Bound<'a, PyAny>> {
+    callback.call1(("World!",))?;
+    Ok(callback)
+}
+
+pyo3_stub_gen::inventory::submit! {
+    pyo3_stub_gen::derive::gen_function_from_python! {
+        r#"
+import collections.abc
+import typing
+
+def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    """
+    Example function using gen_function_from_python! macro.
+    This demonstrates how to define type information using Python stub syntax.
+    """
+        "#
+    }
+}
 #[gen_stub_pyclass]
 #[pyclass]
 pub struct OverrideType {

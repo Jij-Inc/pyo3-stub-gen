@@ -150,3 +150,27 @@ pub fn remove_gen_stub(_attr: TokenStream, item: TokenStream) -> TokenStream {
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
+
+/// Generate PyFunctionInfo from Python stub string
+///
+/// This proc-macro parses Python stub syntax and generates a PyFunctionInfo structure.
+/// It should be used inside `inventory::submit!` blocks.
+///
+/// ```ignore
+/// submit! {
+///     gen_function_from_python! {
+///         r#"
+///             import collections.abc
+///             import typing
+///
+///             def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
+///         "#
+///     }
+/// }
+/// ```
+#[proc_macro]
+pub fn gen_function_from_python(input: TokenStream) -> TokenStream {
+    gen_stub::gen_function_from_python_impl(input.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}

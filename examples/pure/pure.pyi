@@ -336,6 +336,12 @@ def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: .
 
 def fn_override_type(cb:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
+def fn_with_python_stub(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    r"""
+    Example function using gen_function_from_python! macro.
+        This demonstrates how to define type information using Python stub syntax.
+    """
+
 def func_with_kwargs(**kwargs) -> builtins.bool:
     r"""
     Takes a variable number of keyword arguments and does nothing

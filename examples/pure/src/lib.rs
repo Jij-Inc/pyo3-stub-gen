@@ -428,6 +428,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(deprecated_function, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_with_python_stub, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
