@@ -136,6 +136,97 @@ use pyo3_stub_gen::define_stub_info_gatherer;
 define_stub_info_gatherer!(stub_info);
 ```
 
+### Python Stub Syntax Support
+
+For complex type definitions (e.g., `collections.abc.Callable`, overloads, generics), you can write type information directly in Python stub syntax instead of using Rust attributes.
+
+#### Three Approaches
+
+**1. Inline Python Parameter (Recommended for single functions)**
+
+Use the `python` parameter in `#[gen_stub_pyfunction]` to specify types directly:
+
+```rust
+#[gen_stub_pyfunction(python = r#"
+    import collections.abc
+    import typing
+
+    def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        """Example using python parameter."""
+"#)]
+#[pyfunction]
+pub fn fn_with_python_param<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
+    callback.call1(("Hello!",))?;
+    Ok(callback)
+}
+```
+
+**2. Function Stub Generation Macro (For overloads or separate definitions)**
+
+Use `gen_function_from_python!` inside `submit!` block:
+
+```rust
+// Rust implementation
+#[pyfunction]
+pub fn overload_example(x: f64) -> f64 {
+    x + 1.0
+}
+
+// Additional overload definition
+use pyo3_stub_gen::inventory::submit;
+
+submit! {
+    gen_function_from_python! {
+        r#"
+        def overload_example(x: int) -> int: ...
+        "#
+    }
+}
+```
+
+**3. Methods Stub Generation Macro (For class methods)**
+
+Use `gen_methods_from_python!` to define multiple method signatures at once:
+
+```rust
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct Calculator {}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Calculator {
+    fn add(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+
+// Additional overload for integer type
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Calculator:
+            def add(self, x: int) -> int:
+                """Add operation for integers"""
+        "#
+    }
+}
+```
+
+#### When to Use
+
+- **Complex types**: `collections.abc.Callable`, `typing.Protocol`, nested generics
+- **Overloads**: Multiple type signatures for the same function (`@overload` in `.pyi`)
+- **Type override**: When automatic Rust → Python type mapping is insufficient
+- **Readability**: Python developers find stub syntax more familiar
+
+#### Notes
+
+- Python stub syntax is parsed at compile time using `rustpython-parser`
+- Type information is stored as strings (no Rust type validation)
+- Import statements are automatically extracted and included in generated `.pyi` files
+- This approach complements automatic type generation, not replaces it
+
 ## Testing Strategy
 
 Each example includes comprehensive testing:
