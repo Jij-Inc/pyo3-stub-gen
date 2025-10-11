@@ -1,5 +1,3 @@
-use proc_macro2::TokenStream as TokenStream2;
-use quote::ToTokens;
 use rustpython_parser::{ast, Parse};
 use std::collections::HashSet;
 use syn::{Error, LitStr, Result, Type};
@@ -32,11 +30,9 @@ fn dedent(text: &str) -> String {
         .join("\n")
 }
 
-/// Parse Python stub string and generate PyFunctionInfo token stream
-pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
-    // Parse the input as a string literal
-    let stub_str: LitStr = syn::parse2(input)?;
-    let stub_content = stub_str.value();
+/// Parse Python stub string and return PyFunctionInfo
+pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
+    let stub_content = input.value();
 
     // Remove common indentation to allow indented Python code in raw strings
     let dedented_content = dedent(&stub_content);
@@ -44,7 +40,7 @@ pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2
     // Parse Python code using rustpython-parser
     let parsed = ast::Suite::parse(&dedented_content, "<stub>").map_err(|e| {
         Error::new(
-            stub_str.span(),
+            input.span(),
             format!("Failed to parse Python stub: {}", e),
         )
     })?;
@@ -77,28 +73,28 @@ pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2
     // Check that exactly one function is defined
     if functions.is_empty() {
         return Err(Error::new(
-            stub_str.span(),
+            input.span(),
             "No function definition found in Python stub",
         ));
     }
     if functions.len() > 1 {
         return Err(Error::new(
-            stub_str.span(),
+            input.span(),
             "Multiple function definitions found. Only one function is allowed per gen_function_from_python! call",
         ));
     }
 
     let func_def = &functions[0];
 
-    // Generate PyFunctionInfo token stream
-    generate_py_function_info(func_def, &imports)
+    // Generate PyFunctionInfo
+    build_py_function_info(func_def, &imports)
 }
 
-/// Generate PyFunctionInfo token stream from Python function definition
-fn generate_py_function_info(
+/// Build PyFunctionInfo from Python function definition
+fn build_py_function_info(
     func_def: &ast::StmtFunctionDef,
     imports: &[String],
-) -> Result<TokenStream2> {
+) -> Result<PyFunctionInfo> {
     let func_name = func_def.name.to_string();
 
     // Extract docstring
@@ -114,7 +110,7 @@ fn generate_py_function_info(
     let is_async = false; // TODO: handle async functions
 
     // Construct PyFunctionInfo
-    let info = PyFunctionInfo {
+    Ok(PyFunctionInfo {
         name: func_name,
         args,
         r#return: return_type,
@@ -124,10 +120,7 @@ fn generate_py_function_info(
         is_async,
         deprecated: None,
         type_ignored: None,
-    };
-
-    // Convert to token stream using ToTokens
-    Ok(info.to_token_stream())
+    })
 }
 
 /// Extract docstring from function definition
@@ -272,17 +265,19 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
 #[cfg(test)]
 mod test {
     use super::*;
-    use quote::quote;
+    use proc_macro2::TokenStream as TokenStream2;
+    use quote::{quote, ToTokens};
 
     #[test]
     fn test_basic_function() -> Result<()> {
-        let input = quote! {
+        let stub_str: LitStr = syn::parse2(quote! {
             r#"
             def foo(x: int) -> int:
                 """A simple function"""
             "#
-        };
-        let out = gen_function_from_python_impl(input)?;
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
@@ -312,7 +307,7 @@ mod test {
 
     #[test]
     fn test_function_with_imports() -> Result<()> {
-        let input = quote! {
+        let stub_str: LitStr = syn::parse2(quote! {
             r#"
             import typing
             from collections.abc import Callable
@@ -320,8 +315,9 @@ mod test {
             def process(func: Callable[[str], int]) -> typing.Optional[int]:
                 """Process a callback function"""
             "#
-        };
-        let out = gen_function_from_python_impl(input)?;
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "process",
@@ -331,8 +327,8 @@ mod test {
                     r#type: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
                         import: ::std::collections::HashSet::from([
-                            "typing".into(),
                             "collections.abc".into(),
+                            "typing".into(),
                         ]),
                     },
                     signature: None,
@@ -341,8 +337,8 @@ mod test {
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "typing.Optional[int]".to_string(),
                 import: ::std::collections::HashSet::from([
-                    "collections.abc".into(),
                     "typing".into(),
+                    "collections.abc".into(),
                 ]),
             },
             doc: "Process a callback function",
@@ -357,7 +353,7 @@ mod test {
 
     #[test]
     fn test_complex_types() -> Result<()> {
-        let input = quote! {
+        let stub_str: LitStr = syn::parse2(quote! {
             r#"
             import collections.abc
             import typing
@@ -365,8 +361,9 @@ mod test {
             def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
                 """Example function with complex types"""
             "#
-        };
-        let out = gen_function_from_python_impl(input)?;
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "fn_override_type",
@@ -376,8 +373,8 @@ mod test {
                     r#type: || ::pyo3_stub_gen::TypeInfo {
                         name: "collections.abc.Callable[[str], typing.Any]".to_string(),
                         import: ::std::collections::HashSet::from([
-                            "collections.abc".into(),
                             "typing".into(),
+                            "collections.abc".into(),
                         ]),
                     },
                     signature: None,
@@ -402,14 +399,15 @@ mod test {
 
     #[test]
     fn test_multiple_args() -> Result<()> {
-        let input = quote! {
+        let stub_str: LitStr = syn::parse2(quote! {
             r#"
             import typing
 
             def add(a: int, b: int, c: typing.Optional[int]) -> int: ...
             "#
-        };
-        let out = gen_function_from_python_impl(input)?;
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "add",
@@ -455,13 +453,14 @@ mod test {
 
     #[test]
     fn test_no_return_type() -> Result<()> {
-        let input = quote! {
+        let stub_str: LitStr = syn::parse2(quote! {
             r#"
             def print_hello(name: str):
                 """Print a greeting"""
             "#
-        };
-        let out = gen_function_from_python_impl(input)?;
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "print_hello",

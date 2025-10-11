@@ -93,7 +93,6 @@ mod variant;
 
 use arg::*;
 use attr::*;
-pub use gen_from_python::*;
 use member::*;
 use method::*;
 use pyclass::*;
@@ -108,7 +107,7 @@ use util::*;
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, Result};
+use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
     let mut item_struct = parse2::<ItemStruct>(item)?;
@@ -173,6 +172,12 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
             #inner
         }
     })
+}
+
+pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
+    let stub_str: LitStr = parse2(input)?;
+    let inner = gen_from_python::parse_python_function_stub(stub_str)?;
+    Ok(quote! { #inner })
 }
 
 pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
