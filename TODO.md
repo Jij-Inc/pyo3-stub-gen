@@ -282,9 +282,9 @@ PyFunctionInfo {
 - [x] 型マッピングの問題を解決
   - Python型をRust型に変換する必要はない
   - Python型文字列をそのまま使う方針に決定
-- [ ] Pythonパーサーライブラリの選定
-  - 候補: `ruff_python_parser`, `rustpython-parser`, 手書き簡易パーサー
-  - 評価基準: メンテナンス状況、パフォーマンス、実装の複雑さ
+- [x] Pythonパーサーライブラリの選定
+  - **決定:** `rustpython-parser` を使用
+  - 理由: 型ヒントは `Optional[list[tuple[int, str]]]` や `collections.abc.Callable[[str], typing.Any]` のように複雑になるため、完全なPython ASTパーサーが必要
 
 ### Phase 2: プロトタイプ実装（関数のみ）
 
@@ -349,27 +349,22 @@ inventory::submit! {
   - [ ] パースエラーの適切な報告
   - [ ] エラー位置の表示
 
-**パーサーの選択肢:**
+**パーサーの選択:**
 
-**Option A: 軽量手書きパーサー（推奨）**
-- 対象: 関数定義とimport文のみ
-- 必要な構文:
-  ```python
-  import module
-  from module import name
-  def func_name(arg1: Type1, arg2: Type2) -> RetType:
-      """docstring"""
-  ```
-- 実装: 正規表現 or `nom` などの軽量パーサーコンビネータ
-- メリット: 依存が少ない、シンプル、必要最小限
-- デメリット: 複雑なPython構文は非対応
+**`rustpython-parser` を使用**
+- 完全なPython ASTパーサー（crates.ioに公開済み）
+- メリット:
+  - 正確なPython構文解析
+  - 複雑な型ヒント（`Optional[list[tuple[int, str]]]`, `collections.abc.Callable[[str], typing.Any]` など）に対応
+  - 将来の拡張性が高い
+  - デフォルト引数、可変長引数、async関数なども対応可能
+- デメリット:
+  - proc-macroのビルド時間増加の可能性（実用上は問題ないレベルと想定）
 
-**Option B: `ruff_python_parser`**
-- 完全なPython ASTパーサー
-- メリット: 正確、将来の拡張性
-- デメリット: 重い依存、proc-macroのビルド時間増加
-
-**初期プロトタイプはOption Aで開始し、必要に応じてOption Bに移行**
+**手書きパーサーは採用しない理由:**
+- Python型ヒントは非常に複雑になり得る
+- ネストした型パラメータ `[[str], typing.Any]` のパースは困難
+- 正規表現や簡易パーサーでは保守性が低い
 
 ### Phase 3: テストと検証
 
@@ -504,16 +499,16 @@ inventory::submit! {
 
 ### 1. パーサーの実装方針
 
-**決定待ち:** 軽量手書きパーサー vs `ruff_python_parser`
+**✅ 決定:** `rustpython-parser` を使用
 
-**手書きパーサーで対応が必要な構文:**
+**`rustpython-parser` で対応する構文:**
 - [x] 基本: `def func(arg: Type) -> RetType: ...`
 - [x] import: `import module`, `from module import name`
 - [x] docstring: `"""doc"""`
-- [ ] 複雑な型: `Optional[list[tuple[int, str]]]`
-- [ ] デフォルト引数: `def func(x: int = 10): ...`
-- [ ] 可変長引数: `def func(*args: int, **kwargs: str): ...`
-- [ ] async関数: `async def func(): ...`
+- [x] 複雑な型: `Optional[list[tuple[int, str]]]`, `collections.abc.Callable[[str], typing.Any]`
+- [ ] デフォルト引数: `def func(x: int = 10): ...` （将来対応）
+- [ ] 可変長引数: `def func(*args: int, **kwargs: str): ...` （将来対応）
+- [ ] async関数: `async def func(): ...` （将来対応）
 
 ### 2. エラーメッセージの品質
 
@@ -563,16 +558,16 @@ gen_methods_from_python! {
 
 1. ✅ 既存実装の理解（完了）
 2. ✅ 設計方針の決定（完了）
-3. ⏳ パーサーの選択と実装開始
-   - まず軽量手書きパーサーでプロトタイプ
-   - 基本的な関数定義のみサポート
-4. ⏳ `examples/pure` で動作確認
-5. ⏳ フィードバックを得て改善
+3. ✅ パーサーの選択（完了: `rustpython-parser`）
+4. ⏳ 実装開始
+   - `rustpython-parser` を使用してPython stub をパース
+   - `PyFunctionInfo` の生成コード実装
+5. ⏳ `examples/pure` で動作確認
+6. ⏳ フィードバックを得て改善
 
 ## 参考リンク
 
 - RustPython Parser: https://github.com/RustPython/Parser
-- Ruff: https://github.com/astral-sh/ruff
+- rustpython-parser crate: https://crates.io/crates/rustpython-parser
 - Python AST documentation: https://docs.python.org/3/library/ast.html
-- nom parser combinator: https://github.com/rust-bakery/nom
 - syn (Rust parser): https://docs.rs/syn/latest/syn/
