@@ -208,7 +208,7 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
 }
 
 /// Parse Python class definition and return PyMethodsInfo
-pub fn parse_python_class_methods(input: &LitStr) -> Result<PyMethodsInfo> {
+pub fn parse_python_methods_stub(input: &LitStr) -> Result<PyMethodsInfo> {
     let stub = PythonClassStub::new(input)?;
     PyMethodsInfo::try_from(stub).map_err(|e| Error::new(input.span(), format!("{}", e)))
 }
@@ -304,7 +304,7 @@ mod test {
                     """Increment by one"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
@@ -347,7 +347,7 @@ mod test {
                     """Second method"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 2);
 
         assert_eq!(py_methods_info.methods[0].name, "increment_1");
@@ -365,7 +365,7 @@ mod test {
                     """Create something"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
@@ -406,7 +406,7 @@ mod test {
                     """Create from string"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
@@ -446,7 +446,7 @@ mod test {
                     """Constructor"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
@@ -480,7 +480,7 @@ mod test {
                     """Process a callback"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
@@ -526,7 +526,7 @@ mod test {
                     """Fetch data asynchronously"""
             "#
         })?;
-        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();

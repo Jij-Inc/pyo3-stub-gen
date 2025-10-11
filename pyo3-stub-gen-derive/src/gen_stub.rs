@@ -195,7 +195,7 @@ pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2
 
 pub fn gen_methods_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
     let stub_str: LitStr = parse2(input)?;
-    let inner = parse_python::parse_python_class_methods(&stub_str)?;
+    let inner = parse_python::parse_python_methods_stub(&stub_str)?;
     Ok(quote! { #inner })
 }
 

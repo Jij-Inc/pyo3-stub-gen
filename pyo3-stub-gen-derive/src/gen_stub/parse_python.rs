@@ -7,7 +7,7 @@ mod pyfunction;
 mod pymethods;
 
 pub use pyfunction::parse_python_function_stub;
-pub use pymethods::parse_python_class_methods;
+pub use pymethods::parse_python_methods_stub;
 
 use indexmap::IndexSet;
 use rustpython_parser::ast;
@@ -16,7 +16,7 @@ use syn::{Result, Type};
 use super::{arg::ArgInfo, attr::DeprecatedInfo, util::TypeOrOverride};
 
 /// Remove common leading whitespace from all lines (similar to Python's textwrap.dedent)
-pub(super) fn dedent(text: &str) -> String {
+fn dedent(text: &str) -> String {
     let lines: Vec<&str> = text.lines().collect();
 
     // Find the minimum indentation (ignoring empty lines)
@@ -42,7 +42,7 @@ pub(super) fn dedent(text: &str) -> String {
 }
 
 /// Extract docstring from function definition
-pub(super) fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
+fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
     if let Some(ast::Stmt::Expr(expr_stmt)) = func_def.body.first() {
         if let ast::Expr::Constant(constant) = &*expr_stmt.value {
             if let ast::Constant::Str(s) = &constant.value {
@@ -54,9 +54,7 @@ pub(super) fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
 }
 
 /// Extract deprecated decorator information if present
-pub(super) fn extract_deprecated_from_decorators(
-    decorators: &[ast::Expr],
-) -> Option<DeprecatedInfo> {
+fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<DeprecatedInfo> {
     for decorator in decorators {
         // Check for @deprecated or @deprecated("message")
         match decorator {
@@ -88,7 +86,7 @@ pub(super) fn extract_deprecated_from_decorators(
 }
 
 /// Extract arguments from function definition
-pub(super) fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo>> {
+fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo>> {
     let mut arg_infos = Vec::new();
 
     // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
@@ -124,7 +122,7 @@ pub(super) fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<
 }
 
 /// Extract return type from function definition
-pub(super) fn extract_return_type(
+fn extract_return_type(
     returns: &Option<Box<ast::Expr>>,
     imports: &[String],
 ) -> Result<Option<TypeOrOverride>> {
@@ -144,7 +142,7 @@ pub(super) fn extract_return_type(
 }
 
 /// Convert Python type annotation to TypeOrOverride
-pub(super) fn type_annotation_to_type_override(
+fn type_annotation_to_type_override(
     expr: &ast::Expr,
     imports: &[String],
     dummy_type: Type,
