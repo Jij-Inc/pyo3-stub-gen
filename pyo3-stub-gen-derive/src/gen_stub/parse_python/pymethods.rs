@@ -60,6 +60,57 @@ pub struct PythonClassStub {
     pub imports: Vec<String>,
 }
 
+impl PythonClassStub {
+    /// Parse Python class definition from a literal string
+    pub fn new(input: &LitStr) -> Result<Self> {
+        let stub_content = input.value();
+
+        // Remove common indentation to allow indented Python code in raw strings
+        let dedented_content = dedent(&stub_content);
+
+        // Parse Python code using rustpython-parser
+        let parsed = ast::Suite::parse(&dedented_content, "<stub>")
+            .map_err(|e| Error::new(input.span(), format!("Failed to parse Python stub: {}", e)))?;
+
+        // Extract imports and class definition
+        let mut imports = Vec::new();
+        let mut class_def: Option<ast::StmtClassDef> = None;
+
+        for stmt in parsed {
+            match stmt {
+                ast::Stmt::Import(import_stmt) => {
+                    for alias in &import_stmt.names {
+                        imports.push(alias.name.to_string());
+                    }
+                }
+                ast::Stmt::ImportFrom(import_from_stmt) => {
+                    if let Some(module) = &import_from_stmt.module {
+                        imports.push(module.to_string());
+                    }
+                }
+                ast::Stmt::ClassDef(cls_def) => {
+                    if class_def.is_some() {
+                        return Err(Error::new(
+                            input.span(),
+                            "Multiple class definitions found. Only one class is allowed per gen_methods_from_python! call",
+                        ));
+                    }
+                    class_def = Some(cls_def);
+                }
+                _ => {
+                    // Ignore other statements
+                }
+            }
+        }
+
+        // Check that exactly one class is defined
+        let class_def = class_def
+            .ok_or_else(|| Error::new(input.span(), "No class definition found in Python stub"))?;
+
+        Ok(Self { class_def, imports })
+    }
+}
+
 impl TryFrom<PythonClassStub> for PyMethodsInfo {
     type Error = syn::Error;
 
@@ -153,52 +204,7 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
 
 /// Parse Python class definition and return PyMethodsInfo
 pub fn parse_python_class_methods(input: &LitStr) -> Result<PyMethodsInfo> {
-    let stub_content = input.value();
-
-    // Remove common indentation to allow indented Python code in raw strings
-    let dedented_content = dedent(&stub_content);
-
-    // Parse Python code using rustpython-parser
-    let parsed = ast::Suite::parse(&dedented_content, "<stub>")
-        .map_err(|e| Error::new(input.span(), format!("Failed to parse Python stub: {}", e)))?;
-
-    // Extract imports and class definition
-    let mut imports = Vec::new();
-    let mut class_def: Option<ast::StmtClassDef> = None;
-
-    for stmt in parsed {
-        match stmt {
-            ast::Stmt::Import(import_stmt) => {
-                for alias in &import_stmt.names {
-                    imports.push(alias.name.to_string());
-                }
-            }
-            ast::Stmt::ImportFrom(import_from_stmt) => {
-                if let Some(module) = &import_from_stmt.module {
-                    imports.push(module.to_string());
-                }
-            }
-            ast::Stmt::ClassDef(cls_def) => {
-                if class_def.is_some() {
-                    return Err(Error::new(
-                        input.span(),
-                        "Multiple class definitions found. Only one class is allowed per gen_methods_from_python! call",
-                    ));
-                }
-                class_def = Some(cls_def);
-            }
-            _ => {
-                // Ignore other statements
-            }
-        }
-    }
-
-    // Check that exactly one class is defined
-    let class_def = class_def
-        .ok_or_else(|| Error::new(input.span(), "No class definition found in Python stub"))?;
-
-    // Generate PyMethodsInfo using TryFrom
-    let stub = PythonClassStub { class_def, imports };
+    let stub = PythonClassStub::new(input)?;
     PyMethodsInfo::try_from(stub).map_err(|e| Error::new(input.span(), format!("{}", e)))
 }
 
