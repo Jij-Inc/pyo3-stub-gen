@@ -4,11 +4,11 @@ use indexmap::IndexSet;
 use rustpython_parser::{ast, Parse};
 use syn::{Error, LitStr, Result, Type};
 
+use super::pyfunction::PythonFunctionStub;
 use super::{
     dedent, extract_deprecated_from_decorators, extract_docstring, extract_return_type,
     type_annotation_to_type_override,
 };
-use super::pyfunction::PythonFunctionStub;
 use crate::gen_stub::{
     arg::ArgInfo, method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo,
     util::TypeOrOverride,
@@ -30,14 +30,19 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         let doc = extract_docstring(&stub.func_stub.func_def);
 
         // Extract arguments based on method type
-        let args =
-            extract_args_for_method(&stub.func_stub.func_def.args, &stub.func_stub.imports, stub.method_type)?;
+        let args = extract_args_for_method(
+            &stub.func_stub.func_def.args,
+            &stub.func_stub.imports,
+            stub.method_type,
+        )?;
 
         // Extract return type
-        let return_type = extract_return_type(&stub.func_stub.func_def.returns, &stub.func_stub.imports)?;
+        let return_type =
+            extract_return_type(&stub.func_stub.func_def.returns, &stub.func_stub.imports)?;
 
         // Try to extract deprecated decorator
-        let deprecated = extract_deprecated_from_decorators(&stub.func_stub.func_def.decorator_list);
+        let deprecated =
+            extract_deprecated_from_decorators(&stub.func_stub.func_def.decorator_list);
 
         // Construct MethodInfo
         Ok(MethodInfo {
