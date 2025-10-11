@@ -4,9 +4,9 @@ fn main() {
     pyo3_stub_gen::inventory::submit! {
         gen_function_from_python! {
             r#"
-import typing
+            import typing
 
-# Only imports, no function definition
+            # Only imports, no function definition
             "#
         }
     }
