@@ -14,6 +14,7 @@ from pure import (
     add_decimals,
     DecimalHolder,
     fn_override_type,
+    fn_with_python_param,
     fn_with_python_stub,
 )
 import pytest
@@ -241,6 +242,15 @@ def test_fn_override_type():
         return len(s)
 
     result = fn_override_type(callback)
+    assert result == callback
+
+
+def test_fn_with_python_param():
+    """Test fn_with_python_param using python parameter in gen_stub_pyfunction"""
+    def callback(s: str) -> int:
+        return len(s)
+
+    result = fn_with_python_param(callback)
     assert result == callback
 
 

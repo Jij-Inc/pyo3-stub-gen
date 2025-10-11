@@ -38,12 +38,8 @@ pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
     let dedented_content = dedent(&stub_content);
 
     // Parse Python code using rustpython-parser
-    let parsed = ast::Suite::parse(&dedented_content, "<stub>").map_err(|e| {
-        Error::new(
-            input.span(),
-            format!("Failed to parse Python stub: {}", e),
-        )
-    })?;
+    let parsed = ast::Suite::parse(&dedented_content, "<stub>")
+        .map_err(|e| Error::new(input.span(), format!("Failed to parse Python stub: {}", e)))?;
 
     // Extract imports and function definitions
     let mut imports = Vec::new();

@@ -12,6 +12,24 @@ pub fn fn_override_type<'a>(
     Ok(cb)
 }
 
+// Example: Using python parameter in gen_stub_pyfunction attribute
+// This allows you to specify type information using Python stub syntax
+#[gen_stub_pyfunction(python = r#"
+    import collections.abc
+    import typing
+
+    def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        """
+        Example using python parameter in gen_stub_pyfunction attribute.
+        This demonstrates specifying types directly in Python stub syntax.
+        """
+"#)]
+#[pyfunction]
+pub fn fn_with_python_param<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
+    callback.call1(("Option C!",))?;
+    Ok(callback)
+}
+
 // New example using gen_function_from_python!
 #[pyfunction]
 pub fn fn_with_python_stub<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {

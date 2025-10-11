@@ -336,6 +336,12 @@ def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: .
 
 def fn_override_type(cb:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
+def fn_with_python_param(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    r"""
+    Example using python parameter in gen_stub_pyfunction attribute.
+        This demonstrates specifying types directly in Python stub syntax.
+    """
+
 def fn_with_python_stub(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example function using gen_function_from_python! macro.

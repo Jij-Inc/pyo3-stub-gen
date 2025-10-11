@@ -163,15 +163,28 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item_fn = parse2::<ItemFn>(item)?;
     let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
-    inner.parse_attr(attr)?;
+    let python_stub = inner.parse_attr(attr)?;
     pyfunction::prune_attrs(&mut item_fn);
-    Ok(quote! {
-        #item_fn
-        #[automatically_derived]
-        pyo3_stub_gen::inventory::submit! {
-            #inner
-        }
-    })
+
+    // If python parameter is provided, use it instead of auto-generated metadata
+    if let Some(stub_str) = python_stub {
+        let python_inner = gen_from_python::parse_python_function_stub(stub_str)?;
+        Ok(quote! {
+            #item_fn
+            #[automatically_derived]
+            pyo3_stub_gen::inventory::submit! {
+                #python_inner
+            }
+        })
+    } else {
+        Ok(quote! {
+            #item_fn
+            #[automatically_derived]
+            pyo3_stub_gen::inventory::submit! {
+                #inner
+            }
+        })
+    }
 }
 
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
