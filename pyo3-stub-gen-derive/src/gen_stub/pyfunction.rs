@@ -14,15 +14,15 @@ use super::{
 };
 
 pub struct PyFunctionInfo {
-    name: String,
-    args: Vec<ArgInfo>,
-    r#return: Option<TypeOrOverride>,
-    sig: Option<Signature>,
-    doc: String,
-    module: Option<String>,
-    is_async: bool,
-    deprecated: Option<DeprecatedInfo>,
-    type_ignored: Option<IgnoreTarget>,
+    pub(crate) name: String,
+    pub(crate) args: Vec<ArgInfo>,
+    pub(crate) r#return: Option<TypeOrOverride>,
+    pub(crate) sig: Option<Signature>,
+    pub(crate) doc: String,
+    pub(crate) module: Option<String>,
+    pub(crate) is_async: bool,
+    pub(crate) deprecated: Option<DeprecatedInfo>,
+    pub(crate) type_ignored: Option<IgnoreTarget>,
 }
 
 struct ModuleAttr {

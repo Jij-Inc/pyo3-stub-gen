@@ -1,7 +1,10 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::ToTokens;
 use rustpython_parser::{ast, Parse};
-use syn::{Error, LitStr, Result};
+use std::collections::HashSet;
+use syn::{Error, LitStr, Result, Type};
+
+use super::{arg::ArgInfo, pyfunction::PyFunctionInfo, util::TypeOrOverride};
 
 /// Remove common leading whitespace from all lines (similar to Python's textwrap.dedent)
 fn dedent(text: &str) -> String {
@@ -110,19 +113,21 @@ fn generate_py_function_info(
     // Check if function is async
     let is_async = false; // TODO: handle async functions
 
-    // Generate token stream
-    Ok(quote! {
-        ::pyo3_stub_gen::type_info::PyFunctionInfo {
-            name: #func_name,
-            args: &[#(#args),*],
-            r#return: #return_type,
-            doc: #doc,
-            module: None,
-            is_async: #is_async,
-            deprecated: None,
-            type_ignored: None,
-        }
-    })
+    // Construct PyFunctionInfo
+    let info = PyFunctionInfo {
+        name: func_name,
+        args,
+        r#return: return_type,
+        sig: None,
+        doc,
+        module: None,
+        is_async,
+        deprecated: None,
+        type_ignored: None,
+    };
+
+    // Convert to token stream using ToTokens
+    Ok(info.to_token_stream())
 }
 
 /// Extract docstring from function definition
@@ -138,8 +143,11 @@ fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
 }
 
 /// Extract arguments from function definition
-fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<TokenStream2>> {
-    let mut arg_tokens = Vec::new();
+fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo>> {
+    let mut arg_infos = Vec::new();
+
+    // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
+    let dummy_type: Type = syn::parse_str("()").unwrap();
 
     // Process positional arguments
     for arg in &args.args {
@@ -150,62 +158,61 @@ fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<TokenSt
             continue;
         }
 
-        let type_info = if let Some(annotation) = &arg.def.annotation {
-            type_annotation_to_token_stream(annotation, imports)?
+        let type_override = if let Some(annotation) = &arg.def.annotation {
+            type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
         } else {
             // No type annotation - use Any
-            quote! {
-                || ::pyo3_stub_gen::TypeInfo {
-                    name: "typing.Any".to_string(),
-                    import: ::std::collections::HashSet::from(["typing".into()])
-                }
+            TypeOrOverride::OverrideType {
+                r#type: dummy_type.clone(),
+                type_repr: "typing.Any".to_string(),
+                imports: HashSet::from(["typing".to_string()]),
             }
         };
 
-        arg_tokens.push(quote! {
-            ::pyo3_stub_gen::type_info::ArgInfo {
-                name: #arg_name,
-                r#type: #type_info,
-                signature: None,
-            }
+        arg_infos.push(ArgInfo {
+            name: arg_name,
+            r#type: type_override,
         });
     }
 
-    Ok(arg_tokens)
+    Ok(arg_infos)
 }
 
 /// Extract return type from function definition
 fn extract_return_type(
     returns: &Option<Box<ast::Expr>>,
     imports: &[String],
-) -> Result<TokenStream2> {
+) -> Result<Option<TypeOrOverride>> {
+    // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
+    let dummy_type: Type = syn::parse_str("()").unwrap();
+
     if let Some(return_annotation) = returns {
-        type_annotation_to_token_stream(return_annotation, imports)
+        Ok(Some(type_annotation_to_type_override(
+            return_annotation,
+            imports,
+            dummy_type,
+        )?))
     } else {
         // No return type annotation - use None (void)
-        Ok(quote! {
-            ::pyo3_stub_gen::type_info::no_return_type_output
-        })
+        Ok(None)
     }
 }
 
-/// Convert Python type annotation to TypeInfo token stream
-fn type_annotation_to_token_stream(expr: &ast::Expr, imports: &[String]) -> Result<TokenStream2> {
+/// Convert Python type annotation to TypeOrOverride
+fn type_annotation_to_type_override(
+    expr: &ast::Expr,
+    imports: &[String],
+    dummy_type: Type,
+) -> Result<TypeOrOverride> {
     let type_str = expr_to_type_string(expr);
 
-    // Convert imports to token stream
-    let import_tokens: Vec<_> = imports
-        .iter()
-        .map(|imp| {
-            quote! { #imp.into() }
-        })
-        .collect();
+    // Convert imports to HashSet
+    let import_set: HashSet<String> = imports.iter().map(|s| s.to_string()).collect();
 
-    Ok(quote! {
-        || ::pyo3_stub_gen::TypeInfo {
-            name: #type_str.to_string(),
-            import: ::std::collections::HashSet::from([#(#import_tokens),*])
-        }
+    Ok(TypeOrOverride::OverrideType {
+        r#type: dummy_type,
+        type_repr: type_str,
+        imports: import_set,
     })
 }
 
@@ -334,8 +341,8 @@ mod test {
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "typing.Optional[int]".to_string(),
                 import: ::std::collections::HashSet::from([
-                    "typing".into(),
                     "collections.abc".into(),
+                    "typing".into(),
                 ]),
             },
             doc: "Process a callback function",
