@@ -107,7 +107,7 @@ use util::*;
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result};
+use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result, Type};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
     let mut item_struct = parse2::<ItemStruct>(item)?;
@@ -191,6 +191,32 @@ pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2
     let stub_str: LitStr = parse2(input)?;
     let inner = gen_from_python::parse_python_function_stub(stub_str)?;
     Ok(quote! { #inner })
+}
+
+pub fn gen_methods_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
+    let stub_str: LitStr = parse2(input)?;
+    let (class_name, methods) = gen_from_python::parse_python_class_methods(&stub_str)?;
+
+    // Parse class name as Type
+    let class: Type = syn::parse_str(&class_name).map_err(|e| {
+        syn::Error::new(
+            stub_str.span(),
+            format!("Failed to parse class name '{}': {}", class_name, e),
+        )
+    })?;
+
+    // Generate PyMethodsInfo
+    Ok(quote! {
+        ::pyo3_stub_gen::type_info::PyMethodsInfo {
+            struct_id: ::std::any::TypeId::of::<#class>,
+            attrs: &[],
+            getters: &[],
+            setters: &[],
+            methods: &[
+                #(#methods),*
+            ],
+        }
+    })
 }
 
 pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {

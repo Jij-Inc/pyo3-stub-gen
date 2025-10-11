@@ -1,11 +1,5 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{
-    derive::*,
-    generate::MethodType,
-    inventory::submit,
-    type_info::{ArgInfo, MethodInfo, PyMethodsInfo},
-    PyStubType,
-};
+use pyo3_stub_gen::{derive::*, inventory::submit};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[pyclass]
@@ -27,29 +21,12 @@ impl Incrementer {
 }
 
 submit! {
-    PyMethodsInfo {
-        struct_id: std::any::TypeId::of::<Incrementer>,
-        attrs: &[],
-        getters: &[],
-        setters: &[],
-        methods: &[
-            MethodInfo {
-                name: "increment_1",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || i64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || i64::type_output(),
-                doc: "And this is for the second comment",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            }
-        ],
+    gen_methods_from_python! {
+        r#"
+        class Incrementer:
+            def increment_1(self, x: int) -> int:
+                """And this is for the second comment"""
+        "#
     }
 }
 
@@ -72,54 +49,17 @@ impl Incrementer2 {
 }
 
 submit! {
-    PyMethodsInfo {
-        struct_id: std::any::TypeId::of::<Incrementer2>,
-        attrs: &[],
-        getters: &[],
-        setters: &[],
-        methods: &[
-            MethodInfo {
-                name: "increment_2",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || i64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || i64::type_output(),
-                doc: "increment_2 for integers, submitted by hands",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-            MethodInfo {
-                name: "__new__",
-                args: &[],
-                r#type: MethodType::New,
-                r#return: || Incrementer2::type_output(),
-                doc: "Constructor for Incrementer2",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-            MethodInfo {
-                name: "increment_2",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || f64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || f64::type_output(),
-                doc: "increment_2 for floats, submitted by hands",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-        ],
+    gen_methods_from_python! {
+        r#"
+        class Incrementer2:
+            def increment_2(self, x: int) -> int:
+                """increment_2 for integers, submitted by hands"""
+
+            def __new__(cls) -> Incrementer2:
+                """Constructor for Incrementer2"""
+
+            def increment_2(self, x: float) -> float:
+                """increment_2 for floats, submitted by hands"""
+        "#
     }
 }

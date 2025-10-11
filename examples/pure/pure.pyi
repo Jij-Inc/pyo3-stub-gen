@@ -110,7 +110,7 @@ class HashableStruct:
 @typing.final
 class Incrementer:
     @typing.overload
-    def increment_1(self, x:builtins.int) -> builtins.int:
+    def increment_1(self, x:int) -> int:
         r"""
         And this is for the second comment
         """
@@ -124,12 +124,12 @@ class Incrementer:
 @typing.final
 class Incrementer2:
     @typing.overload
-    def increment_2(self, x:builtins.int) -> builtins.int:
+    def increment_2(self, x:int) -> int:
         r"""
         increment_2 for integers, submitted by hands
         """
     @typing.overload
-    def increment_2(self, x:builtins.float) -> builtins.float:
+    def increment_2(self, x:float) -> float:
         r"""
         increment_2 for floats, submitted by hands
         """

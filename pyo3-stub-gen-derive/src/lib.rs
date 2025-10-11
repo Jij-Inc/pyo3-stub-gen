@@ -174,3 +174,46 @@ pub fn gen_function_from_python(input: TokenStream) -> TokenStream {
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
+
+/// Generate PyMethodsInfo from Python class definition
+///
+/// This proc-macro parses Python class definition syntax and generates a PyMethodsInfo structure.
+/// It should be used inside `inventory::submit!` blocks.
+///
+/// Supports single or multiple method definitions within a class:
+///
+/// ```ignore
+/// // Single method
+/// submit! {
+///     gen_methods_from_python! {
+///         r#"
+///         class Incrementer:
+///             def increment_1(self, x: int) -> int:
+///                 """Increment by one"""
+///         "#
+///     }
+/// }
+///
+/// // Multiple methods
+/// submit! {
+///     gen_methods_from_python! {
+///         r#"
+///         class Incrementer2:
+///             def increment_2(self, x: float) -> float:
+///                 """Increment by two (float version)"""
+///
+///             def __new__(cls) -> Incrementer2:
+///                 """Constructor"""
+///
+///             def increment_2(self, x: int) -> int:
+///                 """Increment by two (int version)"""
+///         "#
+///     }
+/// }
+/// ```
+#[proc_macro]
+pub fn gen_methods_from_python(input: TokenStream) -> TokenStream {
+    gen_stub::gen_methods_from_python_impl(input.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
