@@ -22,14 +22,14 @@ pub fn fn_with_python_stub<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a,
 pyo3_stub_gen::inventory::submit! {
     pyo3_stub_gen::derive::gen_function_from_python! {
         r#"
-import collections.abc
-import typing
+        import collections.abc
+        import typing
 
-def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
-    """
-    Example function using gen_function_from_python! macro.
-    This demonstrates how to define type information using Python stub syntax.
-    """
+        def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+            """
+            Example function using gen_function_from_python! macro.
+            This demonstrates how to define type information using Python stub syntax.
+            """
         "#
     }
 }

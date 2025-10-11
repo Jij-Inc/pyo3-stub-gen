@@ -3,14 +3,43 @@ use quote::quote;
 use rustpython_parser::{ast, Parse};
 use syn::{Error, LitStr, Result};
 
+/// Remove common leading whitespace from all lines (similar to Python's textwrap.dedent)
+fn dedent(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+
+    // Find the minimum indentation (ignoring empty lines)
+    let min_indent = lines
+        .iter()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| line.len() - line.trim_start().len())
+        .min()
+        .unwrap_or(0);
+
+    // Remove the common indentation from each line
+    lines
+        .iter()
+        .map(|line| {
+            if line.len() >= min_indent {
+                &line[min_indent..]
+            } else {
+                line
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 /// Parse Python stub string and generate PyFunctionInfo token stream
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
     // Parse the input as a string literal
     let stub_str: LitStr = syn::parse2(input)?;
     let stub_content = stub_str.value();
 
+    // Remove common indentation to allow indented Python code in raw strings
+    let dedented_content = dedent(&stub_content);
+
     // Parse Python code using rustpython-parser
-    let parsed = ast::Suite::parse(&stub_content, "<stub>").map_err(|e| {
+    let parsed = ast::Suite::parse(&dedented_content, "<stub>").map_err(|e| {
         Error::new(
             stub_str.span(),
             format!("Failed to parse Python stub: {}", e),
@@ -242,8 +271,8 @@ mod test {
     fn test_basic_function() -> Result<()> {
         let input = quote! {
             r#"
-def foo(x: int) -> int:
-    """A simple function"""
+            def foo(x: int) -> int:
+                """A simple function"""
             "#
         };
         let out = gen_function_from_python_impl(input)?;
@@ -278,11 +307,11 @@ def foo(x: int) -> int:
     fn test_function_with_imports() -> Result<()> {
         let input = quote! {
             r#"
-import typing
-from collections.abc import Callable
+            import typing
+            from collections.abc import Callable
 
-def process(func: Callable[[str], int]) -> typing.Optional[int]:
-    """Process a callback function"""
+            def process(func: Callable[[str], int]) -> typing.Optional[int]:
+                """Process a callback function"""
             "#
         };
         let out = gen_function_from_python_impl(input)?;
@@ -323,11 +352,11 @@ def process(func: Callable[[str], int]) -> typing.Optional[int]:
     fn test_complex_types() -> Result<()> {
         let input = quote! {
             r#"
-import collections.abc
-import typing
+            import collections.abc
+            import typing
 
-def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
-    """Example function with complex types"""
+            def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+                """Example function with complex types"""
             "#
         };
         let out = gen_function_from_python_impl(input)?;
@@ -368,9 +397,9 @@ def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collect
     fn test_multiple_args() -> Result<()> {
         let input = quote! {
             r#"
-import typing
+            import typing
 
-def add(a: int, b: int, c: typing.Optional[int]) -> int: ...
+            def add(a: int, b: int, c: typing.Optional[int]) -> int: ...
             "#
         };
         let out = gen_function_from_python_impl(input)?;
@@ -421,8 +450,8 @@ def add(a: int, b: int, c: typing.Optional[int]) -> int: ...
     fn test_no_return_type() -> Result<()> {
         let input = quote! {
             r#"
-def print_hello(name: str):
-    """Print a greeting"""
+            def print_hello(name: str):
+                """Print a greeting"""
             "#
         };
         let out = gen_function_from_python_impl(input)?;
