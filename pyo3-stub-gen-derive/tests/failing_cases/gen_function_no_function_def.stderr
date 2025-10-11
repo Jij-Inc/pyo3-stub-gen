@@ -1,0 +1,9 @@
+error: No function definition found in Python stub
+  --> tests/failing_cases/gen_function_no_function_def.rs:6:13
+   |
+ 6 | /             r#"
+ 7 | |             import typing
+ 8 | |
+ 9 | |             # Only imports, no function definition
+10 | |             "#
+   | |______________^

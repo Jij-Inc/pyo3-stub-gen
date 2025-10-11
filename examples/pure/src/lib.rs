@@ -1,22 +1,21 @@
 #![allow(deprecated)]
 
 mod custom_exceptions;
+mod manual_submit;
+mod overloading;
+mod overriding;
+
 use custom_exceptions::*;
+use manual_submit::*;
+use overloading::*;
+use overriding::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{exceptions::PyTypeError, prelude::*, types::*, IntoPyObjectExt, PyObject};
-use pyo3_stub_gen::{
-    define_stub_info_gatherer,
-    derive::*,
-    generate::MethodType,
-    inventory::submit,
-    module_doc, module_variable,
-    type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
-    PyStubType,
-};
+use pyo3::{prelude::*, types::*};
+use pyo3_stub_gen::{define_stub_info_gatherer, derive::*, module_doc, module_variable};
 use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
 
@@ -336,238 +335,6 @@ fn default_value(num: Number) -> Number {
     num
 }
 
-#[gen_stub_pyfunction]
-#[pyfunction]
-#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
-fn fn_override_type<'a>(
-    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
-    cb: Bound<'a, PyAny>,
-) -> PyResult<Bound<'a, PyAny>> {
-    cb.call1(("Hello!",))?;
-    Ok(cb)
-}
-#[gen_stub_pyclass]
-#[pyclass]
-struct OverrideType {
-    num: isize,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl OverrideType {
-    #[gen_stub(override_return_type(type_repr="typing_extensions.Never", imports=("typing_extensions")))]
-    fn error(&self) -> PyResult<()> {
-        Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-            "I'm an error!",
-        ))
-    }
-
-    #[getter]
-    #[gen_stub(override_return_type(type_repr = "int"))]
-    fn get_num(&self) -> PyResult<Py<PyAny>> {
-        Python::attach(|py| self.num.into_py_any(py))
-    }
-
-    #[setter]
-    fn set_num(
-        &mut self,
-        #[gen_stub(override_type(type_repr = "str"))] value: Py<PyAny>,
-    ) -> PyResult<()> {
-        self.num = Python::attach(|py| value.extract::<String>(py))?.parse::<isize>()?;
-        Ok(())
-    }
-}
-
-// Test for `@overload` decorator generation
-
-/// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
-/// and then manually with `submit!` macro.
-#[gen_stub_pyfunction]
-#[pyfunction]
-fn overload_example_1(x: f64) -> f64 {
-    x + 1.0
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_1",
-        args: &[ArgInfo{
-            name: "x",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
-}
-/// Second example: all hints manually `submit!`ed via macro.
-#[pyfunction]
-fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
-    let py = ob.py();
-    if let Ok(f) = ob.extract::<f64>() {
-        (f + 1.0).into_py_any(py)
-    } else if let Ok(i) = ob.extract::<i64>() {
-        (i + 1).into_py_any(py)
-    } else {
-        Err(PyTypeError::new_err("Invalid type, expected float or int"))
-    }
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || f64::type_input(),
-        }],
-        r#return: || f64::type_output(),
-        module: None,
-        doc: "Increments float by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "Increments integer by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[pyclass]
-#[gen_stub_pyclass]
-pub struct Incrementer {}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl Incrementer {
-    #[new]
-    fn new() -> Self {
-        Incrementer {}
-    }
-
-    /// This is the original doc comment
-    fn increment_1(&self, x: f64) -> f64 {
-        x + 1.0
-    }
-}
-
-submit! {
-    PyMethodsInfo {
-        struct_id: std::any::TypeId::of::<Incrementer>,
-        attrs: &[],
-        getters: &[],
-        setters: &[],
-        methods: &[
-            MethodInfo {
-                name: "increment_1",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || i64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || i64::type_output(),
-                doc: "And this is for the second comment",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            }
-        ],
-    }
-}
-
-// Next, without gen_stub_pymethods and all submitted manually
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[pyclass]
-#[gen_stub_pyclass]
-pub struct Incrementer2 {}
-
-#[pymethods]
-impl Incrementer2 {
-    #[new]
-    fn new() -> Self {
-        Incrementer2 {}
-    }
-
-    fn increment_2(&self, x: f64) -> f64 {
-        x + 2.0
-    }
-}
-
-submit! {
-    PyMethodsInfo {
-        struct_id: std::any::TypeId::of::<Incrementer2>,
-        attrs: &[],
-        getters: &[],
-        setters: &[],
-        methods: &[
-            MethodInfo {
-                name: "increment_2",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || i64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || i64::type_output(),
-                doc: "increment_2 for integers, submitted by hands",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-            MethodInfo {
-                name: "__new__",
-                args: &[],
-                r#type: MethodType::New,
-                r#return: || Incrementer2::type_output(),
-                doc: "Constructor for Incrementer2",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-            MethodInfo {
-                name: "increment_2",
-                args: &[
-                    ArgInfo {
-                        name: "x",
-                        signature: None,
-                        r#type: || f64::type_input(),
-                    },
-                ],
-                r#type: MethodType::Instance,
-                r#return: || f64::type_output(),
-                doc: "increment_2 for floats, submitted by hands",
-                is_async: false,
-                deprecated: None,
-                type_ignored: None,
-            },
-        ],
-    }
-}
-
 // These are the tests to test the treatment of `*args` and `**kwargs` in functions
 
 /// Test struct for eq and ord comparison methods
@@ -661,6 +428,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(deprecated_function, m)?)?;
     m.add_function(wrap_pyfunction!(default_value, m)?)?;
     m.add_function(wrap_pyfunction!(fn_override_type, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_with_python_param, m)?)?;
+    m.add_function(wrap_pyfunction!(fn_with_python_stub, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;

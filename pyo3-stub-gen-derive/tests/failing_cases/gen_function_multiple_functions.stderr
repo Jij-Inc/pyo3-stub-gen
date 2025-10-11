@@ -1,0 +1,8 @@
+error: Multiple function definitions found. Only one function is allowed per gen_function_from_python! call
+ --> tests/failing_cases/gen_function_multiple_functions.rs:6:13
+  |
+6 | /             r#"
+7 | |             def foo(x: int) -> int: ...
+8 | |             def bar(y: str) -> str: ...
+9 | |             "#
+  | |______________^

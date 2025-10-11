@@ -14,41 +14,76 @@ use super::{
 };
 
 pub struct PyFunctionInfo {
-    name: String,
-    args: Vec<ArgInfo>,
-    r#return: Option<TypeOrOverride>,
-    sig: Option<Signature>,
-    doc: String,
+    pub(crate) name: String,
+    pub(crate) args: Vec<ArgInfo>,
+    pub(crate) r#return: Option<TypeOrOverride>,
+    pub(crate) sig: Option<Signature>,
+    pub(crate) doc: String,
+    pub(crate) module: Option<String>,
+    pub(crate) is_async: bool,
+    pub(crate) deprecated: Option<DeprecatedInfo>,
+    pub(crate) type_ignored: Option<IgnoreTarget>,
+}
+
+struct PyFunctionAttr {
     module: Option<String>,
-    is_async: bool,
-    deprecated: Option<DeprecatedInfo>,
-    type_ignored: Option<IgnoreTarget>,
+    python: Option<syn::LitStr>,
 }
 
-struct ModuleAttr {
-    _module: syn::Ident,
-    _eq_token: syn::token::Eq,
-    name: syn::LitStr,
-}
-
-impl Parse for ModuleAttr {
+impl Parse for PyFunctionAttr {
     fn parse(input: ParseStream) -> Result<Self> {
-        Ok(Self {
-            _module: input.parse()?,
-            _eq_token: input.parse()?,
-            name: input.parse()?,
-        })
+        let mut module = None;
+        let mut python = None;
+
+        // Parse comma-separated key-value pairs
+        while !input.is_empty() {
+            let key: syn::Ident = input.parse()?;
+            let _: syn::token::Eq = input.parse()?;
+
+            match key.to_string().as_str() {
+                "module" => {
+                    let value: syn::LitStr = input.parse()?;
+                    module = Some(value.value());
+                }
+                "python" => {
+                    let value: syn::LitStr = input.parse()?;
+                    python = Some(value);
+                }
+                _ => {
+                    return Err(Error::new(
+                        key.span(),
+                        format!("Unknown parameter: {}", key),
+                    ));
+                }
+            }
+
+            // Check for comma separator
+            if input.peek(syn::token::Comma) {
+                let _: syn::token::Comma = input.parse()?;
+            } else {
+                break;
+            }
+        }
+
+        Ok(Self { module, python })
     }
 }
 
 impl PyFunctionInfo {
-    pub fn parse_attr(&mut self, attr: TokenStream2) -> Result<()> {
+    /// Parse attribute and return python stub string if present
+    pub fn parse_attr(&mut self, attr: TokenStream2) -> Result<Option<syn::LitStr>> {
         if attr.is_empty() {
-            return Ok(());
+            return Ok(None);
         }
-        let attr: ModuleAttr = syn::parse2(attr)?;
-        self.module = Some(attr.name.value());
-        Ok(())
+        let parsed_attr: PyFunctionAttr = syn::parse2(attr)?;
+
+        // Set module if provided
+        if let Some(module) = parsed_attr.module {
+            self.module = Some(module);
+        }
+
+        // Return python stub string if provided
+        Ok(parsed_attr.python)
     }
 }
 

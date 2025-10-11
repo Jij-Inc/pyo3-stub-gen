@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use indexmap::IndexSet;
 
 use super::{RenamingRule, Signature};
 use proc_macro2::{TokenStream as TokenStream2, TokenTree};
@@ -494,7 +494,7 @@ pub(crate) enum AttributeLocation {
 #[derive(Debug, Clone, PartialEq)]
 pub struct OverrideTypeAttribute {
     pub(crate) type_repr: String,
-    pub(crate) imports: HashSet<String>,
+    pub(crate) imports: IndexSet<String>,
 }
 
 mod kw {
@@ -506,7 +506,7 @@ mod kw {
 impl Parse for OverrideTypeAttribute {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut type_repr = None;
-        let mut imports = HashSet::new();
+        let mut imports = IndexSet::new();
 
         while !input.is_empty() {
             let lookahead = input.lookahead1();
@@ -668,7 +668,7 @@ mod test {
                 *expr,
                 OverrideTypeAttribute {
                     type_repr: "typing.Never".into(),
-                    imports: HashSet::from(["typing".into()])
+                    imports: IndexSet::from(["typing".into()])
                 }
             );
         } else {
@@ -682,7 +682,7 @@ mod test {
                     *expr,
                     OverrideTypeAttribute {
                         type_repr: "collections.abc.Callable[[str]]".into(),
-                        imports: HashSet::from(["collections.abc".into()])
+                        imports: IndexSet::from(["collections.abc".into()])
                     }
                 );
             } else {

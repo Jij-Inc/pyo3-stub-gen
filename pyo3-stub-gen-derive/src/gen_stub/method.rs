@@ -22,15 +22,15 @@ pub enum MethodType {
 
 #[derive(Debug)]
 pub struct MethodInfo {
-    name: String,
-    args: Vec<ArgInfo>,
-    sig: Option<Signature>,
-    r#return: Option<TypeOrOverride>,
-    doc: String,
-    r#type: MethodType,
-    is_async: bool,
-    deprecated: Option<DeprecatedInfo>,
-    type_ignored: Option<IgnoreTarget>,
+    pub(super) name: String,
+    pub(super) args: Vec<ArgInfo>,
+    pub(super) sig: Option<Signature>,
+    pub(super) r#return: Option<TypeOrOverride>,
+    pub(super) doc: String,
+    pub(super) r#type: MethodType,
+    pub(super) is_async: bool,
+    pub(super) deprecated: Option<DeprecatedInfo>,
+    pub(super) type_ignored: Option<IgnoreTarget>,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
