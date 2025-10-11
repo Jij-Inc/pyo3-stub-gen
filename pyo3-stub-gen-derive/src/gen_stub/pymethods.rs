@@ -6,11 +6,11 @@ use super::{attr::parse_gen_stub_skip, MemberInfo, MethodInfo};
 
 #[derive(Debug)]
 pub struct PyMethodsInfo {
-    struct_id: Type,
-    attrs: Vec<MemberInfo>,
-    getters: Vec<MemberInfo>,
-    setters: Vec<MemberInfo>,
-    methods: Vec<MethodInfo>,
+    pub(crate) struct_id: Type,
+    pub(crate) attrs: Vec<MemberInfo>,
+    pub(crate) getters: Vec<MemberInfo>,
+    pub(crate) setters: Vec<MemberInfo>,
+    pub(crate) methods: Vec<MethodInfo>,
 }
 
 impl TryFrom<ItemImpl> for PyMethodsInfo {

@@ -8,7 +8,51 @@ use super::{
     dedent, extract_deprecated_from_decorators, extract_docstring, extract_return_type,
     type_annotation_to_type_override,
 };
-use crate::gen_stub::{arg::ArgInfo, method::MethodInfo, method::MethodType, util::TypeOrOverride};
+use super::pyfunction::PythonFunctionStub;
+use crate::gen_stub::{
+    arg::ArgInfo, method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo,
+    util::TypeOrOverride,
+};
+
+/// Intermediate representation for Python method stub
+pub struct PythonMethodStub {
+    pub func_stub: PythonFunctionStub,
+    pub method_type: MethodType,
+}
+
+impl TryFrom<PythonMethodStub> for MethodInfo {
+    type Error = syn::Error;
+
+    fn try_from(stub: PythonMethodStub) -> Result<Self> {
+        let func_name = stub.func_stub.func_def.name.to_string();
+
+        // Extract docstring
+        let doc = extract_docstring(&stub.func_stub.func_def);
+
+        // Extract arguments based on method type
+        let args =
+            extract_args_for_method(&stub.func_stub.func_def.args, &stub.func_stub.imports, stub.method_type)?;
+
+        // Extract return type
+        let return_type = extract_return_type(&stub.func_stub.func_def.returns, &stub.func_stub.imports)?;
+
+        // Try to extract deprecated decorator
+        let deprecated = extract_deprecated_from_decorators(&stub.func_stub.func_def.decorator_list);
+
+        // Construct MethodInfo
+        Ok(MethodInfo {
+            name: func_name,
+            args,
+            sig: None,
+            r#return: return_type,
+            doc,
+            r#type: stub.method_type,
+            is_async: stub.func_stub.is_async,
+            deprecated,
+            type_ignored: None,
+        })
+    }
+}
 
 /// Intermediate representation for Python class stub (for methods)
 pub struct PythonClassStub {
@@ -16,7 +60,7 @@ pub struct PythonClassStub {
     pub imports: Vec<String>,
 }
 
-impl TryFrom<PythonClassStub> for (String, Vec<MethodInfo>) {
+impl TryFrom<PythonClassStub> for PyMethodsInfo {
     type Error = syn::Error;
 
     fn try_from(stub: PythonClassStub) -> Result<Self> {
@@ -27,7 +71,22 @@ impl TryFrom<PythonClassStub> for (String, Vec<MethodInfo>) {
         for stmt in &stub.class_def.body {
             match stmt {
                 ast::Stmt::FunctionDef(func_def) => {
-                    let method = build_method_info(func_def, &stub.imports, false)?;
+                    // Determine method type
+                    let method_type = determine_method_type(func_def, &func_def.args);
+
+                    // Create PythonFunctionStub
+                    let func_stub = PythonFunctionStub {
+                        func_def: func_def.clone(),
+                        imports: stub.imports.clone(),
+                        is_async: false,
+                    };
+
+                    // Create PythonMethodStub and convert to MethodInfo
+                    let method_stub = PythonMethodStub {
+                        func_stub,
+                        method_type,
+                    };
+                    let method = MethodInfo::try_from(method_stub)?;
                     methods.push(method);
                 }
                 ast::Stmt::AsyncFunctionDef(func_def) => {
@@ -42,7 +101,23 @@ impl TryFrom<PythonClassStub> for (String, Vec<MethodInfo>) {
                         returns: func_def.returns.clone(),
                         type_comment: func_def.type_comment.clone(),
                     };
-                    let method = build_method_info(&sync_func, &stub.imports, true)?;
+
+                    // Determine method type
+                    let method_type = determine_method_type(&sync_func, &sync_func.args);
+
+                    // Create PythonFunctionStub
+                    let func_stub = PythonFunctionStub {
+                        func_def: sync_func,
+                        imports: stub.imports.clone(),
+                        is_async: true,
+                    };
+
+                    // Create PythonMethodStub and convert to MethodInfo
+                    let method_stub = PythonMethodStub {
+                        func_stub,
+                        method_type,
+                    };
+                    let method = MethodInfo::try_from(method_stub)?;
                     methods.push(method);
                 }
                 _ => {
@@ -58,50 +133,26 @@ impl TryFrom<PythonClassStub> for (String, Vec<MethodInfo>) {
             ));
         }
 
-        Ok((class_name, methods))
+        // Parse class name as Type
+        let struct_id: Type = syn::parse_str(&class_name).map_err(|e| {
+            Error::new(
+                proc_macro2::Span::call_site(),
+                format!("Failed to parse class name '{}': {}", class_name, e),
+            )
+        })?;
+
+        Ok(PyMethodsInfo {
+            struct_id,
+            attrs: Vec::new(),
+            getters: Vec::new(),
+            setters: Vec::new(),
+            methods,
+        })
     }
 }
 
-/// Build MethodInfo from Python function definition
-fn build_method_info(
-    func_def: &ast::StmtFunctionDef,
-    imports: &[String],
-    is_async: bool,
-) -> Result<MethodInfo> {
-    let func_name = func_def.name.to_string();
-
-    // Extract docstring
-    let doc = extract_docstring(func_def);
-
-    // Determine method type based on decorators and function name
-    let method_type = determine_method_type(func_def, &func_def.args);
-
-    // Extract arguments (skip 'self' or 'cls' for instance/class methods)
-    let args = extract_args_for_method(&func_def.args, imports, method_type)?;
-
-    // Extract return type
-    let return_type = extract_return_type(&func_def.returns, imports)?;
-
-    // Try to extract deprecated decorator
-    let deprecated = extract_deprecated_from_decorators(&func_def.decorator_list);
-
-    // Construct MethodInfo
-    Ok(MethodInfo {
-        name: func_name,
-        args,
-        sig: None,
-        r#return: return_type,
-        doc,
-        r#type: method_type,
-        is_async,
-        deprecated,
-        type_ignored: None,
-    })
-}
-
-/// Parse Python class definition and return class name and methods
-/// Returns (class_name, Vec<MethodInfo>)
-pub fn parse_python_class_methods(input: &LitStr) -> Result<(String, Vec<MethodInfo>)> {
+/// Parse Python class definition and return PyMethodsInfo
+pub fn parse_python_class_methods(input: &LitStr) -> Result<PyMethodsInfo> {
     let stub_content = input.value();
 
     // Remove common indentation to allow indented Python code in raw strings
@@ -146,10 +197,9 @@ pub fn parse_python_class_methods(input: &LitStr) -> Result<(String, Vec<MethodI
     let class_def = class_def
         .ok_or_else(|| Error::new(input.span(), "No class definition found in Python stub"))?;
 
-    // Generate methods using TryFrom
+    // Generate PyMethodsInfo using TryFrom
     let stub = PythonClassStub { class_def, imports };
-    <(String, Vec<MethodInfo>)>::try_from(stub)
-        .map_err(|e| Error::new(input.span(), format!("{}", e)))
+    PyMethodsInfo::try_from(stub).map_err(|e| Error::new(input.span(), format!("{}", e)))
 }
 
 /// Determine method type from decorators and arguments
@@ -243,11 +293,10 @@ mod test {
                     """Increment by one"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "Incrementer");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "increment",
@@ -287,12 +336,11 @@ mod test {
                     """Second method"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "Incrementer");
-        assert_eq!(methods.len(), 2);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 2);
 
-        assert_eq!(methods[0].name, "increment_1");
-        assert_eq!(methods[1].name, "increment_2");
+        assert_eq!(py_methods_info.methods[0].name, "increment_1");
+        assert_eq!(py_methods_info.methods[1].name, "increment_2");
         Ok(())
     }
 
@@ -306,11 +354,10 @@ mod test {
                     """Create something"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "MyClass");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "create",
@@ -348,11 +395,10 @@ mod test {
                     """Create from string"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "MyClass");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "from_string",
@@ -389,11 +435,10 @@ mod test {
                     """Constructor"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "MyClass");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
@@ -424,11 +469,10 @@ mod test {
                     """Process a callback"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "MyClass");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "process",
@@ -471,11 +515,10 @@ mod test {
                     """Fetch data asynchronously"""
             "#
         })?;
-        let (class_name, methods) = parse_python_class_methods(&stub_str)?;
-        assert_eq!(class_name, "MyClass");
-        assert_eq!(methods.len(), 1);
+        let py_methods_info = parse_python_class_methods(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
 
-        let out = methods[0].to_token_stream();
+        let out = py_methods_info.methods[0].to_token_stream();
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "fetch_data",
