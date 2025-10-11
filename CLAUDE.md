@@ -18,6 +18,35 @@ This is a Python stub file (*.pyi) generator for PyO3-based Rust projects. It au
 2. **Runtime**: `define_stub_info_gatherer!` macro collects metadata and reads `pyproject.toml` configuration
 3. **Generation**: Transforms metadata into Python stub syntax and generates `.pyi` files
 
+### Procedural Macro Design Pattern (`pyo3-stub-gen-derive`)
+
+The derive crate follows a consistent three-layer architecture:
+
+1. **Entry Point (`src/gen_stub.rs`)**:
+   - Public functions handle `TokenStream` parsing and generation
+   - Examples: `pyclass()`, `pyfunction()`, `gen_function_from_python_impl()`
+   - This is the ONLY module that directly manipulates `TokenStream`
+
+2. **Intermediate Representation (`src/gen_stub/*.rs`)**:
+   - Each module provides `*Info` structs (e.g., `PyFunctionInfo`, `PyClassInfo`)
+   - Conversion from `syn` types: `TryFrom<ItemFn>`, `TryFrom<ItemStruct>`, etc.
+   - Implementation of `ToTokens` trait for code generation
+
+3. **Flow Pattern**:
+   ```rust
+   // In gen_stub.rs
+   pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+       let item_fn = parse2::<ItemFn>(item)?;           // Parse TokenStream
+       let inner = PyFunctionInfo::try_from(item_fn)?;  // Convert to Info struct
+       Ok(quote! { #inner })                             // Generate via ToTokens
+   }
+   ```
+
+**Important**: When adding new functionality, follow this pattern strictly:
+- TokenStream manipulation stays in `gen_stub.rs`
+- Business logic and intermediate representations go in `gen_stub/*.rs`
+- Use `ToTokens` trait for code generation, not direct `quote!` in submodules
+
 ## Development Commands
 
 ### Build and Testing
