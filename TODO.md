@@ -1,20 +1,27 @@
 # TODO: Python Stub構文からのメタデータ生成
 
-## ✅ 実装完了 (Phase 1-3)
+## ✅ 実装完了 (Phase 1-4)
 
-**Option A** と **Option C** の実装が完了しました！
+**Phase 1-4** の実装が完了しました！
 
 ### 実装済み機能
 
-1. **Option A: `gen_function_from_python!` マクロ**
+1. **`gen_function_from_python!` マクロ** (Phase 1-3)
    - `submit!` ブロック内で使用
    - Python stub文字列から`PyFunctionInfo`を生成
    - オーバーロード定義などに使用
 
-2. **Option C: `python` パラメータ**
+2. **`python` パラメータ** (Phase 1-3)
    - `#[gen_stub_pyfunction(python = "...")]` 属性
    - 関数定義の近くに型情報を記述
    - より簡潔で読みやすい
+
+3. **`gen_methods_from_python!` マクロ** (Phase 4) 🎉
+   - **純粋なPythonクラス構文**を使用
+   - Pythonクラス定義から`PyMethodsInfo`を生成
+   - **複数メソッドを一度に定義可能**
+   - `self`/`cls`引数を自動処理
+   - インスタンス、静的、クラスメソッド、`__new__`に対応
 
 ### 使用例
 
@@ -39,7 +46,7 @@ fn func(arg: PyAny) { ... }
 
 ### テスト状況
 
-- ✅ ユニットテスト: `insta`スナップショットテスト (6テストケース)
+- ✅ ユニットテスト: `insta`スナップショットテスト (22テストケース: 関数6件、メソッド6件、その他10件)
 - ✅ 統合テスト: `examples/pure` (21/21 pytest パス)
 - ✅ 型チェック: pyright エラーなし
 - ✅ Lint: ruff エラーなし
@@ -96,7 +103,7 @@ Python開発者が慣れ親しんだ構文で型情報を書けるようにす�
 
 ### アプローチ: 2つの方法を提供
 
-#### Option A: `submit!` + `gen_function_from_python!` (関数とRust実装が離れている場合)
+#### Option A: `submit!` + Python stub マクロ (関数とRust実装が離れている場合)
 
 ```rust
 // 関数の場合
@@ -114,10 +121,13 @@ submit! {
 // メソッドの場合
 submit! {
     gen_methods_from_python! {
-        class: Incrementer,
-        method_stub: r#"
+        r#"
+        class Incrementer:
             def increment_1(self, x: int) -> int:
                 """And this is for the second comment"""
+
+            def increment_1(self, x: float) -> float:
+                """Float overload"""
         "#
     }
 }
@@ -126,6 +136,7 @@ submit! {
 **適用ケース:**
 - オーバーロードの追加型定義（`@overload`用）
 - 関数とは別の場所でまとめて型定義を書きたい場合
+- 複数メソッドをまとめて定義したい場合
 
 #### Option C: 既存マクロの拡張 (attribute macro、推奨)
 
@@ -174,17 +185,20 @@ impl Incrementer {
 
 ## 設計上の重要な決定事項
 
-### 決定: `submit!` をそのまま活用する方針
+### ✅ 決定: `submit!` をそのまま活用する方針（実装完了）
 
 `submit!` マクロの仕組みは変更せず、**`PyMethodsInfo` を生成するproc-macro** を作る：
 
 ```rust
 submit! {
     gen_methods_from_python! {
-        class: Incrementer,
-        method_stub: r#"
+        r#"
+        class Incrementer:
             def increment_1(self, x: int) -> int:
                 """And this is for the second comment"""
+
+            def increment_1(self, x: float) -> float:
+                """Float overload"""
         "#
     }
 }
@@ -213,7 +227,8 @@ submit! {
                 is_async: false,
                 deprecated: None,
                 type_ignored: None,
-            }
+            },
+            // ... more methods
         ],
     }
 }
@@ -223,12 +238,15 @@ submit! {
 - `submit!` の既存インフラをそのまま活用
 - proc-macroで完結（コンパイル時に全て解決）
 - 段階的な移行が可能（新旧両方が共存可能）
+- 純粋なPython構文を使用（既存のPythonコードをそのままコピー可能）
 
-**必要な実装:**
+**✅ 実装済み:**
 - `gen_function_from_python!` - 関数用proc-macro（→ `PyFunctionInfo`）
 - `gen_methods_from_python!` - メソッド用proc-macro（→ `PyMethodsInfo`）
 - `#[gen_stub_pyfunction(python = "...")]` - 既存マクロの拡張
-- `#[gen_stub_python("...")]` - メソッド用attribute macro（要検討）
+
+**今後の検討:**
+- `#[gen_stub_python("...")]` - メソッド用attribute macro（オプション）
 
 ### ✅ 最終決定: Python型をそのまま使う
 
@@ -411,7 +429,7 @@ fn foo() { ... }
   - [x] 複数引数の処理 (`test_multiple_args`)
   - [x] 複雑な型の処理 (`test_complex_types`)
   - [x] 戻り値なしの処理 (`test_no_return_type`)
-  - すべてのテストは`insta`スナップショットテストで検証済み
+  - 全22テストケースが`insta`スナップショットテストで検証済み（関数6件、メソッド6件含む）
 
 - [x] 統合テスト（`examples/pure`）
   - [x] **Option A のテスト: `fn_with_python_stub`**（`examples/pure/src/overriding.rs`）
@@ -465,39 +483,47 @@ fn foo() { ... }
   - [ ] 使用例とベストプラクティス
   - [ ] 既存の`submit!`との使い分けガイド
 
-### Phase 4: メソッドのサポート（要検討）
+### Phase 4: メソッドのサポート ✅
 
 関数が動作したら、メソッドにも対応：
 
 **Option A: `submit!` approach**
-- [ ] `gen_methods_from_python!` マクロの実装
-  - `class: StructName` パラメータで対象のクラスを指定
-  - メソッドのパース（`self` 引数の処理）
+- [x] `gen_methods_from_python!` マクロの実装
+  - **純粋なPythonクラス構文**を使用（`class ClassName: def method(): ...`）
+  - **複数メソッドの同時定義**に対応
+  - メソッドのパース（`self`/`cls` 引数の自動処理）
   - `PyMethodsInfo` の生成
+  - インスタンス、静的、クラスメソッド、`__new__` に対応
+  - async メソッドに対応
+  - `@deprecated` デコレータに対応
 
-**Option C: attribute macro approach（実装の複雑さ次第）**
+**Option C: attribute macro approach（将来の拡張）**
 - [ ] `#[gen_stub_python("...")]` attribute macroの検討
   - 個別メソッドに適用
   - 既存の `#[gen_stub_pymethods]` との統合方法
-  - 実装の複雑さを評価
+  - 実装の複雑さを評価（将来的に検討）
 
-- [ ] `examples/pure` での検証（`examples/pure/src/manual_submit.rs`）
-  - [ ] `Incrementer::increment_1` の変換
-  - [ ] `Incrementer2` の変換
+- [x] `examples/pure` での検証（`examples/pure/src/manual_submit.rs`）
+  - [x] `Incrementer::increment_1` の変換
+  - [x] `Incrementer2` の複数メソッド変換（98行の手動定義を削減）
 
-### Phase 5: 既存コードの移行（完了後）
+### Phase 5: 既存コードの移行 🔄
 
-- [ ] `examples/pure` の `submit!` を変換
-  - [ ] `examples/pure/src/overloading.rs`
-    - [ ] `overload_example_1`
-    - [ ] `overload_example_2`
-  - [ ] `examples/pure/src/manual_submit.rs`
-    - [ ] `Incrementer::increment_1`
-    - [ ] `Incrementer2` の複数メソッド
-  - [ ] `examples/pure/src/overriding.rs`
-    - [ ] `fn_override_type`
+- [x] `examples/pure` の `submit!` を変換
+  - [x] `examples/pure/src/overloading.rs`
+    - [x] `overload_example_1` → `gen_function_from_python!`
+    - [x] `overload_example_2` → `gen_function_from_python!`
+    - 49行削減（64%のコード削減）
+  - [x] `examples/pure/src/manual_submit.rs`
+    - [x] `Incrementer::increment_1` → `gen_methods_from_python!`
+    - [x] `Incrementer2` の複数メソッド → `gen_methods_from_python!`
+    - 98行の手動定義を簡潔なPython構文に変換
+  - [x] `examples/pure/src/overriding.rs`
+    - [x] `fn_override_type` → 既にPhase 3で`gen_function_from_python!`を使用
+    - [x] `fn_with_python_stub` → Phase 3で実装
+    - [x] `fn_with_python_param` → Phase 3で実装
 
-- [ ] 他のexamplesも確認
+- [ ] 他のexamplesも確認（必要に応じて）
 
 
 ## 未解決の課題・検討事項
@@ -545,38 +571,54 @@ gen_functions_from_python! {  // 複数形
 
 → 単一のマクロ呼び出しで複数の `PyFunctionInfo` を生成？
 
-### 5. メソッドの場合の構文
+### 5. メソッドの場合の構文 ✅
+
+**✅ 実装完了: 純粋なPythonクラス構文**
 
 ```rust
 gen_methods_from_python! {
-    class: Incrementer,  // ← Rustのクラス（struct）名が必要
-    method_stub: r#"
-        def increment_1(self, x: int) -> int: ...
+    r#"
+    class Incrementer:
+        def increment_1(self, x: int) -> int:
+            """Documentation"""
+
+        def increment_1(self, x: float) -> float:
+            """Overload for float"""
     "#
 }
 ```
 
-`class:` パラメータでRustのクラス（struct）を指定する必要がある
-（`struct_id: TypeId::of::<Incrementer>` のため）
+- クラス名は自動的にRustの型として解釈される（`struct_id: TypeId::of::<Incrementer>`）
+- 複数メソッドを一度に定義可能
+- `self`/`cls` 引数は自動処理される
 
 ## 次のステップ
 
 1. ✅ 既存実装の理解（完了）
 2. ✅ 設計方針の決定（完了）
 3. ✅ パーサーの選択（完了: `rustpython-parser`）
-4. ✅ 実装完了
+4. ✅ Phase 1-3 実装完了（関数のサポート）
    - `rustpython-parser` を使用してPython stub をパース
    - `PyFunctionInfo` の生成コード実装
    - Option A: `gen_function_from_python!` マクロ
    - Option C: `#[gen_stub_pyfunction(python = "...")]` 属性
-5. ✅ `examples/pure` で動作確認
-   - すべてのテストがパス
-6. ⏳ ドキュメント更新とフィードバック
+5. ✅ Phase 4 実装完了（メソッドのサポート）
+   - `gen_methods_from_python!` マクロ
+   - 純粋なPythonクラス構文の使用
+   - 複数メソッドの同時定義に対応
+   - async、deprecated、静的メソッドなどに対応
+6. ✅ Phase 5 実装完了（既存コードの移行）
+   - `examples/pure` の全ファイル変換完了
+   - 大幅なコード削減を達成（49-98行削減）
+7. ✅ `examples/pure` で動作確認
+   - すべてのテストがパス（22 unit tests, 21 pytest）
+8. ⏳ ドキュメント更新とフィードバック
    - [ ] `CLAUDE.md`に新機能を追加
    - [ ] 既存の`submit!`との使い分けガイド
-7. 🔄 次フェーズ（オプション）
-   - メソッドへの対応 (Phase 4)
-   - オーバーロードの既存コード移行 (Phase 5)
+   - [ ] 使用例とベストプラクティスの追加
+9. 🔜 今後の拡張（オプション）
+   - [ ] Option C for methods: `#[gen_stub_python("...")]` attribute macro
+   - [ ] 他のexamplesプロジェクトへの適用検討
 
 ## 参考リンク
 
