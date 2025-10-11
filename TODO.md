@@ -7,7 +7,7 @@
 ### 現在の問題点
 
 ```rust
-// examples/pure/src/lib.rs:473-498
+// examples/pure/src/manual_submit.rs の Incrementer
 submit! {
     PyMethodsInfo {
         struct_id: std::any::TypeId::of::<Incrementer>,
@@ -395,7 +395,7 @@ inventory::submit! {
   - [ ] パースエラーのテスト
 
 - [ ] 統合テスト（`examples/pure`）
-  - [ ] **最初のテストケース: `fn_override_type`**
+  - [ ] **最初のテストケース: `fn_override_type`**（`examples/pure/src/overriding.rs`）
 
     **Step 1: Option A で直接テスト**
     ```rust
@@ -442,7 +442,7 @@ inventory::submit! {
     - 既存の `submit!` ブロックを削除
     - より簡潔に書けることを確認
 
-  - [ ] **オーバーロードのテスト: `overload_example_1`**（Option A を使用）
+  - [ ] **オーバーロードのテスト: `overload_example_1`**（`examples/pure/src/overloading.rs`、Option A を使用）
     ```rust
     #[gen_stub_pyfunction]
     #[pyfunction]
@@ -481,17 +481,21 @@ inventory::submit! {
   - 既存の `#[gen_stub_pymethods]` との統合方法
   - 実装の複雑さを評価
 
-- [ ] `examples/pure` での検証
+- [ ] `examples/pure` での検証（`examples/pure/src/manual_submit.rs`）
   - [ ] `Incrementer::increment_1` の変換
   - [ ] `Incrementer2` の変換
 
 ### Phase 5: 既存コードの移行（完了後）
 
-- [ ] `examples/pure/src/lib.rs`の`submit!`を変換
-  - [ ] `overload_example_1` (lines 391-406)
-  - [ ] `overload_example_2` (lines 420-452)
-  - [ ] `Incrementer` (lines 473-498)
-  - [ ] `Incrementer2` (lines 518-569)
+- [ ] `examples/pure` の `submit!` を変換
+  - [ ] `examples/pure/src/overloading.rs`
+    - [ ] `overload_example_1`
+    - [ ] `overload_example_2`
+  - [ ] `examples/pure/src/manual_submit.rs`
+    - [ ] `Incrementer::increment_1`
+    - [ ] `Incrementer2` の複数メソッド
+  - [ ] `examples/pure/src/overriding.rs`
+    - [ ] `fn_override_type`
 
 - [ ] 他のexamplesも確認
 
