@@ -93,12 +93,8 @@ pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
     }
 
     // Check that exactly one function is defined
-    let (func_def, is_async) = function.ok_or_else(|| {
-        Error::new(
-            input.span(),
-            "No function definition found in Python stub",
-        )
-    })?;
+    let (func_def, is_async) = function
+        .ok_or_else(|| Error::new(input.span(), "No function definition found in Python stub"))?;
 
     // Generate PyFunctionInfo
     build_py_function_info(&func_def, &imports, is_async)
@@ -168,19 +164,13 @@ fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<Deprec
                 if let ast::Expr::Name(name) = &*call.func {
                     if name.id.as_str() == "deprecated" {
                         // Try to extract the message from the first argument
-                        let note = if let Some(arg) = call.args.first() {
-                            if let ast::Expr::Constant(constant) = arg {
-                                if let ast::Constant::Str(s) = &constant.value {
-                                    Some(s.to_string())
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            }
-                        } else {
-                            None
-                        };
+                        let note = call.args.first().and_then(|arg| match arg {
+                            ast::Expr::Constant(constant) => match &constant.value {
+                                ast::Constant::Str(s) => Some(s.to_string()),
+                                _ => None,
+                            },
+                            _ => None,
+                        });
                         return Some(DeprecatedInfo { since: None, note });
                     }
                 }
