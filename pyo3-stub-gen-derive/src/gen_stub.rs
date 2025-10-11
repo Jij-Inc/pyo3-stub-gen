@@ -77,9 +77,9 @@
 
 mod arg;
 mod attr;
-mod gen_from_python;
 mod member;
 mod method;
+mod parse_python;
 mod pyclass;
 mod pyclass_complex_enum;
 mod pyclass_enum;
@@ -168,7 +168,7 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
 
     // If python parameter is provided, use it instead of auto-generated metadata
     if let Some(stub_str) = python_stub {
-        let python_inner = gen_from_python::parse_python_function_stub(stub_str)?;
+        let python_inner = parse_python::parse_python_function_stub(stub_str)?;
         Ok(quote! {
             #item_fn
             #[automatically_derived]
@@ -189,13 +189,13 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
 
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
     let stub_str: LitStr = parse2(input)?;
-    let inner = gen_from_python::parse_python_function_stub(stub_str)?;
+    let inner = parse_python::parse_python_function_stub(stub_str)?;
     Ok(quote! { #inner })
 }
 
 pub fn gen_methods_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
     let stub_str: LitStr = parse2(input)?;
-    let (class_name, methods) = gen_from_python::parse_python_class_methods(&stub_str)?;
+    let (class_name, methods) = parse_python::parse_python_class_methods(&stub_str)?;
 
     // Parse class name as Type
     let class: Type = syn::parse_str(&class_name).map_err(|e| {
