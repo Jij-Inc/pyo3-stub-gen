@@ -1,5 +1,5 @@
 use rustpython_parser::{ast, Parse};
-use std::collections::HashSet;
+use indexmap::IndexSet;
 use syn::{Error, LitStr, Result, Type};
 
 use super::{arg::ArgInfo, pyfunction::PyFunctionInfo, util::TypeOrOverride};
@@ -154,7 +154,7 @@ fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo
             TypeOrOverride::OverrideType {
                 r#type: dummy_type.clone(),
                 type_repr: "typing.Any".to_string(),
-                imports: HashSet::from(["typing".to_string()]),
+                imports: IndexSet::from(["typing".to_string()]),
             }
         };
 
@@ -195,8 +195,8 @@ fn type_annotation_to_type_override(
 ) -> Result<TypeOrOverride> {
     let type_str = expr_to_type_string(expr);
 
-    // Convert imports to HashSet
-    let import_set: HashSet<String> = imports.iter().map(|s| s.to_string()).collect();
+    // Convert imports to IndexSet
+    let import_set: IndexSet<String> = imports.iter().map(|s| s.to_string()).collect();
 
     Ok(TypeOrOverride::OverrideType {
         r#type: dummy_type,
@@ -323,8 +323,8 @@ mod test {
                     r#type: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
                         import: ::std::collections::HashSet::from([
-                            "collections.abc".into(),
                             "typing".into(),
+                            "collections.abc".into(),
                         ]),
                     },
                     signature: None,
@@ -369,8 +369,8 @@ mod test {
                     r#type: || ::pyo3_stub_gen::TypeInfo {
                         name: "collections.abc.Callable[[str], typing.Any]".to_string(),
                         import: ::std::collections::HashSet::from([
-                            "typing".into(),
                             "collections.abc".into(),
+                            "typing".into(),
                         ]),
                     },
                     signature: None,
