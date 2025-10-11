@@ -1,23 +1,25 @@
 #![allow(deprecated)]
 
 mod custom_exceptions;
+mod overloading;
 mod overriding;
 
 use custom_exceptions::*;
+use overloading::*;
 use overriding::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use ahash::RandomState;
-use pyo3::{exceptions::PyTypeError, prelude::*, types::*, IntoPyObjectExt, PyObject};
+use pyo3::{prelude::*, types::*};
 use pyo3_stub_gen::{
     define_stub_info_gatherer,
     derive::*,
     generate::MethodType,
     inventory::submit,
     module_doc, module_variable,
-    type_info::{ArgInfo, MethodInfo, PyFunctionInfo, PyMethodsInfo},
+    type_info::{ArgInfo, MethodInfo, PyMethodsInfo},
     PyStubType,
 };
 use rust_decimal::Decimal;
@@ -337,79 +339,6 @@ fn deprecated_function() {
 #[pyo3(signature = (num = Number::Float))]
 fn default_value(num: Number) -> Number {
     num
-}
-
-// Test for `@overload` decorator generation
-
-/// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
-/// and then manually with `submit!` macro.
-#[gen_stub_pyfunction]
-#[pyfunction]
-fn overload_example_1(x: f64) -> f64 {
-    x + 1.0
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_1",
-        args: &[ArgInfo{
-            name: "x",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
-}
-/// Second example: all hints manually `submit!`ed via macro.
-#[pyfunction]
-fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
-    let py = ob.py();
-    if let Ok(f) = ob.extract::<f64>() {
-        (f + 1.0).into_py_any(py)
-    } else if let Ok(i) = ob.extract::<i64>() {
-        (i + 1).into_py_any(py)
-    } else {
-        Err(PyTypeError::new_err("Invalid type, expected float or int"))
-    }
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || f64::type_input(),
-        }],
-        r#return: || f64::type_output(),
-        module: None,
-        doc: "Increments float by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
-}
-
-submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "Increments integer by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
