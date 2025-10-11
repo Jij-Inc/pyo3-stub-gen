@@ -1,0 +1,7 @@
+error: Failed to parse Python stub: invalid syntax. Got unexpected token '->' at byte offset 16
+ --> tests/failing_cases/gen_function_invalid_syntax.rs:6:13
+  |
+6 | /             r#"
+7 | |             def foo(x: int -> int:  # Invalid syntax: missing closing paren
+8 | |             "#
+  | |______________^

@@ -110,7 +110,7 @@ class HashableStruct:
 @typing.final
 class Incrementer:
     @typing.overload
-    def increment_1(self, x:builtins.int) -> builtins.int:
+    def increment_1(self, x:int) -> int:
         r"""
         And this is for the second comment
         """
@@ -124,12 +124,12 @@ class Incrementer:
 @typing.final
 class Incrementer2:
     @typing.overload
-    def increment_2(self, x:builtins.int) -> builtins.int:
+    def increment_2(self, x:int) -> int:
         r"""
         increment_2 for integers, submitted by hands
         """
     @typing.overload
-    def increment_2(self, x:builtins.float) -> builtins.float:
+    def increment_2(self, x:float) -> float:
         r"""
         increment_2 for floats, submitted by hands
         """
@@ -336,6 +336,18 @@ def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: .
 
 def fn_override_type(cb:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
+def fn_with_python_param(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    r"""
+    Example using python parameter in gen_stub_pyfunction attribute.
+        This demonstrates specifying types directly in Python stub syntax.
+    """
+
+def fn_with_python_stub(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    r"""
+    Example function using gen_function_from_python! macro.
+        This demonstrates how to define type information using Python stub syntax.
+    """
+
 def func_with_kwargs(**kwargs) -> builtins.bool:
     r"""
     Takes a variable number of keyword arguments and does nothing
@@ -347,7 +359,7 @@ def func_with_star_arg(*args) -> builtins.str:
     """
 
 @typing.overload
-def overload_example_1(x:builtins.int) -> builtins.int: ...
+def overload_example_1(x:int) -> int: ...
 
 @typing.overload
 def overload_example_1(x:builtins.float) -> builtins.float:
@@ -357,13 +369,13 @@ def overload_example_1(x:builtins.float) -> builtins.float:
     """
 
 @typing.overload
-def overload_example_2(ob:builtins.int) -> builtins.int:
+def overload_example_2(ob:int) -> int:
     r"""
     Increments integer by 1
     """
 
 @typing.overload
-def overload_example_2(ob:builtins.float) -> builtins.float:
+def overload_example_2(ob:float) -> float:
     r"""
     Increments float by 1
     """

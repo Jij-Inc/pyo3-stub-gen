@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-
+use indexmap::IndexSet;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::{
@@ -103,7 +102,7 @@ pub enum TypeOrOverride {
     OverrideType {
         r#type: Type,
         type_repr: String,
-        imports: HashSet<String>,
+        imports: IndexSet<String>,
     },
 }
 
