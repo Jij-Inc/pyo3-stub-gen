@@ -35,7 +35,7 @@ log = "0.4.28"
 maplit = "1.0.2"
 num-complex = "0.4.6"
 numpy = ">= 0.26.0"
-ordered-float = { version = "5.0", default-features = false }
+ordered-float = { version = "5.1", default-features = false }
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.101"
 pyo3 = ">= 0.26.0"
@@ -44,5 +44,5 @@ quote = "1.0.41"
 serde = { version = "1.0.223", features = ["derive"] }
 syn = "2.0.106"
 test-case = "3.3.1"
-toml = "0.9.5"
+toml = "0.9.8"
 trybuild = "1.0.111"
