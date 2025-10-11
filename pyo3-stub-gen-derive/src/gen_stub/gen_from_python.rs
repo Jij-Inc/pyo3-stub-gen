@@ -163,7 +163,7 @@ pub fn parse_python_class_methods(input: &LitStr) -> Result<(String, Vec<MethodI
             ast::Stmt::AsyncFunctionDef(func_def) => {
                 // Convert AsyncFunctionDef to FunctionDef for uniform processing
                 let sync_func = ast::StmtFunctionDef {
-                    range: func_def.range.clone(),
+                    range: func_def.range,
                     name: func_def.name.clone(),
                     type_params: func_def.type_params.clone(),
                     args: func_def.args.clone(),
@@ -313,13 +313,12 @@ fn extract_args_for_method(
         let arg_name = arg.def.arg.to_string();
 
         // Skip 'self' or 'cls' for instance/class/new methods (first argument only)
-        if idx == 0 {
-            if (method_type == MethodType::Instance && arg_name == "self")
+        if idx == 0
+            && ((method_type == MethodType::Instance && arg_name == "self")
                 || (method_type == MethodType::Class && arg_name == "cls")
-                || (method_type == MethodType::New && arg_name == "cls")
-            {
-                continue;
-            }
+                || (method_type == MethodType::New && arg_name == "cls"))
+        {
+            continue;
         }
 
         let type_override = if let Some(annotation) = &arg.def.annotation {
