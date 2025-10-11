@@ -14,9 +14,7 @@ pub fn fn_override_type<'a>(
 
 // New example using gen_function_from_python!
 #[pyfunction]
-pub fn fn_with_python_stub<'a>(
-    callback: Bound<'a, PyAny>,
-) -> PyResult<Bound<'a, PyAny>> {
+pub fn fn_with_python_stub<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
     callback.call1(("World!",))?;
     Ok(callback)
 }

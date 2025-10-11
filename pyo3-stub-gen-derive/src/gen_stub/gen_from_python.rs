@@ -10,8 +10,12 @@ pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2
     let stub_content = stub_str.value();
 
     // Parse Python code using rustpython-parser
-    let parsed = ast::Suite::parse(&stub_content, "<stub>")
-        .map_err(|e| Error::new(stub_str.span(), format!("Failed to parse Python stub: {}", e)))?;
+    let parsed = ast::Suite::parse(&stub_content, "<stub>").map_err(|e| {
+        Error::new(
+            stub_str.span(),
+            format!("Failed to parse Python stub: {}", e),
+        )
+    })?;
 
     // Extract imports and function definitions
     let mut imports = Vec::new();
@@ -94,12 +98,10 @@ fn generate_py_function_info(
 
 /// Extract docstring from function definition
 fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
-    if let Some(first_stmt) = func_def.body.first() {
-        if let ast::Stmt::Expr(expr_stmt) = first_stmt {
-            if let ast::Expr::Constant(constant) = &*expr_stmt.value {
-                if let ast::Constant::Str(s) = &constant.value {
-                    return s.to_string();
-                }
+    if let Some(ast::Stmt::Expr(expr_stmt)) = func_def.body.first() {
+        if let ast::Expr::Constant(constant) = &*expr_stmt.value {
+            if let ast::Constant::Str(s) = &constant.value {
+                return s.to_string();
             }
         }
     }
@@ -107,10 +109,7 @@ fn extract_docstring(func_def: &ast::StmtFunctionDef) -> String {
 }
 
 /// Extract arguments from function definition
-fn extract_args(
-    args: &ast::Arguments,
-    imports: &[String],
-) -> Result<Vec<TokenStream2>> {
+fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<TokenStream2>> {
     let mut arg_tokens = Vec::new();
 
     // Process positional arguments
@@ -162,16 +161,16 @@ fn extract_return_type(
 }
 
 /// Convert Python type annotation to TypeInfo token stream
-fn type_annotation_to_token_stream(
-    expr: &ast::Expr,
-    imports: &[String],
-) -> Result<TokenStream2> {
+fn type_annotation_to_token_stream(expr: &ast::Expr, imports: &[String]) -> Result<TokenStream2> {
     let type_str = expr_to_type_string(expr);
 
     // Convert imports to token stream
-    let import_tokens: Vec<_> = imports.iter().map(|imp| {
-        quote! { #imp.into() }
-    }).collect();
+    let import_tokens: Vec<_> = imports
+        .iter()
+        .map(|imp| {
+            quote! { #imp.into() }
+        })
+        .collect();
 
     Ok(quote! {
         || ::pyo3_stub_gen::TypeInfo {
@@ -191,7 +190,11 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
     match expr {
         ast::Expr::Name(name) => name.id.to_string(),
         ast::Expr::Attribute(attr) => {
-            format!("{}.{}", expr_to_type_string_inner(&attr.value, false), attr.attr)
+            format!(
+                "{}.{}",
+                expr_to_type_string_inner(&attr.value, false),
+                attr.attr
+            )
         }
         ast::Expr::Subscript(subscript) => {
             let base = expr_to_type_string_inner(&subscript.value, false);
@@ -199,11 +202,19 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
             format!("{}[{}]", base, slice)
         }
         ast::Expr::List(list) => {
-            let elements: Vec<String> = list.elts.iter().map(|e| expr_to_type_string_inner(e, false)).collect();
+            let elements: Vec<String> = list
+                .elts
+                .iter()
+                .map(|e| expr_to_type_string_inner(e, false))
+                .collect();
             format!("[{}]", elements.join(", "))
         }
         ast::Expr::Tuple(tuple) => {
-            let elements: Vec<String> = tuple.elts.iter().map(|e| expr_to_type_string_inner(e, in_subscript)).collect();
+            let elements: Vec<String> = tuple
+                .elts
+                .iter()
+                .map(|e| expr_to_type_string_inner(e, in_subscript))
+                .collect();
             if in_subscript {
                 // In subscript context, preserve tuple structure without extra parentheses
                 elements.join(", ")
