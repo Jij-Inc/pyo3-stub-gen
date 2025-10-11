@@ -48,9 +48,23 @@ submit! {
 
 Python開発者が慣れ親しんだ構文で型情報を書けるようにする。
 
-既存の `submit!` マクロはそのまま使い、その中で新しいproc-macroを使う形：
+### アプローチ: 2つの方法を提供
+
+#### Option A: `submit!` + `gen_function_from_python!` (関数とRust実装が離れている場合)
 
 ```rust
+// 関数の場合
+submit! {
+    gen_function_from_python! {
+        r#"
+            import collections.abc
+            import typing
+
+            def overload_example_1(x: int) -> int: ...
+        "#
+    }
+}
+
 // メソッドの場合
 submit! {
     gen_methods_from_python! {
@@ -61,23 +75,56 @@ submit! {
         "#
     }
 }
+```
 
-// 関数の場合
-submit! {
-    gen_function_from_python! {
-        r#"
-            def overload_example_1(x: int) -> int: ...
-        "#
-    }
+**適用ケース:**
+- オーバーロードの追加型定義（`@overload`用）
+- 関数とは別の場所でまとめて型定義を書きたい場合
+
+#### Option C: 既存マクロの拡張 (attribute macro、推奨)
+
+```rust
+#[gen_stub_pyfunction(python = r#"
+    import collections.abc
+    import typing
+
+    def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
+"#)]
+#[pyfunction]
+fn fn_override_type<'a>(
+    cb: Bound<'a, PyAny>,
+) -> PyResult<Bound<'a, PyAny>> {
+    cb.call1(("Hello!",))?;
+    Ok(cb)
 }
 ```
+
+**適用ケース:**
+- 関数定義の近くに型情報を書きたい場合
+- 既存の `#[gen_stub(override_type)]` の代替として
+- より簡潔で読みやすい
+
+**メソッドの場合（要検討）:**
+```rust
+#[gen_stub_pymethods]
+#[pymethods]
+impl Incrementer {
+    #[gen_stub_python(r#"
+        def increment_1(self, x: int) -> int:
+            """Additional overload"""
+    "#)]
+    fn increment_1(&self, x: f64) -> f64 { x + 1.0 }
+}
+```
+※ 実装の複雑さ次第で対応
 
 ### 利点
 
 1. **可読性**: Pythonの構文そのままなので直感的
 2. **保守性**: `.pyi`ファイルとの一貫性が保たれる
-3. **エラー削減**: 手動での構造体構築が不要
-4. **既存インフラ活用**: `submit!` と `inventory` をそのまま使える
+3. **柔軟性**: 用途に応じて2つのアプローチから選択可能
+4. **簡潔性**: Option Cは特に簡潔で関数定義の近くに書ける
+5. **既存インフラ活用**: `submit!` と `inventory` をそのまま使える
 
 ## 設計上の重要な決定事項
 
@@ -131,9 +178,11 @@ submit! {
 - proc-macroで完結（コンパイル時に全て解決）
 - 段階的な移行が可能（新旧両方が共存可能）
 
-**必要なproc-macro:**
-- `gen_methods_from_python!` - メソッド用（→ `PyMethodsInfo`）
-- `gen_function_from_python!` - 関数用（→ `PyFunctionInfo`）
+**必要な実装:**
+- `gen_function_from_python!` - 関数用proc-macro（→ `PyFunctionInfo`）
+- `gen_methods_from_python!` - メソッド用proc-macro（→ `PyMethodsInfo`）
+- `#[gen_stub_pyfunction(python = "...")]` - 既存マクロの拡張
+- `#[gen_stub_python("...")]` - メソッド用attribute macro（要検討）
 
 ### ✅ 最終決定: Python型をそのまま使う
 
@@ -241,9 +290,48 @@ PyFunctionInfo {
 
 まずは **関数のみ** に焦点を絞る：
 
+**実装の関係性:**
+
+Option C は Option A の糖衣構文として実装：
+
+```rust
+// Option C（ユーザーが書くコード）
+#[gen_stub_pyfunction(python = r#"def foo(): ..."#)]
+#[pyfunction]
+fn foo() { ... }
+
+// ↓ proc-macroが展開
+
+// Option A（展開後のコード）
+#[pyfunction]
+fn foo() { ... }
+
+inventory::submit! {
+    gen_function_from_python! {
+        r#"def foo(): ..."#
+    }
+}
+```
+
+**実装順序:**
+1. Option A: `gen_function_from_python!` の実装（コア）
+2. Option C: `#[gen_stub_pyfunction(python = "...")]` の実装（ラッパー）
+
 - [ ] proc-macro の基本構造
   - `pyo3-stub-gen-derive/src/gen_stub/gen_from_python.rs` (新モジュール)
-  - `gen_function_from_python!` マクロのエントリポイント
+  - 共通のパーサーとコード生成ロジック
+
+- [ ] **Step 1: Option A の実装**（コア機能）
+  - `gen_function_from_python!` proc-macro
+  - Python stub 文字列を受け取る
+  - `PyFunctionInfo` 構造体のトークンストリームを生成
+  - `submit!` 内で使用される想定
+
+- [ ] **Step 2: Option C の実装**（糖衣構文）
+  - 既存の `gen_stub_pyfunction` を拡張
+  - `python = "..."` パラメータを受け取る
+  - 関数定義をそのまま出力 + `inventory::submit!` ブロックを追加
+  - 内部で `gen_function_from_python!` を呼び出すだけ
 
 - [ ] Python stub パーサー
   - [ ] import文の抽出
@@ -307,7 +395,54 @@ PyFunctionInfo {
   - [ ] パースエラーのテスト
 
 - [ ] 統合テスト（`examples/pure`）
-  - [ ] 既存の `overload_example_1` を新マクロで書き直し
+  - [ ] **最初のテストケース: `fn_override_type`**
+
+    **Step 1: Option A で直接テスト**
+    ```rust
+    #[pyfunction]
+    fn fn_override_type<'a>(
+        cb: Bound<'a, PyAny>,
+    ) -> PyResult<Bound<'a, PyAny>> {
+        cb.call1(("Hello!",))?;
+        Ok(cb)
+    }
+
+    submit! {
+        gen_function_from_python! {
+            r#"
+                import collections.abc
+                import typing
+
+                def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
+            "#
+        }
+    }
+    ```
+    - 既存の `#[gen_stub_pyfunction]` と `#[gen_stub(override_type)]` を削除
+    - `cargo run --bin stub_gen` でstub生成
+    - 生成された`.pyi`が既存と同じか確認
+    - `task pure:test` で型チェックが通ることを確認
+
+    **Step 2: Option C で書き直し**（Option A が動作したら）
+    ```rust
+    #[gen_stub_pyfunction(python = r#"
+        import collections.abc
+        import typing
+
+        def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
+    "#)]
+    #[pyfunction]
+    fn fn_override_type<'a>(
+        cb: Bound<'a, PyAny>,
+    ) -> PyResult<Bound<'a, PyAny>> {
+        cb.call1(("Hello!",))?;
+        Ok(cb)
+    }
+    ```
+    - 既存の `submit!` ブロックを削除
+    - より簡潔に書けることを確認
+
+  - [ ] **オーバーロードのテスト: `overload_example_1`**（Option A を使用）
     ```rust
     #[gen_stub_pyfunction]
     #[pyfunction]
@@ -323,23 +458,28 @@ PyFunctionInfo {
         }
     }
     ```
-  - [ ] `cargo run --bin stub_gen` でstub生成
-  - [ ] 生成された`.pyi`ファイルに`@overload`が正しく出力されるか確認
-  - [ ] `task pure:test` で型チェックが通ることを確認
+    - `@overload`が正しく出力されるか確認
 
 - [ ] ドキュメント更新
   - [ ] `CLAUDE.md`に新機能を追加
   - [ ] 使用例とベストプラクティス
   - [ ] 既存の`submit!`との使い分けガイド
 
-### Phase 4: メソッドのサポート（オプション）
+### Phase 4: メソッドのサポート（要検討）
 
 関数が動作したら、メソッドにも対応：
 
+**Option A: `submit!` approach**
 - [ ] `gen_methods_from_python!` マクロの実装
   - `class: StructName` パラメータで対象のクラスを指定
   - メソッドのパース（`self` 引数の処理）
   - `PyMethodsInfo` の生成
+
+**Option C: attribute macro approach（実装の複雑さ次第）**
+- [ ] `#[gen_stub_python("...")]` attribute macroの検討
+  - 個別メソッドに適用
+  - 既存の `#[gen_stub_pymethods]` との統合方法
+  - 実装の複雑さを評価
 
 - [ ] `examples/pure` での検証
   - [ ] `Incrementer::increment_1` の変換
