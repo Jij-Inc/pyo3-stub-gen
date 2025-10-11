@@ -359,7 +359,7 @@ def func_with_star_arg(*args) -> builtins.str:
     """
 
 @typing.overload
-def overload_example_1(x:builtins.int) -> builtins.int: ...
+def overload_example_1(x:int) -> int: ...
 
 @typing.overload
 def overload_example_1(x:builtins.float) -> builtins.float:
@@ -369,13 +369,13 @@ def overload_example_1(x:builtins.float) -> builtins.float:
     """
 
 @typing.overload
-def overload_example_2(ob:builtins.int) -> builtins.int:
+def overload_example_2(ob:int) -> int:
     r"""
     Increments integer by 1
     """
 
 @typing.overload
-def overload_example_2(ob:builtins.float) -> builtins.float:
+def overload_example_2(ob:float) -> float:
     r"""
     Increments float by 1
     """

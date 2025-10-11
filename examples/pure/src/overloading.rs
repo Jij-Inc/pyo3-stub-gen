@@ -1,12 +1,7 @@
 //! Test for `@overload` decorator generation
 
 use pyo3::{exceptions::PyTypeError, prelude::*, IntoPyObjectExt, PyObject};
-use pyo3_stub_gen::{
-    derive::*,
-    inventory::submit,
-    type_info::{ArgInfo, PyFunctionInfo},
-    PyStubType,
-};
+use pyo3_stub_gen::{derive::*, inventory::submit};
 
 /// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
 /// and then manually with `submit!` macro.
@@ -17,19 +12,10 @@ pub fn overload_example_1(x: f64) -> f64 {
 }
 
 submit! {
-    PyFunctionInfo {
-        name: "overload_example_1",
-        args: &[ArgInfo{
-            name: "x",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
+    gen_function_from_python! {
+        r#"
+        def overload_example_1(x: int) -> int: ...
+        "#
     }
 }
 /// Second example: all hints manually `submit!`ed via macro.
@@ -46,35 +32,19 @@ pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
 }
 
 submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || f64::type_input(),
-        }],
-        r#return: || f64::type_output(),
-        module: None,
-        doc: "Increments float by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
+    gen_function_from_python! {
+        r#"
+        def overload_example_2(ob: float) -> float:
+            """Increments float by 1"""
+        "#
     }
 }
 
 submit! {
-    PyFunctionInfo {
-        name: "overload_example_2",
-        args: &[ArgInfo{
-            name: "ob",
-            signature: None,
-            r#type: || i64::type_input(),
-        }],
-        r#return: || i64::type_output(),
-        module: None,
-        doc: "Increments integer by 1",
-        is_async: false,
-        deprecated: None,
-        type_ignored: None,
+    gen_function_from_python! {
+        r#"
+        def overload_example_2(ob: int) -> int:
+            """Increments integer by 1"""
+        "#
     }
 }
