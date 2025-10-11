@@ -1,5 +1,5 @@
-use rustpython_parser::{ast, Parse};
 use indexmap::IndexSet;
+use rustpython_parser::{ast, Parse};
 use syn::{Error, LitStr, Result, Type};
 
 use super::{arg::ArgInfo, pyfunction::PyFunctionInfo, util::TypeOrOverride};
