@@ -932,9 +932,9 @@ checksum = "c3160422bbd54dd5ecfdca71e5fd59b7b8fe2b1697ab2baf64f6d05dcc66d298"
 
 [[package]]
 name = "rust_decimal"
-version = "1.38.0"
+version = "1.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8975fc98059f365204d635119cf9c5a60ae67b841ed49b5422a9a7e56cdfac0"
+checksum = "35affe401787a9bd846712274d97654355d21b2a2c092a3139aabe31e9022282"
 dependencies = [
  "arrayvec",
  "num-traits",
@@ -1437,9 +1437,9 @@ dependencies = [
 
 [[package]]
 name = "windows-core"
-version = "0.62.1"
+version = "0.62.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6844ee5416b285084d3d3fffd743b925a6c9385455f64f6d4fa3031c4c2749a9"
+checksum = "b8e83a14d34d0623b51dce9581199302a221863196a1dde71a7663a4c2be9deb"
 dependencies = [
  "windows-implement",
  "windows-interface",
