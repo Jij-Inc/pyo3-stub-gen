@@ -94,6 +94,61 @@ define_stub_info_gatherer!(stub_info);
 > [!NOTE]
 > The `#[gen_stub_pyfunction]` macro must be placed before `#[pyfunction]` macro.
 
+### `#[gen_stub(skip)]`
+
+For functions or methods that you want to exclude from the generated stub file, use the `#[gen_stub(skip)]` attribute:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct MyClass;
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl MyClass {
+    #[gen_stub(skip)]
+    fn internal_method(&self) {
+        // This method will not appear in the .pyi file
+    }
+}
+```
+
+### `#[gen_stub(default=xx)]`
+
+For getters, setters, and class attributes, you can specify default values that will appear in the stub file:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct Config {
+    #[pyo3(get, set)]
+    #[gen_stub(default = Config::default().timeout)]
+    timeout: usize,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config { timeout: 30 }
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Config {
+    #[getter]
+    #[gen_stub(default = Config::default().timeout)]
+    fn get_timeout(&self) -> usize {
+        self.timeout
+    }
+}
+```
+
 ## Generate a stub file
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
@@ -124,75 +179,185 @@ cargo run --bin stub_gen
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
 
-## Advanced: `#[gen_stub(xxx)]` Attributes
-### `#[gen_stub(default=xx)]`
+## Manual Overriding
 
-For getters, setters, and classattr functions, you can specify the default value of it. e.g.
+When the automatic Rust-to-Python type translation doesn't produce the desired result, you can manually specify type information using Python stub syntax. There are two main approaches:
+
+1. **Complete override** - Replace entire function signature with `#[gen_stub_pyfunction(python = "...")]`
+2. **Partial override** - Override specific arguments or return types with `#[gen_stub(override_type(...))]`
+
+### Method 1: Complete Override Using `python` Parameter
+
+Use the `python` parameter to specify the complete function signature in Python stub syntax. This is ideal when you need to define complex types or when the entire signature needs custom definition.
+
 ```rust
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
-#[gen_stub_pyclass]
-#[pyclass]
-struct A {
-    #[pyo3(get,set)]
-    #[gen_stub(default = A::default().x)]
-    x: usize,
-    y: usize,
-}
+#[gen_stub_pyfunction(python = r#"
+    import collections.abc
+    import typing
 
-impl Default for A {
-    fn default() -> Self {
-        A { x: 0, y: 0 }
-    }
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl A {
-    #[gen_stub(default = A::default().y)]
-    fn get_y(&self) -> usize {
-        self.y
-    }
+    def fn_with_callback(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        """Example using python parameter for complete override."""
+"#)]
+#[pyfunction]
+pub fn fn_with_callback<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
+    callback.call1(("Hello!",))?;
+    Ok(callback)
 }
 ```
 
-### `#[gen_stub(skip)]`
-For classattrs or functions in pymethods, ignore it in .pyi file. e.g.
-```rust
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
+This approach:
+- ✅ Provides complete control over the generated stub
+- ✅ Supports complex types like `collections.abc.Callable`
+- ✅ Allows adding custom docstrings
+- ✅ Import statements are automatically extracted
 
-#[gen_stub_pyclass]
-#[pyclass]
-struct A;
+### Method 2: Partial Override Using Attributes
 
-#[gen_stub_pymethods]
-#[pymethods]
-impl A {
-    #[gen_stub(skip)]
-    fn need_skip(&self) {}
-}
-```
+For selective overrides, use `#[gen_stub(override_type(...))]` on specific arguments or `#[gen_stub(override_return_type(...))]` on the function. This is useful when most types translate correctly but a few need adjustment.
 
-### `#[gen_stub(override_type(type_repr=xx, imports=(xx)))]` and `#[gen_stub(override_return_type(type_repr=xx, imports=(xx)))]`
-Override the type for function arguments or return type in .pyi file. e.g.
 ```rust
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-#[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
-fn say_hello_forever<'a>(
-    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
+#[gen_stub(override_return_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
+pub fn get_callback<'a>(
+    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str], typing.Any]", imports=("collections.abc", "typing")))]
     cb: Bound<'a, PyAny>,
-) -> PyResult<()> {
-    loop {
-        cb.call1(("Hello!",))?;
+) -> PyResult<Bound<'a, PyAny>> {
+    Ok(cb)
+}
+```
+
+This approach:
+- ✅ Fine-grained control over individual types
+- ✅ Preserves automatic generation for other parameters
+- ✅ Explicit about which types need manual specification
+
+### Method 3: Separate Definitions Using Macros
+
+**How `submit!` works:**
+
+The `#[gen_stub_pyfunction]` and `#[gen_stub_pyclass]` macros automatically generate `submit!` blocks internally to register type information. You can also manually add `submit!` blocks to supplement or override this automatic registration.
+
+When multiple `submit!` blocks exist for the same function or method, the stub generator interprets them as overloads and generates `@overload` decorators in the `.pyi` file. This enables proper type checking for functions that accept multiple type signatures.
+
+**Use cases:**
+
+For function overloads or when you want to keep the Python stub definition separate from the Rust implementation, use `gen_function_from_python!` or `gen_methods_from_python!` macros with `submit!` blocks.
+
+**Function overloads:**
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+// #[gen_stub_pyfunction] automatically generates one submit! for float signature
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn process(x: f64) -> f64 {
+    x + 1.0
+}
+
+// Manual submit! for integer overload
+// Now we have 2 submit! blocks for "process" → generates @overload decorators
+submit! {
+    gen_function_from_python! {
+        r#"
+        def process(x: int) -> int:
+            """Process integer input"""
+        "#
     }
 }
 ```
+
+**Class method overloads:**
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct Calculator {}
+
+// #[gen_stub_pymethods] automatically generates submit! for float signature
+#[gen_stub_pymethods]
+#[pymethods]
+impl Calculator {
+    fn add(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+
+// Manual submit! for integer overload
+// Now Calculator.add has 2 submit! blocks → generates @overload decorators
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Calculator:
+            def add(self, x: int) -> int:
+                """Add integer (overload)"""
+        "#
+    }
+}
+```
+
+This approach:
+- ✅ Ideal for `@overload` decorator support
+- ✅ Keeps type definitions organized separately
+- ✅ Allows multiple signatures for the same function
+
+### Advanced: Using `RustType` Marker
+
+Within Python stub syntax, you can reference Rust types directly using the `pyo3_stub_gen.RustType["TypeName"]` marker. This leverages the `PyStubType` trait implementation of the Rust type.
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+#[pyfunction]
+pub fn sum_list(values: Vec<i32>) -> i32 {
+    values.iter().sum()
+}
+
+submit! {
+    gen_function_from_python! {
+        r#"
+        def sum_list(values: pyo3_stub_gen.RustType["Vec<i32>"]) -> pyo3_stub_gen.RustType["i32"]:
+            """Sum a list of integers"""
+        "#
+    }
+}
+```
+
+The `RustType` marker automatically expands to the appropriate Python type:
+- `RustType["Vec<i32>"]` → `typing.Sequence[int]` (for arguments)
+- `RustType["i32"]` → `int` (for return values)
+
+This is particularly useful for:
+- Generic types like `Vec<T>`, `HashMap<K, V>`
+- Custom types that implement `PyStubType`
+- Ensuring consistency between Rust and Python type mappings
+
+### When to Use Which Method
+
+| Scenario | Recommended Method |
+|----------|-------------------|
+| Complex types (e.g., `Callable`, `Protocol`) | Method 1: `python = "..."` parameter |
+| Override one or two arguments | Method 2: `#[gen_stub(override_type(...))]` |
+| Function overloads (`@overload`) | Method 3: `gen_function_from_python!` |
+| Reference Rust types in Python syntax | Use `RustType["..."]` marker |
+| Complete function signature replacement | Method 1: `python = "..."` parameter |
+
+For complete examples, see the [examples/pure](./examples/pure/) directory, particularly:
+- `overriding.rs` - Type override examples
+- `overloading.rs` - Function overload examples
+- `rust_type_marker.rs` - RustType marker examples
 
 ## Advanced: mypy.stubtest integration
 
