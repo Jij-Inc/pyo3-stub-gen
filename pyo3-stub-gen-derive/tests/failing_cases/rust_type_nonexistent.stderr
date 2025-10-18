@@ -1,0 +1,25 @@
+error[E0412]: cannot find type `NonExistentType` in this scope
+  --> tests/failing_cases/rust_type_nonexistent.rs:5:9
+   |
+ 5 | /         gen_function_from_python! {
+ 6 | |             r#"
+ 7 | |             def process(x: pyo3_stub_gen.RustType["NonExistentType"]) -> pyo3_stub_gen.RustType["AnotherNonExistentType"]:
+ 8 | |                 """Function using non-existent Rust types"""
+ 9 | |             "#
+10 | |         }
+   | |_________^ not found in this scope
+   |
+   = note: this error originates in the macro `gen_function_from_python` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0412]: cannot find type `AnotherNonExistentType` in this scope
+  --> tests/failing_cases/rust_type_nonexistent.rs:5:9
+   |
+ 5 | /         gen_function_from_python! {
+ 6 | |             r#"
+ 7 | |             def process(x: pyo3_stub_gen.RustType["NonExistentType"]) -> pyo3_stub_gen.RustType["AnotherNonExistentType"]:
+ 8 | |                 """Function using non-existent Rust types"""
+ 9 | |             "#
+10 | |         }
+   | |_________^ not found in this scope
+   |
+   = note: this error originates in the macro `gen_function_from_python` (in Nightly builds, run with -Z macro-backtrace for more info)

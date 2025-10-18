@@ -1,0 +1,12 @@
+error: Failed to parse Rust type 'Invalid:::': expected identifier
+  --> tests/failing_cases/rust_type_invalid_syntax.rs:5:9
+   |
+ 5 | /         gen_function_from_python! {
+ 6 | |             r#"
+ 7 | |             def process(x: pyo3_stub_gen.RustType["Invalid:::"]) -> int:
+ 8 | |                 """Function using invalid Rust type syntax"""
+ 9 | |             "#
+10 | |         }
+   | |_________^
+   |
+   = note: this error originates in the macro `gen_function_from_python` (in Nightly builds, run with -Z macro-backtrace for more info)

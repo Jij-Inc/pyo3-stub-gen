@@ -147,6 +147,17 @@ fn type_annotation_to_type_override(
     imports: &[String],
     dummy_type: Type,
 ) -> Result<TypeOrOverride> {
+    // Check for pyo3_stub_gen.RustType["TypeName"] marker
+    if let Some(type_name) = extract_rust_type_marker(expr)? {
+        let rust_type: Type = syn::parse_str(&type_name).map_err(|e| {
+            syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("Failed to parse Rust type '{}': {}", type_name, e),
+            )
+        })?;
+        return Ok(TypeOrOverride::RustType { r#type: rust_type });
+    }
+
     let type_str = expr_to_type_string(expr);
 
     // Convert imports to IndexSet
@@ -157,6 +168,37 @@ fn type_annotation_to_type_override(
         type_repr: type_str,
         imports: import_set,
     })
+}
+
+/// Extract type name from pyo3_stub_gen.RustType["TypeName"]
+///
+/// Returns Some(type_name) if the expression matches the pattern, None otherwise.
+/// Returns an error if the pattern matches but the type name is not a string literal.
+fn extract_rust_type_marker(expr: &ast::Expr) -> Result<Option<String>> {
+    // Match pattern: pyo3_stub_gen.RustType[...]
+    if let ast::Expr::Subscript(subscript) = expr {
+        if let ast::Expr::Attribute(attr) = &*subscript.value {
+            // Check attribute name is "RustType"
+            if attr.attr.as_str() == "RustType" {
+                // Check module name is "pyo3_stub_gen"
+                if let ast::Expr::Name(name) = &*attr.value {
+                    if name.id.as_str() == "pyo3_stub_gen" {
+                        // Extract type name from subscript (must be a string literal)
+                        if let ast::Expr::Constant(constant) = &*subscript.slice {
+                            if let ast::Constant::Str(s) = &constant.value {
+                                return Ok(Some(s.to_string()));
+                            }
+                        }
+                        return Err(syn::Error::new(
+                            proc_macro2::Span::call_site(),
+                            "pyo3_stub_gen.RustType requires a string literal (e.g., RustType[\"MyType\"])",
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    Ok(None)
 }
 
 /// Convert Python expression to type string

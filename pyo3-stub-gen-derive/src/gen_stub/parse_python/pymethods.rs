@@ -557,6 +557,40 @@ mod test {
         Ok(())
     }
 
+    #[test]
+    fn test_rust_type_marker_in_method() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            class PyProblem:
+                def __iadd__(self, other: pyo3_stub_gen.RustType["SomeRustType"]) -> pyo3_stub_gen.RustType["PyProblem"]:
+                    """In-place addition using Rust type marker"""
+            "#
+        })?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
+
+        let out = py_methods_info.methods[0].to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::MethodInfo {
+            name: "__iadd__",
+            args: &[
+                ::pyo3_stub_gen::type_info::ArgInfo {
+                    name: "other",
+                    r#type: <SomeRustType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    signature: None,
+                },
+            ],
+            r#return: <PyProblem as pyo3_stub_gen::PyStubType>::type_output,
+            doc: "In-place addition using Rust type marker",
+            r#type: ::pyo3_stub_gen::type_info::MethodType::Instance,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+        }
+        "###);
+        Ok(())
+    }
+
     fn format_as_value(tt: TokenStream2) -> String {
         let ttt = quote! { const _: () = #tt; };
         let formatted = prettyplease::unparse(&syn::parse_file(&ttt.to_string()).unwrap());

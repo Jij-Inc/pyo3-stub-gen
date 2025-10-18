@@ -469,6 +469,68 @@ mod test {
         Ok(())
     }
 
+    #[test]
+    fn test_rust_type_marker() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            def process_data(x: pyo3_stub_gen.RustType["MyRustType"]) -> pyo3_stub_gen.RustType["MyRustType"]:
+                """Process data using Rust type marker"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "process_data",
+            args: &[
+                ::pyo3_stub_gen::type_info::ArgInfo {
+                    name: "x",
+                    r#type: <MyRustType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    signature: None,
+                },
+            ],
+            r#return: <MyRustType as pyo3_stub_gen::PyStubType>::type_output,
+            doc: "Process data using Rust type marker",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+        }
+        "###);
+        Ok(())
+    }
+
+    #[test]
+    fn test_rust_type_marker_with_path() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            def process(x: pyo3_stub_gen.RustType["crate::MyType"]) -> pyo3_stub_gen.RustType["Vec<String>"]:
+                """Test with type paths"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "process",
+            args: &[
+                ::pyo3_stub_gen::type_info::ArgInfo {
+                    name: "x",
+                    r#type: <crate::MyType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    signature: None,
+                },
+            ],
+            r#return: <Vec<String> as pyo3_stub_gen::PyStubType>::type_output,
+            doc: "Test with type paths",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+        }
+        "###);
+        Ok(())
+    }
+
     fn format_as_value(tt: TokenStream2) -> String {
         let ttt = quote! { const _: () = #tt; };
         let formatted = prettyplease::unparse(&syn::parse_file(&ttt.to_string()).unwrap());
