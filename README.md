@@ -240,6 +240,14 @@ This approach:
 
 ### Method 3: Separate Definitions Using Macros
 
+**How `submit!` works:**
+
+The `#[gen_stub_pyfunction]` and `#[gen_stub_pyclass]` macros automatically generate `submit!` blocks internally to register type information. You can also manually add `submit!` blocks to supplement or override this automatic registration.
+
+When multiple `submit!` blocks exist for the same function or method, the stub generator interprets them as overloads and generates `@overload` decorators in the `.pyi` file. This enables proper type checking for functions that accept multiple type signatures.
+
+**Use cases:**
+
 For function overloads or when you want to keep the Python stub definition separate from the Rust implementation, use `gen_function_from_python!` or `gen_methods_from_python!` macros with `submit!` blocks.
 
 **Function overloads:**
@@ -248,14 +256,15 @@ For function overloads or when you want to keep the Python stub definition separ
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::*, inventory::submit};
 
-// Primary implementation with automatic stub generation
+// #[gen_stub_pyfunction] automatically generates one submit! for float signature
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn process(x: f64) -> f64 {
     x + 1.0
 }
 
-// Additional overload for integer type
+// Manual submit! for integer overload
+// Now we have 2 submit! blocks for "process" → generates @overload decorators
 submit! {
     gen_function_from_python! {
         r#"
@@ -276,6 +285,7 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 #[pyclass]
 pub struct Calculator {}
 
+// #[gen_stub_pymethods] automatically generates submit! for float signature
 #[gen_stub_pymethods]
 #[pymethods]
 impl Calculator {
@@ -284,6 +294,8 @@ impl Calculator {
     }
 }
 
+// Manual submit! for integer overload
+// Now Calculator.add has 2 submit! blocks → generates @overload decorators
 submit! {
     gen_methods_from_python! {
         r#"
