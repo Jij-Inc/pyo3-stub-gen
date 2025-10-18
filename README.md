@@ -94,6 +94,61 @@ define_stub_info_gatherer!(stub_info);
 > [!NOTE]
 > The `#[gen_stub_pyfunction]` macro must be placed before `#[pyfunction]` macro.
 
+### `#[gen_stub(skip)]`
+
+For functions or methods that you want to exclude from the generated stub file, use the `#[gen_stub(skip)]` attribute:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct MyClass;
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl MyClass {
+    #[gen_stub(skip)]
+    fn internal_method(&self) {
+        // This method will not appear in the .pyi file
+    }
+}
+```
+
+### `#[gen_stub(default=xx)]`
+
+For getters, setters, and class attributes, you can specify default values that will appear in the stub file:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyclass]
+#[pyclass]
+struct Config {
+    #[pyo3(get, set)]
+    #[gen_stub(default = Config::default().timeout)]
+    timeout: usize,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config { timeout: 30 }
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Config {
+    #[getter]
+    #[gen_stub(default = Config::default().timeout)]
+    fn get_timeout(&self) -> usize {
+        self.timeout
+    }
+}
+```
+
 ## Generate a stub file
 
 And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
@@ -291,76 +346,6 @@ For complete examples, see the [examples/pure](./examples/pure/) directory, part
 - `overriding.rs` - Type override examples
 - `overloading.rs` - Function overload examples
 - `rust_type_marker.rs` - RustType marker examples
-
-## Advanced: `#[gen_stub(xxx)]` Attributes
-### `#[gen_stub(default=xx)]`
-
-For getters, setters, and classattr functions, you can specify the default value of it. e.g.
-```rust
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
-
-#[gen_stub_pyclass]
-#[pyclass]
-struct A {
-    #[pyo3(get,set)]
-    #[gen_stub(default = A::default().x)]
-    x: usize,
-    y: usize,
-}
-
-impl Default for A {
-    fn default() -> Self {
-        A { x: 0, y: 0 }
-    }
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl A {
-    #[gen_stub(default = A::default().y)]
-    fn get_y(&self) -> usize {
-        self.y
-    }
-}
-```
-
-### `#[gen_stub(skip)]`
-For classattrs or functions in pymethods, ignore it in .pyi file. e.g.
-```rust
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
-
-#[gen_stub_pyclass]
-#[pyclass]
-struct A;
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl A {
-    #[gen_stub(skip)]
-    fn need_skip(&self) {}
-}
-```
-
-### `#[gen_stub(override_type(type_repr=xx, imports=(xx)))]` and `#[gen_stub(override_return_type(type_repr=xx, imports=(xx)))]`
-Override the type for function arguments or return type in .pyi file. e.g.
-```rust
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
-
-#[gen_stub_pyfunction]
-#[pyfunction]
-#[gen_stub(override_return_type(type_repr="typing.Never", imports=("typing")))]
-fn say_hello_forever<'a>(
-    #[gen_stub(override_type(type_repr="collections.abc.Callable[[str]]", imports=("collections.abc")))]
-    cb: Bound<'a, PyAny>,
-) -> PyResult<()> {
-    loop {
-        cb.call1(("Hello!",))?;
-    }
-}
-```
 
 ## Advanced: mypy.stubtest integration
 
