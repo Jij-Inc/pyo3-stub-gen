@@ -76,6 +76,17 @@ class B(A):
     ...
 
 @typing.final
+class Calculator:
+    def multiply(self, other:Calculator) -> Calculator:
+        r"""
+        Multiply this calculator's result by another calculator's result.
+        
+                Using RustType marker for both input and output types.
+        """
+    def __new__(cls) -> Calculator: ...
+    def add(self, value:builtins.float) -> builtins.float: ...
+
+@typing.final
 class ComparableStruct:
     r"""
     Test struct for eq and ord comparison methods
@@ -88,6 +99,14 @@ class ComparableStruct:
     def __gt__(self, other:builtins.object) -> builtins.bool: ...
     def __ge__(self, other:builtins.object) -> builtins.bool: ...
     def __new__(cls, value:builtins.int) -> ComparableStruct: ...
+
+@typing.final
+class DataContainer:
+    @property
+    def value(self) -> builtins.int: ...
+    @value.setter
+    def value(self, value: builtins.int) -> None: ...
+    def __new__(cls, value:builtins.int) -> DataContainer: ...
 
 @typing.final
 class DecimalHolder:
@@ -325,6 +344,13 @@ async def async_num() -> builtins.int: ...
 
 def create_a(x:builtins.int=2) -> A: ...
 
+def create_containers(count:builtins.int) -> builtins.list[DataContainer]:
+    r"""
+    Create a list of DataContainer instances.
+    
+        Demonstrates using RustType with generic types containing custom types.
+    """
+
 def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
 def default_value(num:Number=Number.FLOAT) -> Number: ...
@@ -382,6 +408,14 @@ def overload_example_2(ob:float) -> float:
 
 def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
 
+def process_container(container:DataContainer) -> DataContainer:
+    r"""
+    Process a DataContainer by doubling its value.
+    
+        This uses the RustType marker to reference the Rust type directly,
+        which will expand to the correct Python stub type using PyStubType trait.
+    """
+
 def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
 
 def str_len(x:builtins.str) -> builtins.int:
@@ -392,6 +426,14 @@ def str_len(x:builtins.str) -> builtins.int:
 def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
+    """
+
+def sum_list(values:typing.Sequence[builtins.int]) -> builtins.int:
+    r"""
+    Sum a list of integers.
+    
+        RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
+        and RustType["i32"] will expand to the correct output type (int).
     """
 
 def test_type_ignore_all() -> builtins.int:  # type: ignore
