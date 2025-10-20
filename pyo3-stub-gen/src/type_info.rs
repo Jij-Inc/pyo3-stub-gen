@@ -50,22 +50,6 @@ pub fn no_return_type_output() -> TypeInfo {
     TypeInfo::none()
 }
 
-/// Info of method argument appears in `#[pymethods]`
-#[derive(Debug)]
-pub struct ArgInfo {
-    pub name: &'static str,
-    pub r#type: fn() -> TypeInfo,
-    pub signature: Option<SignatureArg>,
-}
-#[derive(Debug, Clone)]
-pub enum SignatureArg {
-    Ident,
-    Assign { default: fn() -> String },
-    Star,
-    Args,
-    Keywords,
-}
-
 /// Kind of parameter in Python function signature
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ParameterKind {
@@ -119,20 +103,6 @@ pub struct ParameterInfo {
     pub type_info: fn() -> TypeInfo,
     /// Default value
     pub default: ParameterDefault,
-}
-
-impl PartialEq for SignatureArg {
-    #[inline]
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Assign { default: l_default }, Self::Assign { default: r_default }) => {
-                let l_default = l_default();
-                let r_default = r_default();
-                l_default.eq(&r_default)
-            }
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-        }
-    }
 }
 
 /// Type of a method

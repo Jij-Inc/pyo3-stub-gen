@@ -497,11 +497,12 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 - **注意**: derive側の内部表現（`PyFunctionInfo.args: Vec<ArgInfo>`）は維持する設計
 
 #### 7. 旧型の完全削除
-- [ ] `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除
-- [ ] `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除
-- [ ] `pyo3-stub-gen-derive/src/gen_stub/arg.rs` の `ArgInfo` を削除またはリファクタ
-- [ ] `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（もしくは deprecated マーク）
-- [ ] 全ての参照箇所を確認
+- [x] `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除（~16行削除）
+- [x] `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除（~14行削除）
+- [x] `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（~95行削除）
+- [ ] `pyo3-stub-gen-derive/src/gen_stub/arg.rs` の `ArgInfo` - derive内部で継続使用（設計判断により残す）
+- [x] 全ての参照箇所を確認 - ランタイム側の旧型は完全削除完了
+- **テスト結果**: 全48ワークスペーステスト パス
 
 #### 8. 統合テストと検証
 - [ ] `task stub-gen` を実行して全 example のスタブファイルを生成
@@ -518,16 +519,17 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 ### 📝 備考
 
-#### 型の二重管理について
-現在、以下の2箇所で型が管理されている：
+#### 型の管理状況
+現在、以下の型が存在する：
 
 1. **pyo3-stub-gen/src/type_info.rs**（ランタイム用、`inventory` で収集）
    - `ParameterInfo` - 新型 ✅ 使用中
-   - `ArgInfo`, `SignatureArg` - 旧型 ⚠️ 後方互換のため残存
+   - `ArgInfo`, `SignatureArg` - ✅ **削除完了**
 
 2. **pyo3-stub-gen-derive/src/gen_stub/**（derive内部の中間表現）
-   - `arg.rs` の `ArgInfo` - 旧型 ⚠️ まだ使用中（特に parse_python 経路）
-   - `signature.rs` の `SignatureArg` - 旧型 ⚠️ パーサーで使用中
+   - `arg.rs` の `ArgInfo` - derive内部専用 ℹ️ 継続使用（設計判断）
+   - `signature.rs` の `SignatureArg` - signature パース用 ℹ️ 継続使用
+   - `parameter.rs` の `Parameters`, `ParameterWithKind` - 中間表現 ✅ 新型
 
 #### 現在のデータフロー
 

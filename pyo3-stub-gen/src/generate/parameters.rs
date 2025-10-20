@@ -118,101 +118,6 @@ impl Parameters {
         params
     }
 
-    /// Build Parameters from a slice of ArgInfo (legacy support)
-    ///
-    /// This converts from the old ArgInfo format to the new Parameters format.
-    /// It uses SignatureArg to determine parameter kind and default values.
-    pub fn from_arg_infos(infos: &[crate::type_info::ArgInfo]) -> Self {
-        use crate::type_info::SignatureArg;
-
-        let mut params = Self::new();
-        let after_slash = false;
-        let mut after_star = false;
-
-        for info in infos {
-            let type_info = (info.r#type)();
-
-            match &info.signature {
-                Some(SignatureArg::Star) => {
-                    // Bare `*` means keyword-only parameters follow
-                    after_star = true;
-                    continue;
-                }
-                Some(SignatureArg::Args) => {
-                    params.varargs = Some(Parameter {
-                        name: info.name,
-                        kind: ParameterKind::VarPositional,
-                        type_info,
-                        default: ParameterDefault::None,
-                    });
-                    after_star = true; // After *args, everything is keyword-only
-                }
-                Some(SignatureArg::Keywords) => {
-                    params.varkw = Some(Parameter {
-                        name: info.name,
-                        kind: ParameterKind::VarKeyword,
-                        type_info,
-                        default: ParameterDefault::None,
-                    });
-                }
-                Some(SignatureArg::Ident) => {
-                    let kind = if after_star {
-                        ParameterKind::KeywordOnly
-                    } else if after_slash {
-                        ParameterKind::PositionalOrKeyword
-                    } else {
-                        ParameterKind::PositionalOrKeyword
-                    };
-
-                    let param = Parameter {
-                        name: info.name,
-                        kind,
-                        type_info,
-                        default: ParameterDefault::None,
-                    };
-
-                    match kind {
-                        ParameterKind::KeywordOnly => params.keyword_only.push(param),
-                        _ => params.positional_or_keyword.push(param),
-                    }
-                }
-                Some(SignatureArg::Assign { default }) => {
-                    let kind = if after_star {
-                        ParameterKind::KeywordOnly
-                    } else if after_slash {
-                        ParameterKind::PositionalOrKeyword
-                    } else {
-                        ParameterKind::PositionalOrKeyword
-                    };
-
-                    let param = Parameter {
-                        name: info.name,
-                        kind,
-                        type_info,
-                        default: ParameterDefault::Expr(default()),
-                    };
-
-                    match kind {
-                        ParameterKind::KeywordOnly => params.keyword_only.push(param),
-                        _ => params.positional_or_keyword.push(param),
-                    }
-                }
-                None => {
-                    // No signature info, treat as positional or keyword
-                    let param = Parameter {
-                        name: info.name,
-                        kind: ParameterKind::PositionalOrKeyword,
-                        type_info,
-                        default: ParameterDefault::None,
-                    };
-                    params.positional_or_keyword.push(param);
-                }
-            }
-        }
-
-        params
-    }
-
     /// Iterate over all parameters in signature order
     pub fn iter_entries(&self) -> impl Iterator<Item = &Parameter> {
         self.positional_only
@@ -241,9 +146,7 @@ impl Default for Parameters {
 
 impl Import for Parameters {
     fn import(&self) -> HashSet<ImportRef> {
-        self.iter_entries()
-            .flat_map(|p| p.import())
-            .collect()
+        self.iter_entries().flat_map(|p| p.import()).collect()
     }
 }
 
@@ -380,6 +283,9 @@ mod tests {
             ..Default::default()
         };
 
-        assert_eq!(params.to_string(), "*args: builtins.str, **kwargs: typing.Any");
+        assert_eq!(
+            params.to_string(),
+            "*args: builtins.str, **kwargs: typing.Any"
+        );
     }
 }
