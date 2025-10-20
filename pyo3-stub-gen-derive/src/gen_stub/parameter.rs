@@ -275,12 +275,22 @@ impl Parameters {
                     after_star = true; // After *args, everything is keyword-only
                     let name = ident.to_string();
 
-                    let arg_info = args_map
+                    let mut arg_info = args_map
                         .get(&name)
                         .ok_or_else(|| {
                             syn::Error::new(ident.span(), format!("cannot find argument: {}", name))
                         })?
                         .clone();
+
+                    // For VarPositional, if the type is auto-inferred from Rust (RustType),
+                    // replace it with typing.Any. If it's OverrideType, keep the user's specification.
+                    if matches!(arg_info.r#type, TypeOrOverride::RustType { .. }) {
+                        arg_info.r#type = TypeOrOverride::OverrideType {
+                            r#type: syn::parse_quote!(()), // Dummy type, won't be used
+                            type_repr: "typing.Any".to_string(),
+                            imports: ["typing".to_string()].into_iter().collect(),
+                        };
+                    }
 
                     parameters.push(ParameterWithKind {
                         arg_info,
@@ -292,12 +302,22 @@ impl Parameters {
                     positional_only = false;
                     let name = ident.to_string();
 
-                    let arg_info = args_map
+                    let mut arg_info = args_map
                         .get(&name)
                         .ok_or_else(|| {
                             syn::Error::new(ident.span(), format!("cannot find argument: {}", name))
                         })?
                         .clone();
+
+                    // For VarKeyword, if the type is auto-inferred from Rust (RustType),
+                    // replace it with typing.Any. If it's OverrideType, keep the user's specification.
+                    if matches!(arg_info.r#type, TypeOrOverride::RustType { .. }) {
+                        arg_info.r#type = TypeOrOverride::OverrideType {
+                            r#type: syn::parse_quote!(()), // Dummy type, won't be used
+                            type_repr: "typing.Any".to_string(),
+                            imports: ["typing".to_string()].into_iter().collect(),
+                        };
+                    }
 
                     parameters.push(ParameterWithKind {
                         arg_info,

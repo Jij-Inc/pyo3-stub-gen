@@ -408,12 +408,12 @@ def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -
         This demonstrates how to define type information using Python stub syntax.
     """
 
-def func_with_kwargs(**kwargs: typing.Optional[dict]) -> builtins.bool:
+def func_with_kwargs(**kwargs: typing.Any) -> builtins.bool:
     r"""
     Takes a variable number of keyword arguments and does nothing
     """
 
-def func_with_star_arg(*args: tuple) -> builtins.str:
+def func_with_star_arg(*args: typing.Any) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
     """
