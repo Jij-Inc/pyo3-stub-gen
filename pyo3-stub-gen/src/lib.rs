@@ -136,11 +136,19 @@
 //! For example, [generate::MethodDef] generates Python class method definition as follows:
 //!
 //! ```rust
-//! use pyo3_stub_gen::{TypeInfo, generate::*};
+//! use pyo3_stub_gen::{TypeInfo, generate::*, type_info::ParameterKind};
 //!
 //! let method = MethodDef {
 //!     name: "foo",
-//!     args: vec![Arg { name: "x", r#type: TypeInfo::builtin("int"), signature: None, }],
+//!     parameters: Parameters {
+//!         positional_or_keyword: vec![Parameter {
+//!             name: "x",
+//!             kind: ParameterKind::PositionalOrKeyword,
+//!             type_info: TypeInfo::builtin("int"),
+//!             default: ParameterDefault::None,
+//!         }],
+//!         ..Parameters::new()
+//!     },
 //!     r#return: TypeInfo::builtin("int"),
 //!     doc: "This is a foo method.",
 //!     r#type: MethodType::Instance,
@@ -152,7 +160,7 @@
 //! assert_eq!(
 //!     method.to_string().trim(),
 //!     r#"
-//!     def foo(self, x:builtins.int) -> builtins.int:
+//!     def foo(self, x: builtins.int) -> builtins.int:
 //!         r"""
 //!         This is a foo method.
 //!         """

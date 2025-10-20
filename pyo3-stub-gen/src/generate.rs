@@ -1,6 +1,5 @@
 //! Generate Python typing stub file a.k.a. `*.pyi` file.
 
-mod arg;
 mod class;
 mod deprecated;
 mod docstring;
@@ -14,7 +13,6 @@ mod stub_info;
 mod variable;
 mod variant_methods;
 
-pub use arg::*;
 pub use class::*;
 pub use enum_::*;
 pub use function::*;
