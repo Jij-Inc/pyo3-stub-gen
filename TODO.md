@@ -411,7 +411,7 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 ---
 
-## 実装進捗状況（2025-10-20）
+## 実装進捗状況（2025-10-20 更新）
 
 ### ✅ 完了したタスク
 
@@ -435,27 +435,29 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
   - `Display` 実装を更新
   - `Import` 実装を更新
 - `Parameters::from_arg_infos()` 実装（既存 ArgInfo からの変換サポート）
-- `Arg` struct と `arg.rs` モジュールを完全削除
+- `Arg` struct と `arg.rs` モジュールを完全削除（pyo3-stub-gen側）
 - `class.rs`, `variant_methods.rs` の全メソッド生成コードを更新
 - `lib.rs` の doctest サンプルを更新
 - **テスト結果**: 全25ユニットテスト + 20統合テスト（doctest含む）パス
 
-#### 3. procedural macro での ParameterInfo 生成
+#### 3. signature.rs での ParameterInfo 生成（部分完了）
 - **コミット**: `b810ac6` - "Update procedural macros to generate ParameterInfo instead of ArgInfo"
-- `pyo3-stub-gen-derive/src/gen_stub/signature.rs`:
-  - `ParameterInfo` を生成するように全面書き換え
+- ✅ **完了**: `pyo3-stub-gen-derive/src/gen_stub/signature.rs`
+  - `ArgsWithSignature::to_tokens()` が `ParameterInfo` を生成するように全面書き換え
   - `/` (positional-only) デリミタのパース対応を追加
   - `SignatureArg::Slash` variant を追加
   - デリミタと位置に基づいて `ParameterKind` を決定
-  - `ArgsWithSignature::to_tokens()` を完全に再実装
-- `pyfunction.rs`, `method.rs`: `parameters` フィールドを使用
-- `type_info.rs`:
+  - 全ての `ParameterKind` バリアントに対応
+- ✅ **完了**: `pyo3-stub-gen/src/type_info.rs` のランタイム型定義更新
   - `PyFunctionInfo.args` → `parameters: &'static [ParameterInfo]`
   - `MethodInfo.args` → `parameters: &'static [ParameterInfo]`
   - `VariantInfo.constr_args` → `&'static [ParameterInfo]`
-- `generate/function.rs`, `generate/method.rs`, `generate/variant_methods.rs`:
+- ✅ **完了**: `generate/function.rs`, `generate/method.rs`, `generate/variant_methods.rs`
   - `Parameters::from_infos()` を使用（`from_arg_infos()` から移行）
-- **テスト結果**: 全25ユニットテスト + 20統合テスト パス
+- ❌ **未完了**: derive側の内部構造体定義
+  - `pyo3-stub-gen-derive/src/gen_stub/pyfunction.rs` の `PyFunctionInfo` は未だ `args: Vec<ArgInfo>` を使用
+  - `pyo3-stub-gen-derive/src/gen_stub/method.rs` の `MethodInfo` も同様
+  - これらは derive内部のみで使用され、`ToTokens` で最終的に新しい `ParameterInfo` に変換される
 
 ### 🚧 残タスク
 
@@ -464,17 +466,23 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
   - `constr_args` の生成を `ParameterInfo` ベースに変更
   - `ArgsWithSignature` の使用を確認・更新
 
-#### 5. parse_python モジュールの更新
+#### 5. parse_python モジュールの更新【優先度: 高】
+- [ ] **現在のブロッカー**: derive側の `PyFunctionInfo` と `MethodInfo` が古い `args: Vec<ArgInfo>` を使用
+  - `pyo3-stub-gen-derive/src/gen_stub/pyfunction.rs`: `PyFunctionInfo` 構造体の更新
+  - `pyo3-stub-gen-derive/src/gen_stub/method.rs`: `MethodInfo` 構造体の更新
 - [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pyfunction.rs` の更新
-  - Python stub 文字列から `ParameterInfo` を生成
+  - Python stub 文字列から新しい derive側表現を生成
   - 位置限定 (`/`)、キーワード限定 (`*`) のパース対応
+  - `ToTokens` 実装で `ParameterInfo` を生成
 - [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pymethods.rs` の更新
-  - Python class 定義から `ParameterInfo` を生成
+  - Python class 定義から新しい derive側表現を生成
   - メソッドシグネチャのパース対応
+- **テスト状況**: 18個のテストが失敗中（主に parse_python 経路）
 
 #### 6. 旧型の完全削除
 - [ ] `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除
 - [ ] `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除
+- [ ] `pyo3-stub-gen-derive/src/gen_stub/arg.rs` の `ArgInfo` を削除またはリファクタ
 - [ ] `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（もしくは deprecated マーク）
 - [ ] 全ての参照箇所を確認
 
@@ -493,6 +501,33 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 ### 📝 備考
 
-- 現在の実装では、`ArgInfo` と `SignatureArg` が `type_info.rs` に残っているが、これらはもはや使用されていない
-- `Parameters::from_arg_infos()` は過渡期の実装で、最終的には削除予定
-- parse_python モジュールの更新が完了すれば、完全に新モデルへ移行可能
+#### 型の二重管理について
+現在、以下の2箇所で型が管理されている：
+
+1. **pyo3-stub-gen/src/type_info.rs**（ランタイム用、`inventory` で収集）
+   - `ParameterInfo` - 新型 ✅ 使用中
+   - `ArgInfo`, `SignatureArg` - 旧型 ⚠️ 後方互換のため残存
+
+2. **pyo3-stub-gen-derive/src/gen_stub/**（derive内部の中間表現）
+   - `arg.rs` の `ArgInfo` - 旧型 ⚠️ まだ使用中（特に parse_python 経路）
+   - `signature.rs` の `SignatureArg` - 旧型 ⚠️ パーサーで使用中
+
+#### 現在のデータフロー
+```
+[Rust関数定義]
+  → derive/arg.rs: ArgInfo（旧型）
+  → derive/signature.rs: ToTokens
+  → 生成コード: ::pyo3_stub_gen::type_info::ParameterInfo（新型）✅
+  → 実行時: generate/parameters.rs: Parameters
+  → .pyi出力
+
+[Python stub文字列]
+  → derive/parse_python: ArgInfo（旧型）❌
+  → derive/pyfunction.rs: ToTokens
+  → 生成コード: ??? (現在不整合)
+```
+
+#### 次のステップ
+- derive側の内部表現をリファクタして新モデルに統一する必要がある
+- または、derive側は旧型のまま維持し、`ToTokens` で新型に変換する設計を継続するかを決定
+- parse_python モジュールが最優先の修正対象（テスト失敗の原因）
