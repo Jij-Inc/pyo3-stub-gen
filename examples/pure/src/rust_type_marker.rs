@@ -216,6 +216,7 @@ impl Placeholder {
     }
 
     #[gen_stub(skip)]
+    #[pyo3(signature = (name, *, dtype, ndim, shape, jagged = false, latex = None))]
     fn configure(
         &self,
         name: String,
