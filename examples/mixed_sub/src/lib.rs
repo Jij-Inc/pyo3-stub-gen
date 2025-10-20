@@ -181,6 +181,21 @@ fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+// Test gen_function_from_python! with module parameter
+use pyo3_stub_gen::inventory::submit;
+
+submit! {
+    gen_function_from_python! {
+        module = "mixed_sub.main_mod.mod_b",
+        r#"
+        import typing
+
+        def test_submit_with_module(values: typing.List[int]) -> int:
+            """Test function defined with gen_function_from_python! and module parameter"""
+        "#
+    }
+}
+
 define_stub_info_gatherer!(stub_info);
 
 /// Test of unit test for testing link problem
