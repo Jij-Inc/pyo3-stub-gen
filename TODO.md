@@ -411,7 +411,7 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 ---
 
-## 実装進捗状況（2025-10-20 更新 - 最終更新: Parameters統一完了）
+## 実装進捗状況（2025-10-20 更新 - 最終更新: examples/ バグ修正完了）
 
 ### ✅ 完了したタスク
 
@@ -517,17 +517,28 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 - ✅ **完了**: 全ての参照箇所を確認 - ランタイム側の旧型は完全削除完了
 - **テスト結果**: derive クレート全27テスト パス
 
+#### 8. examples/ のバグ修正と統合テスト
+- **コミット**: `1e208c9`, `5d0dfc8`, `d2ae907` - "Fix OverrideType parameter generation issues"
+- ✅ **完了**: `TypeOrOverride::OverrideType` のデフォルト値生成修正
+  - ダミー型 `()` を使った型注釈を避け、直接文字列化するように修正
+  - `let v: () = false` のような型エラーを解消
+- ✅ **完了**: `cls` パラメータの重複問題修正
+  - `build_parameters_from_ast()` で `cls` を `self` と同様にスキップ
+  - `def __new__(cls, cls: typing.Any)` → `def __new__(cls)` に修正
+- ✅ **完了**: Rust bool リテラルを Python bool リテラルに変換
+  - `false`/`true` → `False`/`True` に変換
+  - `jagged: bool = false` → `jagged: bool = False` に修正
+- ✅ **完了**: examples/pure のビルド成功確認
+- ✅ **完了**: スタブファイル生成成功確認
+  - 位置限定パラメータ (`/`) が正しく出力
+  - キーワード限定パラメータ (`*`) が正しく出力
+  - デフォルト値が正しく出力（Python の構文で）
+- ✅ **完了**: 全28ユニットテスト + スナップショットテスト パス
+
 ### 🚧 残タスク
 
-#### 8. 統合テストと検証
-- [ ] examples/ のコンパイルエラー修正
-  - `gen_methods_from_python!` マクロ使用箇所のエラー対応
-  - 既知の問題: examples/pure/src/rust_type_marker.rs:234
+#### 9. 全 examples の統合テストと検証
 - [ ] `task stub-gen` を実行して全 example のスタブファイルを生成
-- [ ] 生成された `.pyi` ファイルの内容を確認
-  - 位置限定パラメータ (`/`) が正しく出力されているか
-  - キーワード限定パラメータ (`*`) が正しく出力されているか
-  - デフォルト値が正しく出力されているか
 - [ ] `task test` を実行して全 example のテストを実行
   - pytest パス確認
   - pyright パス確認
