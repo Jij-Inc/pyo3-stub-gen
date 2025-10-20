@@ -9,6 +9,7 @@ mod function;
 mod member;
 mod method;
 mod module;
+mod parameters;
 mod stub_info;
 mod variable;
 mod variant_methods;
@@ -20,6 +21,7 @@ pub use function::*;
 pub use member::*;
 pub use method::*;
 pub use module::*;
+pub use parameters::*;
 pub use stub_info::*;
 pub use variable::*;
 

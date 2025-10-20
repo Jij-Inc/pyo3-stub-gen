@@ -66,6 +66,61 @@ pub enum SignatureArg {
     Keywords,
 }
 
+/// Kind of parameter in Python function signature
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ParameterKind {
+    /// Positional-only parameter (before `/`)
+    PositionalOnly,
+    /// Positional or keyword parameter (default)
+    PositionalOrKeyword,
+    /// Keyword-only parameter (after `*`)
+    KeywordOnly,
+    /// Variable positional parameter (`*args`)
+    VarPositional,
+    /// Variable keyword parameter (`**kwargs`)
+    VarKeyword,
+}
+
+/// Default value of a parameter
+#[derive(Debug, Clone)]
+pub enum ParameterDefault {
+    /// No default value
+    None,
+    /// Default value expression as a string
+    Expr(fn() -> String),
+}
+
+impl PartialEq for ParameterDefault {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Expr(l), Self::Expr(r)) => {
+                let l_val = l();
+                let r_val = r();
+                l_val.eq(&r_val)
+            }
+            (Self::None, Self::None) => true,
+            _ => false,
+        }
+    }
+}
+
+/// Information about a parameter in a Python function/method signature
+///
+/// This struct is used at compile time to store metadata about parameters
+/// that will be used to generate Python stub files.
+#[derive(Debug)]
+pub struct ParameterInfo {
+    /// Parameter name
+    pub name: &'static str,
+    /// Parameter kind (positional-only, keyword-only, etc.)
+    pub kind: ParameterKind,
+    /// Type information getter
+    pub type_info: fn() -> TypeInfo,
+    /// Default value
+    pub default: ParameterDefault,
+}
+
 impl PartialEq for SignatureArg {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
