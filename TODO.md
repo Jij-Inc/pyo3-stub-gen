@@ -408,3 +408,91 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 - `Parameters` には `step` のみが含まれる。
 - `MethodDef::fmt`（または更新されたロジック）が `self` を自動追加。
+
+---
+
+## 実装進捗状況（2025-10-20）
+
+### ✅ 完了したタスク
+
+#### 1. 基盤となる型定義の実装
+- **コミット**: `8843ac1` - "Add Parameter model foundation for Python signature syntax"
+- `pyo3-stub-gen/src/type_info.rs`:
+  - `ParameterKind` enum を追加（PositionalOnly, PositionalOrKeyword, KeywordOnly, VarPositional, VarKeyword）
+  - `ParameterDefault` enum を追加（None, Expr(fn() -> String)）
+  - `ParameterInfo` struct を追加（コンパイル時メタデータ）
+- `pyo3-stub-gen/src/generate/parameters.rs` を新規作成:
+  - `Parameter` struct（ランタイム表現）
+  - `Parameters` struct（セクション別管理: positional_only, positional_or_keyword, keyword_only, varargs, varkw）
+  - `Display` trait 実装（Python スタブ構文生成）
+  - 包括的なテスト（4パターン）
+- 既存の `Arg`/`ArgInfo`/`SignatureArg` は互換性のため残存
+
+#### 2. generate 層での Parameters モデル移行
+- **コミット**: `53d5da2` - "Migrate FunctionDef and MethodDef to use Parameters model"
+- `FunctionDef` と `MethodDef` を `Parameters` 使用に変更:
+  - `args: Vec<Arg>` → `parameters: Parameters`
+  - `Display` 実装を更新
+  - `Import` 実装を更新
+- `Parameters::from_arg_infos()` 実装（既存 ArgInfo からの変換サポート）
+- `Arg` struct と `arg.rs` モジュールを完全削除
+- `class.rs`, `variant_methods.rs` の全メソッド生成コードを更新
+- `lib.rs` の doctest サンプルを更新
+- **テスト結果**: 全25ユニットテスト + 20統合テスト（doctest含む）パス
+
+#### 3. procedural macro での ParameterInfo 生成
+- **コミット**: `b810ac6` - "Update procedural macros to generate ParameterInfo instead of ArgInfo"
+- `pyo3-stub-gen-derive/src/gen_stub/signature.rs`:
+  - `ParameterInfo` を生成するように全面書き換え
+  - `/` (positional-only) デリミタのパース対応を追加
+  - `SignatureArg::Slash` variant を追加
+  - デリミタと位置に基づいて `ParameterKind` を決定
+  - `ArgsWithSignature::to_tokens()` を完全に再実装
+- `pyfunction.rs`, `method.rs`: `parameters` フィールドを使用
+- `type_info.rs`:
+  - `PyFunctionInfo.args` → `parameters: &'static [ParameterInfo]`
+  - `MethodInfo.args` → `parameters: &'static [ParameterInfo]`
+  - `VariantInfo.constr_args` → `&'static [ParameterInfo]`
+- `generate/function.rs`, `generate/method.rs`, `generate/variant_methods.rs`:
+  - `Parameters::from_infos()` を使用（`from_arg_infos()` から移行）
+- **テスト結果**: 全25ユニットテスト + 20統合テスト パス
+
+### 🚧 残タスク
+
+#### 4. variant.rs の更新（complex enum 用）
+- [ ] `pyo3-stub-gen-derive/src/gen_stub/variant.rs` の更新
+  - `constr_args` の生成を `ParameterInfo` ベースに変更
+  - `ArgsWithSignature` の使用を確認・更新
+
+#### 5. parse_python モジュールの更新
+- [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pyfunction.rs` の更新
+  - Python stub 文字列から `ParameterInfo` を生成
+  - 位置限定 (`/`)、キーワード限定 (`*`) のパース対応
+- [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pymethods.rs` の更新
+  - Python class 定義から `ParameterInfo` を生成
+  - メソッドシグネチャのパース対応
+
+#### 6. 旧型の完全削除
+- [ ] `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除
+- [ ] `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除
+- [ ] `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（もしくは deprecated マーク）
+- [ ] 全ての参照箇所を確認
+
+#### 7. 統合テストと検証
+- [ ] `task stub-gen` を実行して全 example のスタブファイルを生成
+- [ ] 生成された `.pyi` ファイルの内容を確認
+  - 位置限定パラメータ (`/`) が正しく出力されているか
+  - キーワード限定パラメータ (`*`) が正しく出力されているか
+  - デフォルト値が正しく出力されているか
+- [ ] `task test` を実行して全 example のテストを実行
+  - pytest パス確認
+  - pyright パス確認
+  - ruff パス確認
+  - mypy パス確認
+  - stubtest パス確認
+
+### 📝 備考
+
+- 現在の実装では、`ArgInfo` と `SignatureArg` が `type_info.rs` に残っているが、これらはもはや使用されていない
+- `Parameters::from_arg_infos()` は過渡期の実装で、最終的には削除予定
+- parse_python モジュールの更新が完了すれば、完全に新モデルへ移行可能
