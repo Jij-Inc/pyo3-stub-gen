@@ -96,49 +96,53 @@ fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<Deprec
 ///
 /// This function constructs Parameters with proper ParameterKind classification
 /// based on Python's argument structure (positional-only, keyword-only, varargs, etc.)
-pub(super) fn build_parameters_from_ast(args: &ast::Arguments, imports: &[String]) -> Result<Parameters> {
+pub(super) fn build_parameters_from_ast(
+    args: &ast::Arguments,
+    imports: &[String],
+) -> Result<Parameters> {
     let dummy_type: Type = syn::parse_str("()").unwrap();
     let mut parameters = Vec::new();
 
     // Helper to process a single argument with default value
-    let process_arg_with_default =
-        |arg: &ast::ArgWithDefault, kind: ParameterKindIntermediate| -> Result<Option<ParameterWithKind>> {
-            let arg_name = arg.def.arg.to_string();
+    let process_arg_with_default = |arg: &ast::ArgWithDefault,
+                                    kind: ParameterKindIntermediate|
+     -> Result<Option<ParameterWithKind>> {
+        let arg_name = arg.def.arg.to_string();
 
-            // Skip 'self' and 'cls' arguments (they are added automatically in generation)
-            if arg_name == "self" || arg_name == "cls" {
-                return Ok(None);
+        // Skip 'self' and 'cls' arguments (they are added automatically in generation)
+        if arg_name == "self" || arg_name == "cls" {
+            return Ok(None);
+        }
+
+        let type_override = if let Some(annotation) = &arg.def.annotation {
+            type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
+        } else {
+            // No type annotation - use Any
+            TypeOrOverride::OverrideType {
+                r#type: dummy_type.clone(),
+                type_repr: "typing.Any".to_string(),
+                imports: IndexSet::from(["typing".to_string()]),
             }
-
-            let type_override = if let Some(annotation) = &arg.def.annotation {
-                type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
-            } else {
-                // No type annotation - use Any
-                TypeOrOverride::OverrideType {
-                    r#type: dummy_type.clone(),
-                    type_repr: "typing.Any".to_string(),
-                    imports: IndexSet::from(["typing".to_string()]),
-                }
-            };
-
-            let arg_info = ArgInfo {
-                name: arg_name,
-                r#type: type_override,
-            };
-
-            // Convert default value from Python AST to syn::Expr
-            let default_expr = if let Some(default) = &arg.default {
-                Some(python_expr_to_syn_expr(default)?)
-            } else {
-                None
-            };
-
-            Ok(Some(ParameterWithKind {
-                arg_info,
-                kind,
-                default_expr,
-            }))
         };
+
+        let arg_info = ArgInfo {
+            name: arg_name,
+            r#type: type_override,
+        };
+
+        // Convert default value from Python AST to syn::Expr
+        let default_expr = if let Some(default) = &arg.default {
+            Some(python_expr_to_syn_expr(default)?)
+        } else {
+            None
+        };
+
+        Ok(Some(ParameterWithKind {
+            arg_info,
+            kind,
+            default_expr,
+        }))
+    };
 
     // Helper to process vararg or kwarg (ast::Arg, not ast::ArgWithDefault)
     let process_var_arg =
@@ -170,33 +174,44 @@ pub(super) fn build_parameters_from_ast(args: &ast::Arguments, imports: &[String
 
     // Process positional-only arguments (before /)
     for arg in &args.posonlyargs {
-        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::PositionalOnly)? {
+        if let Some(param) =
+            process_arg_with_default(arg, ParameterKindIntermediate::PositionalOnly)?
+        {
             parameters.push(param);
         }
     }
 
     // Process regular positional/keyword arguments
     for arg in &args.args {
-        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::PositionalOrKeyword)? {
+        if let Some(param) =
+            process_arg_with_default(arg, ParameterKindIntermediate::PositionalOrKeyword)?
+        {
             parameters.push(param);
         }
     }
 
     // Process *args (vararg)
     if let Some(vararg) = &args.vararg {
-        parameters.push(process_var_arg(vararg, ParameterKindIntermediate::VarPositional)?);
+        parameters.push(process_var_arg(
+            vararg,
+            ParameterKindIntermediate::VarPositional,
+        )?);
     }
 
     // Process keyword-only arguments (after *)
     for arg in &args.kwonlyargs {
-        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::KeywordOnly)? {
+        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::KeywordOnly)?
+        {
             parameters.push(param);
         }
     }
 
     // Process **kwargs (kwarg)
     if let Some(kwarg) = &args.kwarg {
-        parameters.push(process_var_arg(kwarg, ParameterKindIntermediate::VarKeyword)?);
+        parameters.push(process_var_arg(
+            kwarg,
+            ParameterKindIntermediate::VarKeyword,
+        )?);
     }
 
     Ok(Parameters::from_vec(parameters))

@@ -224,7 +224,6 @@ impl Placeholder {
         _shape: Option<String>,
         _jagged: bool,
         _latex: Option<String>,
-        _description: Option<String>,
     ) -> Self {
         self.clone()
     }
@@ -246,7 +245,6 @@ submit! {
                 shape: typing.Optional[builtins.str],
                 jagged: builtins.bool = False,
                 latex: typing.Optional[builtins.str] = None,
-                description: typing.Optional[builtins.str] = None,
             ) -> pyo3_stub_gen.RustType["Placeholder"]:
                 """
                 Configure placeholder with keyword-only parameters.

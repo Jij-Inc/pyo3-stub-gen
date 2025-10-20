@@ -232,7 +232,7 @@ class Placeholder:
     def name(self) -> builtins.str: ...
     @name.setter
     def name(self, value: builtins.str) -> None: ...
-    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None, description: typing.Optional[builtins.str] = None) -> Placeholder:
+    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
         

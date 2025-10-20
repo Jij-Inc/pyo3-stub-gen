@@ -26,10 +26,8 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         let doc = extract_docstring(&stub.func_stub.func_def);
 
         // Build Parameters directly from Python AST with proper kind classification
-        let parameters = build_parameters_from_ast(
-            &stub.func_stub.func_def.args,
-            &stub.func_stub.imports,
-        )?;
+        let parameters =
+            build_parameters_from_ast(&stub.func_stub.func_def.args, &stub.func_stub.imports)?;
 
         // For instance/class/new methods, the first parameter (self/cls) is handled by Python's AST
         // but we need to skip it in our parameters list since it's implied by the method type
@@ -550,7 +548,6 @@ mod test {
         "###);
         Ok(())
     }
-
 
     #[test]
     fn test_keyword_only_params_with_defaults() -> Result<()> {
