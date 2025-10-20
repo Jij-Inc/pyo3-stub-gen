@@ -94,13 +94,13 @@ fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo
     // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
     let dummy_type: Type = syn::parse_str("()").unwrap();
 
-    // Process positional arguments
-    for arg in &args.args {
+    // Helper function to process a single argument
+    let process_arg = |arg: &ast::ArgWithDefault| -> Result<Option<ArgInfo>> {
         let arg_name = arg.def.arg.to_string();
 
         // Skip 'self' argument
         if arg_name == "self" {
-            continue;
+            return Ok(None);
         }
 
         let type_override = if let Some(annotation) = &arg.def.annotation {
@@ -114,10 +114,31 @@ fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo
             }
         };
 
-        arg_infos.push(ArgInfo {
+        Ok(Some(ArgInfo {
             name: arg_name,
             r#type: type_override,
-        });
+        }))
+    };
+
+    // Process positional-only arguments (before /)
+    for arg in &args.posonlyargs {
+        if let Some(arg_info) = process_arg(arg)? {
+            arg_infos.push(arg_info);
+        }
+    }
+
+    // Process regular positional/keyword arguments
+    for arg in &args.args {
+        if let Some(arg_info) = process_arg(arg)? {
+            arg_infos.push(arg_info);
+        }
+    }
+
+    // Process keyword-only arguments (after *)
+    for arg in &args.kwonlyargs {
+        if let Some(arg_info) = process_arg(arg)? {
+            arg_infos.push(arg_info);
+        }
     }
 
     Ok(arg_infos)
