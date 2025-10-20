@@ -158,6 +158,14 @@ class Incrementer2:
         """
 
 @typing.final
+class InstanceValue:
+    @property
+    def data(self) -> builtins.str: ...
+    @data.setter
+    def data(self, value: builtins.str) -> None: ...
+    def __new__(cls, data:builtins.str) -> InstanceValue: ...
+
+@typing.final
 class MyDate(datetime.date):
     ...
 
@@ -217,6 +225,17 @@ class OverrideType:
     @num.setter
     def num(self, value: str) -> None: ...
     def error(self) -> typing_extensions.Never: ...
+
+@typing.final
+class Problem:
+    def evaluate(self, instance_data:builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
+        r"""
+        Evaluate with instance data mapping string keys to InstanceValue objects.
+        
+                This example demonstrates RustType marker usage within nested generic types
+                such as dict value types. The marker should expand to the correct Python type.
+        """
+    def __new__(cls) -> Problem: ...
 
 class Shape1:
     r"""
