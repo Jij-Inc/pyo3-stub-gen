@@ -648,7 +648,7 @@ mod test {
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                         fn _fmt() -> String {
-                            "false".to_string()
+                            "False".to_string()
                         }
                         _fmt
                     }),

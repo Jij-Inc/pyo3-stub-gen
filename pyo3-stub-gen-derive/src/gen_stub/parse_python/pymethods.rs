@@ -371,15 +371,6 @@ mod test {
             name: "from_string",
             parameters: &[
                 ::pyo3_stub_gen::type_info::ParameterInfo {
-                    name: "cls",
-                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
-                    type_info: || ::pyo3_stub_gen::TypeInfo {
-                        name: "typing.Any".to_string(),
-                        import: ::std::collections::HashSet::from(["typing".into()]),
-                    },
-                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
-                },
-                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "s",
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
@@ -419,17 +410,7 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
-            parameters: &[
-                ::pyo3_stub_gen::type_info::ParameterInfo {
-                    name: "cls",
-                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
-                    type_info: || ::pyo3_stub_gen::TypeInfo {
-                        name: "typing.Any".to_string(),
-                        import: ::std::collections::HashSet::from(["typing".into()]),
-                    },
-                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
-                },
-            ],
+            parameters: &[],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "object".to_string(),
                 import: ::std::collections::HashSet::from([]),
@@ -672,7 +653,7 @@ mod test {
                             },
                             default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                                 fn _fmt() -> String {
-                                    "false".to_string()
+                                    "False".to_string()
                                 }
                                 _fmt
                             }),
