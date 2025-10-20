@@ -1,8 +1,9 @@
 use crate::gen_stub::arg::ArgInfo;
 use crate::gen_stub::attr::{extract_documents, parse_pyo3_attrs, Attr};
 use crate::gen_stub::member::MemberInfo;
+use crate::gen_stub::parameter::Parameters;
 use crate::gen_stub::renaming::RenamingRule;
-use crate::gen_stub::signature::{ArgsWithSignature, Signature};
+use crate::gen_stub::signature::Signature;
 use crate::gen_stub::util::quote_option;
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens, TokenStreamExt};
@@ -115,9 +116,16 @@ impl ToTokens for VariantInfo {
             constr_sig,
         } = self;
 
-        let args_with_sig = ArgsWithSignature {
-            args: constr_args,
-            sig: constr_sig,
+        let parameters = if let Some(sig) = constr_sig {
+            match Parameters::new_with_sig(constr_args, sig) {
+                Ok(params) => params,
+                Err(err) => {
+                    tokens.extend(err.to_compile_error());
+                    return;
+                }
+            }
+        } else {
+            Parameters::new(constr_args)
         };
 
         let module = quote_option(module);
@@ -128,7 +136,7 @@ impl ToTokens for VariantInfo {
                 module: #module,
                 doc: #doc,
                 form: &pyo3_stub_gen::type_info::VariantForm::#form,
-                constr_args: #args_with_sig,
+                constr_args: #parameters,
             }
         })
     }

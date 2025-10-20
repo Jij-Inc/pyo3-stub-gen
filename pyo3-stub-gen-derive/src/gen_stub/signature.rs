@@ -1,13 +1,9 @@
-use proc_macro2::TokenStream as TokenStream2;
-use quote::ToTokens;
 use syn::{
     parenthesized,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     token, Expr, Ident, Result, Token,
 };
-
-use super::{parameter::*, ArgInfo};
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum SignatureArg {
@@ -65,27 +61,6 @@ impl Parse for Signature {
         let paren = parenthesized!(content in input);
         let args = content.parse_terminated(SignatureArg::parse, Token![,])?;
         Ok(Self { paren, args })
-    }
-}
-
-/// Arguments with signature information, structured by parameter kinds
-pub struct ArgsWithSignature<'a> {
-    pub args: &'a Vec<ArgInfo>,
-    pub sig: &'a Option<Signature>,
-}
-
-impl ToTokens for ArgsWithSignature<'_> {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let params_result = if let Some(sig) = self.sig {
-            Parameters::new_with_sig(self.args, sig)
-        } else {
-            Ok(Parameters::new(self.args))
-        };
-
-        match params_result {
-            Ok(parameters) => parameters.to_tokens(tokens),
-            Err(err) => tokens.extend(err.to_compile_error()),
-        }
     }
 }
 

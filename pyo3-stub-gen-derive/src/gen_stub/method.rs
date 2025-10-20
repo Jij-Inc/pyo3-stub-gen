@@ -2,8 +2,8 @@ use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
     arg::parse_args, attr::IgnoreTarget, extract_deprecated, extract_documents,
-    extract_return_type, parse_gen_stub_type_ignore, parse_pyo3_attrs, ArgInfo, ArgsWithSignature,
-    Attr, DeprecatedInfo, Signature,
+    extract_return_type, parameter::Parameters, parse_gen_stub_type_ignore, parse_pyo3_attrs,
+    ArgInfo, Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -139,7 +139,19 @@ impl ToTokens for MethodInfo {
             deprecated,
             type_ignored,
         } = self;
-        let args_with_sig = ArgsWithSignature { args, sig };
+
+        let parameters = if let Some(sig) = sig {
+            match Parameters::new_with_sig(args, sig) {
+                Ok(params) => params,
+                Err(err) => {
+                    tokens.extend(err.to_compile_error());
+                    return;
+                }
+            }
+        } else {
+            Parameters::new(args)
+        };
+
         let ret_tt = if let Some(ret) = ret {
             match ret {
                 TypeOrOverride::RustType { r#type } => {
@@ -188,7 +200,7 @@ impl ToTokens for MethodInfo {
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                parameters: #args_with_sig,
+                parameters: #parameters,
                 r#return: #ret_tt,
                 doc: #doc,
                 r#type: #type_tt,
