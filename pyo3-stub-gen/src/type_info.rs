@@ -148,7 +148,7 @@ pub enum MethodType {
 #[derive(Debug)]
 pub struct MethodInfo {
     pub name: &'static str,
-    pub args: &'static [ArgInfo],
+    pub parameters: &'static [ParameterInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub r#type: MethodType,
@@ -230,7 +230,7 @@ pub struct VariantInfo {
     pub doc: &'static str,
     pub fields: &'static [MemberInfo],
     pub form: &'static VariantForm,
-    pub constr_args: &'static [ArgInfo],
+    pub constr_args: &'static [ParameterInfo],
 }
 
 /// Info of a `#[pyclass]` with a rich (structured) Rust enum
@@ -271,7 +271,7 @@ inventory::collect!(PyEnumInfo);
 #[derive(Debug)]
 pub struct PyFunctionInfo {
     pub name: &'static str,
-    pub args: &'static [ArgInfo],
+    pub parameters: &'static [ParameterInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub module: Option<&'static str>,

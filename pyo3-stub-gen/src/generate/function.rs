@@ -31,7 +31,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
     fn from(info: &PyFunctionInfo) -> Self {
         Self {
             name: info.name,
-            parameters: Parameters::from_arg_infos(info.args),
+            parameters: Parameters::from_infos(info.parameters),
             r#return: (info.r#return)(),
             doc: info.doc,
             is_async: info.is_async,

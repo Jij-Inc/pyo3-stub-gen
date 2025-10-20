@@ -34,7 +34,7 @@ impl From<&MethodInfo> for MethodDef {
     fn from(info: &MethodInfo) -> Self {
         Self {
             name: info.name,
-            parameters: Parameters::from_arg_infos(info.args),
+            parameters: Parameters::from_infos(info.parameters),
             r#return: (info.r#return)(),
             doc: info.doc,
             r#type: info.r#type,

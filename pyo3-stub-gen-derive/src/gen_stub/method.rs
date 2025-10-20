@@ -188,7 +188,7 @@ impl ToTokens for MethodInfo {
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                args: #args_with_sig,
+                parameters: #args_with_sig,
                 r#return: #ret_tt,
                 doc: #doc,
                 r#type: #type_tt,

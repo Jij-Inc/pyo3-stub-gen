@@ -18,7 +18,7 @@ pub(super) fn get_variant_methods(
         .or_default()
         .push(MethodDef {
             name: "__new__",
-            parameters: Parameters::from_arg_infos(info.constr_args),
+            parameters: Parameters::from_infos(info.constr_args),
             r#return: TypeInfo {
                 name: full_class_name,
                 import: HashSet::new(),
