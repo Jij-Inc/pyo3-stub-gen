@@ -200,14 +200,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -240,17 +241,18 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "process",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "func",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
                         ]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -286,17 +288,18 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "fn_override_type",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "cb",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "collections.abc.Callable[[str], typing.Any]".to_string(),
                         import: ::std::collections::HashSet::from([
                             "collections.abc".into(),
                             "typing".into(),
                         ]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -330,30 +333,33 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "add",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "a",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
-                ::pyo3_stub_gen::type_info::ArgInfo {
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "b",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
-                ::pyo3_stub_gen::type_info::ArgInfo {
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "c",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "typing.Optional[int]".to_string(),
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -383,14 +389,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "print_hello",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "name",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: ::pyo3_stub_gen::type_info::no_return_type_output,
@@ -417,14 +424,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "fetch_data",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "url",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -455,14 +463,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "old_function",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -496,14 +505,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "old_function",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -536,11 +546,12 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "process_data",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: <MyRustType as ::pyo3_stub_gen::PyStubType>::type_input,
-                    signature: None,
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: <MyRustType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: <MyRustType as pyo3_stub_gen::PyStubType>::type_output,
@@ -567,11 +578,12 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "process",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: <crate::MyType as ::pyo3_stub_gen::PyStubType>::type_input,
-                    signature: None,
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: <crate::MyType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: <Vec<String> as pyo3_stub_gen::PyStubType>::type_output,

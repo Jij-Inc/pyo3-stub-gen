@@ -311,14 +311,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "increment",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -372,14 +373,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "create",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "name",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -413,14 +415,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "from_string",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "s",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -453,7 +456,7 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
-            args: &[],
+            parameters: &[],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "object".to_string(),
                 import: ::std::collections::HashSet::from([]),
@@ -487,17 +490,18 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "process",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "func",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
                         ]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -533,14 +537,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "fetch_data",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "url",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -573,11 +578,12 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__iadd__",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "other",
-                    r#type: <SomeRustType as ::pyo3_stub_gen::PyStubType>::type_input,
-                    signature: None,
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: <SomeRustType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: <PyProblem as pyo3_stub_gen::PyStubType>::type_output,
