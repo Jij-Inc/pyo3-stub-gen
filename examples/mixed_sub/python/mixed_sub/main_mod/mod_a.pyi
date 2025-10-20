@@ -12,3 +12,8 @@ def create_c(a:A, b:B) -> C: ...
 
 def greet_a() -> None: ...
 
+def test_module_with_python(x:typing.Generator[int, None, None]) -> int:
+    r"""
+    Test function with both module and python parameters
+    """
+

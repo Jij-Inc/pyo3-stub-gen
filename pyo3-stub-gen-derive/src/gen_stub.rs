@@ -168,7 +168,9 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
 
     // If python parameter is provided, use it instead of auto-generated metadata
     if let Some(stub_str) = python_stub {
-        let python_inner = parse_python::parse_python_function_stub(stub_str)?;
+        let mut python_inner = parse_python::parse_python_function_stub(stub_str)?;
+        // Preserve module information from attributes
+        python_inner.module = inner.module;
         Ok(quote! {
             #item_fn
             #[automatically_derived]
