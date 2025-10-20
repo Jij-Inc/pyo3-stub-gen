@@ -212,9 +212,8 @@ fn expr_to_type_string(expr: &ast::Expr) -> Result<String> {
 fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> Result<String> {
     // Check for pyo3_stub_gen.RustType["TypeName"] marker first
     // If found, return just the type name (the marker will be handled elsewhere)
-    match extract_rust_type_marker(expr)? {
-        Some(type_name) => return Ok(type_name),
-        None => {}
+    if let Some(type_name) = extract_rust_type_marker(expr)? {
+        return Ok(type_name);
     }
 
     Ok(match expr {
