@@ -131,3 +131,64 @@ submit! {
         "#
     }
 }
+
+// Example 5: RustType marker nested in complex type annotations
+// This demonstrates using RustType markers within nested generic types like dict values
+
+#[gen_stub_pyclass]
+#[pyclass]
+#[derive(Clone)]
+pub struct InstanceValue {
+    #[pyo3(get, set)]
+    pub data: String,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl InstanceValue {
+    #[new]
+    fn new(data: String) -> Self {
+        Self { data }
+    }
+}
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct Problem {}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Problem {
+    #[new]
+    fn new() -> Self {
+        Self {}
+    }
+
+    #[gen_stub(skip)]
+    fn evaluate(&self, _instance_data: std::collections::HashMap<String, Py<InstanceValue>>) -> String {
+        "result".to_string()
+    }
+}
+
+submit! {
+    gen_methods_from_python! {
+        r#"
+        import builtins
+
+        class Problem:
+            def evaluate(
+                self,
+                instance_data: builtins.dict[
+                    builtins.str,
+                    pyo3_stub_gen.RustType["InstanceValue"]
+                ]
+            ) -> builtins.str:
+                """
+                Evaluate with instance data mapping string keys to InstanceValue objects.
+
+                This example demonstrates RustType marker usage within nested generic types
+                such as dict value types. The marker should expand to the correct Python type.
+                """
+        "#
+    }
+}
