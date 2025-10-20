@@ -227,6 +227,21 @@ class OverrideType:
     def error(self) -> typing_extensions.Never: ...
 
 @typing.final
+class Placeholder:
+    @property
+    def name(self) -> builtins.str: ...
+    @name.setter
+    def name(self, value: builtins.str) -> None: ...
+    def configure(self, name:builtins.str) -> Placeholder:
+        r"""
+        Configure placeholder with keyword-only parameters.
+        
+                This demonstrates keyword-only parameters (after *) which should be
+                preserved in the generated stub file.
+        """
+    def __new__(cls, name:builtins.str) -> Placeholder: ...
+
+@typing.final
 class Problem:
     def evaluate(self, instance_data: builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
         r"""

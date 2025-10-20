@@ -597,6 +597,47 @@ mod test {
         Ok(())
     }
 
+    #[test]
+    fn test_keyword_only_args() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            import typing
+
+            def configure(name: str, *, dtype: str, ndim: int, jagged: bool = False) -> None:
+                """Test keyword-only parameters"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+
+        // Should have 4 args: name, dtype, ndim, jagged
+        assert_eq!(info.args.len(), 4, "Expected 4 arguments");
+        assert_eq!(info.args[0].name, "name");
+        assert_eq!(info.args[1].name, "dtype");
+        assert_eq!(info.args[2].name, "ndim");
+        assert_eq!(info.args[3].name, "jagged");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_positional_only_args() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            def func(x: int, y: int, /, z: int) -> int:
+                """Test positional-only parameters"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+
+        // Should have 3 args: x, y, z
+        assert_eq!(info.args.len(), 3, "Expected 3 arguments");
+        assert_eq!(info.args[0].name, "x");
+        assert_eq!(info.args[1].name, "y");
+        assert_eq!(info.args[2].name, "z");
+
+        Ok(())
+    }
+
     fn format_as_value(tt: TokenStream2) -> String {
         let ttt = quote! { const _: () = #tt; };
         let formatted = prettyplease::unparse(&syn::parse_file(&ttt.to_string()).unwrap());
