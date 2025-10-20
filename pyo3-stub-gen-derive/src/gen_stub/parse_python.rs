@@ -6,7 +6,9 @@
 mod pyfunction;
 mod pymethods;
 
-pub use pyfunction::parse_python_function_stub;
+pub use pyfunction::{
+    parse_gen_function_from_python_input, parse_python_function_stub, GenFunctionFromPythonInput,
+};
 pub use pymethods::parse_python_methods_stub;
 
 use indexmap::IndexSet;
@@ -158,7 +160,7 @@ fn type_annotation_to_type_override(
         return Ok(TypeOrOverride::RustType { r#type: rust_type });
     }
 
-    let type_str = expr_to_type_string(expr);
+    let type_str = expr_to_type_string(expr)?;
 
     // Convert imports to IndexSet
     let import_set: IndexSet<String> = imports.iter().map(|s| s.to_string()).collect();
@@ -202,40 +204,47 @@ fn extract_rust_type_marker(expr: &ast::Expr) -> Result<Option<String>> {
 }
 
 /// Convert Python expression to type string
-fn expr_to_type_string(expr: &ast::Expr) -> String {
+fn expr_to_type_string(expr: &ast::Expr) -> Result<String> {
     expr_to_type_string_inner(expr, false)
 }
 
 /// Convert Python expression to type string with context
-fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
-    match expr {
+fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> Result<String> {
+    // Check for pyo3_stub_gen.RustType["TypeName"] marker first
+    // If found, return just the type name (the marker will be handled elsewhere)
+    if let Some(type_name) = extract_rust_type_marker(expr)? {
+        return Ok(type_name);
+    }
+
+    Ok(match expr {
         ast::Expr::Name(name) => name.id.to_string(),
         ast::Expr::Attribute(attr) => {
             format!(
                 "{}.{}",
-                expr_to_type_string_inner(&attr.value, false),
+                expr_to_type_string_inner(&attr.value, false)?,
                 attr.attr
             )
         }
         ast::Expr::Subscript(subscript) => {
-            let base = expr_to_type_string_inner(&subscript.value, false);
-            let slice = expr_to_type_string_inner(&subscript.slice, true);
+            let base = expr_to_type_string_inner(&subscript.value, false)?;
+            let slice = expr_to_type_string_inner(&subscript.slice, true)?;
             format!("{}[{}]", base, slice)
         }
         ast::Expr::List(list) => {
-            let elements: Vec<String> = list
+            let elements: Result<Vec<String>> = list
                 .elts
                 .iter()
                 .map(|e| expr_to_type_string_inner(e, false))
                 .collect();
-            format!("[{}]", elements.join(", "))
+            format!("[{}]", elements?.join(", "))
         }
         ast::Expr::Tuple(tuple) => {
-            let elements: Vec<String> = tuple
+            let elements: Result<Vec<String>> = tuple
                 .elts
                 .iter()
                 .map(|e| expr_to_type_string_inner(e, in_subscript))
                 .collect();
+            let elements = elements?;
             if in_subscript {
                 // In subscript context, preserve tuple structure without extra parentheses
                 elements.join(", ")
@@ -251,5 +260,5 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
             _ => "Any".to_string(),
         },
         _ => "Any".to_string(),
-    }
+    })
 }
