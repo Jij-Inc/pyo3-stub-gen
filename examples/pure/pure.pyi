@@ -232,14 +232,14 @@ class Placeholder:
     def name(self) -> builtins.str: ...
     @name.setter
     def name(self, value: builtins.str) -> None: ...
-    def configure(self, name:builtins.str) -> Placeholder:
+    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = false, latex: typing.Optional[builtins.str] = None, description: typing.Optional[builtins.str] = None) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
         
                 This demonstrates keyword-only parameters (after *) which should be
                 preserved in the generated stub file.
         """
-    def __new__(cls, name:builtins.str) -> Placeholder: ...
+    def __new__(cls, name: builtins.str) -> Placeholder: ...
 
 @typing.final
 class Problem:

@@ -105,8 +105,8 @@ pub(super) fn build_parameters_from_ast(args: &ast::Arguments, imports: &[String
         |arg: &ast::ArgWithDefault, kind: ParameterKindIntermediate| -> Result<Option<ParameterWithKind>> {
             let arg_name = arg.def.arg.to_string();
 
-            // Skip 'self' argument
-            if arg_name == "self" {
+            // Skip 'self' and 'cls' arguments (they are added automatically in generation)
+            if arg_name == "self" || arg_name == "cls" {
                 return Ok(None);
             }
 
