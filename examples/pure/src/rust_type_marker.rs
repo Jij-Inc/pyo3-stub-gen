@@ -165,7 +165,10 @@ impl Problem {
     }
 
     #[gen_stub(skip)]
-    fn evaluate(&self, instance_data: std::collections::HashMap<String, Py<InstanceValue>>) -> String {
+    fn evaluate(
+        &self,
+        instance_data: std::collections::HashMap<String, Py<InstanceValue>>,
+    ) -> String {
         let _ = instance_data;
         "result".to_string()
     }
