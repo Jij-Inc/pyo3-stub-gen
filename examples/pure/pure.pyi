@@ -228,7 +228,7 @@ class OverrideType:
 
 @typing.final
 class Problem:
-    def evaluate(self, instance_data:builtins.dict[builtins.str, pyo3_stub_gen.RustType["InstanceValue"]]) -> builtins.str:
+    def evaluate(self, instance_data:builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
         

@@ -210,6 +210,12 @@ fn expr_to_type_string(expr: &ast::Expr) -> String {
 
 /// Convert Python expression to type string with context
 fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> String {
+    // Check for pyo3_stub_gen.RustType["TypeName"] marker first
+    // If found, return just the type name (the marker will be handled elsewhere)
+    if let Ok(Some(type_name)) = extract_rust_type_marker(expr) {
+        return type_name;
+    }
+
     match expr {
         ast::Expr::Name(name) => name.id.to_string(),
         ast::Expr::Attribute(attr) => {

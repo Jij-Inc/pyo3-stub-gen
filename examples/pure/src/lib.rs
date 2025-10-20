@@ -420,6 +420,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<DecimalHolder>()?;
     m.add_class::<DataContainer>()?;
     m.add_class::<Calculator>()?;
+    m.add_class::<InstanceValue>()?;
+    m.add_class::<Problem>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
