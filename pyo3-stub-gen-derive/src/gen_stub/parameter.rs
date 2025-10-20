@@ -23,7 +23,7 @@ pub(crate) struct ParameterWithKind {
 impl ToTokens for ParameterWithKind {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let name = &self.arg_info.name;
-        let kind_tokens = self.kind.to_tokens();
+        let kind = &self.kind;
 
         let default_tokens = if let Some(value) = &self.default_expr {
             match &self.arg_info.r#type {
@@ -73,22 +73,20 @@ impl ToTokens for ParameterWithKind {
                 quote! {
                     ::pyo3_stub_gen::type_info::ParameterInfo {
                         name: #name,
-                        kind: #kind_tokens,
+                        kind: #kind,
                         type_info: <#r#type as ::pyo3_stub_gen::PyStubType>::type_input,
                         default: #default_tokens,
                     }
                 }
             }
             TypeOrOverride::OverrideType {
-                type_repr,
-                imports,
-                ..
+                type_repr, imports, ..
             } => {
                 let imports = imports.iter().collect::<Vec<&String>>();
                 quote! {
                     ::pyo3_stub_gen::type_info::ParameterInfo {
                         name: #name,
-                        kind: #kind_tokens,
+                        kind: #kind,
                         type_info: || ::pyo3_stub_gen::TypeInfo {
                             name: #type_repr.to_string(),
                             import: ::std::collections::HashSet::from([#(#imports.into(),)*])
@@ -116,9 +114,9 @@ pub(crate) enum ParameterKindIntermediate {
     VarKeyword,
 }
 
-impl ParameterKindIntermediate {
-    pub(crate) fn to_tokens(&self) -> TokenStream2 {
-        match self {
+impl ToTokens for ParameterKindIntermediate {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let kind_tokens = match self {
             Self::PositionalOnly => {
                 quote! { ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly }
             }
@@ -134,7 +132,8 @@ impl ParameterKindIntermediate {
             Self::VarKeyword => {
                 quote! { ::pyo3_stub_gen::type_info::ParameterKind::VarKeyword }
             }
-        }
+        };
+        tokens.append_all(kind_tokens);
     }
 }
 

@@ -49,7 +49,11 @@ impl fmt::Display for FunctionDef {
         }
 
         let async_ = if self.is_async { "async " } else { "" };
-        write!(f, "{async_}def {}({}) -> {}:", self.name, self.parameters, self.r#return)?;
+        write!(
+            f,
+            "{async_}def {}({}) -> {}:",
+            self.name, self.parameters, self.r#return
+        )?;
 
         // Calculate type: ignore comment once
         let type_ignore_comment = if let Some(target) = &self.type_ignored {
