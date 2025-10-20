@@ -32,7 +32,10 @@ impl SynParse for GenFunctionFromPythonInput {
             } else {
                 return Err(Error::new(
                     key.span(),
-                    format!("Unknown parameter: {}. Expected 'module' or a string literal", key),
+                    format!(
+                        "Unknown parameter: {}. Expected 'module' or a string literal",
+                        key
+                    ),
                 ));
             }
         }
