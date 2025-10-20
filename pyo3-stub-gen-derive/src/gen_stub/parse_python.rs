@@ -6,7 +6,9 @@
 mod pyfunction;
 mod pymethods;
 
-pub use pyfunction::parse_python_function_stub;
+pub use pyfunction::{
+    parse_gen_function_from_python_input, parse_python_function_stub, GenFunctionFromPythonInput,
+};
 pub use pymethods::parse_python_methods_stub;
 
 use indexmap::IndexSet;

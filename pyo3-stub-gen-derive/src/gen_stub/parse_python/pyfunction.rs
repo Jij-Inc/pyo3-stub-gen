@@ -1,13 +1,53 @@
 //! Parse Python function stub syntax and generate PyFunctionInfo
 
 use rustpython_parser::{ast, Parse};
-use syn::{Error, LitStr, Result};
+use syn::{parse::Parse as SynParse, parse::ParseStream, Error, LitStr, Result};
 
 use super::{
     dedent, extract_args, extract_deprecated_from_decorators, extract_docstring,
     extract_return_type,
 };
 use crate::gen_stub::pyfunction::PyFunctionInfo;
+
+/// Input for gen_function_from_python! macro
+pub struct GenFunctionFromPythonInput {
+    module: Option<String>,
+    python_stub: LitStr,
+}
+
+impl SynParse for GenFunctionFromPythonInput {
+    fn parse(input: ParseStream) -> Result<Self> {
+        // Check if first token is an identifier (for module parameter)
+        if input.peek(syn::Ident) {
+            let key: syn::Ident = input.parse()?;
+            if key == "module" {
+                let _: syn::token::Eq = input.parse()?;
+                let value: LitStr = input.parse()?;
+                let _: syn::token::Comma = input.parse()?;
+                let python_stub: LitStr = input.parse()?;
+                return Ok(Self {
+                    module: Some(value.value()),
+                    python_stub,
+                });
+            } else {
+                return Err(Error::new(
+                    key.span(),
+                    format!(
+                        "Unknown parameter: {}. Expected 'module' or a string literal",
+                        key
+                    ),
+                ));
+            }
+        }
+
+        // No module parameter, just parse the string literal
+        let python_stub: LitStr = input.parse()?;
+        Ok(Self {
+            module: None,
+            python_stub,
+        })
+    }
+}
 
 /// Intermediate representation for Python function stub
 pub struct PythonFunctionStub {
@@ -125,6 +165,20 @@ pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
         is_async,
     };
     PyFunctionInfo::try_from(stub)
+}
+
+/// Parse gen_function_from_python! input with optional module parameter
+pub fn parse_gen_function_from_python_input(
+    input: GenFunctionFromPythonInput,
+) -> Result<PyFunctionInfo> {
+    let mut info = parse_python_function_stub(input.python_stub)?;
+
+    // Set module if provided
+    if let Some(module) = input.module {
+        info.module = Some(module);
+    }
+
+    Ok(info)
 }
 
 #[cfg(test)]

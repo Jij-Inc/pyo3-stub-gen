@@ -119,6 +119,22 @@ fn dummy_int_fun(x: usize) -> usize {
     x
 }
 
+// Test function with both module and python parameters (bug reproduction case)
+// This should be placed in mod_a submodule
+#[gen_stub_pyfunction(
+    module = "mixed_sub.main_mod.mod_a",
+    python = r#"
+    import typing
+
+    def test_module_with_python(x: typing.Generator[int, None, None]) -> int:
+        """Test function with both module and python parameters"""
+"#
+)]
+#[pyfunction]
+fn test_module_with_python(_x: &Bound<PyAny>) -> PyResult<usize> {
+    Ok(42)
+}
+
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     // Add classes and functions to main module
@@ -141,6 +157,7 @@ fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     sub.add_class::<C>()?;
     sub.add_function(wrap_pyfunction!(greet_a, &sub)?)?;
     sub.add_function(wrap_pyfunction!(create_c, &sub)?)?;
+    sub.add_function(wrap_pyfunction!(test_module_with_python, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
 }
@@ -162,6 +179,21 @@ fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     sub.add_function(wrap_pyfunction!(dummy_int_fun, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
+}
+
+// Test gen_function_from_python! with module parameter
+use pyo3_stub_gen::inventory::submit;
+
+submit! {
+    gen_function_from_python! {
+        module = "mixed_sub.main_mod.mod_b",
+        r#"
+        import typing
+
+        def test_submit_with_module(values: typing.List[int]) -> int:
+            """Test function defined with gen_function_from_python! and module parameter"""
+        "#
+    }
 }
 
 define_stub_info_gatherer!(stub_info);
