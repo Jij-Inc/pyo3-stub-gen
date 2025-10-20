@@ -648,8 +648,7 @@ mod test {
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                         fn _fmt() -> String {
-                            let v: () = false;
-                            ::pyo3_stub_gen::util::fmt_py_obj(v)
+                            "false".to_string()
                         }
                         _fmt
                     }),

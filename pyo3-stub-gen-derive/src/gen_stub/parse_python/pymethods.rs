@@ -570,6 +570,161 @@ mod test {
         Ok(())
     }
 
+
+    #[test]
+    fn test_keyword_only_params_with_defaults() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            import builtins
+            import typing
+
+            class Placeholder:
+                def configure(
+                    self,
+                    name: builtins.str,
+                    *,
+                    dtype: builtins.str,
+                    ndim: builtins.int,
+                    shape: typing.Optional[builtins.str],
+                    jagged: builtins.bool = False,
+                    latex: typing.Optional[builtins.str] = None,
+                    description: typing.Optional[builtins.str] = None,
+                ) -> pyo3_stub_gen.RustType["Placeholder"]:
+                    """
+                    Configure placeholder with keyword-only parameters.
+
+                    This demonstrates keyword-only parameters (after *) which should be
+                    preserved in the generated stub file.
+                    """
+            "#
+        })?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
+
+        let out = py_methods_info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyMethodsInfo {
+            struct_id: std::any::TypeId::of::<Placeholder>,
+            attrs: &[],
+            getters: &[],
+            setters: &[],
+            methods: &[
+                ::pyo3_stub_gen::type_info::MethodInfo {
+                    name: "configure",
+                    parameters: &[
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "name",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.str".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "dtype",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.str".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "ndim",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.int".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "shape",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "jagged",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.bool".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "false".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "latex",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "None".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "description",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "None".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                    ],
+                    r#return: <Placeholder as pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "\n        Configure placeholder with keyword-only parameters.\n\n        This demonstrates keyword-only parameters (after *) which should be\n        preserved in the generated stub file.\n        ",
+                    r#type: ::pyo3_stub_gen::type_info::MethodType::Instance,
+                    is_async: false,
+                    deprecated: None,
+                    type_ignored: None,
+                },
+            ],
+        }
+        "###);
+        Ok(())
+    }
+
     fn format_as_value(tt: TokenStream2) -> String {
         let ttt = quote! { const _: () = #tt; };
         let formatted = prettyplease::unparse(&syn::parse_file(&ttt.to_string()).unwrap());

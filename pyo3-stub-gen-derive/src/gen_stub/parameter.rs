@@ -45,19 +45,14 @@ impl ToTokens for ParameterWithKind {
                         })
                     }
                 }
-                TypeOrOverride::OverrideType { r#type, .. } => {
-                    let default = if value.to_token_stream().to_string() == "None" {
-                        quote! { "None".to_string() }
-                    } else {
-                        quote! {
-                            let v: #r#type = #value;
-                            ::pyo3_stub_gen::util::fmt_py_obj(v)
-                        }
-                    };
+                TypeOrOverride::OverrideType { .. } => {
+                    // For OverrideType, convert the default value expression directly to a string
+                    // since r#type may be a dummy type and we can't use it for type annotations
+                    let value_str = value.to_token_stream().to_string();
                     quote! {
                         ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                             fn _fmt() -> String {
-                                #default
+                                #value_str.to_string()
                             }
                             _fmt
                         })
