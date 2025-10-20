@@ -79,6 +79,7 @@ mod arg;
 mod attr;
 mod member;
 mod method;
+mod parameter;
 mod parse_python;
 mod pyclass;
 mod pyclass_complex_enum;
