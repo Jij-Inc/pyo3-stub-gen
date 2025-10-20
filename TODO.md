@@ -411,7 +411,7 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 
 ---
 
-## 実装進捗状況（2025-10-20 更新 - 最終更新: ArgsWithSignature廃止完了）
+## 実装進捗状況（2025-10-20 更新 - 最終更新: Parameters統一完了）
 
 ### ✅ 完了したタスク
 
@@ -483,28 +483,46 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
 - ✅ **完了**: 各箇所で適切なエラーハンドリングを追加
 - **テスト結果**: 全25ユニットテスト + 48ワークスペーステスト パス
 
-### 🚧 残タスク
-
-#### 6. parse_python モジュールの更新【優先度: 高】
-- [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pyfunction.rs` の更新
-  - Python stub 文字列から `Parameters` を直接構築
-  - 位置限定 (`/`)、キーワード限定 (`*`) のパース対応
-  - `Parameters::new_with_sig()` または類似の API を使用
-- [ ] `pyo3-stub-gen-derive/src/gen_stub/parse_python/pymethods.rs` の更新
-  - Python class 定義から `Parameters` を構築
-  - メソッドシグネチャのパース対応
-- **テスト状況**: 18個のテストが失敗中（主に parse_python 経路）
-- **注意**: derive側の内部表現（`PyFunctionInfo.args: Vec<ArgInfo>`）は維持する設計
+#### 6. parse_python モジュールの更新と Parameters への完全統一
+- **コミット**: `2b60fd3` - "Unify parameter handling with Parameters model in derive macros"
+- ✅ **完了**: `ParameterKindIntermediate` に `ToTokens` trait を実装
+- ✅ **完了**: `build_parameters_from_ast()` 関数を追加
+  - Python AST から直接 `Parameters` を構築
+  - 位置限定 (`/`)、キーワード限定 (`*`)、`*args`, `**kwargs` のサポート
+  - デフォルト値の処理を実装（`python_expr_to_syn_expr()`）
+- ✅ **完了**: `PyFunctionInfo` のリファクタリング
+  - `args: Vec<ArgInfo>` と `sig: Option<Signature>` を削除
+  - `parameters: Parameters` に統一
+  - Rust path と parse_python path の両方で `Parameters` を使用
+- ✅ **完了**: `MethodInfo` のリファクタリング
+  - `args: Vec<ArgInfo>` と `sig: Option<Signature>` を削除
+  - `parameters: Parameters` に統一
+  - `replace_self()` メソッドを `Parameters` に対応
+- ✅ **完了**: parse_python 経路の完全対応
+  - `pyo3-stub-gen-derive/src/gen_stub/parse_python/pyfunction.rs` を更新
+  - `pyo3-stub-gen-derive/src/gen_stub/parse_python/pymethods.rs` を更新
+  - レガシー関数 `extract_args`, `extract_args_for_method` を削除
+- ✅ **完了**: `Parameters` へのユーティリティメソッド追加
+  - `Parameters::from_vec()` - 既に分類済みのパラメータから構築
+  - `Parameters::iter_mut()` - 内部パラメータへのミュータブルアクセス
+- **テスト結果**: 全27ユニットテスト パス、スナップショットテスト更新済み
 
 #### 7. 旧型の完全削除
-- [x] `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除（~16行削除）
-- [x] `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除（~14行削除）
-- [x] `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（~95行削除）
-- [ ] `pyo3-stub-gen-derive/src/gen_stub/arg.rs` の `ArgInfo` - derive内部で継続使用（設計判断により残す）
-- [x] 全ての参照箇所を確認 - ランタイム側の旧型は完全削除完了
-- **テスト結果**: 全48ワークスペーステスト パス
+- ✅ **完了**: `pyo3-stub-gen/src/type_info.rs` から `ArgInfo` を削除（~16行削除）
+- ✅ **完了**: `pyo3-stub-gen/src/type_info.rs` から `SignatureArg` を削除（~14行削除）
+- ✅ **完了**: `pyo3-stub-gen/src/generate/parameters.rs` から `from_arg_infos()` を削除（~95行削除）
+- ℹ️ **設計判断**: `pyo3-stub-gen-derive/src/gen_stub/arg.rs` の `ArgInfo` は derive 内部で継続使用
+  - `Parameters` を構築する前の中間表現として使用
+  - 最終的に `ParameterInfo` に変換される
+- ✅ **完了**: 全ての参照箇所を確認 - ランタイム側の旧型は完全削除完了
+- **テスト結果**: derive クレート全27テスト パス
+
+### 🚧 残タスク
 
 #### 8. 統合テストと検証
+- [ ] examples/ のコンパイルエラー修正
+  - `gen_methods_from_python!` マクロ使用箇所のエラー対応
+  - 既知の問題: examples/pure/src/rust_type_marker.rs:234
 - [ ] `task stub-gen` を実行して全 example のスタブファイルを生成
 - [ ] 生成された `.pyi` ファイルの内容を確認
   - 位置限定パラメータ (`/`) が正しく出力されているか
@@ -527,9 +545,11 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
    - `ArgInfo`, `SignatureArg` - ✅ **削除完了**
 
 2. **pyo3-stub-gen-derive/src/gen_stub/**（derive内部の中間表現）
-   - `arg.rs` の `ArgInfo` - derive内部専用 ℹ️ 継続使用（設計判断）
-   - `signature.rs` の `SignatureArg` - signature パース用 ℹ️ 継続使用
-   - `parameter.rs` の `Parameters`, `ParameterWithKind` - 中間表現 ✅ 新型
+   - `arg.rs` の `ArgInfo` - Rust 関数シグネチャパース専用 ℹ️ 継続使用
+   - `signature.rs` の `SignatureArg` - PyO3 signature 属性パース専用 ℹ️ 継続使用
+   - `parameter.rs` の `Parameters`, `ParameterWithKind`, `ParameterKindIntermediate` - ✅ 新型
+     - `PyFunctionInfo` と `MethodInfo` で唯一のパラメータ表現
+     - Rust path と parse_python path の両方で使用
 
 #### 現在のデータフロー
 
@@ -540,26 +560,35 @@ assert!(rendered.contains("def incr(self, step: builtins.int = 1) -> builtins.in
   → derive/parameter.rs: Parameters::new_with_sig(args, sig)
       - Signature を解析して ParameterKind を決定
       - Vec<ParameterWithKind> を構築
+  → derive/pyfunction.rs または method.rs:
+      - PyFunctionInfo/MethodInfo.parameters: Parameters に保存
   → ToTokens: &[::pyo3_stub_gen::type_info::ParameterInfo] を生成
   → 実行時: generate/parameters.rs: Parameters::from_infos()
   → .pyi出力
 ```
 
-**Python stub文字列からのパス（❌ 未完了）:**
+**Python stub文字列からのパス（✅ 完了）:**
 ```
 [gen_function_from_python! / gen_methods_from_python!]
-  → derive/parse_python: Vec<ArgInfo>（旧実装）❌
-  → derive/pyfunction.rs: ToTokens
-  → 生成コード: 不整合が発生
+  → derive/parse_python: build_parameters_from_ast()
+      - Python AST を直接解析
+      - ParameterKind を決定（位置限定/キーワード限定/可変長）
+      - Vec<ParameterWithKind> を構築
+  → derive/pyfunction.rs または method.rs:
+      - PyFunctionInfo/MethodInfo.parameters: Parameters に保存
+  → ToTokens: &[::pyo3_stub_gen::type_info::ParameterInfo] を生成
+  → 実行時: generate/parameters.rs: Parameters::from_infos()
+  → .pyi出力
 ```
 
-#### 設計方針
-- **derive側の内部表現**: `Vec<ArgInfo>` のまま維持（設計判断済み）
-  - derive 内部では既存の ArgInfo を使い続ける
-  - `Parameters` は中間表現としてのみ使用
-  - `ToTokens` で最終的に `ParameterInfo` 配列を生成
+#### 設計原則
+- **derive側の中間表現**:
+  - `ArgInfo` は Rust 関数シグネチャのパース結果として使用
+  - `Parameters` は `ArgInfo` と `Signature` を統合した中間表現
+  - Python stub からは直接 `Parameters` を構築
+  - 両経路とも最終的に同じ `Parameters` → `ParameterInfo` フローに収束
 
-- **parse_python の修正方針**:
-  - Python stub を解析して `Vec<ArgInfo>` と `Signature` を構築
-  - `Parameters::new_with_sig()` を使って `ParameterInfo` を生成
-  - Rust定義からのパスと同じフローに統一
+- **統一された型システム**:
+  - `PyFunctionInfo` と `MethodInfo` は `parameters: Parameters` のみを保持
+  - `args` と `sig` フィールドは完全に廃止
+  - Rust path と parse_python path で同じデータ構造を使用
