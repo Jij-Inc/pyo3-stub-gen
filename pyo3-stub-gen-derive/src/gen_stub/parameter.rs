@@ -48,7 +48,13 @@ impl ToTokens for ParameterWithKind {
                 TypeOrOverride::OverrideType { .. } => {
                     // For OverrideType, convert the default value expression directly to a string
                     // since r#type may be a dummy type and we can't use it for type annotations
-                    let value_str = value.to_token_stream().to_string();
+                    let mut value_str = value.to_token_stream().to_string();
+                    // Convert Rust bool literals to Python bool literals
+                    if value_str == "false" {
+                        value_str = "False".to_string();
+                    } else if value_str == "true" {
+                        value_str = "True".to_string();
+                    }
                     quote! {
                         ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                             fn _fmt() -> String {
