@@ -119,6 +119,22 @@ fn dummy_int_fun(x: usize) -> usize {
     x
 }
 
+// Test function with both module and python parameters (bug reproduction case)
+// This should be placed in mod_a submodule
+#[gen_stub_pyfunction(
+    module = "mixed_sub.main_mod.mod_a",
+    python = r#"
+    import typing
+
+    def test_module_with_python(x: typing.Generator[int, None, None]) -> int:
+        """Test function with both module and python parameters"""
+"#
+)]
+#[pyfunction]
+fn test_module_with_python(_x: &Bound<PyAny>) -> PyResult<usize> {
+    Ok(42)
+}
+
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     // Add classes and functions to main module
@@ -141,6 +157,7 @@ fn mod_a(parent: &Bound<PyModule>) -> PyResult<()> {
     sub.add_class::<C>()?;
     sub.add_function(wrap_pyfunction!(greet_a, &sub)?)?;
     sub.add_function(wrap_pyfunction!(create_c, &sub)?)?;
+    sub.add_function(wrap_pyfunction!(test_module_with_python, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
 }

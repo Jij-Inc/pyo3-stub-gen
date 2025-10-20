@@ -21,3 +21,8 @@ def create_b(x:builtins.int) -> B: ...
 
 def greet_main() -> None: ...
 
+def test_module_with_python(x:typing.Generator[int, None, None]) -> int:
+    r"""
+    Test function with both module and python parameters
+    """
+
