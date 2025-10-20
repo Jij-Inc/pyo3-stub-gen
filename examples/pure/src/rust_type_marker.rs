@@ -218,13 +218,14 @@ impl Placeholder {
     #[gen_stub(skip)]
     fn configure(
         &self,
-        _name: String,
-        _dtype: String,
-        _ndim: i32,
-        _shape: Option<String>,
-        _jagged: bool,
-        _latex: Option<String>,
+        name: String,
+        dtype: String,
+        ndim: i32,
+        shape: Option<String>,
+        jagged: bool,
+        latex: Option<String>,
     ) -> Self {
+        dbg!(&name, &dtype, &ndim, &shape, &jagged, &latex);
         self.clone()
     }
 }

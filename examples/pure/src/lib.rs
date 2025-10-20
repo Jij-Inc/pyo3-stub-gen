@@ -419,6 +419,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<HashableStruct>()?;
     m.add_class::<DecimalHolder>()?;
     m.add_class::<DataContainer>()?;
+    m.add_class::<Placeholder>()?;
     m.add_class::<Calculator>()?;
     m.add_class::<InstanceValue>()?;
     m.add_class::<Problem>()?;

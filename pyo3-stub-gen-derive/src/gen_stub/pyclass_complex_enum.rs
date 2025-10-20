@@ -172,13 +172,13 @@ mod test {
                     constr_args: &[
                         ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "_0",
-                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                             type_info: <i32 as ::pyo3_stub_gen::PyStubType>::type_input,
                             default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                         },
                         ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "_1",
-                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                             type_info: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
                             default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                                 fn _fmt() -> String {

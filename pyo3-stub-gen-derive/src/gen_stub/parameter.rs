@@ -205,14 +205,18 @@ impl Parameters {
             .collect();
 
         // Track parameter kinds based on position and delimiters
-        let mut positional_only = true; // Start in positional-only mode
+        // By default, parameters are PositionalOrKeyword unless `/` or `*` appear
+        let mut positional_only = false;
         let mut after_star = false;
-        let mut parameters = Vec::new();
+        let mut parameters: Vec<ParameterWithKind> = Vec::new();
 
         for sig_arg in sig.args() {
             match sig_arg {
                 SignatureArg::Slash(_) => {
-                    // `/` delimiter - parameters before this are positional-only
+                    // `/` delimiter - mark all previous parameters as positional-only
+                    for param in &mut parameters {
+                        param.kind = ParameterKindIntermediate::PositionalOnly;
+                    }
                     positional_only = false;
                 }
                 SignatureArg::Star(_) => {
