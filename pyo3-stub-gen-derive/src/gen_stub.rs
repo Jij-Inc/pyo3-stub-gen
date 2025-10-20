@@ -107,10 +107,7 @@ use util::*;
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{
-    parse::Parse, parse::ParseStream, parse2, Error, ItemEnum, ItemFn, ItemImpl, ItemStruct,
-    LitStr, Result,
-};
+use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result};
 
 pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
     let mut item_struct = parse2::<ItemStruct>(item)?;
@@ -192,51 +189,9 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
     }
 }
 
-struct GenFunctionFromPythonInput {
-    module: Option<String>,
-    python_stub: LitStr,
-}
-
-impl Parse for GenFunctionFromPythonInput {
-    fn parse(input: ParseStream) -> Result<Self> {
-        // Check if first token is an identifier (for module parameter)
-        if input.peek(syn::Ident) {
-            let key: syn::Ident = input.parse()?;
-            if key == "module" {
-                let _: syn::token::Eq = input.parse()?;
-                let value: LitStr = input.parse()?;
-                let _: syn::token::Comma = input.parse()?;
-                let python_stub: LitStr = input.parse()?;
-                return Ok(Self {
-                    module: Some(value.value()),
-                    python_stub,
-                });
-            } else {
-                return Err(Error::new(
-                    key.span(),
-                    format!("Unknown parameter: {}. Expected 'module' or a string literal", key),
-                ));
-            }
-        }
-
-        // No module parameter, just parse the string literal
-        let python_stub: LitStr = input.parse()?;
-        Ok(Self {
-            module: None,
-            python_stub,
-        })
-    }
-}
-
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
-    let parsed: GenFunctionFromPythonInput = parse2(input)?;
-    let mut inner = parse_python::parse_python_function_stub(parsed.python_stub)?;
-
-    // Set module if provided
-    if let Some(module) = parsed.module {
-        inner.module = Some(module);
-    }
-
+    let parsed: parse_python::GenFunctionFromPythonInput = parse2(input)?;
+    let inner = parse_python::parse_gen_function_from_python_input(parsed)?;
     Ok(quote! { #inner })
 }
 
