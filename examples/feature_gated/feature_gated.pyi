@@ -23,7 +23,7 @@ class A:
     def __new__(cls) -> A: ...
     def get_y(self) -> builtins.int: ...
 
-def sum_as_string(a:builtins.int, b:builtins.int) -> builtins.str:
+def sum_as_string(a: builtins.int, b: builtins.int) -> builtins.str:
     r"""
     Formats the sum of two numbers as string.
     """

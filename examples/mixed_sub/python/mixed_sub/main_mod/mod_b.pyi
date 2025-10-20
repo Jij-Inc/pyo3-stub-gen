@@ -8,11 +8,11 @@ import typing
 class D:
     def show_x(self) -> None: ...
 
-def create_d(x:builtins.int) -> D: ...
+def create_d(x: builtins.int) -> D: ...
 
 def greet_b() -> None: ...
 
-def test_submit_with_module(values:typing.List[int]) -> int:
+def test_submit_with_module(values: typing.List[int]) -> int:
     r"""
     Test function defined with gen_function_from_python! and module parameter
     """

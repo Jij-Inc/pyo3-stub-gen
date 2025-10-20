@@ -3,5 +3,5 @@
 
 import builtins
 
-def dummy_int_fun(x:builtins.int) -> builtins.int: ...
+def dummy_int_fun(x: builtins.int) -> builtins.int: ...
 

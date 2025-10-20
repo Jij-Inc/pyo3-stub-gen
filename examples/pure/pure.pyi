@@ -51,7 +51,7 @@ class A:
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
-    def __new__(cls, x:builtins.int) -> A:
+    def __new__(cls, x: builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
         """
@@ -63,7 +63,7 @@ class A:
     @classmethod
     def classmethod_test2(cls) -> None: ...
     def show_x(self) -> None: ...
-    def ref_test(self, x:dict) -> dict: ...
+    def ref_test(self, x: dict) -> dict: ...
     async def async_get_x(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     def deprecated_method(self) -> None: ...
@@ -77,14 +77,14 @@ class B(A):
 
 @typing.final
 class Calculator:
-    def multiply(self, other:Calculator) -> Calculator:
+    def multiply(self, other: Calculator) -> Calculator:
         r"""
         Multiply this calculator's result by another calculator's result.
         
                 Using RustType marker for both input and output types.
         """
     def __new__(cls) -> Calculator: ...
-    def add(self, value:builtins.float) -> builtins.float: ...
+    def add(self, value: builtins.float) -> builtins.float: ...
 
 @typing.final
 class ComparableStruct:
@@ -93,12 +93,12 @@ class ComparableStruct:
     """
     @property
     def value(self) -> builtins.int: ...
-    def __eq__(self, other:builtins.object) -> builtins.bool: ...
-    def __lt__(self, other:builtins.object) -> builtins.bool: ...
-    def __le__(self, other:builtins.object) -> builtins.bool: ...
-    def __gt__(self, other:builtins.object) -> builtins.bool: ...
-    def __ge__(self, other:builtins.object) -> builtins.bool: ...
-    def __new__(cls, value:builtins.int) -> ComparableStruct: ...
+    def __eq__(self, other: builtins.object) -> builtins.bool: ...
+    def __lt__(self, other: builtins.object) -> builtins.bool: ...
+    def __le__(self, other: builtins.object) -> builtins.bool: ...
+    def __gt__(self, other: builtins.object) -> builtins.bool: ...
+    def __ge__(self, other: builtins.object) -> builtins.bool: ...
+    def __new__(cls, value: builtins.int) -> ComparableStruct: ...
 
 @typing.final
 class DataContainer:
@@ -106,13 +106,13 @@ class DataContainer:
     def value(self) -> builtins.int: ...
     @value.setter
     def value(self, value: builtins.int) -> None: ...
-    def __new__(cls, value:builtins.int) -> DataContainer: ...
+    def __new__(cls, value: builtins.int) -> DataContainer: ...
 
 @typing.final
 class DecimalHolder:
     @property
     def value(self) -> decimal.Decimal: ...
-    def __new__(cls, value:decimal.Decimal) -> DecimalHolder: ...
+    def __new__(cls, value: decimal.Decimal) -> DecimalHolder: ...
 
 @typing.final
 class HashableStruct:
@@ -121,20 +121,20 @@ class HashableStruct:
     """
     @property
     def name(self) -> builtins.str: ...
-    def __eq__(self, other:builtins.object) -> builtins.bool: ...
+    def __eq__(self, other: builtins.object) -> builtins.bool: ...
     def __hash__(self) -> builtins.int: ...
     def __str__(self) -> builtins.str: ...
-    def __new__(cls, name:builtins.str) -> HashableStruct: ...
+    def __new__(cls, name: builtins.str) -> HashableStruct: ...
 
 @typing.final
 class Incrementer:
     @typing.overload
-    def increment_1(self, x:int) -> int:
+    def increment_1(self, x: int) -> int:
         r"""
         And this is for the second comment
         """
     @typing.overload
-    def increment_1(self, x:builtins.float) -> builtins.float:
+    def increment_1(self, x: builtins.float) -> builtins.float:
         r"""
         This is the original doc comment
         """
@@ -143,12 +143,12 @@ class Incrementer:
 @typing.final
 class Incrementer2:
     @typing.overload
-    def increment_2(self, x:int) -> int:
+    def increment_2(self, x: int) -> int:
         r"""
         increment_2 for integers, submitted by hands
         """
     @typing.overload
-    def increment_2(self, x:float) -> float:
+    def increment_2(self, x: float) -> float:
         r"""
         increment_2 for floats, submitted by hands
         """
@@ -163,7 +163,7 @@ class InstanceValue:
     def data(self) -> builtins.str: ...
     @data.setter
     def data(self, value: builtins.str) -> None: ...
-    def __new__(cls, data:builtins.str) -> InstanceValue: ...
+    def __new__(cls, data: builtins.str) -> InstanceValue: ...
 
 @typing.final
 class MyDate(datetime.date):
@@ -179,7 +179,7 @@ class NotIntError(builtins.TypeError):
     
     Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
     """
-    def __new__(cls, item:typing.Any) -> NotIntError: ...
+    def __new__(cls, item: typing.Any) -> NotIntError: ...
     def __str__(self) -> builtins.str: ...
     def trivial_number(self) -> builtins.int:
         r"""
@@ -199,9 +199,9 @@ class NumberComplex:
         __match_args__ = ("_0",)
         @property
         def _0(self) -> builtins.float: ...
-        def __new__(cls, _0:builtins.float) -> NumberComplex.FLOAT: ...
+        def __new__(cls, _0: builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key:builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int) -> typing.Any: ...
     
     @typing.final
     class INTEGER(NumberComplex):
@@ -214,7 +214,7 @@ class NumberComplex:
             r"""
             The integer value
             """
-        def __new__(cls, int:builtins.int=2) -> NumberComplex.INTEGER: ...
+        def __new__(cls, int: builtins.int = 2, /) -> NumberComplex.INTEGER: ...
     
     ...
 
@@ -228,7 +228,7 @@ class OverrideType:
 
 @typing.final
 class Problem:
-    def evaluate(self, instance_data:builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
+    def evaluate(self, instance_data: builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
         
@@ -247,7 +247,7 @@ class Shape1:
         __match_args__ = ("radius",)
         @property
         def radius(self) -> builtins.float: ...
-        def __new__(cls, radius:builtins.float) -> Shape1.Circle: ...
+        def __new__(cls, radius: builtins.float) -> Shape1.Circle: ...
     
     @typing.final
     class Rectangle(Shape1):
@@ -256,7 +256,7 @@ class Shape1:
         def width(self) -> builtins.float: ...
         @property
         def height(self) -> builtins.float: ...
-        def __new__(cls, width:builtins.float, height:builtins.float) -> Shape1.Rectangle: ...
+        def __new__(cls, width: builtins.float, height: builtins.float) -> Shape1.Rectangle: ...
     
     @typing.final
     class RegularPolygon(Shape1):
@@ -265,9 +265,9 @@ class Shape1:
         def _0(self) -> builtins.int: ...
         @property
         def _1(self) -> builtins.float: ...
-        def __new__(cls, _0:builtins.int, _1:builtins.float) -> Shape1.RegularPolygon: ...
+        def __new__(cls, _0: builtins.int, _1: builtins.float) -> Shape1.RegularPolygon: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key:builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int) -> typing.Any: ...
     
     @typing.final
     class Nothing(Shape1):
@@ -286,7 +286,7 @@ class Shape2:
         __match_args__ = ("radius",)
         @property
         def radius(self) -> builtins.float: ...
-        def __new__(cls, radius:builtins.float=1.0) -> Shape2.Circle: ...
+        def __new__(cls, radius: builtins.float = 1.0, /) -> Shape2.Circle: ...
     
     @typing.final
     class Rectangle(Shape2):
@@ -295,7 +295,7 @@ class Shape2:
         def width(self) -> builtins.float: ...
         @property
         def height(self) -> builtins.float: ...
-        def __new__(cls, *, width:builtins.float, height:builtins.float) -> Shape2.Rectangle: ...
+        def __new__(cls, *, width: builtins.float, height: builtins.float) -> Shape2.Rectangle: ...
     
     @typing.final
     class RegularPolygon(Shape2):
@@ -304,7 +304,7 @@ class Shape2:
         def side_count(self) -> builtins.int: ...
         @property
         def radius(self) -> builtins.float: ...
-        def __new__(cls, side_count:builtins.int, radius:builtins.float=1.0) -> Shape2.RegularPolygon: ...
+        def __new__(cls, side_count: builtins.int, radius: builtins.float = 1.0, /) -> Shape2.RegularPolygon: ...
     
     @typing.final
     class Nothing(Shape2):
@@ -319,7 +319,7 @@ class TypeIgnoreTest:
     Test class for method type: ignore functionality
     """
     def __new__(cls) -> TypeIgnoreTest: ...
-    def test_method_ignore(self, value:builtins.int) -> builtins.int:  # type: ignore[union-attr,return-value]
+    def test_method_ignore(self, value: builtins.int) -> builtins.int:  # type: ignore[union-attr,return-value]
         r"""
         Test method with type: ignore for specific rules
         """
@@ -352,7 +352,7 @@ class NumberRenameAll(enum.Enum):
     """
     INTEGER = ...
 
-def add_decimals(a:decimal.Decimal, b:decimal.Decimal) -> decimal.Decimal:
+def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
     r"""
     Add two decimal numbers with high precision
     """
@@ -361,73 +361,73 @@ def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
 async def async_num() -> builtins.int: ...
 
-def create_a(x:builtins.int=2) -> A: ...
+def create_a(x: builtins.int = 2, /) -> A: ...
 
-def create_containers(count:builtins.int) -> builtins.list[DataContainer]:
+def create_containers(count: builtins.int) -> builtins.list[DataContainer]:
     r"""
     Create a list of DataContainer instances.
     
         Demonstrates using RustType with generic types containing custom types.
     """
 
-def create_dict(n:builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
+def create_dict(n: builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 
-def default_value(num:Number=Number.FLOAT) -> Number: ...
+def default_value(num: Number = Number.FLOAT, /) -> Number: ...
 
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
 
-def echo_path(path:builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 
-def fn_override_type(cb:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
+def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
-def fn_with_python_param(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example using python parameter in gen_stub_pyfunction attribute.
         This demonstrates specifying types directly in Python stub syntax.
     """
 
-def fn_with_python_stub(callback:collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example function using gen_function_from_python! macro.
         This demonstrates how to define type information using Python stub syntax.
     """
 
-def func_with_kwargs(**kwargs) -> builtins.bool:
+def func_with_kwargs(**kwargs: typing.Optional[dict]) -> builtins.bool:
     r"""
     Takes a variable number of keyword arguments and does nothing
     """
 
-def func_with_star_arg(*args) -> builtins.str:
+def func_with_star_arg(*args: tuple) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
     """
 
 @typing.overload
-def overload_example_1(x:int) -> int: ...
+def overload_example_1(x: int) -> int: ...
 
 @typing.overload
-def overload_example_1(x:builtins.float) -> builtins.float:
+def overload_example_1(x: builtins.float) -> builtins.float:
     r"""
     First example: One generated with ordinary `#[gen_stub_pyfunction]`,
     and then manually with `submit!` macro.
     """
 
 @typing.overload
-def overload_example_2(ob:int) -> int:
+def overload_example_2(ob: int) -> int:
     r"""
     Increments integer by 1
     """
 
 @typing.overload
-def overload_example_2(ob:float) -> float:
+def overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
     """
 
-def print_c(c:typing.Optional[builtins.int]=None) -> None: ...
+def print_c(c: typing.Optional[builtins.int] = None, /) -> None: ...
 
-def process_container(container:DataContainer) -> DataContainer:
+def process_container(container: DataContainer) -> DataContainer:
     r"""
     Process a DataContainer by doubling its value.
     
@@ -435,19 +435,19 @@ def process_container(container:DataContainer) -> DataContainer:
         which will expand to the correct Python stub type using PyStubType trait.
     """
 
-def read_dict(dict:typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
+def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
 
-def str_len(x:builtins.str) -> builtins.int:
+def str_len(x: builtins.str) -> builtins.int:
     r"""
     Returns the length of the string.
     """
 
-def sum(v:typing.Sequence[builtins.int]) -> builtins.int:
+def sum(v: typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
     """
 
-def sum_list(values:typing.Sequence[builtins.int]) -> builtins.int:
+def sum_list(values: typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Sum a list of integers.
     
