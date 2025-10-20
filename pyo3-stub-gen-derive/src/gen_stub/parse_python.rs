@@ -15,7 +15,12 @@ use indexmap::IndexSet;
 use rustpython_parser::ast;
 use syn::{Result, Type};
 
-use super::{arg::ArgInfo, attr::DeprecatedInfo, util::TypeOrOverride};
+use super::{
+    arg::ArgInfo,
+    attr::DeprecatedInfo,
+    parameter::{ParameterKindIntermediate, ParameterWithKind, Parameters},
+    util::TypeOrOverride,
+};
 
 /// Remove common leading whitespace from all lines (similar to Python's textwrap.dedent)
 fn dedent(text: &str) -> String {
@@ -87,61 +92,114 @@ fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<Deprec
     None
 }
 
-/// Extract arguments from function definition
-fn extract_args(args: &ast::Arguments, imports: &[String]) -> Result<Vec<ArgInfo>> {
-    let mut arg_infos = Vec::new();
-
-    // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
+/// Build Parameters directly from Python AST Arguments
+///
+/// This function constructs Parameters with proper ParameterKind classification
+/// based on Python's argument structure (positional-only, keyword-only, varargs, etc.)
+pub(super) fn build_parameters_from_ast(args: &ast::Arguments, imports: &[String]) -> Result<Parameters> {
     let dummy_type: Type = syn::parse_str("()").unwrap();
+    let mut parameters = Vec::new();
 
-    // Helper function to process a single argument
-    let process_arg = |arg: &ast::ArgWithDefault| -> Result<Option<ArgInfo>> {
-        let arg_name = arg.def.arg.to_string();
+    // Helper to process a single argument with default value
+    let process_arg_with_default =
+        |arg: &ast::ArgWithDefault, kind: ParameterKindIntermediate| -> Result<Option<ParameterWithKind>> {
+            let arg_name = arg.def.arg.to_string();
 
-        // Skip 'self' argument
-        if arg_name == "self" {
-            return Ok(None);
-        }
-
-        let type_override = if let Some(annotation) = &arg.def.annotation {
-            type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
-        } else {
-            // No type annotation - use Any
-            TypeOrOverride::OverrideType {
-                r#type: dummy_type.clone(),
-                type_repr: "typing.Any".to_string(),
-                imports: IndexSet::from(["typing".to_string()]),
+            // Skip 'self' argument
+            if arg_name == "self" {
+                return Ok(None);
             }
+
+            let type_override = if let Some(annotation) = &arg.def.annotation {
+                type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
+            } else {
+                // No type annotation - use Any
+                TypeOrOverride::OverrideType {
+                    r#type: dummy_type.clone(),
+                    type_repr: "typing.Any".to_string(),
+                    imports: IndexSet::from(["typing".to_string()]),
+                }
+            };
+
+            let arg_info = ArgInfo {
+                name: arg_name,
+                r#type: type_override,
+            };
+
+            // Convert default value from Python AST to syn::Expr
+            let default_expr = if let Some(default) = &arg.default {
+                Some(python_expr_to_syn_expr(default)?)
+            } else {
+                None
+            };
+
+            Ok(Some(ParameterWithKind {
+                arg_info,
+                kind,
+                default_expr,
+            }))
         };
 
-        Ok(Some(ArgInfo {
-            name: arg_name,
-            r#type: type_override,
-        }))
-    };
+    // Helper to process vararg or kwarg (ast::Arg, not ast::ArgWithDefault)
+    let process_var_arg =
+        |arg: &ast::Arg, kind: ParameterKindIntermediate| -> Result<ParameterWithKind> {
+            let arg_name = arg.arg.to_string();
+
+            let type_override = if let Some(annotation) = &arg.annotation {
+                type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
+            } else {
+                // No type annotation - use Any
+                TypeOrOverride::OverrideType {
+                    r#type: dummy_type.clone(),
+                    type_repr: "typing.Any".to_string(),
+                    imports: IndexSet::from(["typing".to_string()]),
+                }
+            };
+
+            let arg_info = ArgInfo {
+                name: arg_name,
+                r#type: type_override,
+            };
+
+            Ok(ParameterWithKind {
+                arg_info,
+                kind,
+                default_expr: None,
+            })
+        };
 
     // Process positional-only arguments (before /)
     for arg in &args.posonlyargs {
-        if let Some(arg_info) = process_arg(arg)? {
-            arg_infos.push(arg_info);
+        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::PositionalOnly)? {
+            parameters.push(param);
         }
     }
 
     // Process regular positional/keyword arguments
     for arg in &args.args {
-        if let Some(arg_info) = process_arg(arg)? {
-            arg_infos.push(arg_info);
+        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::PositionalOrKeyword)? {
+            parameters.push(param);
         }
+    }
+
+    // Process *args (vararg)
+    if let Some(vararg) = &args.vararg {
+        parameters.push(process_var_arg(vararg, ParameterKindIntermediate::VarPositional)?);
     }
 
     // Process keyword-only arguments (after *)
     for arg in &args.kwonlyargs {
-        if let Some(arg_info) = process_arg(arg)? {
-            arg_infos.push(arg_info);
+        if let Some(param) = process_arg_with_default(arg, ParameterKindIntermediate::KeywordOnly)? {
+            parameters.push(param);
         }
     }
 
-    Ok(arg_infos)
+    // Process **kwargs (kwarg)
+    if let Some(kwarg) = &args.kwarg {
+        parameters.push(process_var_arg(kwarg, ParameterKindIntermediate::VarKeyword)?);
+    }
+
+    Ok(Parameters::from_vec(parameters))
 }
 
 /// Extract return type from function definition
@@ -222,6 +280,70 @@ fn extract_rust_type_marker(expr: &ast::Expr) -> Result<Option<String>> {
         }
     }
     Ok(None)
+}
+
+/// Convert Python default value expression to syn::Expr
+///
+/// This converts Python AST expressions like `None`, `True`, `3`, `"hello"` to syn::Expr
+fn python_expr_to_syn_expr(expr: &ast::Expr) -> Result<syn::Expr> {
+    let expr_str = match expr {
+        ast::Expr::Constant(constant) => match &constant.value {
+            ast::Constant::None => "None".to_string(),
+            ast::Constant::Bool(b) => b.to_string(),
+            ast::Constant::Int(i) => i.to_string(),
+            ast::Constant::Float(f) => f.to_string(),
+            ast::Constant::Str(s) => format!("\"{}\"", s.escape_default()),
+            ast::Constant::Bytes(_) => {
+                return Err(syn::Error::new(
+                    proc_macro2::Span::call_site(),
+                    "Bytes literals are not supported as default values",
+                ))
+            }
+            ast::Constant::Ellipsis => "...".to_string(),
+            _ => {
+                return Err(syn::Error::new(
+                    proc_macro2::Span::call_site(),
+                    format!("Unsupported constant type: {:?}", constant.value),
+                ))
+            }
+        },
+        ast::Expr::List(_) | ast::Expr::Tuple(_) | ast::Expr::Dict(_) => {
+            // For complex default values, use "..." placeholder
+            "...".to_string()
+        }
+        ast::Expr::Name(name) => name.id.to_string(),
+        ast::Expr::Attribute(_) => {
+            // Handle qualified names like `typing.Optional`
+            expr_to_type_string(expr)?
+        }
+        ast::Expr::UnaryOp(unary) => {
+            // Handle negative numbers
+            if matches!(unary.op, ast::UnaryOp::USub) {
+                if let ast::Expr::Constant(constant) = &*unary.operand {
+                    match &constant.value {
+                        ast::Constant::Int(i) => format!("-{}", i),
+                        ast::Constant::Float(f) => format!("-{}", f),
+                        _ => "...".to_string(),
+                    }
+                } else {
+                    "...".to_string()
+                }
+            } else {
+                "...".to_string()
+            }
+        }
+        _ => {
+            // For other expressions, use "..." placeholder
+            "...".to_string()
+        }
+    };
+
+    syn::parse_str(&expr_str).map_err(|e| {
+        syn::Error::new(
+            proc_macro2::Span::call_site(),
+            format!("Failed to parse expression '{}': {}", expr_str, e),
+        )
+    })
 }
 
 /// Convert Python expression to type string

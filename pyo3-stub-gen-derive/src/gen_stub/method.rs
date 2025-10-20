@@ -23,8 +23,7 @@ pub enum MethodType {
 #[derive(Debug)]
 pub struct MethodInfo {
     pub(super) name: String,
-    pub(super) args: Vec<ArgInfo>,
-    pub(super) sig: Option<Signature>,
+    pub(super) parameters: Parameters,
     pub(super) r#return: Option<TypeOrOverride>,
     pub(super) doc: String,
     pub(super) r#type: MethodType,
@@ -58,7 +57,8 @@ fn replace_inner(ty: &mut Type, self_: &Type) {
 
 impl MethodInfo {
     pub fn replace_self(&mut self, self_: &Type) {
-        for mut arg in &mut self.args {
+        for param in self.parameters.iter_mut() {
+            let arg_info = &mut param.arg_info;
             let (ArgInfo {
                 r#type:
                     TypeOrOverride::RustType {
@@ -72,7 +72,7 @@ impl MethodInfo {
                         r#type: ref mut ty, ..
                     },
                 ..
-            }) = &mut arg;
+            }) = arg_info;
             replace_inner(ty, self_);
         }
         if let Some(
@@ -112,10 +112,18 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             method_name.unwrap_or(sig.ident.to_string())
         };
         let r#return = extract_return_type(&sig.output, &attrs)?;
+
+        // Build parameters from args and signature
+        let args = parse_args(sig.inputs)?;
+        let parameters = if let Some(text_sig) = text_sig {
+            Parameters::new_with_sig(&args, &text_sig)?
+        } else {
+            Parameters::new(&args)
+        };
+
         Ok(MethodInfo {
             name,
-            sig: text_sig,
-            args: parse_args(sig.inputs)?,
+            parameters,
             r#return,
             doc,
             r#type: method_type,
@@ -131,26 +139,13 @@ impl ToTokens for MethodInfo {
         let Self {
             name,
             r#return: ret,
-            args,
-            sig,
+            parameters,
             doc,
             r#type,
             is_async,
             deprecated,
             type_ignored,
         } = self;
-
-        let parameters = if let Some(sig) = sig {
-            match Parameters::new_with_sig(args, sig) {
-                Ok(params) => params,
-                Err(err) => {
-                    tokens.extend(err.to_compile_error());
-                    return;
-                }
-            }
-        } else {
-            Parameters::new(args)
-        };
 
         let ret_tt = if let Some(ret) = ret {
             match ret {

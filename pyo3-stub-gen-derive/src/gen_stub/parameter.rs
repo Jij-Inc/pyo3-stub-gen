@@ -145,6 +145,18 @@ impl ToTokens for ParameterKindIntermediate {
 pub(crate) struct Parameters(Vec<ParameterWithKind>);
 
 impl Parameters {
+    /// Create Parameters from a Vec<ParameterWithKind>
+    ///
+    /// This is used when parameters are already classified (e.g., from Python AST).
+    pub(crate) fn from_vec(parameters: Vec<ParameterWithKind>) -> Self {
+        Self(parameters)
+    }
+
+    /// Get mutable access to internal parameters
+    pub(crate) fn iter_mut(&mut self) -> impl Iterator<Item = &mut ParameterWithKind> {
+        self.0.iter_mut()
+    }
+
     /// Create parameters without signature attribute
     ///
     /// All parameters will be classified as `PositionalOrKeyword`.

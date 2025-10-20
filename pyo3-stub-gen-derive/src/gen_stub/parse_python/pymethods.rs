@@ -1,18 +1,14 @@
 //! Parse Python class method stub syntax and generate MethodInfo
 
-use indexmap::IndexSet;
 use rustpython_parser::{ast, Parse};
 use syn::{Error, LitStr, Result, Type};
 
 use super::pyfunction::PythonFunctionStub;
 use super::{
-    dedent, extract_deprecated_from_decorators, extract_docstring, extract_return_type,
-    type_annotation_to_type_override,
+    build_parameters_from_ast, dedent, extract_deprecated_from_decorators, extract_docstring,
+    extract_return_type,
 };
-use crate::gen_stub::{
-    arg::ArgInfo, method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo,
-    util::TypeOrOverride,
-};
+use crate::gen_stub::{method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo};
 
 /// Intermediate representation for Python method stub
 pub struct PythonMethodStub {
@@ -29,12 +25,15 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         // Extract docstring
         let doc = extract_docstring(&stub.func_stub.func_def);
 
-        // Extract arguments based on method type
-        let args = extract_args_for_method(
+        // Build Parameters directly from Python AST with proper kind classification
+        let parameters = build_parameters_from_ast(
             &stub.func_stub.func_def.args,
             &stub.func_stub.imports,
-            stub.method_type,
         )?;
+
+        // For instance/class/new methods, the first parameter (self/cls) is handled by Python's AST
+        // but we need to skip it in our parameters list since it's implied by the method type
+        // (The build_parameters_from_ast already skips 'self', so no additional filtering needed)
 
         // Extract return type
         let return_type =
@@ -47,8 +46,7 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         // Construct MethodInfo
         Ok(MethodInfo {
             name: func_name,
-            args,
-            sig: None,
+            parameters,
             r#return: return_type,
             doc,
             r#type: stub.method_type,
@@ -245,50 +243,6 @@ fn determine_method_type(func_def: &ast::StmtFunctionDef, args: &ast::Arguments)
     MethodType::Instance
 }
 
-/// Extract arguments for method (handling self/cls)
-fn extract_args_for_method(
-    args: &ast::Arguments,
-    imports: &[String],
-    method_type: MethodType,
-) -> Result<Vec<ArgInfo>> {
-    let mut arg_infos = Vec::new();
-
-    // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
-    let dummy_type: Type = syn::parse_str("()").unwrap();
-
-    // Process positional arguments
-    for (idx, arg) in args.args.iter().enumerate() {
-        let arg_name = arg.def.arg.to_string();
-
-        // Skip 'self' or 'cls' for instance/class/new methods (first argument only)
-        if idx == 0
-            && ((method_type == MethodType::Instance && arg_name == "self")
-                || (method_type == MethodType::Class && arg_name == "cls")
-                || (method_type == MethodType::New && arg_name == "cls"))
-        {
-            continue;
-        }
-
-        let type_override = if let Some(annotation) = &arg.def.annotation {
-            type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
-        } else {
-            // No type annotation - use Any
-            TypeOrOverride::OverrideType {
-                r#type: dummy_type.clone(),
-                type_repr: "typing.Any".to_string(),
-                imports: IndexSet::from(["typing".to_string()]),
-            }
-        };
-
-        arg_infos.push(ArgInfo {
-            name: arg_name,
-            r#type: type_override,
-        });
-    }
-
-    Ok(arg_infos)
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -417,6 +371,15 @@ mod test {
             name: "from_string",
             parameters: &[
                 ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "cls",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "typing.Any".to_string(),
+                        import: ::std::collections::HashSet::from(["typing".into()]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "s",
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
@@ -456,7 +419,17 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
-            parameters: &[],
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "cls",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "typing.Any".to_string(),
+                        import: ::std::collections::HashSet::from(["typing".into()]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+            ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "object".to_string(),
                 import: ::std::collections::HashSet::from([]),
