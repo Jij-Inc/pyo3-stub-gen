@@ -52,6 +52,7 @@ submit! {
 /// Example using Literal[True] and Literal[False] for overloading.
 /// This is a common pattern for functions that return different types based on a boolean flag.
 #[pyfunction]
+#[pyo3(signature = (xs, /, *, tuple_out))]
 pub fn as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<PyObject> {
     Python::with_gil(|py| {
         if tuple_out {
