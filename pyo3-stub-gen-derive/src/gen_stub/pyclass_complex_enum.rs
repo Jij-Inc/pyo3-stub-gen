@@ -140,10 +140,11 @@ mod test {
                     doc: "",
                     form: &pyo3_stub_gen::type_info::VariantForm::Tuple,
                     constr_args: &[
-                        ::pyo3_stub_gen::type_info::ArgInfo {
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "_0",
-                            r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: None,
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: <String as ::pyo3_stub_gen::PyStubType>::type_input,
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                         },
                     ],
                 },
@@ -169,22 +170,22 @@ mod test {
                     doc: "",
                     form: &pyo3_stub_gen::type_info::VariantForm::Tuple,
                     constr_args: &[
-                        ::pyo3_stub_gen::type_info::ArgInfo {
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "_0",
-                            r#type: <i32 as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Ident),
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: <i32 as ::pyo3_stub_gen::PyStubType>::type_input,
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                         },
-                        ::pyo3_stub_gen::type_info::ArgInfo {
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "_1",
-                            r#type: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: Some(pyo3_stub_gen::type_info::SignatureArg::Assign {
-                                default: {
-                                    fn _fmt() -> String {
-                                        let v: f64 = 1.0;
-                                        ::pyo3_stub_gen::util::fmt_py_obj(v)
-                                    }
-                                    _fmt
-                                },
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    let v: f64 = 1.0;
+                                    ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                }
+                                _fmt
                             }),
                         },
                     ],
@@ -204,10 +205,11 @@ mod test {
                     doc: "",
                     form: &pyo3_stub_gen::type_info::VariantForm::Struct,
                     constr_args: &[
-                        ::pyo3_stub_gen::type_info::ArgInfo {
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "count",
-                            r#type: <usize as ::pyo3_stub_gen::PyStubType>::type_input,
-                            signature: None,
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: <usize as ::pyo3_stub_gen::PyStubType>::type_input,
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                         },
                     ],
                 },

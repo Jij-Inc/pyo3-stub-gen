@@ -9,7 +9,7 @@ pub use crate::type_info::MethodType;
 #[derive(Debug, Clone, PartialEq)]
 pub struct MethodDef {
     pub name: &'static str,
-    pub args: Vec<Arg>,
+    pub parameters: Parameters,
     pub r#return: TypeInfo,
     pub doc: &'static str,
     pub r#type: MethodType,
@@ -21,9 +21,7 @@ pub struct MethodDef {
 impl Import for MethodDef {
     fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
-        for arg in &self.args {
-            import.extend(arg.import().into_iter());
-        }
+        import.extend(self.parameters.import());
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
             import.insert("typing_extensions".into());
@@ -36,7 +34,7 @@ impl From<&MethodInfo> for MethodDef {
     fn from(info: &MethodInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from).collect(),
+            parameters: Parameters::from_infos(info.parameters),
             r#return: (info.r#return)(),
             doc: info.doc,
             r#type: info.r#type,
@@ -50,7 +48,6 @@ impl From<&MethodInfo> for MethodDef {
 impl fmt::Display for MethodDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
-        let mut needs_comma = false;
         let async_ = if self.is_async { "async " } else { "" };
 
         // Add deprecated decorator if present
@@ -58,32 +55,29 @@ impl fmt::Display for MethodDef {
             writeln!(f, "{indent}{deprecated}")?;
         }
 
+        let params_str = if self.parameters.is_empty() {
+            String::new()
+        } else {
+            format!(", {}", self.parameters)
+        };
+
         match self.r#type {
             MethodType::Static => {
                 writeln!(f, "{indent}@staticmethod")?;
-                write!(f, "{indent}{async_}def {}(", self.name)?;
+                write!(f, "{indent}{async_}def {}({})", self.name, self.parameters)?;
             }
             MethodType::Class | MethodType::New => {
                 if self.r#type == MethodType::Class {
                     // new is a classmethod without the decorator
                     writeln!(f, "{indent}@classmethod")?;
                 }
-                write!(f, "{indent}{async_}def {}(cls", self.name)?;
-                needs_comma = true;
+                write!(f, "{indent}{async_}def {}(cls{})", self.name, params_str)?;
             }
             MethodType::Instance => {
-                write!(f, "{indent}{async_}def {}(self", self.name)?;
-                needs_comma = true;
+                write!(f, "{indent}{async_}def {}(self{})", self.name, params_str)?;
             }
         }
-        for arg in &self.args {
-            if needs_comma {
-                write!(f, ", ")?;
-            }
-            write!(f, "{arg}")?;
-            needs_comma = true;
-        }
-        write!(f, ") -> {}:", self.r#return)?;
+        write!(f, " -> {}:", self.r#return)?;
 
         // Calculate type: ignore comment once
         let type_ignore_comment = if let Some(target) = &self.type_ignored {

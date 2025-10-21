@@ -8,11 +8,11 @@ from mixed_sub.main_mod import A, B
 class C:
     def show_x(self) -> None: ...
 
-def create_c(a:A, b:B) -> C: ...
+def create_c(a: A, b: B) -> C: ...
 
 def greet_a() -> None: ...
 
-def test_module_with_python(x:typing.Generator[int, None, None]) -> int:
+def test_module_with_python(x: typing.Generator[int, None, None]) -> int:
     r"""
     Test function with both module and python parameters
     """

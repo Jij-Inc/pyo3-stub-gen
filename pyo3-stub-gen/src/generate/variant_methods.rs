@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 
-use crate::generate::{Arg, MethodDef, MethodType};
-use crate::type_info::{PyComplexEnumInfo, VariantForm, VariantInfo};
+use crate::generate::{MethodDef, MethodType, Parameter, ParameterDefault, Parameters};
+use crate::type_info::{ParameterKind, PyComplexEnumInfo, VariantForm, VariantInfo};
 use crate::TypeInfo;
 use std::collections::HashSet;
 
@@ -18,7 +18,7 @@ pub(super) fn get_variant_methods(
         .or_default()
         .push(MethodDef {
             name: "__new__",
-            args: info.constr_args.iter().map(|a| a.into()).collect(),
+            parameters: Parameters::from_infos(info.constr_args),
             r#return: TypeInfo {
                 name: full_class_name,
                 import: HashSet::new(),
@@ -37,7 +37,7 @@ pub(super) fn get_variant_methods(
             .or_default()
             .push(MethodDef {
                 name: len_name,
-                args: Vec::new(),
+                parameters: Parameters::new(),
                 r#return: TypeInfo::builtin("int"),
                 doc: "",
                 r#type: MethodType::Instance,
@@ -52,11 +52,15 @@ pub(super) fn get_variant_methods(
             .or_default()
             .push(MethodDef {
                 name: getitem_name,
-                args: vec![Arg {
-                    name: "key",
-                    r#type: TypeInfo::builtin("int"),
-                    signature: None,
-                }],
+                parameters: Parameters {
+                    positional_or_keyword: vec![Parameter {
+                        name: "key",
+                        kind: ParameterKind::PositionalOrKeyword,
+                        type_info: TypeInfo::builtin("int"),
+                        default: ParameterDefault::None,
+                    }],
+                    ..Parameters::new()
+                },
                 r#return: TypeInfo::any(),
                 doc: "",
                 r#type: MethodType::Instance,

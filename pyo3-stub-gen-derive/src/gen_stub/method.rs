@@ -2,8 +2,8 @@ use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
     arg::parse_args, attr::IgnoreTarget, extract_deprecated, extract_documents,
-    extract_return_type, parse_gen_stub_type_ignore, parse_pyo3_attrs, ArgInfo, ArgsWithSignature,
-    Attr, DeprecatedInfo, Signature,
+    extract_return_type, parameter::Parameters, parse_gen_stub_type_ignore, parse_pyo3_attrs,
+    ArgInfo, Attr, DeprecatedInfo, Signature,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -23,8 +23,7 @@ pub enum MethodType {
 #[derive(Debug)]
 pub struct MethodInfo {
     pub(super) name: String,
-    pub(super) args: Vec<ArgInfo>,
-    pub(super) sig: Option<Signature>,
+    pub(super) parameters: Parameters,
     pub(super) r#return: Option<TypeOrOverride>,
     pub(super) doc: String,
     pub(super) r#type: MethodType,
@@ -58,7 +57,8 @@ fn replace_inner(ty: &mut Type, self_: &Type) {
 
 impl MethodInfo {
     pub fn replace_self(&mut self, self_: &Type) {
-        for mut arg in &mut self.args {
+        for param in self.parameters.iter_mut() {
+            let arg_info = &mut param.arg_info;
             let (ArgInfo {
                 r#type:
                     TypeOrOverride::RustType {
@@ -72,7 +72,7 @@ impl MethodInfo {
                         r#type: ref mut ty, ..
                     },
                 ..
-            }) = &mut arg;
+            }) = arg_info;
             replace_inner(ty, self_);
         }
         if let Some(
@@ -112,10 +112,18 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             method_name.unwrap_or(sig.ident.to_string())
         };
         let r#return = extract_return_type(&sig.output, &attrs)?;
+
+        // Build parameters from args and signature
+        let args = parse_args(sig.inputs)?;
+        let parameters = if let Some(text_sig) = text_sig {
+            Parameters::new_with_sig(&args, &text_sig)?
+        } else {
+            Parameters::new(&args)
+        };
+
         Ok(MethodInfo {
             name,
-            sig: text_sig,
-            args: parse_args(sig.inputs)?,
+            parameters,
             r#return,
             doc,
             r#type: method_type,
@@ -131,15 +139,14 @@ impl ToTokens for MethodInfo {
         let Self {
             name,
             r#return: ret,
-            args,
-            sig,
+            parameters,
             doc,
             r#type,
             is_async,
             deprecated,
             type_ignored,
         } = self;
-        let args_with_sig = ArgsWithSignature { args, sig };
+
         let ret_tt = if let Some(ret) = ret {
             match ret {
                 TypeOrOverride::RustType { r#type } => {
@@ -188,7 +195,7 @@ impl ToTokens for MethodInfo {
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::MethodInfo {
                 name: #name,
-                args: #args_with_sig,
+                parameters: #parameters,
                 r#return: #ret_tt,
                 doc: #doc,
                 r#type: #type_tt,

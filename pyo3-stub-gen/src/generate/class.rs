@@ -1,7 +1,16 @@
 use indexmap::IndexMap;
 
 use crate::generate::variant_methods::get_variant_methods;
-use crate::{generate::*, type_info::*, TypeInfo};
+use crate::{
+    generate::{
+        docstring, indent, GetterDisplay, Import, MemberDef, MethodDef, Parameter,
+        ParameterDefault, Parameters, SetterDisplay,
+    },
+    stub_type::ImportRef,
+    type_info::*,
+    TypeInfo,
+};
+use std::collections::HashSet;
 use std::{fmt, vec};
 
 /// Definition of a Python class.
@@ -150,11 +159,15 @@ impl ClassDef {
     fn add_eq_method(&mut self) {
         let method = MethodDef {
             name: "__eq__",
-            args: vec![Arg {
-                name: "other",
-                r#type: TypeInfo::builtin("object"),
-                signature: None,
-            }],
+            parameters: Parameters {
+                positional_or_keyword: vec![Parameter {
+                    name: "other",
+                    kind: ParameterKind::PositionalOrKeyword,
+                    type_info: TypeInfo::builtin("object"),
+                    default: ParameterDefault::None,
+                }],
+                ..Parameters::new()
+            },
             r#return: TypeInfo::builtin("bool"),
             doc: "",
             r#type: MethodType::Instance,
@@ -174,11 +187,15 @@ impl ClassDef {
         for name in &ord_methods {
             let method = MethodDef {
                 name,
-                args: vec![Arg {
-                    name: "other",
-                    r#type: TypeInfo::builtin("object"),
-                    signature: None,
-                }],
+                parameters: Parameters {
+                    positional_or_keyword: vec![Parameter {
+                        name: "other",
+                        kind: ParameterKind::PositionalOrKeyword,
+                        type_info: TypeInfo::builtin("object"),
+                        default: ParameterDefault::None,
+                    }],
+                    ..Parameters::new()
+                },
                 r#return: TypeInfo::builtin("bool"),
                 doc: "",
                 r#type: MethodType::Instance,
@@ -196,7 +213,7 @@ impl ClassDef {
     fn add_hash_method(&mut self) {
         let method = MethodDef {
             name: "__hash__",
-            args: vec![],
+            parameters: Parameters::new(),
             r#return: TypeInfo::builtin("int"),
             doc: "",
             r#type: MethodType::Instance,
@@ -213,7 +230,7 @@ impl ClassDef {
     fn add_str_method(&mut self) {
         let method = MethodDef {
             name: "__str__",
-            args: vec![],
+            parameters: Parameters::new(),
             r#return: TypeInfo::builtin("str"),
             doc: "",
             r#type: MethodType::Instance,

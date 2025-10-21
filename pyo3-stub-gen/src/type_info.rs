@@ -50,34 +50,59 @@ pub fn no_return_type_output() -> TypeInfo {
     TypeInfo::none()
 }
 
-/// Info of method argument appears in `#[pymethods]`
-#[derive(Debug)]
-pub struct ArgInfo {
-    pub name: &'static str,
-    pub r#type: fn() -> TypeInfo,
-    pub signature: Option<SignatureArg>,
-}
-#[derive(Debug, Clone)]
-pub enum SignatureArg {
-    Ident,
-    Assign { default: fn() -> String },
-    Star,
-    Args,
-    Keywords,
+/// Kind of parameter in Python function signature
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ParameterKind {
+    /// Positional-only parameter (before `/`)
+    PositionalOnly,
+    /// Positional or keyword parameter (default)
+    PositionalOrKeyword,
+    /// Keyword-only parameter (after `*`)
+    KeywordOnly,
+    /// Variable positional parameter (`*args`)
+    VarPositional,
+    /// Variable keyword parameter (`**kwargs`)
+    VarKeyword,
 }
 
-impl PartialEq for SignatureArg {
+/// Default value of a parameter
+#[derive(Debug, Clone)]
+pub enum ParameterDefault {
+    /// No default value
+    None,
+    /// Default value expression as a string
+    Expr(fn() -> String),
+}
+
+impl PartialEq for ParameterDefault {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Assign { default: l_default }, Self::Assign { default: r_default }) => {
-                let l_default = l_default();
-                let r_default = r_default();
-                l_default.eq(&r_default)
+            (Self::Expr(l), Self::Expr(r)) => {
+                let l_val = l();
+                let r_val = r();
+                l_val.eq(&r_val)
             }
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+            (Self::None, Self::None) => true,
+            _ => false,
         }
     }
+}
+
+/// Information about a parameter in a Python function/method signature
+///
+/// This struct is used at compile time to store metadata about parameters
+/// that will be used to generate Python stub files.
+#[derive(Debug)]
+pub struct ParameterInfo {
+    /// Parameter name
+    pub name: &'static str,
+    /// Parameter kind (positional-only, keyword-only, etc.)
+    pub kind: ParameterKind,
+    /// Type information getter
+    pub type_info: fn() -> TypeInfo,
+    /// Default value
+    pub default: ParameterDefault,
 }
 
 /// Type of a method
@@ -93,7 +118,7 @@ pub enum MethodType {
 #[derive(Debug)]
 pub struct MethodInfo {
     pub name: &'static str,
-    pub args: &'static [ArgInfo],
+    pub parameters: &'static [ParameterInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub r#type: MethodType,
@@ -175,7 +200,7 @@ pub struct VariantInfo {
     pub doc: &'static str,
     pub fields: &'static [MemberInfo],
     pub form: &'static VariantForm,
-    pub constr_args: &'static [ArgInfo],
+    pub constr_args: &'static [ParameterInfo],
 }
 
 /// Info of a `#[pyclass]` with a rich (structured) Rust enum
@@ -216,7 +241,7 @@ inventory::collect!(PyEnumInfo);
 #[derive(Debug)]
 pub struct PyFunctionInfo {
     pub name: &'static str,
-    pub args: &'static [ArgInfo],
+    pub parameters: &'static [ParameterInfo],
     pub r#return: fn() -> TypeInfo,
     pub doc: &'static str,
     pub module: Option<&'static str>,

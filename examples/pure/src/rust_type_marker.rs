@@ -196,3 +196,64 @@ submit! {
         "#
     }
 }
+
+// Example 6: Keyword-only parameters (after *)
+// This demonstrates Issue with keyword-only parameters being ignored
+#[gen_stub_pyclass]
+#[pyclass]
+#[derive(Clone)]
+pub struct Placeholder {
+    #[pyo3(get, set)]
+    pub name: String,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Placeholder {
+    #[new]
+    fn new(name: String) -> Self {
+        Self { name }
+    }
+
+    #[gen_stub(skip)]
+    #[pyo3(signature = (name, *, dtype, ndim, shape, jagged = false, latex = None))]
+    fn configure(
+        &self,
+        name: String,
+        dtype: String,
+        ndim: i32,
+        shape: Option<String>,
+        jagged: bool,
+        latex: Option<String>,
+    ) -> Self {
+        dbg!(&name, &dtype, &ndim, &shape, &jagged, &latex);
+        self.clone()
+    }
+}
+
+submit! {
+    gen_methods_from_python! {
+        r#"
+        import builtins
+        import typing
+
+        class Placeholder:
+            def configure(
+                self,
+                name: builtins.str,
+                *,
+                dtype: builtins.str,
+                ndim: builtins.int,
+                shape: typing.Optional[builtins.str],
+                jagged: builtins.bool = False,
+                latex: typing.Optional[builtins.str] = None,
+            ) -> pyo3_stub_gen.RustType["Placeholder"]:
+                """
+                Configure placeholder with keyword-only parameters.
+
+                This demonstrates keyword-only parameters (after *) which should be
+                preserved in the generated stub file.
+                """
+        "#
+    }
+}

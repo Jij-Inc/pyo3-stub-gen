@@ -8,16 +8,15 @@ use syn::{
 use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
-    attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type, parse_args,
-    parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option, ArgInfo, ArgsWithSignature, Attr,
-    DeprecatedInfo, Signature,
+    attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type,
+    parameter::Parameters, parse_args, parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option,
+    Attr, DeprecatedInfo,
 };
 
 pub struct PyFunctionInfo {
     pub(crate) name: String,
-    pub(crate) args: Vec<ArgInfo>,
+    pub(crate) parameters: Parameters,
     pub(crate) r#return: Option<TypeOrOverride>,
-    pub(crate) sig: Option<Signature>,
     pub(crate) doc: String,
     pub(crate) module: Option<String>,
     pub(crate) is_async: bool,
@@ -105,11 +104,18 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             }
         }
         let name = name.unwrap_or_else(|| item.sig.ident.to_string());
+
+        // Build parameters from args and signature
+        let parameters = if let Some(sig) = sig {
+            Parameters::new_with_sig(&args, &sig)?
+        } else {
+            Parameters::new(&args)
+        };
+
         Ok(Self {
-            args,
-            sig,
-            r#return,
             name,
+            parameters,
+            r#return,
             doc,
             module: None,
             is_async: item.sig.asyncness.is_some(),
@@ -122,11 +128,10 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
 impl ToTokens for PyFunctionInfo {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let Self {
-            args,
             r#return: ret,
             name,
             doc,
-            sig,
+            parameters,
             module,
             is_async,
             deprecated,
@@ -173,11 +178,11 @@ impl ToTokens for PyFunctionInfo {
         } else {
             quote! { None }
         };
-        let args_with_sig = ArgsWithSignature { args, sig };
+
         tokens.append_all(quote! {
             ::pyo3_stub_gen::type_info::PyFunctionInfo {
                 name: #name,
-                args: #args_with_sig,
+                parameters: #parameters,
                 r#return: #ret_tt,
                 doc: #doc,
                 module: #module_tt,

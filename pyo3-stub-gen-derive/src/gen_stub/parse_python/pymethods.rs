@@ -1,18 +1,14 @@
 //! Parse Python class method stub syntax and generate MethodInfo
 
-use indexmap::IndexSet;
 use rustpython_parser::{ast, Parse};
 use syn::{Error, LitStr, Result, Type};
 
 use super::pyfunction::PythonFunctionStub;
 use super::{
-    dedent, extract_deprecated_from_decorators, extract_docstring, extract_return_type,
-    type_annotation_to_type_override,
+    build_parameters_from_ast, dedent, extract_deprecated_from_decorators, extract_docstring,
+    extract_return_type,
 };
-use crate::gen_stub::{
-    arg::ArgInfo, method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo,
-    util::TypeOrOverride,
-};
+use crate::gen_stub::{method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo};
 
 /// Intermediate representation for Python method stub
 pub struct PythonMethodStub {
@@ -29,12 +25,13 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         // Extract docstring
         let doc = extract_docstring(&stub.func_stub.func_def);
 
-        // Extract arguments based on method type
-        let args = extract_args_for_method(
-            &stub.func_stub.func_def.args,
-            &stub.func_stub.imports,
-            stub.method_type,
-        )?;
+        // Build Parameters directly from Python AST with proper kind classification
+        let parameters =
+            build_parameters_from_ast(&stub.func_stub.func_def.args, &stub.func_stub.imports)?;
+
+        // For instance/class/new methods, the first parameter (self/cls) is handled by Python's AST
+        // but we need to skip it in our parameters list since it's implied by the method type
+        // (The build_parameters_from_ast already skips 'self', so no additional filtering needed)
 
         // Extract return type
         let return_type =
@@ -47,8 +44,7 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
         // Construct MethodInfo
         Ok(MethodInfo {
             name: func_name,
-            args,
-            sig: None,
+            parameters,
             r#return: return_type,
             doc,
             r#type: stub.method_type,
@@ -245,50 +241,6 @@ fn determine_method_type(func_def: &ast::StmtFunctionDef, args: &ast::Arguments)
     MethodType::Instance
 }
 
-/// Extract arguments for method (handling self/cls)
-fn extract_args_for_method(
-    args: &ast::Arguments,
-    imports: &[String],
-    method_type: MethodType,
-) -> Result<Vec<ArgInfo>> {
-    let mut arg_infos = Vec::new();
-
-    // Dummy type for TypeOrOverride (not used in ToTokens for OverrideType)
-    let dummy_type: Type = syn::parse_str("()").unwrap();
-
-    // Process positional arguments
-    for (idx, arg) in args.args.iter().enumerate() {
-        let arg_name = arg.def.arg.to_string();
-
-        // Skip 'self' or 'cls' for instance/class/new methods (first argument only)
-        if idx == 0
-            && ((method_type == MethodType::Instance && arg_name == "self")
-                || (method_type == MethodType::Class && arg_name == "cls")
-                || (method_type == MethodType::New && arg_name == "cls"))
-        {
-            continue;
-        }
-
-        let type_override = if let Some(annotation) = &arg.def.annotation {
-            type_annotation_to_type_override(annotation, imports, dummy_type.clone())?
-        } else {
-            // No type annotation - use Any
-            TypeOrOverride::OverrideType {
-                r#type: dummy_type.clone(),
-                type_repr: "typing.Any".to_string(),
-                imports: IndexSet::from(["typing".to_string()]),
-            }
-        };
-
-        arg_infos.push(ArgInfo {
-            name: arg_name,
-            r#type: type_override,
-        });
-    }
-
-    Ok(arg_infos)
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -311,14 +263,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "increment",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "x",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -372,14 +325,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "create",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "name",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -413,14 +367,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "from_string",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "s",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -453,7 +408,7 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
-            args: &[],
+            parameters: &[],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "object".to_string(),
                 import: ::std::collections::HashSet::from([]),
@@ -487,17 +442,18 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "process",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "func",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
                         ]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -533,14 +489,15 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "fetch_data",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "url",
-                    r#type: || ::pyo3_stub_gen::TypeInfo {
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
                         import: ::std::collections::HashSet::from([]),
                     },
-                    signature: None,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -573,11 +530,12 @@ mod test {
         insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__iadd__",
-            args: &[
-                ::pyo3_stub_gen::type_info::ArgInfo {
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
                     name: "other",
-                    r#type: <SomeRustType as ::pyo3_stub_gen::PyStubType>::type_input,
-                    signature: None,
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: <SomeRustType as ::pyo3_stub_gen::PyStubType>::type_input,
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: <PyProblem as pyo3_stub_gen::PyStubType>::type_output,
@@ -586,6 +544,160 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+        }
+        "###);
+        Ok(())
+    }
+
+    #[test]
+    fn test_keyword_only_params_with_defaults() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            import builtins
+            import typing
+
+            class Placeholder:
+                def configure(
+                    self,
+                    name: builtins.str,
+                    *,
+                    dtype: builtins.str,
+                    ndim: builtins.int,
+                    shape: typing.Optional[builtins.str],
+                    jagged: builtins.bool = False,
+                    latex: typing.Optional[builtins.str] = None,
+                    description: typing.Optional[builtins.str] = None,
+                ) -> pyo3_stub_gen.RustType["Placeholder"]:
+                    """
+                    Configure placeholder with keyword-only parameters.
+
+                    This demonstrates keyword-only parameters (after *) which should be
+                    preserved in the generated stub file.
+                    """
+            "#
+        })?;
+        let py_methods_info = parse_python_methods_stub(&stub_str)?;
+        assert_eq!(py_methods_info.methods.len(), 1);
+
+        let out = py_methods_info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyMethodsInfo {
+            struct_id: std::any::TypeId::of::<Placeholder>,
+            attrs: &[],
+            getters: &[],
+            setters: &[],
+            methods: &[
+                ::pyo3_stub_gen::type_info::MethodInfo {
+                    name: "configure",
+                    parameters: &[
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "name",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.str".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "dtype",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.str".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "ndim",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.int".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "shape",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "jagged",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "builtins.bool".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "False".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "latex",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "None".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                        ::pyo3_stub_gen::type_info::ParameterInfo {
+                            name: "description",
+                            kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                            type_info: || ::pyo3_stub_gen::TypeInfo {
+                                name: "typing.Optional[builtins.str]".to_string(),
+                                import: ::std::collections::HashSet::from([
+                                    "builtins".into(),
+                                    "typing".into(),
+                                ]),
+                            },
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    "None".to_string()
+                                }
+                                _fmt
+                            }),
+                        },
+                    ],
+                    r#return: <Placeholder as pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "\n        Configure placeholder with keyword-only parameters.\n\n        This demonstrates keyword-only parameters (after *) which should be\n        preserved in the generated stub file.\n        ",
+                    r#type: ::pyo3_stub_gen::type_info::MethodType::Instance,
+                    is_async: false,
+                    deprecated: None,
+                    type_ignored: None,
+                },
+            ],
         }
         "###);
         Ok(())

@@ -7,7 +7,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionDef {
     pub name: &'static str,
-    pub args: Vec<Arg>,
+    pub parameters: Parameters,
     pub r#return: TypeInfo,
     pub doc: &'static str,
     pub is_async: bool,
@@ -18,9 +18,7 @@ pub struct FunctionDef {
 impl Import for FunctionDef {
     fn import(&self) -> HashSet<ImportRef> {
         let mut import = self.r#return.import.clone();
-        for arg in &self.args {
-            import.extend(arg.import().into_iter());
-        }
+        import.extend(self.parameters.import());
         // Add typing_extensions import if deprecated
         if self.deprecated.is_some() {
             import.insert("typing_extensions".into());
@@ -33,7 +31,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
     fn from(info: &PyFunctionInfo) -> Self {
         Self {
             name: info.name,
-            args: info.args.iter().map(Arg::from).collect(),
+            parameters: Parameters::from_infos(info.parameters),
             r#return: (info.r#return)(),
             doc: info.doc,
             is_async: info.is_async,
@@ -51,14 +49,11 @@ impl fmt::Display for FunctionDef {
         }
 
         let async_ = if self.is_async { "async " } else { "" };
-        write!(f, "{async_}def {}(", self.name)?;
-        for (i, arg) in self.args.iter().enumerate() {
-            write!(f, "{arg}")?;
-            if i != self.args.len() - 1 {
-                write!(f, ", ")?;
-            }
-        }
-        write!(f, ") -> {}:", self.r#return)?;
+        write!(
+            f,
+            "{async_}def {}({}) -> {}:",
+            self.name, self.parameters, self.r#return
+        )?;
 
         // Calculate type: ignore comment once
         let type_ignore_comment = if let Some(target) = &self.type_ignored {

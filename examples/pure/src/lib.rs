@@ -385,6 +385,16 @@ impl HashableStruct {
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (*args))]
+fn func_with_star_arg_typed(
+    #[gen_stub(override_type(type_repr = "str"))] args: &Bound<PyTuple>,
+) -> String {
+    args.to_string()
+}
+
+/// Takes a variable number of arguments and returns their string representation.
+#[gen_stub_pyfunction]
+#[pyfunction]
+#[pyo3(signature = (*args))]
 fn func_with_star_arg(args: &Bound<PyTuple>) -> String {
     args.to_string()
 }
@@ -419,6 +429,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<HashableStruct>()?;
     m.add_class::<DecimalHolder>()?;
     m.add_class::<DataContainer>()?;
+    m.add_class::<Placeholder>()?;
     m.add_class::<Calculator>()?;
     m.add_class::<InstanceValue>()?;
     m.add_class::<Problem>()?;
@@ -444,6 +455,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_containers, m)?)?;
     // Test-cases for `*args` and `**kwargs`
     m.add_function(wrap_pyfunction!(func_with_star_arg, m)?)?;
+    m.add_function(wrap_pyfunction!(func_with_star_arg_typed, m)?)?;
     m.add_function(wrap_pyfunction!(func_with_kwargs, m)?)?;
 
     // Test cases for type: ignore functionality
