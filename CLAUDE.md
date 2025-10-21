@@ -10,7 +10,7 @@ This is a Python stub file (*.pyi) generator for PyO3-based Rust projects. It au
 
 ### Workspace Structure
 - `pyo3-stub-gen/` - Core library for stub generation
-- `pyo3-stub-gen-derive/` - Procedural macros for automatic metadata collection  
+- `pyo3-stub-gen-derive/` - Procedural macros for automatic metadata collection
 - `examples/` - Example projects showing different maturin layouts (pure, mixed, mixed_sub, etc.)
 
 ### Three-Phase Generation Process
@@ -18,34 +18,24 @@ This is a Python stub file (*.pyi) generator for PyO3-based Rust projects. It au
 2. **Runtime**: `define_stub_info_gatherer!` macro collects metadata and reads `pyproject.toml` configuration
 3. **Generation**: Transforms metadata into Python stub syntax and generates `.pyi` files
 
+> [!NOTE]
+> For detailed architecture documentation, see [`docs/architecture.md`](./docs/architecture.md)
+
 ### Procedural Macro Design Pattern (`pyo3-stub-gen-derive`)
 
 The derive crate follows a consistent three-layer architecture:
 
-1. **Entry Point (`src/gen_stub.rs`)**:
-   - Public functions handle `TokenStream` parsing and generation
-   - Examples: `pyclass()`, `pyfunction()`, `gen_function_from_python_impl()`
-   - This is the ONLY module that directly manipulates `TokenStream`
+1. **Entry Point (`src/gen_stub.rs`)**: TokenStream parsing and generation
+2. **Intermediate Representation (`src/gen_stub/*.rs`)**: `*Info` structs and business logic
+3. **Code Generation**: `ToTokens` trait implementations
 
-2. **Intermediate Representation (`src/gen_stub/*.rs`)**:
-   - Each module provides `*Info` structs (e.g., `PyFunctionInfo`, `PyClassInfo`)
-   - Conversion from `syn` types: `TryFrom<ItemFn>`, `TryFrom<ItemStruct>`, etc.
-   - Implementation of `ToTokens` trait for code generation
-
-3. **Flow Pattern**:
-   ```rust
-   // In gen_stub.rs
-   pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-       let item_fn = parse2::<ItemFn>(item)?;           // Parse TokenStream
-       let inner = PyFunctionInfo::try_from(item_fn)?;  // Convert to Info struct
-       Ok(quote! { #inner })                             // Generate via ToTokens
-   }
-   ```
-
-**Important**: When adding new functionality, follow this pattern strictly:
+**Important**: When adding new functionality:
 - TokenStream manipulation stays in `gen_stub.rs`
 - Business logic and intermediate representations go in `gen_stub/*.rs`
 - Use `ToTokens` trait for code generation, not direct `quote!` in submodules
+
+> [!NOTE]
+> For detailed design pattern documentation, see [`docs/procedural-macro-design.md`](./docs/procedural-macro-design.md)
 
 ## Development Commands
 
@@ -138,94 +128,26 @@ define_stub_info_gatherer!(stub_info);
 
 ### Python Stub Syntax Support
 
-For complex type definitions (e.g., `collections.abc.Callable`, overloads, generics), you can write type information directly in Python stub syntax instead of using Rust attributes.
+For complex type definitions (e.g., `collections.abc.Callable`, overloads, generics), you can write type information directly in Python stub syntax.
 
-#### Three Approaches
-
-**1. Inline Python Parameter (Recommended for single functions)**
-
-Use the `python` parameter in `#[gen_stub_pyfunction]` to specify types directly:
+**Quick Example:**
 
 ```rust
 #[gen_stub_pyfunction(python = r#"
     import collections.abc
-    import typing
-
-    def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
-        """Example using python parameter."""
+    def fn_with_callback(callback: collections.abc.Callable[[str], typing.Any]) -> None: ...
 "#)]
 #[pyfunction]
-pub fn fn_with_python_param<'a>(callback: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
-    callback.call1(("Hello!",))?;
-    Ok(callback)
-}
+pub fn fn_with_callback(callback: Bound<'_, PyAny>) -> PyResult<()> { /* ... */ }
 ```
 
-**2. Function Stub Generation Macro (For overloads or separate definitions)**
+**Three Approaches:**
+1. **Inline Python Parameter**: `#[gen_stub_pyfunction(python = "...")]` - Best for single functions
+2. **Function Stub Macro**: `gen_function_from_python!` - Best for overloads
+3. **Methods Stub Macro**: `gen_methods_from_python!` - Best for class method overloads
 
-Use `gen_function_from_python!` inside `submit!` block:
-
-```rust
-// Rust implementation
-#[pyfunction]
-pub fn overload_example(x: f64) -> f64 {
-    x + 1.0
-}
-
-// Additional overload definition
-use pyo3_stub_gen::inventory::submit;
-
-submit! {
-    gen_function_from_python! {
-        r#"
-        def overload_example(x: int) -> int: ...
-        "#
-    }
-}
-```
-
-**3. Methods Stub Generation Macro (For class methods)**
-
-Use `gen_methods_from_python!` to define multiple method signatures at once:
-
-```rust
-#[gen_stub_pyclass]
-#[pyclass]
-pub struct Calculator {}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl Calculator {
-    fn add(&self, x: f64) -> f64 {
-        x + 1.0
-    }
-}
-
-// Additional overload for integer type
-submit! {
-    gen_methods_from_python! {
-        r#"
-        class Calculator:
-            def add(self, x: int) -> int:
-                """Add operation for integers"""
-        "#
-    }
-}
-```
-
-#### When to Use
-
-- **Complex types**: `collections.abc.Callable`, `typing.Protocol`, nested generics
-- **Overloads**: Multiple type signatures for the same function (`@overload` in `.pyi`)
-- **Type override**: When automatic Rust → Python type mapping is insufficient
-- **Readability**: Python developers find stub syntax more familiar
-
-#### Notes
-
-- Python stub syntax is parsed at compile time using `rustpython-parser`
-- Type information is stored as strings (no Rust type validation)
-- Import statements are automatically extracted and included in generated `.pyi` files
-- This approach complements automatic type generation, not replaces it
+> [!NOTE]
+> For detailed documentation, examples, and implementation details, see [`docs/python-stub-syntax.md`](./docs/python-stub-syntax.md)
 
 ## Testing Strategy
 
@@ -244,13 +166,17 @@ Each example includes comprehensive testing:
 
 ## Type System
 
-The project provides mappings between Rust and Python types:
-- `/stub_type/builtins.rs` - Basic Python types
-- `/stub_type/collections.rs` - Python collections
-- `/stub_type/numpy.rs` - NumPy array types
-- `/stub_type/pyo3.rs` - PyO3-specific types
+The project provides automatic mappings between Rust and Python types through the `PyStubType` trait:
+- Built-in types (int, str, bool, etc.)
+- Collection types (Vec → list, HashMap → dict, etc.)
+- PyO3 types (Bound, Py, PyAny, etc.)
+- NumPy array types (feature-gated)
+- Third-party crate support (either, rust_decimal)
 
-Manual type specification is supported for edge cases where automatic translation fails.
+Manual type specification is supported for edge cases where automatic translation is insufficient.
+
+> [!NOTE]
+> For detailed type mapping documentation, see [`docs/type-system.md`](./docs/type-system.md)
 
 ## Important Notes
 
@@ -258,3 +184,14 @@ Manual type specification is supported for edge cases where automatic translatio
 - When you think you are done with your change, use `task stub-gen` to update stub files and inspect the content
 - The project uses the `inventory` crate for compile-time metadata collection across proc-macros
 - Stub files are automatically included in wheel packages by maturin
+
+## Developer Documentation
+
+For in-depth design documentation and implementation details, see the `docs/` directory:
+
+- [`docs/architecture.md`](./docs/architecture.md) - Overall system architecture and three-phase generation process
+- [`docs/procedural-macro-design.md`](./docs/procedural-macro-design.md) - Three-layer architecture pattern for proc-macros
+- [`docs/type-system.md`](./docs/type-system.md) - Rust to Python type mappings and `PyStubType` trait
+- [`docs/python-stub-syntax.md`](./docs/python-stub-syntax.md) - Using Python stub syntax directly
+- [`docs/default-value-arguments.md`](./docs/default-value-arguments.md) - Function parameter default values
+- [`docs/default-value-members.md`](./docs/default-value-members.md) - Class attribute default values
