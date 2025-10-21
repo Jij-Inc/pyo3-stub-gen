@@ -423,6 +423,10 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     Takes a variable number of arguments and returns their string representation.
     """
 
+def literal_false_inline() -> typing.Literal[false]: ...
+
+def literal_true_inline() -> typing.Literal[true]: ...
+
 @typing.overload
 def overload_example_1(x: int) -> int: ...
 
@@ -456,6 +460,12 @@ def process_container(container: DataContainer) -> DataContainer:
     """
 
 def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
+
+def returns_bool(value: typing.Literal[true, false]) -> typing.Literal[true, false]: ...
+
+def returns_false() -> typing.Literal[false]: ...
+
+def returns_true() -> typing.Literal[true]: ...
 
 def str_len(x: builtins.str) -> builtins.int:
     r"""
