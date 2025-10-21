@@ -1,14 +1,12 @@
 #![allow(deprecated)]
 
 mod custom_exceptions;
-mod literal_test;
 mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
 
 use custom_exceptions::*;
-use literal_test::*;
 use manual_submit::*;
 use overloading::*;
 use overriding::*;
@@ -451,6 +449,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fn_with_python_stub, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;
@@ -467,13 +466,6 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(test_type_ignore_custom, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_all, m)?)?;
     m.add_function(wrap_pyfunction!(test_type_ignore_no_comment_specific, m)?)?;
-
-    // Test cases for Literal with boolean values
-    m.add_function(wrap_pyfunction!(returns_true, m)?)?;
-    m.add_function(wrap_pyfunction!(returns_false, m)?)?;
-    m.add_function(wrap_pyfunction!(returns_bool, m)?)?;
-    m.add_function(wrap_pyfunction!(literal_true_inline, m)?)?;
-    m.add_function(wrap_pyfunction!(literal_false_inline, m)?)?;
 
     // Test case for custom exceptions
     m.add("MyError", m.py().get_type::<MyError>())?;

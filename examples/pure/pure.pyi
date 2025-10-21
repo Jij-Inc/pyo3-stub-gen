@@ -374,6 +374,18 @@ def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
+@typing.overload
+def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
+    """
+
+@typing.overload
+def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+    r"""
+    Convert sequence to tuple when tuple_out is True
+    """
+
 async def async_num() -> builtins.int: ...
 
 def create_a(x: builtins.int = 2) -> A: ...
@@ -423,10 +435,6 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     Takes a variable number of arguments and returns their string representation.
     """
 
-def literal_false_inline() -> typing.Literal[false]: ...
-
-def literal_true_inline() -> typing.Literal[true]: ...
-
 @typing.overload
 def overload_example_1(x: int) -> int: ...
 
@@ -460,12 +468,6 @@ def process_container(container: DataContainer) -> DataContainer:
     """
 
 def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
-
-def returns_bool(value: typing.Literal[true, false]) -> typing.Literal[true, false]: ...
-
-def returns_false() -> typing.Literal[false]: ...
-
-def returns_true() -> typing.Literal[true]: ...
 
 def str_len(x: builtins.str) -> builtins.int:
     r"""
