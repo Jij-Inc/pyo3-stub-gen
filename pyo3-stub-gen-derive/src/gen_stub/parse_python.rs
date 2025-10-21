@@ -454,8 +454,9 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> Result<Str
         ast::Expr::Constant(constant) => match &constant.value {
             ast::Constant::Int(i) => i.to_string(),
             ast::Constant::Str(s) => format!("\"{}\"", s),
-            ast::Constant::Bool(b) => b.to_string(),
+            ast::Constant::Bool(b) => if *b { "True" } else { "False" }.to_string(),
             ast::Constant::None => "None".to_string(),
+            ast::Constant::Ellipsis => "...".to_string(),
             _ => "Any".to_string(),
         },
         _ => "Any".to_string(),

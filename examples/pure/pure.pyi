@@ -374,6 +374,18 @@ def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
+@typing.overload
+def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
+    """
+
+@typing.overload
+def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+    r"""
+    Convert sequence to tuple when tuple_out is True
+    """
+
 async def async_num() -> builtins.int: ...
 
 def create_a(x: builtins.int = 2) -> A: ...

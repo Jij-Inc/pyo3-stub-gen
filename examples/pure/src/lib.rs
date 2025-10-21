@@ -449,6 +449,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fn_with_python_stub, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;
