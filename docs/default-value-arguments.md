@@ -49,8 +49,9 @@ fn my_function(x: PyObject, y: PyObject, z: PyObject) -> i32 {
 |--------|-----------|-------------|
 | **Syntax** | `#[pyo3(signature = (x = expr))]` | `#[gen_stub_pyfunction(python = r#"def foo(x = expr): ..."#)]` |
 | **Expression language** | Rust | Python |
+| **Intermediate form** | `DefaultExpr::Rust(syn::Expr)` | `DefaultExpr::Python(String)` |
 | **Type checking** | Compile-time (Rust) | Parse-time (Python AST) |
-| **Conversion** | `fmt_py_obj(rust_value)` → Python repr | Direct use (already Python) |
+| **Conversion timing** | Runtime (`fmt_py_obj`) | Compile-time (`python_ast_to_python_string`) |
 | **Best for** | PyO3 functions with Rust types | Complex types, overloads, type overrides |
 | **Runtime behavior** | Defined by PyO3 signature | Defined by Rust implementation |
 
@@ -121,9 +122,11 @@ def my_function(x: int, y: int = 10, z: str = 'hello') -> int: ...
 │           ↓                                                     │
 │  parse_python_stub() → rustpython-parser                       │
 │           ↓                                                     │
-│  extract_parameters() → Python AST                             │
+│  build_parameters_from_ast() → Extract parameters from AST     │
 │           ↓                                                     │
-│  python_expr_to_syn_expr() → Convert Python AST to syn::Expr   │
+│  python_ast_to_python_string() → Convert Python AST to String  │
+│           ↓                                                     │
+│  DefaultExpr::Python(python_string)                            │
 │           ↓                                                     │
 │  Generate: ParameterDefault::Expr(|| PY_EXPR_STR.to_string()) │
 └─────────────────────────────────────────────────────────────────┘
@@ -148,13 +151,13 @@ def my_function(x: int, y: int = 10, z: str = 'hello') -> int: ...
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Key difference**: Rust-based approach converts Rust values to Python representation at runtime, while Python-based approach uses Python expressions directly.
+**Key difference**: Rust-based approach converts Rust values to Python representation at runtime via `fmt_py_obj`, while Python-based approach converts Python AST to Python string at compile-time and uses it directly.
 
 ## Data Structures
 
-### ParameterDefault Enum
+### ParameterDefault Enum (Runtime)
 
-**Location**: `pyo3-stub-gen/src/type_info.rs:67-74`
+**Location**: `pyo3-stub-gen/src/type_info.rs:68-75`
 
 ```rust
 /// Default value of a parameter
@@ -172,6 +175,49 @@ pub enum ParameterDefault {
 - `Expr(fn() -> String)`: Closure that evaluates the default value at stub generation time
   - Defers evaluation to runtime, allowing complex expressions
   - Returns Python representation as a string
+
+### DefaultExpr Enum (Intermediate Representation)
+
+**Location**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:15-24`
+
+```rust
+/// Represents a default value expression from either Rust or Python source
+#[derive(Debug, Clone)]
+pub(crate) enum DefaultExpr {
+    /// Rust expression that needs to be converted to Python representation at runtime
+    /// Example: `vec![1, 2]`, `Number::Float`, `10`
+    Rust(Expr),
+    /// Python expression already in Python syntax (from Python stub)
+    /// Example: `"False"`, `"[1, 2]"`, `"Number.FLOAT"`
+    Python(String),
+}
+```
+
+**Design rationale**:
+- This enum distinguishes between the two approaches at the procedural macro level
+- `Rust(Expr)`: Rust expression from `#[pyo3(signature = ...)]` that requires runtime conversion via `fmt_py_obj`
+- `Python(String)`: Python expression string from `#[gen_stub_pyfunction(python = ...)]` that's already in Python syntax
+- Both variants are eventually converted to `ParameterDefault::Expr(fn() -> String)` in the generated code
+- This separation allows different code generation strategies for each approach
+
+### ParameterWithKind Struct (Intermediate Representation)
+
+**Location**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:26-32`
+
+```rust
+/// Intermediate representation for a parameter with its kind determined
+#[derive(Debug, Clone)]
+pub(crate) struct ParameterWithKind {
+    pub(crate) arg_info: ArgInfo,
+    pub(crate) kind: ParameterKind,
+    pub(crate) default_expr: Option<DefaultExpr>,
+}
+```
+
+**Design rationale**:
+- Used during procedural macro code generation
+- `default_expr` is `Option<DefaultExpr>`, distinguishing between Rust and Python expressions
+- Converted to `ParameterInfo` via the `ToTokens` trait
 
 ### ParameterInfo Struct
 
@@ -207,93 +253,118 @@ The implementation differs significantly between the two approaches.
 
 #### 1. Signature Parsing
 
-**File**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:138-327`
+**File**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:210-350`
 
-The `Parameters::try_from` implementation parses PyO3's `#[pyo3(signature = ...)]` attribute:
+The `Parameters::new_with_sig` implementation parses PyO3's `#[pyo3(signature = ...)]` attribute:
 
 ```rust
-// Extract signature from #[pyo3(signature = (...))] attribute
-for attr in parse_pyo3_attrs(&item_fn.attrs)? {
-    if let Attr::Signature(signature) = attr {
-        // Parse function signature parameters
-        for pair in signature.pairs() {
-            match pair.value() {
-                // Handle default values: param = value
-                FnArg::PosArgWithDefault(arg, _, value) => {
-                    parameters.push(ParameterWithKind {
-                        arg_info,
-                        kind,
-                        default_expr: Some(value.clone()),  // Capture default expression
-                    });
-                }
-                // Handle parameters without defaults
-                FnArg::PosArg(arg) => {
-                    parameters.push(ParameterWithKind {
-                        arg_info,
-                        kind,
-                        default_expr: None,  // No default
-                    });
-                }
+// Parse signature arguments
+for sig_arg in sig.args() {
+    match sig_arg {
+        SignatureArg::Slash(_) => {
+            // `/` delimiter - mark all previous parameters as positional-only
+            for param in &mut parameters {
+                param.kind = ParameterKind::PositionalOnly;
             }
         }
+        SignatureArg::Star(_) => {
+            // Bare `*` - parameters after this are keyword-only
+            after_star = true;
+        }
+        SignatureArg::Assign(ident, _eq, value) => {
+            // Handle parameters with default values: param = value
+            let kind = if positional_only {
+                ParameterKind::PositionalOnly
+            } else if after_star {
+                ParameterKind::KeywordOnly
+            } else {
+                ParameterKind::PositionalOrKeyword
+            };
+
+            let arg_info = args_map.get(&name)?.clone();
+
+            parameters.push(ParameterWithKind {
+                arg_info,
+                kind,
+                default_expr: Some(DefaultExpr::Rust(value.clone())),  // Rust expression
+            });
+        }
+        SignatureArg::Ident(ident) => {
+            // Handle parameters without defaults
+            parameters.push(ParameterWithKind {
+                arg_info,
+                kind,
+                default_expr: None,  // No default
+            });
+        }
+        // ... other cases (Args, Keywords, etc.)
     }
 }
 ```
 
 #### 2. Code Generation
 
-**File**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:22-102`
+**File**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:34-94`
 
-The `ToTokens` implementation generates code to capture default values:
+The `ToTokens` implementation for `ParameterWithKind` generates code to capture default values. For Rust expressions (`DefaultExpr::Rust`), it handles two cases:
 
 ##### Case 1: RustType (Type-safe conversion)
 
 ```rust
-TypeOrOverride::RustType { r#type } => {
-    let default = if value.to_token_stream().to_string() == "None" {
-        // Special handling for None literal
-        quote! { "None".to_string() }
-    } else {
-        // Type-checked conversion
-        quote! {
-            let v: #r#type = #value;
-            ::pyo3_stub_gen::util::fmt_py_obj(v)
-        }
-    };
-    quote! {
-        ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-            fn _fmt() -> String {
-                #default
+Some(DefaultExpr::Rust(expr)) => {
+    match &self.arg_info.r#type {
+        TypeOrOverride::RustType { r#type } => {
+            let default = if expr.to_token_stream().to_string() == "None" {
+                // Special handling for None literal
+                quote! { "None".to_string() }
+            } else {
+                // Type-checked conversion
+                quote! {
+                    let v: #r#type = #expr;
+                    ::pyo3_stub_gen::util::fmt_py_obj(v)
+                }
+            };
+            quote! {
+                ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                    fn _fmt() -> String {
+                        #default
+                    }
+                    _fmt
+                })
             }
-            _fmt
-        })
+        }
+        // ...
     }
 }
 ```
 
 **Features**:
-- Compile-time type checking: `let v: #r#type = #value`
+- Compile-time type checking: `let v: #r#type = #expr`
 - Runtime conversion via `fmt_py_obj` for proper Python representation
 - Special case for `None` to avoid type inference issues
 
 ##### Case 2: OverrideType (Direct string conversion)
 
 ```rust
-TypeOrOverride::OverrideType { .. } => {
-    let mut value_str = value.to_token_stream().to_string();
-    // Convert Rust bool literals to Python bool literals
-    if value_str == "false" {
-        value_str = "False".to_string();
-    } else if value_str == "true" {
-        value_str = "True".to_string();
-    }
-    quote! {
-        ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-            fn _fmt() -> String {
-                #value_str.to_string()
+Some(DefaultExpr::Rust(expr)) => {
+    match &self.arg_info.r#type {
+        TypeOrOverride::OverrideType { .. } => {
+            let mut value_str = expr.to_token_stream().to_string();
+            // Convert Rust bool literals to Python bool literals
+            if value_str == "false" {
+                value_str = "False".to_string();
+            } else if value_str == "true" {
+                value_str = "True".to_string();
             }
-            _fmt
-        })
+            quote! {
+                ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                    fn _fmt() -> String {
+                        #value_str.to_string()
+                    }
+                    _fmt
+                })
+            }
+        }
     }
 }
 ```
@@ -368,7 +439,7 @@ for stmt in &module.statements {
 
 #### 2. Parameter Extraction with Defaults
 
-**File**: `pyo3-stub-gen-derive/src/gen_stub/parse_python.rs:104-196`
+**File**: `pyo3-stub-gen-derive/src/gen_stub/parse_python.rs:100-145`
 
 Default values are extracted from Python AST:
 
@@ -376,9 +447,9 @@ Default values are extracted from Python AST:
 let process_arg_with_default = |arg: &ast::ArgWithDefault, kind: ParameterKind| -> Result<Option<ParameterWithKind>> {
     let arg_name = arg.def.arg.to_string();
 
-    // Convert default value from Python AST to syn::Expr
+    // Convert default value from Python AST to Python string
     let default_expr = if let Some(default) = &arg.default {
-        Some(python_expr_to_syn_expr(default)?)
+        Some(DefaultExpr::Python(python_ast_to_python_string(default)?))
     } else {
         None
     };
@@ -386,68 +457,109 @@ let process_arg_with_default = |arg: &ast::ArgWithDefault, kind: ParameterKind| 
     Ok(Some(ParameterWithKind {
         arg_info,
         kind,
-        default_expr,  // Python expression converted to Rust syn::Expr
+        default_expr,  // Python expression as DefaultExpr::Python(String)
     }))
 };
 ```
 
-#### 3. Python Expression to Rust Conversion
+#### 3. Python AST to Python String Conversion
 
-**File**: `pyo3-stub-gen-derive/src/gen_stub/parse_python.rs:290-348`
+**File**: `pyo3-stub-gen-derive/src/gen_stub/parse_python.rs:288-380`
 
 ```rust
-fn python_expr_to_syn_expr(expr: &ast::Expr) -> Result<syn::Expr> {
-    let expr_str = match expr {
+fn python_ast_to_python_string(expr: &ast::Expr) -> Result<String> {
+    match expr {
         // Python literals
         ast::Expr::Constant(constant) => match &constant.value {
-            ast::Constant::None => "None".to_string(),
-            ast::Constant::Bool(b) => b.to_string(),  // Python True/False
-            ast::Constant::Int(i) => i.to_string(),
-            ast::Constant::Float(f) => f.to_string(),
-            ast::Constant::Str(s) => format!("\"{}\"", s.escape_default()),
-            ast::Constant::Ellipsis => "...".to_string(),
-            _ => return Err(...),
+            ast::Constant::None => Ok("None".to_string()),
+            ast::Constant::Bool(true) => Ok("True".to_string()),
+            ast::Constant::Bool(false) => Ok("False".to_string()),
+            ast::Constant::Int(i) => Ok(i.to_string()),
+            ast::Constant::Float(f) => Ok(f.to_string()),
+            ast::Constant::Str(s) => {
+                // Use single quotes for Python strings, escape as needed
+                if s.contains('\'') && !s.contains('"') {
+                    Ok(format!("\"{}\"", s.escape_default()))
+                } else {
+                    Ok(format!("'{}'", s.escape_default()))
+                }
+            },
+            ast::Constant::Ellipsis => Ok("...".to_string()),
+            _ => Err(...),
         },
         // Python attribute access: MyEnum.VARIANT
-        ast::Expr::Attribute(_) => expr_to_type_string(expr)?,
+        ast::Expr::Attribute(_) => expr_to_type_string(expr),
         // Python unary operations: -42
         ast::Expr::UnaryOp(unary) => {
             if matches!(unary.op, ast::UnaryOp::USub) {
-                format!("-{}", /* operand */)
+                // Handle negative numbers
+                if let ast::Expr::Constant(constant) = &*unary.operand {
+                    match &constant.value {
+                        ast::Constant::Int(i) => Ok(format!("-{}", i)),
+                        ast::Constant::Float(f) => Ok(format!("-{}", f)),
+                        _ => Ok("...".to_string()),
+                    }
+                } else {
+                    Ok("...".to_string())
+                }
             } else {
-                "...".to_string()
+                Ok("...".to_string())
             }
         }
-        // Complex types fall back to "..."
-        ast::Expr::List(_) | ast::Expr::Tuple(_) | ast::Expr::Dict(_) => "...".to_string(),
-        _ => "...".to_string(),
-    };
-
-    // Parse as Rust syn::Expr
-    syn::parse_str(&expr_str).map_err(|e| ...)
+        // Lists, tuples, dicts are recursively converted
+        ast::Expr::List(list) => {
+            let elements: Result<Vec<_>> =
+                list.elts.iter().map(python_ast_to_python_string).collect();
+            Ok(format!("[{}]", elements?.join(", ")))
+        }
+        ast::Expr::Tuple(tuple) => {
+            let elements: Result<Vec<_>> =
+                tuple.elts.iter().map(python_ast_to_python_string).collect();
+            let elements = elements?;
+            if elements.len() == 1 {
+                Ok(format!("({},)", elements[0]))
+            } else {
+                Ok(format!("({})", elements.join(", ")))
+            }
+        }
+        ast::Expr::Dict(dict) => {
+            let mut pairs = Vec::new();
+            for (key_opt, value) in dict.keys.iter().zip(dict.values.iter()) {
+                if let Some(key) = key_opt {
+                    let key_str = python_ast_to_python_string(key)?;
+                    let value_str = python_ast_to_python_string(value)?;
+                    pairs.push(format!("{}: {}", key_str, value_str));
+                } else {
+                    return Ok("...".to_string());
+                }
+            }
+            Ok(format!("{{{}}}", pairs.join(", ")))
+        }
+        _ => Ok("...".to_string()),
+    }
 }
 ```
 
 **Key conversions**:
-- Python `True`/`False` → Rust `true`/`false` (string form, later converted back)
-- Python `None` → Rust `None` (string)
-- Python `Number.FLOAT` → Rust `Number::FLOAT` (attribute access converted to path)
-- Complex Python expressions → `"..."` (placeholder)
+- Python `True`/`False` → String `"True"`/`"False"` (Python syntax preserved)
+- Python `None` → String `"None"`
+- Python `Number.FLOAT` → String `"Number.FLOAT"` (attribute access as-is)
+- Python collections → Recursively converted to Python string representation
+- Unsupported expressions → `"..."` (placeholder)
 
 #### 4. Code Generation
 
-Once converted to `syn::Expr`, the Python-based approach follows the same code generation path as the Rust-based approach, but with `OverrideType` handling:
+**File**: `pyo3-stub-gen-derive/src/gen_stub/parameter.rs:82-92`
+
+For Python-based parameters, the `DefaultExpr::Python` variant is handled:
 
 ```rust
-// For Python-based parameters, typically OverrideType is used
-TypeOrOverride::OverrideType { .. } => {
-    let mut value_str = value.to_token_stream().to_string();
-    // Boolean conversion is already done in python_expr_to_syn_expr
-    // String is used directly as Python expression
+Some(DefaultExpr::Python(py_str)) => {
+    // Python expression: already in Python syntax, use directly
     quote! {
         ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
             fn _fmt() -> String {
-                #value_str.to_string()
+                #py_str.to_string()
             }
             _fmt
         })
@@ -455,7 +567,11 @@ TypeOrOverride::OverrideType { .. } => {
 }
 ```
 
-**No `fmt_py_obj` conversion**: The expression is already in Python syntax.
+**Key points**:
+- The Python string is used directly without any conversion
+- No `fmt_py_obj` conversion needed - expression is already in Python syntax
+- Boolean conversions (`True`/`False`) were already done in `python_ast_to_python_string`
+- The generated closure simply returns the pre-formatted Python string
 
 ### Common Path: Stub File Generation
 
@@ -715,16 +831,17 @@ def keyword_only(x: int, *, y: int = 5, z: str = 'default') -> int: ...
 - Avoids potential conversion artifacts
 - More predictable output matches input exactly
 
-### 6. Python AST to Rust `syn::Expr` Conversion
+### 6. Python AST to Python String Conversion
 
-**Decision**: Convert Python AST to Rust `syn::Expr` as an intermediate representation.
+**Decision**: Convert Python AST directly to Python string representation, not to Rust `syn::Expr`.
 
 **Rationale**:
-- Unifies both approaches in the code generation phase
-- Allows reuse of existing `ParameterWithKind::to_tokens` implementation
-- Provides compile-time validation that expressions are well-formed
-- Simplifies the implementation by having a common representation
-- Fallback to `"..."` for unsupported Python expressions provides graceful degradation
+- Preserves Python syntax exactly as written in the stub
+- Avoids unnecessary round-trip through Rust expression representation
+- Simpler implementation - no need to map Python constructs to Rust syntax
+- More predictable output - what you write in Python is what appears in the stub
+- The `DefaultExpr` enum distinguishes between Rust and Python expressions at compile-time
+- Both approaches converge at the `ParameterDefault::Expr(fn() -> String)` level
 
 ### 7. Type-safe Conversion Path (Rust-based)
 
@@ -836,8 +953,10 @@ Example test locations:
 |---------|-----------|-------------|
 | **Attribute** | `#[pyo3(signature = (x = expr))]` | `#[gen_stub_pyfunction(python = r#"..."#)]` |
 | **Expression language** | Rust | Python |
+| **Default expr representation** | `DefaultExpr::Rust(syn::Expr)` | `DefaultExpr::Python(String)` |
 | **Compile-time checking** | ✅ Full type checking | ⚠️ Syntax checking only |
-| **Runtime conversion** | `fmt_py_obj()` | Direct string use |
+| **Conversion timing** | Runtime via `fmt_py_obj()` | Compile-time via `python_ast_to_python_string()` |
+| **Conversion result** | Python `repr()` at runtime | Python string at compile-time |
 | **Feature dependency** | `infer_signature` for complex types | None |
 | **Type mapping** | Automatic Rust→Python | Manual specification |
 | **Overloading support** | ❌ No | ✅ Yes (via `gen_function_from_python!`) |
@@ -850,6 +969,31 @@ Example test locations:
 - Complex Python types (e.g., `Callable`, `Protocol`)
 - Type overrides that don't map from Rust
 - Exact control over stub syntax
+
+## Implementation Summary
+
+The key to understanding default value handling is the `DefaultExpr` enum:
+
+```rust
+pub(crate) enum DefaultExpr {
+    Rust(Expr),      // From #[pyo3(signature = ...)] - converted at runtime
+    Python(String),  // From python = r#"..."# - already Python syntax
+}
+```
+
+**Flow**:
+1. **Compile-time** (procedural macros):
+   - Rust-based: Parse signature → `DefaultExpr::Rust(expr)` → Generate code calling `fmt_py_obj(expr)`
+   - Python-based: Parse Python stub → `DefaultExpr::Python(string)` → Generate code returning string directly
+
+2. **Code generation**:
+   - Both create `ParameterDefault::Expr(fn() -> String)` closures
+   - Rust variant: closure calls `fmt_py_obj` at runtime
+   - Python variant: closure returns pre-formatted string
+
+3. **Runtime** (stub generation):
+   - Execute closures to get Python representation strings
+   - Write to `.pyi` files
 
 ## Related Documentation
 
