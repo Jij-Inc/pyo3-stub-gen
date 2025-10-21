@@ -16,7 +16,7 @@ use super::{remove_lifetime, signature::SignatureArg, util::TypeOrOverride, ArgI
 #[derive(Debug, Clone)]
 pub(crate) struct ParameterWithKind {
     pub(crate) arg_info: ArgInfo,
-    pub(crate) kind: ParameterKindIntermediate,
+    pub(crate) kind: ParameterKind,
     pub(crate) default_expr: Option<Expr>,
 }
 
@@ -107,7 +107,7 @@ impl ToTokens for ParameterWithKind {
 /// This enum mirrors `::pyo3_stub_gen::type_info::ParameterKind` but exists
 /// in the derive macro context for code generation purposes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ParameterKindIntermediate {
+pub(crate) enum ParameterKind {
     PositionalOnly,
     PositionalOrKeyword,
     KeywordOnly,
@@ -115,7 +115,7 @@ pub(crate) enum ParameterKindIntermediate {
     VarKeyword,
 }
 
-impl ToTokens for ParameterKindIntermediate {
+impl ToTokens for ParameterKind {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let kind_tokens = match self {
             Self::PositionalOnly => {
@@ -175,7 +175,7 @@ impl Parameters {
                 }
                 ParameterWithKind {
                     arg_info: arg_with_clean_type,
-                    kind: ParameterKindIntermediate::PositionalOrKeyword,
+                    kind: ParameterKind::PositionalOrKeyword,
                     default_expr: None,
                 }
             })
@@ -215,7 +215,7 @@ impl Parameters {
                 SignatureArg::Slash(_) => {
                     // `/` delimiter - mark all previous parameters as positional-only
                     for param in &mut parameters {
-                        param.kind = ParameterKindIntermediate::PositionalOnly;
+                        param.kind = ParameterKind::PositionalOnly;
                     }
                     positional_only = false;
                 }
@@ -227,11 +227,11 @@ impl Parameters {
                 SignatureArg::Ident(ident) => {
                     let name = ident.to_string();
                     let kind = if positional_only {
-                        ParameterKindIntermediate::PositionalOnly
+                        ParameterKind::PositionalOnly
                     } else if after_star {
-                        ParameterKindIntermediate::KeywordOnly
+                        ParameterKind::KeywordOnly
                     } else {
-                        ParameterKindIntermediate::PositionalOrKeyword
+                        ParameterKind::PositionalOrKeyword
                     };
 
                     let arg_info = args_map
@@ -250,11 +250,11 @@ impl Parameters {
                 SignatureArg::Assign(ident, _eq, value) => {
                     let name = ident.to_string();
                     let kind = if positional_only {
-                        ParameterKindIntermediate::PositionalOnly
+                        ParameterKind::PositionalOnly
                     } else if after_star {
-                        ParameterKindIntermediate::KeywordOnly
+                        ParameterKind::KeywordOnly
                     } else {
-                        ParameterKindIntermediate::PositionalOrKeyword
+                        ParameterKind::PositionalOrKeyword
                     };
 
                     let arg_info = args_map
@@ -294,7 +294,7 @@ impl Parameters {
 
                     parameters.push(ParameterWithKind {
                         arg_info,
-                        kind: ParameterKindIntermediate::VarPositional,
+                        kind: ParameterKind::VarPositional,
                         default_expr: None,
                     });
                 }
@@ -321,7 +321,7 @@ impl Parameters {
 
                     parameters.push(ParameterWithKind {
                         arg_info,
-                        kind: ParameterKindIntermediate::VarKeyword,
+                        kind: ParameterKind::VarKeyword,
                         default_expr: None,
                     });
                 }
