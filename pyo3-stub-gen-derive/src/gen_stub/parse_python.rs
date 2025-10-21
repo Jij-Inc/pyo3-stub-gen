@@ -18,6 +18,7 @@ use syn::{Result, Type};
 use super::{
     arg::ArgInfo,
     attr::DeprecatedInfo,
+    parameter::DefaultExpr,
     parameter::{ParameterKind, ParameterWithKind, Parameters},
     util::TypeOrOverride,
 };
@@ -129,9 +130,9 @@ pub(super) fn build_parameters_from_ast(
                 r#type: type_override,
             };
 
-            // Convert default value from Python AST to syn::Expr
+            // Convert default value from Python AST to Python string
             let default_expr = if let Some(default) = &arg.default {
-                Some(python_expr_to_syn_expr(default)?)
+                Some(DefaultExpr::Python(python_ast_to_python_string(default)?))
             } else {
                 None
             };
@@ -284,68 +285,95 @@ fn extract_rust_type_marker(expr: &ast::Expr) -> Result<Option<String>> {
     Ok(None)
 }
 
-/// Convert Python default value expression to syn::Expr
+/// Convert Python AST expression to Python syntax string
 ///
-/// This converts Python AST expressions like `None`, `True`, `3`, `"hello"` to syn::Expr
-fn python_expr_to_syn_expr(expr: &ast::Expr) -> Result<syn::Expr> {
-    let expr_str = match expr {
+/// This converts Python AST expressions like `None`, `True`, `[1, 2]` to Python string representation
+/// that can be used directly in stub files.
+fn python_ast_to_python_string(expr: &ast::Expr) -> Result<String> {
+    match expr {
         ast::Expr::Constant(constant) => match &constant.value {
-            ast::Constant::None => "None".to_string(),
-            ast::Constant::Bool(b) => b.to_string(),
-            ast::Constant::Int(i) => i.to_string(),
-            ast::Constant::Float(f) => f.to_string(),
-            ast::Constant::Str(s) => format!("\"{}\"", s.escape_default()),
-            ast::Constant::Bytes(_) => {
-                return Err(syn::Error::new(
-                    proc_macro2::Span::call_site(),
-                    "Bytes literals are not supported as default values",
-                ))
+            ast::Constant::None => Ok("None".to_string()),
+            ast::Constant::Bool(true) => Ok("True".to_string()),
+            ast::Constant::Bool(false) => Ok("False".to_string()),
+            ast::Constant::Int(i) => Ok(i.to_string()),
+            ast::Constant::Float(f) => Ok(f.to_string()),
+            ast::Constant::Str(s) => {
+                // Use single quotes for Python strings, escape as needed
+                if s.contains('\'') && !s.contains('"') {
+                    Ok(format!("\"{}\"", s.escape_default()))
+                } else {
+                    Ok(format!("'{}'", s.escape_default()))
+                }
             }
-            ast::Constant::Ellipsis => "...".to_string(),
-            _ => {
-                return Err(syn::Error::new(
-                    proc_macro2::Span::call_site(),
-                    format!("Unsupported constant type: {:?}", constant.value),
-                ))
-            }
+            ast::Constant::Bytes(_) => Err(syn::Error::new(
+                proc_macro2::Span::call_site(),
+                "Bytes literals are not supported as default values",
+            )),
+            ast::Constant::Ellipsis => Ok("...".to_string()),
+            _ => Err(syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("Unsupported constant type: {:?}", constant.value),
+            )),
         },
-        ast::Expr::List(_) | ast::Expr::Tuple(_) | ast::Expr::Dict(_) => {
-            // For complex default values, use "..." placeholder
-            "...".to_string()
+        ast::Expr::List(list) => {
+            // Recursively convert list elements
+            let elements: Result<Vec<_>> =
+                list.elts.iter().map(python_ast_to_python_string).collect();
+            Ok(format!("[{}]", elements?.join(", ")))
         }
-        ast::Expr::Name(name) => name.id.to_string(),
+        ast::Expr::Tuple(tuple) => {
+            // Recursively convert tuple elements
+            let elements: Result<Vec<_>> =
+                tuple.elts.iter().map(python_ast_to_python_string).collect();
+            let elements = elements?;
+            if elements.len() == 1 {
+                // Single-element tuple needs trailing comma
+                Ok(format!("({},)", elements[0]))
+            } else {
+                Ok(format!("({})", elements.join(", ")))
+            }
+        }
+        ast::Expr::Dict(dict) => {
+            // Recursively convert dict key-value pairs
+            let mut pairs = Vec::new();
+            for (key_opt, value) in dict.keys.iter().zip(dict.values.iter()) {
+                if let Some(key) = key_opt {
+                    let key_str = python_ast_to_python_string(key)?;
+                    let value_str = python_ast_to_python_string(value)?;
+                    pairs.push(format!("{}: {}", key_str, value_str));
+                } else {
+                    // Handle **kwargs expansion in dict literals
+                    return Ok("...".to_string());
+                }
+            }
+            Ok(format!("{{{}}}", pairs.join(", ")))
+        }
+        ast::Expr::Name(name) => Ok(name.id.to_string()),
         ast::Expr::Attribute(_) => {
-            // Handle qualified names like `typing.Optional`
-            expr_to_type_string(expr)?
+            // Handle qualified names like `MyEnum.VARIANT`
+            expr_to_type_string(expr)
         }
         ast::Expr::UnaryOp(unary) => {
             // Handle negative numbers
             if matches!(unary.op, ast::UnaryOp::USub) {
                 if let ast::Expr::Constant(constant) = &*unary.operand {
                     match &constant.value {
-                        ast::Constant::Int(i) => format!("-{}", i),
-                        ast::Constant::Float(f) => format!("-{}", f),
-                        _ => "...".to_string(),
+                        ast::Constant::Int(i) => Ok(format!("-{}", i)),
+                        ast::Constant::Float(f) => Ok(format!("-{}", f)),
+                        _ => Ok("...".to_string()),
                     }
                 } else {
-                    "...".to_string()
+                    Ok("...".to_string())
                 }
             } else {
-                "...".to_string()
+                Ok("...".to_string())
             }
         }
         _ => {
             // For other expressions, use "..." placeholder
-            "...".to_string()
+            Ok("...".to_string())
         }
-    };
-
-    syn::parse_str(&expr_str).map_err(|e| {
-        syn::Error::new(
-            proc_macro2::Span::call_site(),
-            format!("Failed to parse expression '{}': {}", expr_str, e),
-        )
-    })
+    }
 }
 
 /// Convert Python expression to type string

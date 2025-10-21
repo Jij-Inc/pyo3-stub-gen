@@ -12,12 +12,23 @@ use syn::{Expr, Result};
 
 use super::{remove_lifetime, signature::SignatureArg, util::TypeOrOverride, ArgInfo, Signature};
 
+/// Represents a default value expression from either Rust or Python source
+#[derive(Debug, Clone)]
+pub(crate) enum DefaultExpr {
+    /// Rust expression that needs to be converted to Python representation at runtime
+    /// Example: `vec![1, 2]`, `Number::Float`, `10`
+    Rust(Expr),
+    /// Python expression already in Python syntax (from Python stub)
+    /// Example: `"False"`, `"[1, 2]"`, `"Number.FLOAT"`
+    Python(String),
+}
+
 /// Intermediate representation for a parameter with its kind determined
 #[derive(Debug, Clone)]
 pub(crate) struct ParameterWithKind {
     pub(crate) arg_info: ArgInfo,
     pub(crate) kind: ParameterKind,
-    pub(crate) default_expr: Option<Expr>,
+    pub(crate) default_expr: Option<DefaultExpr>,
 }
 
 impl ToTokens for ParameterWithKind {
@@ -25,48 +36,61 @@ impl ToTokens for ParameterWithKind {
         let name = &self.arg_info.name;
         let kind = &self.kind;
 
-        let default_tokens = if let Some(value) = &self.default_expr {
-            match &self.arg_info.r#type {
-                TypeOrOverride::RustType { r#type } => {
-                    let default = if value.to_token_stream().to_string() == "None" {
-                        quote! { "None".to_string() }
-                    } else {
+        let default_tokens = match &self.default_expr {
+            Some(DefaultExpr::Rust(expr)) => {
+                // Rust expression: needs runtime conversion via fmt_py_obj
+                match &self.arg_info.r#type {
+                    TypeOrOverride::RustType { r#type } => {
+                        let default = if expr.to_token_stream().to_string() == "None" {
+                            quote! { "None".to_string() }
+                        } else {
+                            quote! {
+                                let v: #r#type = #expr;
+                                ::pyo3_stub_gen::util::fmt_py_obj(v)
+                            }
+                        };
                         quote! {
-                            let v: #r#type = #value;
-                            ::pyo3_stub_gen::util::fmt_py_obj(v)
+                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    #default
+                                }
+                                _fmt
+                            })
                         }
-                    };
-                    quote! {
-                        ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                            fn _fmt() -> String {
-                                #default
-                            }
-                            _fmt
-                        })
                     }
-                }
-                TypeOrOverride::OverrideType { .. } => {
-                    // For OverrideType, convert the default value expression directly to a string
-                    // since r#type may be a dummy type and we can't use it for type annotations
-                    let mut value_str = value.to_token_stream().to_string();
-                    // Convert Rust bool literals to Python bool literals
-                    if value_str == "false" {
-                        value_str = "False".to_string();
-                    } else if value_str == "true" {
-                        value_str = "True".to_string();
-                    }
-                    quote! {
-                        ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                            fn _fmt() -> String {
-                                #value_str.to_string()
-                            }
-                            _fmt
-                        })
+                    TypeOrOverride::OverrideType { .. } => {
+                        // For OverrideType, convert the default value expression directly to a string
+                        // since r#type may be a dummy type and we can't use it for type annotations
+                        let mut value_str = expr.to_token_stream().to_string();
+                        // Convert Rust bool literals to Python bool literals
+                        if value_str == "false" {
+                            value_str = "False".to_string();
+                        } else if value_str == "true" {
+                            value_str = "True".to_string();
+                        }
+                        quote! {
+                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                                fn _fmt() -> String {
+                                    #value_str.to_string()
+                                }
+                                _fmt
+                            })
+                        }
                     }
                 }
             }
-        } else {
-            quote! { ::pyo3_stub_gen::type_info::ParameterDefault::None }
+            Some(DefaultExpr::Python(py_str)) => {
+                // Python expression: already in Python syntax, use directly
+                quote! {
+                    ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
+                        fn _fmt() -> String {
+                            #py_str.to_string()
+                        }
+                        _fmt
+                    })
+                }
+            }
+            None => quote! { ::pyo3_stub_gen::type_info::ParameterDefault::None },
         };
 
         let param_info = match &self.arg_info.r#type {
@@ -267,7 +291,7 @@ impl Parameters {
                     parameters.push(ParameterWithKind {
                         arg_info,
                         kind,
-                        default_expr: Some(value.clone()),
+                        default_expr: Some(DefaultExpr::Rust(value.clone())),
                     });
                 }
                 SignatureArg::Args(_, ident) => {
