@@ -100,7 +100,7 @@ impl fmt::Display for Module {
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
             write!(f, "{enum_}")?;
         }
-        for (_function_name, functions) in &self.function {
+        for functions in self.function.values() {
             // Check if we should add @overload to all functions
             let has_overload = functions.iter().any(|func| func.is_overload);
             let should_add_overload = functions.len() > 1 && has_overload;
