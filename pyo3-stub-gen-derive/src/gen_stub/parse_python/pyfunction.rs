@@ -340,6 +340,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -390,6 +391,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -440,6 +442,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -500,6 +503,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -538,6 +542,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -579,6 +584,7 @@ mod test {
             is_async: true,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -624,6 +630,7 @@ mod test {
                 note: None,
             }),
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -669,6 +676,7 @@ mod test {
                 note: Some("Use new_function instead"),
             }),
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -704,6 +712,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -739,6 +748,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -814,6 +824,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
             file: file!(),
             line: line!(),
             column: column!(),
@@ -873,6 +884,183 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
+            file: file!(),
+            line: line!(),
+            column: column!(),
+        }
+        "###);
+        Ok(())
+    }
+
+    #[test]
+    fn test_single_overload() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            @overload
+            def foo(x: int) -> int:
+                """Integer overload"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "foo",
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "x",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "int".to_string(),
+                        import: ::std::collections::HashSet::from([]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+            ],
+            r#return: || ::pyo3_stub_gen::TypeInfo {
+                name: "int".to_string(),
+                import: ::std::collections::HashSet::from([]),
+            },
+            doc: "Integer overload",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+            is_overload: true,
+            file: file!(),
+            line: line!(),
+            column: column!(),
+        }
+        "###);
+        Ok(())
+    }
+
+    #[test]
+    fn test_multiple_overloads() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            @overload
+            def foo(x: int) -> int:
+                """Integer overload"""
+
+            @overload
+            def foo(x: float) -> float:
+                """Float overload"""
+            "#
+        })?;
+        let infos = parse_python_overload_stubs(stub_str, "foo")?;
+        assert_eq!(infos.len(), 2);
+
+        let out1 = infos[0].to_token_stream();
+        insta::assert_snapshot!(format_as_value(out1), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "foo",
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "x",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "int".to_string(),
+                        import: ::std::collections::HashSet::from([]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+            ],
+            r#return: || ::pyo3_stub_gen::TypeInfo {
+                name: "int".to_string(),
+                import: ::std::collections::HashSet::from([]),
+            },
+            doc: "Integer overload",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+            is_overload: true,
+            file: file!(),
+            line: line!(),
+            column: column!(),
+        }
+        "###);
+
+        let out2 = infos[1].to_token_stream();
+        insta::assert_snapshot!(format_as_value(out2), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "foo",
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "x",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "float".to_string(),
+                        import: ::std::collections::HashSet::from([]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+            ],
+            r#return: || ::pyo3_stub_gen::TypeInfo {
+                name: "float".to_string(),
+                import: ::std::collections::HashSet::from([]),
+            },
+            doc: "Float overload",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+            is_overload: true,
+            file: file!(),
+            line: line!(),
+            column: column!(),
+        }
+        "###);
+        Ok(())
+    }
+
+    #[test]
+    fn test_overload_with_literal_types() -> Result<()> {
+        let stub_str: LitStr = syn::parse2(quote! {
+            r#"
+            import typing
+            @overload
+            def as_tuple(xs: list[int], *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+                """Return as tuple"""
+            "#
+        })?;
+        let info = parse_python_function_stub(stub_str)?;
+        let out = info.to_token_stream();
+        insta::assert_snapshot!(format_as_value(out), @r###"
+        ::pyo3_stub_gen::type_info::PyFunctionInfo {
+            name: "as_tuple",
+            parameters: &[
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "xs",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "list[int]".to_string(),
+                        import: ::std::collections::HashSet::from(["typing".into()]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+                ::pyo3_stub_gen::type_info::ParameterInfo {
+                    name: "tuple_out",
+                    kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
+                    type_info: || ::pyo3_stub_gen::TypeInfo {
+                        name: "typing.Literal[True]".to_string(),
+                        import: ::std::collections::HashSet::from(["typing".into()]),
+                    },
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
+                },
+            ],
+            r#return: || ::pyo3_stub_gen::TypeInfo {
+                name: "tuple[int, ...]".to_string(),
+                import: ::std::collections::HashSet::from(["typing".into()]),
+            },
+            doc: "Return as tuple",
+            module: None,
+            is_async: false,
+            deprecated: None,
+            type_ignored: None,
+            is_overload: true,
             file: file!(),
             line: line!(),
             column: column!(),
