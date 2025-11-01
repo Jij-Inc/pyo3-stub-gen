@@ -174,6 +174,7 @@ impl ClassDef {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         };
         self.methods
             .entry("__eq__".to_string())
@@ -202,6 +203,7 @@ impl ClassDef {
                 is_async: false,
                 deprecated: None,
                 type_ignored: None,
+                is_overload: false,
             };
             self.methods
                 .entry(name.to_string())
@@ -220,6 +222,7 @@ impl ClassDef {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         };
         self.methods
             .entry("__hash__".to_string())
@@ -237,6 +240,7 @@ impl ClassDef {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         };
         self.methods
             .entry("__str__".to_string())
@@ -285,10 +289,23 @@ impl fmt::Display for ClassDef {
                 SetterDisplay(setter).fmt(f)?;
             }
         }
-        for methods in self.methods.values() {
-            let overloaded = methods.len() > 1;
+        for (method_name, methods) in &self.methods {
+            // Validation: Check for multiple non-overload methods (error case)
+            let non_overload_count = methods.iter().filter(|m| !m.is_overload).count();
+            if non_overload_count > 1 {
+                panic!(
+                    "Multiple methods with name '{}' in class '{}' found without @overload decorator. \
+                     Please add @overload decorator to all variants.",
+                    method_name, self.name
+                );
+            }
+
+            // Check if we should add @overload to all methods
+            let has_overload = methods.iter().any(|m| m.is_overload);
+            let should_add_overload = methods.len() > 1 && has_overload;
+
             for method in methods {
-                if overloaded {
+                if should_add_overload {
                     writeln!(f, "{indent}@typing.overload")?;
                 }
                 method.fmt(f)?;

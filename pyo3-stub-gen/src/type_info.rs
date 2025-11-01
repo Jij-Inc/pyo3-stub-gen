@@ -125,6 +125,8 @@ pub struct MethodInfo {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Whether this method is marked as an overload variant
+    pub is_overload: bool,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`

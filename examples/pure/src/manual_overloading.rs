@@ -1,5 +1,6 @@
 //! Test for `@overload` decorator generation using submit! syntax
 //! This demonstrates the backward-compatible approach using submit! + gen_function_from_python!
+//! and gen_methods_from_python! for class methods
 
 use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt, PyObject};
 use pyo3_stub_gen::{derive::*, inventory::submit};
@@ -90,6 +91,84 @@ submit! {
         @overload
         def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
             """Convert sequence to list when tuple_out is False"""
+        "#
+    }
+}
+
+// ============================================================================
+// Class Method Overloading Examples
+// ============================================================================
+
+/// Example 1: Class with overloaded instance method
+/// Both signatures defined in Python stub to demonstrate method overloading
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer {}
+
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Incrementer:
+            def __new__(cls) -> Incrementer:
+                """Constructor for Incrementer"""
+
+            @overload
+            def increment_1(self, x: int) -> int:
+                """And this is for the second comment"""
+
+            @overload
+            def increment_1(self, x: float) -> float:
+                """This is the original doc comment"""
+        "#
+    }
+}
+
+#[pymethods]
+impl Incrementer {
+    #[new]
+    fn new() -> Self {
+        Incrementer {}
+    }
+
+    fn increment_1(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+
+/// Example 2: Class with all signatures manually submitted
+/// This demonstrates the pattern where no #[gen_stub_pymethods] is used
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer2 {}
+
+#[pymethods]
+impl Incrementer2 {
+    #[new]
+    fn new() -> Self {
+        Incrementer2 {}
+    }
+
+    fn increment_2(&self, x: f64) -> f64 {
+        x + 2.0
+    }
+}
+
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Incrementer2:
+            @overload
+            def increment_2(self, x: int) -> int:
+                """increment_2 for integers, submitted by hands"""
+
+            def __new__(cls) -> Incrementer2:
+                """Constructor for Incrementer2"""
+
+            @overload
+            def increment_2(self, x: float) -> float:
+                """increment_2 for floats, submitted by hands"""
         "#
     }
 }

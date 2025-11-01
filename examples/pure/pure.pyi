@@ -128,20 +128,31 @@ class HashableStruct:
 
 @typing.final
 class Incrementer:
+    r"""
+    Example 1: Class with overloaded instance method
+    Both signatures defined in Python stub to demonstrate method overloading
+    """
+    def __new__(cls) -> Incrementer:
+        r"""
+        Constructor for Incrementer
+        """
     @typing.overload
     def increment_1(self, x: int) -> int:
         r"""
         And this is for the second comment
         """
     @typing.overload
-    def increment_1(self, x: builtins.float) -> builtins.float:
+    def increment_1(self, x: float) -> float:
         r"""
         This is the original doc comment
         """
-    def __new__(cls) -> Incrementer: ...
 
 @typing.final
 class Incrementer2:
+    r"""
+    Example 2: Class with all signatures manually submitted
+    This demonstrates the pattern where no #[gen_stub_pymethods] is used
+    """
     @typing.overload
     def increment_2(self, x: int) -> int:
         r"""

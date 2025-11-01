@@ -2,14 +2,12 @@
 
 mod custom_exceptions;
 mod manual_overloading;
-mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
 
 use custom_exceptions::*;
 use manual_overloading::*;
-use manual_submit::*;
 use overloading::*;
 use overriding::*;
 use rust_type_marker::*;

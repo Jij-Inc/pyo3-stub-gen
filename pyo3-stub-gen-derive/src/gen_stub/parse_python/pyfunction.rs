@@ -5,7 +5,7 @@ use syn::{parse::Parse as SynParse, parse::ParseStream, Error, LitStr, Result};
 
 use super::{
     build_parameters_from_ast, dedent, extract_deprecated_from_decorators, extract_docstring,
-    extract_return_type,
+    extract_return_type, has_overload_decorator,
 };
 use crate::gen_stub::pyfunction::PyFunctionInfo;
 
@@ -171,20 +171,6 @@ pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
         is_overload,
     };
     PyFunctionInfo::try_from(stub)
-}
-
-/// Check if decorator list contains @overload decorator
-fn has_overload_decorator(decorator_list: &[ast::Expr]) -> bool {
-    decorator_list.iter().any(|decorator| {
-        match decorator {
-            ast::Expr::Name(name) => name.id.as_str() == "overload",
-            ast::Expr::Attribute(attr) => {
-                // Handle typing.overload or t.overload
-                attr.attr.as_str() == "overload"
-            }
-            _ => false,
-        }
-    })
 }
 
 /// Parse multiple overload function definitions from Python stub string

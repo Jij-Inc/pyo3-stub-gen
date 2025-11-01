@@ -94,6 +94,20 @@ fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<Deprec
     None
 }
 
+/// Check if decorator list contains @overload decorator
+fn has_overload_decorator(decorator_list: &[ast::Expr]) -> bool {
+    decorator_list.iter().any(|decorator| {
+        match decorator {
+            ast::Expr::Name(name) => name.id.as_str() == "overload",
+            ast::Expr::Attribute(attr) => {
+                // Handle typing.overload or t.overload
+                attr.attr.as_str() == "overload"
+            }
+            _ => false,
+        }
+    })
+}
+
 /// Build Parameters directly from Python AST Arguments
 ///
 /// This function constructs Parameters with proper ParameterKind classification
