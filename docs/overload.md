@@ -762,26 +762,62 @@ def overload_example_1(x: int) -> int: ...
 def overload_example_1(x: builtins.float) -> builtins.float: ...
 ```
 
-**Root Cause**: The file location-based sorting in `module.rs` may not preserve the intended order of overload signatures. The `python_overload` parameter generates the int overload first, then the auto-generated float overload, but the final stub shows them in reverse order.
+**Root Cause**: The file location-based sorting in `module.rs` does not preserve the intended order when mixing `python_overload` with auto-generated overloads.
 
-**Workaround**: Use `no_default_overload = true` and manually specify all overloads in the correct order.
+In `overload_example_1`:
+- The `python_overload` parameter specifies: `def overload_example_1(x: int) -> int: ...`
+- The Rust function signature auto-generates: `def overload_example_1(x: float) -> float: ...`
+- Expected order in stub: int first, then float
+- **Actual order in stub**: float first, then int (reversed)
 
-**TODO**: Investigate and fix the ordering issue in stub generation.
+The sorting mechanism in `module.rs` uses `(file, line, column)` tuples to order functions. When both overloads have the same source location (the Rust function), the ordering becomes unpredictable.
 
-### Verification Results
+**Workaround**: Use `no_default_overload = true` and manually specify all overloads in the correct order using `python_overload`. This ensures predictable ordering since all overloads come from the same `python_overload` parameter.
 
-All three example functions in `examples/pure/src/overloading.rs` generate correct stub output:
+**Example of workaround**:
+```rust
+#[gen_stub_pyfunction(
+    python_overload = r#"
+    @overload
+    def func(x: int) -> int: ...
 
-**Example 1: `overload_example_1`** (python_overload + auto-generated)
-```python
-@typing.overload
-def overload_example_1(x: int) -> int: ...
-
-@typing.overload
-def overload_example_1(x: builtins.float) -> builtins.float: ...
+    @overload
+    def func(x: float) -> float: ...
+    "#,
+    no_default_overload = true
+)]
+#[pyfunction]
+pub fn func(x: f64) -> f64 { x + 1.0 }
 ```
 
+**TODO**: Investigate and fix the ordering issue in stub generation to properly handle mixed manual + auto-generated overloads.
+
+### Generated Stub Output
+
+The three example functions in `examples/pure/src/overloading.rs` generate the following stub output:
+
+**Example 1: `overload_example_1`** (python_overload + auto-generated)
+
+⚠️ **Has ordering issue** - see "Known Issues" above
+
+```python
+@typing.overload
+def overload_example_1(x: builtins.float) -> builtins.float: ...
+
+@typing.overload
+def overload_example_1(x: int) -> int: ...
+```
+
+**Status**: ❌ Incorrect order (float before int causes pyright error)
+
+**Expected order**: int should come before float (more specific type first)
+
+---
+
 **Example 2: `overload_example_2`** (python_overload with no_default_overload)
+
+✅ **Working correctly**
+
 ```python
 @typing.overload
 def overload_example_2(ob: int) -> int:
@@ -792,7 +828,14 @@ def overload_example_2(ob: float) -> float:
     """Increments float by 1"""
 ```
 
+**Status**: ✅ Correct order (int before float)
+
+---
+
 **Example 3: `as_tuple`** (Literal-based overloading with no_default_overload)
+
+✅ **Working correctly**
+
 ```python
 @typing.overload
 def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
@@ -803,4 +846,11 @@ def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[
     """Convert sequence to list when tuple_out is False"""
 ```
 
-All overload variants correctly have the `@typing.overload` decorator.
+**Status**: ✅ Correct order
+
+---
+
+**Summary**:
+- ✅ All overload variants correctly have the `@typing.overload` decorator
+- ✅ `python_overload` and `no_default_overload` parameters work as designed
+- ❌ Ordering issue exists when mixing `python_overload` with auto-generated overload (Example 1)
