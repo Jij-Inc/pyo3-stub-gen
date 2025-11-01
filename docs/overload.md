@@ -50,7 +50,9 @@ This provides precise type information to type checkers like pyright and mypy.
 
 ## Usage
 
-### Basic Syntax
+### Basic Syntax (Functions)
+
+**For module-level functions:**
 
 ```rust
 #[gen_stub_pyfunction(
@@ -193,6 +195,73 @@ def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[
     """Convert sequence to list when tuple_out is False"""
 ```
 
+### Class Method Overloads
+
+Class methods support the same overload syntax using `gen_methods_from_python!`:
+
+**Example**: `Incrementer` from `examples/pure/src/manual_overloading.rs`
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[pyclass]
+#[gen_stub_pyclass]
+pub struct Incrementer {}
+
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Incrementer:
+            def __new__(cls) -> Incrementer:
+                """Constructor for Incrementer"""
+
+            @overload
+            def increment_1(self, x: int) -> int:
+                """And this is for the second comment"""
+
+            @overload
+            def increment_1(self, x: float) -> float:
+                """This is the original doc comment"""
+        "#
+    }
+}
+
+#[pymethods]
+impl Incrementer {
+    #[new]
+    fn new() -> Self {
+        Incrementer {}
+    }
+
+    fn increment_1(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+}
+```
+
+**Generated stub** (`pure.pyi`):
+
+```python
+class Incrementer:
+    def __new__(cls) -> Incrementer:
+        """Constructor for Incrementer"""
+
+    @typing.overload
+    def increment_1(self, x: int) -> int:
+        """And this is for the second comment"""
+
+    @typing.overload
+    def increment_1(self, x: float) -> float:
+        """This is the original doc comment"""
+```
+
+**Note**: The same validation rules apply to class methods:
+- Multiple methods with the same name must have `@overload` decorator
+- At most one method can have `is_overload = false` (the implementation)
+- The `@overload` decorator is automatically detected from Python stub syntax
+
 ## Implementation
 
 ### Index-Based Ordering
@@ -244,22 +313,32 @@ At stub generation time, functions are sorted by `(file, line, column, index)`, 
 
 **Runtime (Stub Generation):**
 
-1. **Multiple non-overload functions**: If 2+ functions with the same name have `is_overload = false`, this is an error:
+These rules apply to **both module-level functions and class methods**:
+
+1. **Multiple non-overload functions/methods**: If 2+ functions/methods with the same name have `is_overload = false`, this is an error:
    ```
    Error: Multiple functions with name 'func' found without @overload decorator.
    Please add @overload decorator to all variants.
    ```
 
-2. **Overload propagation**: If any function in a same-name group has `is_overload = true`, all functions get `@overload` in the generated stub
+   For class methods:
+   ```
+   Error: Multiple methods with name 'method' in class 'ClassName' found without @overload decorator.
+   Please add @overload decorator to all variants.
+   ```
+
+2. **Overload propagation**: If any function/method in a same-name group has `is_overload = true`, all functions/methods get `@overload` in the generated stub
 
 3. **Allowed patterns**:
-   - Single function (no overload): `is_overload = false`
+   - Single function/method (no overload): `is_overload = false`
    - Multiple overload-only: All have `is_overload = true`
    - Mixed (one implementation + overloads): At most one `is_overload = false` + any number of `is_overload = true`
 
 ### Stub Generation
 
-The stub generation logic in `pyo3-stub-gen/src/generate/module.rs`:
+The stub generation logic applies to both functions (`pyo3-stub-gen/src/generate/module.rs`) and methods (`pyo3-stub-gen/src/generate/class.rs`).
+
+**For module-level functions** (`module.rs`):
 
 ```rust
 // Validation: Check for multiple non-overload functions (error case)
@@ -292,6 +371,38 @@ for function in sorted_functions {
 - Functions are sorted by `(file, line, column, index)` before generation
 - If any function has `is_overload = true` and there are multiple functions, all get `@overload`
 - Validates that at most one function has `is_overload = false`
+
+**For class methods** (`class.rs`):
+
+```rust
+for (method_name, methods) in &self.methods {
+    // Validation: Check for multiple non-overload methods (error case)
+    let non_overload_count = methods.iter().filter(|m| !m.is_overload).count();
+    if non_overload_count > 1 {
+        panic!(
+            "Multiple methods with name '{}' in class '{}' found without @overload decorator. \
+             Please add @overload decorator to all variants.",
+            method_name, self.name
+        );
+    }
+
+    // Check if we should add @overload to all methods
+    let has_overload = methods.iter().any(|m| m.is_overload);
+    let should_add_overload = methods.len() > 1 && has_overload;
+
+    for method in methods {
+        if should_add_overload {
+            writeln!(f, "{indent}@typing.overload")?;
+        }
+        method.fmt(f)?;
+    }
+}
+```
+
+**Key behaviors** (same as functions):
+- If any method has `is_overload = true` and there are multiple methods, all get `@overload`
+- Validates that at most one method has `is_overload = false`
+- Methods within a class are not sorted (they maintain the order from `IndexMap`)
 
 ## Testing
 
@@ -405,11 +516,13 @@ def func(x: float) -> float: ...
 ### Breaking Change Warning
 
 **Old behavior** (before this implementation):
-- Multiple functions with the same name automatically get `@overload` decorator
+- Multiple functions/methods with the same name automatically get `@overload` decorator
 - No error even if `@overload` is missing
 
 **New behavior** (after this implementation):
-- Multiple functions with the same name AND all without `@overload` → **Error**
+- Multiple functions/methods with the same name AND all without `@overload` → **Error**
 - Must explicitly add `@overload` decorator
 
-**Migration**: Add `@overload` decorator to all manual overload definitions in `gen_function_from_python!` calls.
+**Migration**:
+- For functions: Add `@overload` decorator to all manual overload definitions in `gen_function_from_python!` calls
+- For methods: Add `@overload` decorator to all manual overload definitions in `gen_methods_from_python!` calls
