@@ -77,14 +77,14 @@ class B(A):
 
 @typing.final
 class Calculator:
+    def __new__(cls) -> Calculator: ...
+    def add(self, value: builtins.float) -> builtins.float: ...
     def multiply(self, other: Calculator) -> Calculator:
         r"""
         Multiply this calculator's result by another calculator's result.
         
         Using RustType marker for both input and output types.
         """
-    def __new__(cls) -> Calculator: ...
-    def add(self, value: builtins.float) -> builtins.float: ...
 
 @typing.final
 class ComparableStruct:
@@ -232,6 +232,7 @@ class Placeholder:
     def name(self) -> builtins.str: ...
     @name.setter
     def name(self, value: builtins.str) -> None: ...
+    def __new__(cls, name: builtins.str) -> Placeholder: ...
     def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
@@ -239,10 +240,10 @@ class Placeholder:
         This demonstrates keyword-only parameters (after *) which should be
         preserved in the generated stub file.
         """
-    def __new__(cls, name: builtins.str) -> Placeholder: ...
 
 @typing.final
 class Problem:
+    def __new__(cls) -> Problem: ...
     def evaluate(self, instance_data: builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
@@ -250,7 +251,6 @@ class Problem:
         This example demonstrates RustType marker usage within nested generic types
         such as dict value types. The marker should expand to the correct Python type.
         """
-    def __new__(cls) -> Problem: ...
 
 class Shape1:
     r"""

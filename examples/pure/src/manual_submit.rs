@@ -6,6 +6,16 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 #[gen_stub_pyclass]
 pub struct Incrementer {}
 
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class Incrementer:
+            def increment_1(self, x: int) -> int:
+                """And this is for the second comment"""
+        "#
+    }
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Incrementer {
@@ -17,16 +27,6 @@ impl Incrementer {
     /// This is the original doc comment
     fn increment_1(&self, x: f64) -> f64 {
         x + 1.0
-    }
-}
-
-submit! {
-    gen_methods_from_python! {
-        r#"
-        class Incrementer:
-            def increment_1(self, x: int) -> int:
-                """And this is for the second comment"""
-        "#
     }
 }
 

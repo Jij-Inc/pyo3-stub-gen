@@ -3,9 +3,13 @@
 use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt, PyObject};
 use pyo3_stub_gen::{derive::*, inventory::submit};
 
-/// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
-/// and then manually with `submit!` macro.
-/// Note: More specific type (int) should come first for Python overload rules
+// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
+// and then manually with `submit!` macro.
+
+// The order of overload definitions is important for Python overload resolution,
+// so `int` must come before `float` in the generated stub.
+// Since pyo3-stub-gen generates stubs in the order of Rust source code,
+// this submit! block must come before the function definition.
 submit! {
     gen_function_from_python! {
         r#"
@@ -19,6 +23,7 @@ submit! {
 pub fn overload_example_1(x: f64) -> f64 {
     x + 1.0
 }
+
 /// Second example: all hints manually `submit!`ed via macro.
 /// Note: More specific type (int) should come first for Python overload rules
 #[pyfunction]
