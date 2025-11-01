@@ -45,15 +45,20 @@ impl Parse for PyFunctionAttr {
             let key: syn::Ident = input.parse()?;
 
             match key.to_string().as_str() {
-                "module" | "python" | "python_overload" => {
+                "module" => {
                     let _: syn::token::Eq = input.parse()?;
                     let value: syn::LitStr = input.parse()?;
-                    match key.to_string().as_str() {
-                        "module" => module = Some(value.value()),
-                        "python" => python = Some(value),
-                        "python_overload" => python_overload = Some(value),
-                        _ => unreachable!(),
-                    }
+                    module = Some(value.value());
+                }
+                "python" => {
+                    let _: syn::token::Eq = input.parse()?;
+                    let value: syn::LitStr = input.parse()?;
+                    python = Some(value);
+                }
+                "python_overload" => {
+                    let _: syn::token::Eq = input.parse()?;
+                    let value: syn::LitStr = input.parse()?;
+                    python_overload = Some(value);
                 }
                 "no_default_overload" => {
                     let _: syn::token::Eq = input.parse()?;
