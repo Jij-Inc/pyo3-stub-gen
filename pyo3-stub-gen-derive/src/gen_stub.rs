@@ -278,3 +278,93 @@ pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
         .or_else(|_| prune_attrs::<ItemImpl>(&item, pymethods::prune_attrs))
         .or_else(|_| prune_attrs::<ItemFn>(&item, pyfunction::prune_attrs))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+
+    fn format_tokens(tokens: TokenStream2) -> String {
+        let formatted = prettyplease::unparse(&syn::parse_file(&tokens.to_string()).unwrap());
+        formatted.trim().to_string()
+    }
+
+    #[test]
+    fn test_overload_example_1_expansion() {
+        // Test the overload_example_1 case: python_overload + auto-generated
+        // This should generate TWO PyFunctionInfo:
+        // 1. From python_overload: int -> int with is_overload: true
+        // 2. From Rust signature: f64 -> f64 with is_overload: true
+        let attr = quote! {
+            python_overload = r#"
+            @overload
+            def overload_example_1(x: int) -> int: ...
+            "#
+        };
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn overload_example_1(x: f64) -> f64 {
+                x + 1.0
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+
+    #[test]
+    fn test_overload_example_2_expansion() {
+        // Test the overload_example_2 case: python_overload with no_default_overload
+        // This should generate TWO PyFunctionInfo (both from python_overload):
+        // 1. int -> int with is_overload: true
+        // 2. float -> float with is_overload: true
+        // Should NOT generate overload from Rust signature (Bound<PyAny>)
+        let attr = quote! {
+            python_overload = r#"
+            @overload
+            def overload_example_2(ob: int) -> int:
+                """Increments integer by 1"""
+
+            @overload
+            def overload_example_2(ob: float) -> float:
+                """Increments float by 1"""
+            "#,
+            no_default_overload = true
+        };
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+                let py = ob.py();
+                Ok(ob.into_py_any(py)?)
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+
+    #[test]
+    fn test_regular_function_no_overload() {
+        // Test a regular function without python_overload
+        // This should generate ONE PyFunctionInfo with is_overload: false
+        let attr = quote! {};
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn regular_function(x: i32) -> i32 {
+                x + 1
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+}

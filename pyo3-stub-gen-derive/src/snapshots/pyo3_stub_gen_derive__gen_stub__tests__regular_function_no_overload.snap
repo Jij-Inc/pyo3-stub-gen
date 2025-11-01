@@ -1,0 +1,19 @@
+---
+source: pyo3-stub-gen-derive/src/gen_stub.rs
+expression: formatted
+---
+#[pyfunction]
+pub fn regular_function(x: i32) -> i32 {
+    x + 1
+}
+#[automatically_derived]
+pyo3_stub_gen::inventory::submit! {
+    ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "regular_function", parameters :
+    & [::pyo3_stub_gen::type_info::ParameterInfo { name : "x", kind :
+    ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : < i32 as
+    ::pyo3_stub_gen::PyStubType > ::type_input, default :
+    ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : < i32 as
+    pyo3_stub_gen::PyStubType > ::type_output, doc : "", module : None, is_async : false,
+    deprecated : None, type_ignored : None, is_overload : false, file : file!(), line :
+    line!(), column : column!(), }
+}
