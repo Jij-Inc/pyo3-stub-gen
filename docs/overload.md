@@ -197,46 +197,55 @@ def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[
 
 ### Class Method Overloads
 
-Class methods support the same overload syntax using `gen_methods_from_python!`:
+Class methods support overloading using `gen_methods_from_python!`. The basic pattern manually submits method signatures:
 
-**Example**: `Incrementer` from `examples/pure/src/manual_overloading.rs`
+**Example**: `ManualSubmit` from `examples/pure/src/manual_submit.rs`
 
 ```rust
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::*, inventory::submit};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[pyclass]
 #[gen_stub_pyclass]
-pub struct Incrementer {}
+#[pyclass]
+pub struct ManualSubmit {}
 
+// Manually submit method info for the class
 submit! {
     gen_methods_from_python! {
         r#"
-        class Incrementer:
-            def __new__(cls) -> Incrementer:
-                """Constructor for Incrementer"""
+        class ManualSubmit:
+            def __new__(cls) -> ManualSubmit:
+                """Constructor for ManualSubmit class"""
+                ...
+
+            def increment(self, x: float) -> float:
+                """Add 1.0 to the input float"""
+                ...
 
             @overload
-            def increment_1(self, x: int) -> int:
-                """And this is for the second comment"""
+            def echo(self, obj: int) -> int:
+                """If the input is an int, returns int"""
 
             @overload
-            def increment_1(self, x: float) -> float:
-                """This is the original doc comment"""
+            def echo(self, obj: float) -> float:
+                """If the input is a float, returns float"""
         "#
     }
 }
 
 #[pymethods]
-impl Incrementer {
+impl ManualSubmit {
     #[new]
     fn new() -> Self {
-        Incrementer {}
+        ManualSubmit {}
     }
 
-    fn increment_1(&self, x: f64) -> f64 {
+    fn increment(&self, x: f64) -> f64 {
         x + 1.0
+    }
+
+    fn echo<'arg>(&self, obj: Bound<'arg, PyAny>) -> Bound<'arg, PyAny> {
+        obj
     }
 }
 ```
@@ -244,23 +253,199 @@ impl Incrementer {
 **Generated stub** (`pure.pyi`):
 
 ```python
-class Incrementer:
-    def __new__(cls) -> Incrementer:
-        """Constructor for Incrementer"""
+class ManualSubmit:
+    def __new__(cls) -> ManualSubmit:
+        """Constructor for ManualSubmit class"""
+
+    def increment(self, x: float) -> float:
+        """Add 1.0 to the input float"""
 
     @typing.overload
-    def increment_1(self, x: int) -> int:
-        """And this is for the second comment"""
+    def echo(self, obj: int) -> int:
+        """If the input is an int, returns int"""
 
     @typing.overload
-    def increment_1(self, x: float) -> float:
-        """This is the original doc comment"""
+    def echo(self, obj: float) -> float:
+        """If the input is a float, returns float"""
 ```
 
 **Note**: The same validation rules apply to class methods:
 - Multiple methods with the same name must have `@overload` decorator
 - At most one method can have `is_overload = false` (the implementation)
 - The `@overload` decorator is automatically detected from Python stub syntax
+
+### Advanced Class Method Patterns
+
+For more complex scenarios, you can use manual submission patterns. See `examples/pure/src/manual_submit.rs` for complete examples.
+
+#### Pattern 1: Fully Manual Method Submission
+
+When you need complete control over all method signatures, submit them manually without using `#[gen_stub_pymethods]`:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+/// Demonstrates manual submission of class methods using the `submit!` macro
+#[gen_stub_pyclass] // Use proc-macro for submitting class info
+#[pyclass]
+pub struct ManualSubmit {}
+
+// No #[gen_stub_pymethods]
+// i.e., the following methods will not appear in the stub unless we manually submit them
+#[pymethods]
+impl ManualSubmit {
+    #[new]
+    fn new() -> Self {
+        ManualSubmit {}
+    }
+
+    fn increment(&self, x: f64) -> f64 {
+        x + 1.0
+    }
+
+    // Returns the input object as is
+    fn echo<'arg>(&self, obj: Bound<'arg, PyAny>) -> Bound<'arg, PyAny> {
+        obj
+    }
+}
+
+// Manually submit method info for the `ManualSubmit` class.
+submit! {
+    gen_methods_from_python! {
+        r#"
+        class ManualSubmit:
+            def __new__(cls) -> ManualSubmit:
+                """Constructor for ManualSubmit class"""
+                ...
+
+            def increment(self, x: float) -> float:
+                """Add 1.0 to the input float"""
+                ...
+
+            @overload
+            def echo(self, obj: int) -> int:
+                """If the input is an int, returns int"""
+
+            @overload
+            def echo(self, obj: float) -> float:
+                """If the input is a float, returns float"""
+        "#
+    }
+}
+```
+
+**Generated stub** (`pure.pyi`):
+
+```python
+class ManualSubmit:
+    def __new__(cls) -> ManualSubmit:
+        """Constructor for ManualSubmit class"""
+
+    def increment(self, x: float) -> float:
+        """Add 1.0 to the input float"""
+
+    @typing.overload
+    def echo(self, obj: int) -> int:
+        """If the input is an int, returns int"""
+
+    @typing.overload
+    def echo(self, obj: float) -> float:
+        """If the input is a float, returns float"""
+```
+
+**When to use:**
+- Need complete control over all method signatures
+- Want to define overloads that don't match Rust implementation exactly
+- Building code generation tools or macros
+
+#### Pattern 2: Mixing Proc-Macro and Manual Submission
+
+For classes where most methods can use automatic generation but some need manual signatures:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::{derive::*, inventory::submit};
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct PartialManualSubmit {}
+
+// Manually submit method info for the `PartialManualSubmit` class.
+//
+// IMPORTANT: The `submit!` invocation must appear BEFORE the `#[gen_stub_pymethods]` impl block
+// when including `@overload` entries, because Python overload resolution depends on definition
+// order and pyo3-stub-gen orders them by source position.
+submit! {
+    gen_methods_from_python! {
+        r#"
+        import typing
+        import collections.abc
+
+        class PartialManualSubmit:
+            @overload
+            def echo_overloaded(self, obj: int) -> int:
+                """Overloaded version for int input"""
+
+            def fn_override_type(self, cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+                """Example method with complex type annotation, skipped from #[gen_stub_pymethods]"""
+        "#
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl PartialManualSubmit {
+    #[new]
+    fn new() -> Self {
+        PartialManualSubmit {}
+    }
+
+    fn echo<'arg>(&self, obj: Bound<'arg, PyAny>) -> Bound<'arg, PyAny> {
+        obj
+    }
+
+    fn echo_overloaded<'arg>(&self, obj: Bound<'arg, PyAny>) -> Bound<'arg, PyAny> {
+        obj
+    }
+
+    /// Method with complex type annotation, skipped from #[gen_stub_pymethods]
+    #[gen_stub(skip)]
+    pub fn fn_override_type<'a>(&self, cb: Bound<'a, PyAny>) -> PyResult<Bound<'a, PyAny>> {
+        cb.call1(("Hello!",))?;
+        Ok(cb)
+    }
+}
+```
+
+**Generated stub** (`pure.pyi`):
+
+```python
+class PartialManualSubmit:
+    @typing.overload
+    def echo_overloaded(self, obj: int) -> int:
+        """Overloaded version for int input"""
+
+    @typing.overload
+    def echo_overloaded(self, obj: typing.Any) -> typing.Any: ...
+
+    def fn_override_type(self, cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        """Example method with complex type annotation, skipped from #[gen_stub_pymethods]"""
+
+    def __new__(cls) -> PartialManualSubmit: ...
+
+    def echo(self, obj: typing.Any) -> typing.Any: ...
+```
+
+**Key points:**
+- ✅ Use `#[gen_stub(skip)]` to skip methods that need manual type annotations
+- ✅ Place `submit!` blocks **BEFORE** the `#[gen_stub_pymethods]` impl block for proper overload ordering
+- ✅ Combine automatic generation for simple methods with manual submission for complex cases
+
+**When to use:**
+- Most methods work with automatic generation
+- A few methods need complex type annotations (e.g., `Callable`)
+- Need to add overloads to auto-generated methods
 
 ## Implementation
 
