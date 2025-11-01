@@ -2,10 +2,6 @@
 source: pyo3-stub-gen-derive/src/gen_stub.rs
 expression: formatted
 ---
-#[pyfunction]
-pub fn regular_function(x: i32) -> i32 {
-    x + 1
-}
 #[automatically_derived]
 pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "regular_function", parameters :
@@ -16,4 +12,8 @@ pyo3_stub_gen::inventory::submit! {
     pyo3_stub_gen::PyStubType > ::type_output, doc : "", module : None, is_async : false,
     deprecated : None, type_ignored : None, is_overload : false, file : file!(), line :
     line!(), column : column!(), index : 0usize, }
+}
+#[pyfunction]
+pub fn regular_function(x: i32) -> i32 {
+    x + 1
 }

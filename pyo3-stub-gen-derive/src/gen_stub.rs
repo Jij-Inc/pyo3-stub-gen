@@ -99,7 +99,6 @@ use method::*;
 use pyclass::*;
 use pyclass_complex_enum::*;
 use pyclass_enum::*;
-use pyfunction::*;
 use pymethods::*;
 use renaming::*;
 use signature::*;
@@ -162,81 +161,15 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut item_fn = parse2::<ItemFn>(item)?;
-    let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
+    // Step 1: Parse TokenStream to syn types
+    let item_fn = parse2::<ItemFn>(item)?;
+    let attr = parse2::<pyfunction::PyFunctionAttr>(attr)?;
 
-    // Parse attribute to get python, python_overload, and no_default_overload
-    let attr: pyfunction::PyFunctionAttr = parse2(attr)?;
+    // Step 2: Convert to intermediate representation
+    let infos = pyfunction::PyFunctionInfos::from_parts(item_fn, attr)?;
 
-    pyfunction::prune_attrs(&mut item_fn);
-
-    // Get function name for validation
-    let function_name = inner.name.clone();
-
-    // Set module if provided
-    if let Some(ref module) = attr.module {
-        inner.module = Some(module.clone());
-    }
-
-    // Handle different attribute combinations
-    if let Some(python_overload) = attr.python_overload {
-        // Parse multiple overload definitions
-        let mut overload_infos =
-            parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
-
-        // Preserve module information from attributes and assign indices
-        for (index, info) in overload_infos.iter_mut().enumerate() {
-            info.module = inner.module.clone();
-            info.index = index;
-        }
-
-        // If no_default_overload is false (default), also generate from Rust type
-        if !attr.no_default_overload {
-            // Mark the Rust-generated function as overload
-            inner.is_overload = true;
-            inner.index = overload_infos.len();
-            overload_infos.push(inner);
-        }
-
-        // Generate multiple submit! blocks
-        // Note: The order of submit! blocks in the generated code doesn't matter.
-        // The actual order in the .pyi file is determined by module.rs sorting based on
-        // file location (file, line, column, index) from the macro invocation site.
-        let submits = overload_infos.iter().map(|info| {
-            quote! {
-                #[automatically_derived]
-                pyo3_stub_gen::inventory::submit! {
-                    #info
-                }
-            }
-        });
-
-        Ok(quote! {
-            #(#submits)*
-            #item_fn
-        })
-    } else if let Some(python) = attr.python {
-        // Existing python parameter handling
-        let mut python_inner = parse_python::parse_python_function_stub(python)?;
-        // Preserve module information from attributes
-        python_inner.module = inner.module;
-        Ok(quote! {
-            #item_fn
-            #[automatically_derived]
-            pyo3_stub_gen::inventory::submit! {
-                #python_inner
-            }
-        })
-    } else {
-        // No python or python_overload, use auto-generated
-        Ok(quote! {
-            #item_fn
-            #[automatically_derived]
-            pyo3_stub_gen::inventory::submit! {
-                #inner
-            }
-        })
-    }
+    // Step 3: Generate output TokenStream via ToTokens
+    Ok(quote! { #infos })
 }
 
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {

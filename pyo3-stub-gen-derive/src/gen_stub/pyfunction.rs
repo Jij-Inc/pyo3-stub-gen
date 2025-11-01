@@ -9,8 +9,8 @@ use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
     attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type,
-    parameter::Parameters, parse_args, parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option,
-    Attr, DeprecatedInfo,
+    parameter::Parameters, parse_args, parse_gen_stub_type_ignore, parse_pyo3_attrs, parse_python,
+    quote_option, Attr, DeprecatedInfo,
 };
 
 pub struct PyFunctionInfo {
@@ -234,5 +234,86 @@ pub fn prune_attrs(item_fn: &mut ItemFn) {
         if let FnArg::Typed(ref mut pat_type) = arg {
             super::attr::prune_attrs(&mut pat_type.attrs);
         }
+    }
+}
+
+/// Represents one or more PyFunctionInfo with the original ItemFn.
+/// This handles the case where python_overload generates multiple function signatures.
+pub struct PyFunctionInfos {
+    pub(crate) item_fn: ItemFn,
+    pub(crate) infos: Vec<PyFunctionInfo>,
+}
+
+impl PyFunctionInfos {
+    /// Create PyFunctionInfos from ItemFn and PyFunctionAttr
+    pub fn from_parts(mut item_fn: ItemFn, attr: PyFunctionAttr) -> Result<Self> {
+        // Convert ItemFn to base PyFunctionInfo
+        let mut base_info = PyFunctionInfo::try_from(item_fn.clone())?;
+
+        // Set module if provided in attributes
+        if let Some(ref module) = attr.module {
+            base_info.module = Some(module.clone());
+        }
+
+        // Get function name for validation
+        let function_name = base_info.name.clone();
+
+        let infos = if let Some(python_overload) = attr.python_overload {
+            // Parse multiple overload definitions
+            let mut overload_infos =
+                parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
+
+            // Preserve module information and assign indices
+            for (index, info) in overload_infos.iter_mut().enumerate() {
+                info.module = base_info.module.clone();
+                info.index = index;
+            }
+
+            // If no_default_overload is false (default), also generate from Rust type
+            if !attr.no_default_overload {
+                // Mark the Rust-generated function as overload
+                base_info.is_overload = true;
+                base_info.index = overload_infos.len();
+                overload_infos.push(base_info);
+            }
+
+            overload_infos
+        } else if let Some(python) = attr.python {
+            // Use Python stub syntax
+            let mut python_info = parse_python::parse_python_function_stub(python)?;
+            // Preserve module information from attributes
+            python_info.module = base_info.module;
+            vec![python_info]
+        } else {
+            // No python or python_overload, use auto-generated
+            vec![base_info]
+        };
+
+        // Prune attributes from ItemFn
+        prune_attrs(&mut item_fn);
+
+        Ok(Self { item_fn, infos })
+    }
+}
+
+impl ToTokens for PyFunctionInfos {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let item_fn = &self.item_fn;
+        let infos = &self.infos;
+
+        // Generate multiple submit! blocks
+        let submits = infos.iter().map(|info| {
+            quote! {
+                #[automatically_derived]
+                pyo3_stub_gen::inventory::submit! {
+                    #info
+                }
+            }
+        });
+
+        tokens.append_all(quote! {
+            #(#submits)*
+            #item_fn
+        })
     }
 }
