@@ -150,6 +150,10 @@ pub struct PyMethodsInfo {
     pub setters: &'static [MemberInfo],
     /// Other usual methods
     pub methods: &'static [MethodInfo],
+    /// Source file location for deterministic ordering
+    pub file: &'static str,
+    pub line: u32,
+    pub column: u32,
 }
 
 inventory::collect!(PyMethodsInfo);
@@ -248,6 +252,10 @@ pub struct PyFunctionInfo {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Source file location for deterministic ordering
+    pub file: &'static str,
+    pub line: u32,
+    pub column: u32,
 }
 
 inventory::collect!(PyFunctionInfo);

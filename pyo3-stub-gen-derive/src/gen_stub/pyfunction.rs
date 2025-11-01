@@ -189,6 +189,9 @@ impl ToTokens for PyFunctionInfo {
                 is_async: #is_async,
                 deprecated: #deprecated_tt,
                 type_ignored: #type_ignored_tt,
+                file: file!(),
+                line: line!(),
+                column: column!(),
             }
         })
     }

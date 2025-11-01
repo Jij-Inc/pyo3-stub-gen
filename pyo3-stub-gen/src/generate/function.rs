@@ -13,6 +13,10 @@ pub struct FunctionDef {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Source file location for deterministic ordering
+    pub file: &'static str,
+    pub line: u32,
+    pub column: u32,
 }
 
 impl Import for FunctionDef {
@@ -37,6 +41,9 @@ impl From<&PyFunctionInfo> for FunctionDef {
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
             type_ignored: info.type_ignored,
+            file: info.file,
+            line: info.line,
+            column: info.column,
         }
     }
 }

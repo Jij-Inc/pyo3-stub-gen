@@ -243,7 +243,10 @@ impl StubInfoBuilder {
         for info in inventory::iter::<ModuleDocInfo> {
             self.add_module_doc(info);
         }
-        for info in inventory::iter::<PyMethodsInfo> {
+        // Sort PyMethodsInfo by source location for deterministic IndexMap insertion order
+        let mut methods_infos: Vec<&PyMethodsInfo> = inventory::iter::<PyMethodsInfo>().collect();
+        methods_infos.sort_by_key(|info| (info.file, info.line, info.column));
+        for info in methods_infos {
             self.add_methods(info);
         }
         self.register_submodules();
