@@ -146,15 +146,6 @@ def test_overload_incrementer():
     assert incr.increment_1(1) == 2
 
 
-def test_overload_incrementer_2():
-    from pure import Incrementer2
-
-    incr = Incrementer2()
-
-    assert incr.increment_2(1.5) == 3.5
-    assert incr.increment_2(1) == 3
-
-
 @pytest.mark.asyncio
 async def test_async():
     assert await async_num() == 123

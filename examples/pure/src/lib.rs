@@ -423,7 +423,6 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
     m.add_class::<Incrementer>()?;
-    m.add_class::<Incrementer2>()?;
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;

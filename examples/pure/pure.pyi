@@ -148,27 +148,6 @@ class Incrementer:
         """
 
 @typing.final
-class Incrementer2:
-    r"""
-    Example 2: Class with all signatures manually submitted
-    This demonstrates the pattern where no #[gen_stub_pymethods] is used
-    """
-    @typing.overload
-    def increment_2(self, x: int) -> int:
-        r"""
-        increment_2 for integers, submitted by hands
-        """
-    @typing.overload
-    def increment_2(self, x: float) -> float:
-        r"""
-        increment_2 for floats, submitted by hands
-        """
-    def __new__(cls) -> Incrementer2:
-        r"""
-        Constructor for Incrementer2
-        """
-
-@typing.final
 class InstanceValue:
     @property
     def data(self) -> builtins.str: ...
