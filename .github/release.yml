@@ -1,0 +1,14 @@
+changelog:
+  exclude:
+    labels:
+      - dependencies
+  categories:
+    - title: Breaking Changes
+      labels:
+        - breaking change
+    - title: Bug fix
+      labels:
+        - bug
+    - title: Enhancement, and other changes
+      labels:
+        - "*"
