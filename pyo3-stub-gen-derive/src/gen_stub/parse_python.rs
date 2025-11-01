@@ -7,7 +7,8 @@ mod pyfunction;
 mod pymethods;
 
 pub use pyfunction::{
-    parse_gen_function_from_python_input, parse_python_function_stub, GenFunctionFromPythonInput,
+    parse_gen_function_from_python_input, parse_python_function_stub, parse_python_overload_stubs,
+    GenFunctionFromPythonInput,
 };
 pub use pymethods::parse_python_methods_stub;
 
@@ -91,6 +92,20 @@ fn extract_deprecated_from_decorators(decorators: &[ast::Expr]) -> Option<Deprec
         }
     }
     None
+}
+
+/// Check if decorator list contains @overload decorator
+fn has_overload_decorator(decorator_list: &[ast::Expr]) -> bool {
+    decorator_list.iter().any(|decorator| {
+        match decorator {
+            ast::Expr::Name(name) => name.id.as_str() == "overload",
+            ast::Expr::Attribute(attr) => {
+                // Handle typing.overload or t.overload
+                attr.attr.as_str() == "overload"
+            }
+            _ => false,
+        }
+    })
 }
 
 /// Build Parameters directly from Python AST Arguments

@@ -9,8 +9,8 @@ use crate::gen_stub::util::TypeOrOverride;
 
 use super::{
     attr::IgnoreTarget, extract_deprecated, extract_documents, extract_return_type,
-    parameter::Parameters, parse_args, parse_gen_stub_type_ignore, parse_pyo3_attrs, quote_option,
-    Attr, DeprecatedInfo,
+    parameter::Parameters, parse_args, parse_gen_stub_type_ignore, parse_pyo3_attrs, parse_python,
+    quote_option, Attr, DeprecatedInfo,
 };
 
 pub struct PyFunctionInfo {
@@ -22,31 +22,49 @@ pub struct PyFunctionInfo {
     pub(crate) is_async: bool,
     pub(crate) deprecated: Option<DeprecatedInfo>,
     pub(crate) type_ignored: Option<IgnoreTarget>,
+    pub(crate) is_overload: bool,
+    pub(crate) index: usize,
 }
 
-struct PyFunctionAttr {
-    module: Option<String>,
-    python: Option<syn::LitStr>,
+#[derive(Default)]
+pub(crate) struct PyFunctionAttr {
+    pub(crate) module: Option<String>,
+    pub(crate) python: Option<syn::LitStr>,
+    pub(crate) python_overload: Option<syn::LitStr>,
+    pub(crate) no_default_overload: bool,
 }
 
 impl Parse for PyFunctionAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut module = None;
         let mut python = None;
+        let mut python_overload = None;
+        let mut no_default_overload = false;
 
         // Parse comma-separated key-value pairs
         while !input.is_empty() {
             let key: syn::Ident = input.parse()?;
-            let _: syn::token::Eq = input.parse()?;
 
             match key.to_string().as_str() {
                 "module" => {
+                    let _: syn::token::Eq = input.parse()?;
                     let value: syn::LitStr = input.parse()?;
                     module = Some(value.value());
                 }
                 "python" => {
+                    let _: syn::token::Eq = input.parse()?;
                     let value: syn::LitStr = input.parse()?;
                     python = Some(value);
+                }
+                "python_overload" => {
+                    let _: syn::token::Eq = input.parse()?;
+                    let value: syn::LitStr = input.parse()?;
+                    python_overload = Some(value);
+                }
+                "no_default_overload" => {
+                    let _: syn::token::Eq = input.parse()?;
+                    let value: syn::LitBool = input.parse()?;
+                    no_default_overload = value.value();
                 }
                 _ => {
                     return Err(Error::new(
@@ -64,25 +82,29 @@ impl Parse for PyFunctionAttr {
             }
         }
 
-        Ok(Self { module, python })
-    }
-}
-
-impl PyFunctionInfo {
-    /// Parse attribute and return python stub string if present
-    pub fn parse_attr(&mut self, attr: TokenStream2) -> Result<Option<syn::LitStr>> {
-        if attr.is_empty() {
-            return Ok(None);
-        }
-        let parsed_attr: PyFunctionAttr = syn::parse2(attr)?;
-
-        // Set module if provided
-        if let Some(module) = parsed_attr.module {
-            self.module = Some(module);
+        // Validate: cannot mix python and python_overload
+        if python.is_some() && python_overload.is_some() {
+            return Err(Error::new(
+                input.span(),
+                "Cannot specify both 'python' and 'python_overload' parameters. Use 'python' for single signatures or 'python_overload' for multiple overloads.",
+            ));
         }
 
-        // Return python stub string if provided
-        Ok(parsed_attr.python)
+        // Validate: no_default_overload requires python_overload
+        if no_default_overload && python_overload.is_none() {
+            return Err(Error::new(
+                input.span(),
+                "The 'no_default_overload' parameter can only be used with 'python_overload'. \
+                 Use 'python_overload' to define multiple overload signatures.",
+            ));
+        }
+
+        Ok(Self {
+            module,
+            python,
+            python_overload,
+            no_default_overload,
+        })
     }
 }
 
@@ -121,6 +143,8 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             is_async: item.sig.asyncness.is_some(),
             deprecated,
             type_ignored,
+            is_overload: false, // Default to false, will be set by macro if needed
+            index: 0, // Default to 0, will be set by macro if multiple functions are generated
         })
     }
 }
@@ -136,6 +160,8 @@ impl ToTokens for PyFunctionInfo {
             is_async,
             deprecated,
             type_ignored,
+            is_overload,
+            index,
         } = self;
         let ret_tt = if let Some(ret) = ret {
             match ret {
@@ -189,9 +215,11 @@ impl ToTokens for PyFunctionInfo {
                 is_async: #is_async,
                 deprecated: #deprecated_tt,
                 type_ignored: #type_ignored_tt,
+                is_overload: #is_overload,
                 file: file!(),
                 line: line!(),
                 column: column!(),
+                index: #index,
             }
         })
     }
@@ -206,5 +234,87 @@ pub fn prune_attrs(item_fn: &mut ItemFn) {
         if let FnArg::Typed(ref mut pat_type) = arg {
             super::attr::prune_attrs(&mut pat_type.attrs);
         }
+    }
+}
+
+/// Represents one or more PyFunctionInfo with the original ItemFn.
+/// This handles the case where python_overload generates multiple function signatures.
+pub struct PyFunctionInfos {
+    pub(crate) item_fn: ItemFn,
+    pub(crate) infos: Vec<PyFunctionInfo>,
+}
+
+impl PyFunctionInfos {
+    /// Create PyFunctionInfos from ItemFn and PyFunctionAttr
+    pub fn from_parts(mut item_fn: ItemFn, attr: PyFunctionAttr) -> Result<Self> {
+        // Handle python stub syntax early (doesn't need base_info)
+        if let Some(python) = attr.python {
+            let mut python_info = parse_python::parse_python_function_stub(python)?;
+            python_info.module = attr.module;
+            prune_attrs(&mut item_fn);
+            return Ok(Self {
+                item_fn,
+                infos: vec![python_info],
+            });
+        }
+
+        // Convert ItemFn to base PyFunctionInfo for Rust-based generation
+        let mut base_info = PyFunctionInfo::try_from(item_fn.clone())?;
+        base_info.module = attr.module;
+
+        let infos = if let Some(python_overload) = attr.python_overload {
+            // Get function name for validation
+            let function_name = base_info.name.clone();
+
+            // Parse multiple overload definitions
+            let mut overload_infos =
+                parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
+
+            // Preserve module information and assign indices
+            for (index, info) in overload_infos.iter_mut().enumerate() {
+                info.module = base_info.module.clone();
+                info.index = index;
+            }
+
+            // If no_default_overload is false (default), also generate from Rust type
+            if !attr.no_default_overload {
+                // Mark the Rust-generated function as overload
+                base_info.is_overload = true;
+                base_info.index = overload_infos.len();
+                overload_infos.push(base_info);
+            }
+
+            overload_infos
+        } else {
+            // No python or python_overload, use auto-generated
+            vec![base_info]
+        };
+
+        // Prune attributes from ItemFn
+        prune_attrs(&mut item_fn);
+
+        Ok(Self { item_fn, infos })
+    }
+}
+
+impl ToTokens for PyFunctionInfos {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let item_fn = &self.item_fn;
+        let infos = &self.infos;
+
+        // Generate multiple submit! blocks
+        let submits = infos.iter().map(|info| {
+            quote! {
+                #[automatically_derived]
+                pyo3_stub_gen::inventory::submit! {
+                    #info
+                }
+            }
+        });
+
+        tokens.append_all(quote! {
+            #(#submits)*
+            #item_fn
+        })
     }
 }

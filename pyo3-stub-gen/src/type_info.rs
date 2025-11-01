@@ -125,6 +125,8 @@ pub struct MethodInfo {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Whether this method is marked as an overload variant
+    pub is_overload: bool,
 }
 
 /// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
@@ -252,10 +254,14 @@ pub struct PyFunctionInfo {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Whether this function is marked as an overload variant
+    pub is_overload: bool,
     /// Source file location for deterministic ordering
     pub file: &'static str,
     pub line: u32,
     pub column: u32,
+    /// Index for ordering multiple functions from the same macro invocation
+    pub index: usize,
 }
 
 inventory::collect!(PyFunctionInfo);

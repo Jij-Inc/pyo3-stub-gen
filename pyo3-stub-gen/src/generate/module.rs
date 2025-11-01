@@ -46,7 +46,11 @@ impl fmt::Display for Module {
         }
         writeln!(f)?;
         let mut imports = self.import();
-        let any_overloaded = self.function.values().any(|functions| functions.len() > 1);
+        // Check if any function group needs @overload decorator
+        let any_overloaded = self.function.values().any(|functions| {
+            let has_overload = functions.iter().any(|f| f.is_overload);
+            functions.len() > 1 && has_overload
+        });
         if any_overloaded {
             imports.insert("typing".into());
         }
@@ -97,12 +101,15 @@ impl fmt::Display for Module {
             write!(f, "{enum_}")?;
         }
         for functions in self.function.values() {
-            let overloaded = functions.len() > 1;
-            // Sort by source location for deterministic ordering
+            // Check if we should add @overload to all functions
+            let has_overload = functions.iter().any(|func| func.is_overload);
+            let should_add_overload = functions.len() > 1 && has_overload;
+
+            // Sort by source location and index for deterministic ordering
             let mut sorted_functions = functions.clone();
-            sorted_functions.sort_by_key(|f| (f.file, f.line, f.column));
+            sorted_functions.sort_by_key(|func| (func.file, func.line, func.column, func.index));
             for function in sorted_functions {
-                if overloaded {
+                if should_add_overload {
                     writeln!(f, "@typing.overload")?;
                 }
                 write!(f, "{function}")?;

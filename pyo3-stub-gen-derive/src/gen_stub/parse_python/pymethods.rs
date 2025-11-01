@@ -6,7 +6,7 @@ use syn::{Error, LitStr, Result, Type};
 use super::pyfunction::PythonFunctionStub;
 use super::{
     build_parameters_from_ast, dedent, extract_deprecated_from_decorators, extract_docstring,
-    extract_return_type,
+    extract_return_type, has_overload_decorator,
 };
 use crate::gen_stub::{method::MethodInfo, method::MethodType, pymethods::PyMethodsInfo};
 
@@ -51,6 +51,7 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
             is_async: stub.func_stub.is_async,
             deprecated,
             type_ignored: None,
+            is_overload: stub.func_stub.is_overload,
         })
     }
 }
@@ -126,11 +127,15 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
                     // Determine method type
                     let method_type = determine_method_type(func_def, &func_def.args);
 
+                    // Check if method has @overload decorator
+                    let is_overload = has_overload_decorator(&func_def.decorator_list);
+
                     // Create PythonFunctionStub
                     let func_stub = PythonFunctionStub {
                         func_def: func_def.clone(),
                         imports: stub.imports.clone(),
                         is_async: false,
+                        is_overload,
                     };
 
                     // Create PythonMethodStub and convert to MethodInfo
@@ -142,6 +147,9 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
                     methods.push(method);
                 }
                 ast::Stmt::AsyncFunctionDef(func_def) => {
+                    // Check if method has @overload decorator
+                    let is_overload = has_overload_decorator(&func_def.decorator_list);
+
                     // Convert AsyncFunctionDef to FunctionDef for uniform processing
                     let sync_func = ast::StmtFunctionDef {
                         range: func_def.range,
@@ -162,6 +170,7 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
                         func_def: sync_func,
                         imports: stub.imports.clone(),
                         is_async: true,
+                        is_overload,
                     };
 
                     // Create PythonMethodStub and convert to MethodInfo
@@ -283,6 +292,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -345,6 +355,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -387,6 +398,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -418,6 +430,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -468,6 +481,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -509,6 +523,7 @@ mod test {
             is_async: true,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -544,6 +559,7 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            is_overload: false,
         }
         "###);
         Ok(())
@@ -696,6 +712,7 @@ mod test {
                     is_async: false,
                     deprecated: None,
                     type_ignored: None,
+                    is_overload: false,
                 },
             ],
             file: file!(),

@@ -99,7 +99,6 @@ use method::*;
 use pyclass::*;
 use pyclass_complex_enum::*;
 use pyclass_enum::*;
-use pyfunction::*;
 use pymethods::*;
 use renaming::*;
 use signature::*;
@@ -162,32 +161,15 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 }
 
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut item_fn = parse2::<ItemFn>(item)?;
-    let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
-    let python_stub = inner.parse_attr(attr)?;
-    pyfunction::prune_attrs(&mut item_fn);
+    // Step 1: Parse TokenStream to syn types
+    let item_fn = parse2::<ItemFn>(item)?;
+    let attr = parse2::<pyfunction::PyFunctionAttr>(attr)?;
 
-    // If python parameter is provided, use it instead of auto-generated metadata
-    if let Some(stub_str) = python_stub {
-        let mut python_inner = parse_python::parse_python_function_stub(stub_str)?;
-        // Preserve module information from attributes
-        python_inner.module = inner.module;
-        Ok(quote! {
-            #item_fn
-            #[automatically_derived]
-            pyo3_stub_gen::inventory::submit! {
-                #python_inner
-            }
-        })
-    } else {
-        Ok(quote! {
-            #item_fn
-            #[automatically_derived]
-            pyo3_stub_gen::inventory::submit! {
-                #inner
-            }
-        })
-    }
+    // Step 2: Convert to intermediate representation
+    let infos = pyfunction::PyFunctionInfos::from_parts(item_fn, attr)?;
+
+    // Step 3: Generate output TokenStream via ToTokens
+    Ok(quote! { #infos })
 }
 
 pub fn gen_function_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
@@ -215,4 +197,94 @@ pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
     prune_attrs::<ItemStruct>(&item, pyclass::prune_attrs)
         .or_else(|_| prune_attrs::<ItemImpl>(&item, pymethods::prune_attrs))
         .or_else(|_| prune_attrs::<ItemFn>(&item, pyfunction::prune_attrs))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+
+    fn format_tokens(tokens: TokenStream2) -> String {
+        let formatted = prettyplease::unparse(&syn::parse_file(&tokens.to_string()).unwrap());
+        formatted.trim().to_string()
+    }
+
+    #[test]
+    fn test_overload_example_1_expansion() {
+        // Test the overload_example_1 case: python_overload + auto-generated
+        // This should generate TWO PyFunctionInfo:
+        // 1. From python_overload: int -> int with is_overload: true
+        // 2. From Rust signature: f64 -> f64 with is_overload: true
+        let attr = quote! {
+            python_overload = r#"
+            @overload
+            def overload_example_1(x: int) -> int: ...
+            "#
+        };
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn overload_example_1(x: f64) -> f64 {
+                x + 1.0
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+
+    #[test]
+    fn test_overload_example_2_expansion() {
+        // Test the overload_example_2 case: python_overload with no_default_overload
+        // This should generate TWO PyFunctionInfo (both from python_overload):
+        // 1. int -> int with is_overload: true
+        // 2. float -> float with is_overload: true
+        // Should NOT generate overload from Rust signature (Bound<PyAny>)
+        let attr = quote! {
+            python_overload = r#"
+            @overload
+            def overload_example_2(ob: int) -> int:
+                """Increments integer by 1"""
+
+            @overload
+            def overload_example_2(ob: float) -> float:
+                """Increments float by 1"""
+            "#,
+            no_default_overload = true
+        };
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+                let py = ob.py();
+                Ok(ob.into_py_any(py)?)
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+
+    #[test]
+    fn test_regular_function_no_overload() {
+        // Test a regular function without python_overload
+        // This should generate ONE PyFunctionInfo with is_overload: false
+        let attr = quote! {};
+
+        let item = quote! {
+            #[pyfunction]
+            pub fn regular_function(x: i32) -> i32 {
+                x + 1
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
 }

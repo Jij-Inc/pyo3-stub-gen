@@ -1,12 +1,14 @@
 #![allow(deprecated)]
 
 mod custom_exceptions;
+mod manual_overloading;
 mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
 
 use custom_exceptions::*;
+use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
 use overriding::*;
@@ -422,8 +424,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NumberComplex>()?;
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
-    m.add_class::<Incrementer>()?;
-    m.add_class::<Incrementer2>()?;
+    m.add_class::<ManualSubmit>()?;
+    m.add_class::<PartialManualSubmit>()?;
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;
@@ -450,6 +452,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(as_tuple, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_example_1, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;

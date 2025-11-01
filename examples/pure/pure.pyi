@@ -127,43 +127,36 @@ class HashableStruct:
     def __new__(cls, name: builtins.str) -> HashableStruct: ...
 
 @typing.final
-class Incrementer:
-    @typing.overload
-    def increment_1(self, x: int) -> int:
-        r"""
-        And this is for the second comment
-        """
-    @typing.overload
-    def increment_1(self, x: builtins.float) -> builtins.float:
-        r"""
-        This is the original doc comment
-        """
-    def __new__(cls) -> Incrementer: ...
-
-@typing.final
-class Incrementer2:
-    @typing.overload
-    def increment_2(self, x: int) -> int:
-        r"""
-        increment_2 for integers, submitted by hands
-        """
-    @typing.overload
-    def increment_2(self, x: float) -> float:
-        r"""
-        increment_2 for floats, submitted by hands
-        """
-    def __new__(cls) -> Incrementer2:
-        r"""
-        Constructor for Incrementer2
-        """
-
-@typing.final
 class InstanceValue:
     @property
     def data(self) -> builtins.str: ...
     @data.setter
     def data(self, value: builtins.str) -> None: ...
     def __new__(cls, data: builtins.str) -> InstanceValue: ...
+
+@typing.final
+class ManualSubmit:
+    r"""
+    Demonstrates manual submission of class methods using the `submit!` macro
+    """
+    def __new__(cls) -> ManualSubmit:
+        r"""
+        Constructor for ManualSubmit class
+        """
+    def increment(self, x: float) -> float:
+        r"""
+        Add 1.0 to the input float
+        """
+    @typing.overload
+    def echo(self, obj: int) -> int:
+        r"""
+        If the input is an int, returns int
+        """
+    @typing.overload
+    def echo(self, obj: float) -> float:
+        r"""
+        If the input is a float, returns float
+        """
 
 @typing.final
 class MyDate(datetime.date):
@@ -225,6 +218,28 @@ class OverrideType:
     @num.setter
     def num(self, value: str) -> None: ...
     def error(self) -> typing_extensions.Never: ...
+
+@typing.final
+class PartialManualSubmit:
+    r"""
+    Example demonstrating manual submission mixed with proc-macro generated method info
+    """
+    @typing.overload
+    def echo_overloaded(self, obj: int) -> int:
+        r"""
+        Overloaded version for int input
+        """
+    @typing.overload
+    def echo_overloaded(self, obj: typing.Any) -> typing.Any: ...
+    def fn_override_type(self, cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        r"""
+        Example method with complex type annotation, skipped from #[gen_stub_pymethods]
+        """
+    def __new__(cls) -> PartialManualSubmit:
+        r"""
+        The constructor for PartialManualSubmit
+        """
+    def echo(self, obj: typing.Any) -> typing.Any: ...
 
 @typing.final
 class Placeholder:
@@ -433,6 +448,36 @@ def func_with_star_arg(*args: typing.Any) -> builtins.str:
 def func_with_star_arg_typed(*args: str) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
+    """
+
+@typing.overload
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+    r"""
+    Convert sequence to tuple when tuple_out is True
+    """
+
+@typing.overload
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
+    """
+
+@typing.overload
+def manual_overload_example_1(x: int) -> int: ...
+
+@typing.overload
+def manual_overload_example_1(x: builtins.float) -> builtins.float: ...
+
+@typing.overload
+def manual_overload_example_2(ob: int) -> int:
+    r"""
+    Increments integer by 1
+    """
+
+@typing.overload
+def manual_overload_example_2(ob: float) -> float:
+    r"""
+    Increments float by 1
     """
 
 @typing.overload
