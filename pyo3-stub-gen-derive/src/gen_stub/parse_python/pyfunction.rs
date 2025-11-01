@@ -243,7 +243,7 @@ pub fn parse_python_overload_stubs(
             return Err(Error::new(
                 input.span(),
                 format!(
-                    "Function name '{}' in python_overload does not match Rust function name '{}'",
+                    "Function name '{}' in python_overload does not match Rust function name '{}'. Please ensure all overload function names match the Rust function name.",
                     func_name, expected_function_name
                 ),
             ));

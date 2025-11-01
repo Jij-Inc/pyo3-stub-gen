@@ -80,7 +80,7 @@ impl Parse for PyFunctionAttr {
         if python.is_some() && python_overload.is_some() {
             return Err(Error::new(
                 input.span(),
-                "Cannot specify both 'python' and 'python_overload' parameters",
+                "Cannot specify both 'python' and 'python_overload' parameters. Use 'python' for single signatures or 'python_overload' for multiple overloads.",
             ));
         }
 
