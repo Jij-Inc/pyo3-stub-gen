@@ -247,18 +247,25 @@ pub struct PyFunctionInfos {
 impl PyFunctionInfos {
     /// Create PyFunctionInfos from ItemFn and PyFunctionAttr
     pub fn from_parts(mut item_fn: ItemFn, attr: PyFunctionAttr) -> Result<Self> {
-        // Convert ItemFn to base PyFunctionInfo
-        let mut base_info = PyFunctionInfo::try_from(item_fn.clone())?;
-
-        // Set module if provided in attributes
-        if let Some(ref module) = attr.module {
-            base_info.module = Some(module.clone());
+        // Handle python stub syntax early (doesn't need base_info)
+        if let Some(python) = attr.python {
+            let mut python_info = parse_python::parse_python_function_stub(python)?;
+            python_info.module = attr.module;
+            prune_attrs(&mut item_fn);
+            return Ok(Self {
+                item_fn,
+                infos: vec![python_info],
+            });
         }
 
-        // Get function name for validation
-        let function_name = base_info.name.clone();
+        // Convert ItemFn to base PyFunctionInfo for Rust-based generation
+        let mut base_info = PyFunctionInfo::try_from(item_fn.clone())?;
+        base_info.module = attr.module;
 
         let infos = if let Some(python_overload) = attr.python_overload {
+            // Get function name for validation
+            let function_name = base_info.name.clone();
+
             // Parse multiple overload definitions
             let mut overload_infos =
                 parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
@@ -278,12 +285,6 @@ impl PyFunctionInfos {
             }
 
             overload_infos
-        } else if let Some(python) = attr.python {
-            // Use Python stub syntax
-            let mut python_info = parse_python::parse_python_function_stub(python)?;
-            // Preserve module information from attributes
-            python_info.module = base_info.module;
-            vec![python_info]
         } else {
             // No python or python_overload, use auto-generated
             vec![base_info]
