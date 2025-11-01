@@ -219,6 +219,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -266,6 +269,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -313,6 +319,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -370,6 +379,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -405,6 +417,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -443,6 +458,9 @@ mod test {
             is_async: true,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -485,6 +503,9 @@ mod test {
                 note: None,
             }),
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -527,6 +548,9 @@ mod test {
                 note: Some("Use new_function instead"),
             }),
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -559,6 +583,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -591,6 +618,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -663,6 +693,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
@@ -719,6 +752,9 @@ mod test {
             is_async: false,
             deprecated: None,
             type_ignored: None,
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
