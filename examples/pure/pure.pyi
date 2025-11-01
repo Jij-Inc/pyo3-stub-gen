@@ -436,10 +436,40 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     """
 
 @typing.overload
-def overload_example_1(x: int) -> int: ...
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+    r"""
+    Convert sequence to tuple when tuple_out is True
+    """
+
+@typing.overload
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
+    """
+
+@typing.overload
+def manual_overload_example_1(x: int) -> int: ...
+
+@typing.overload
+def manual_overload_example_1(x: builtins.float) -> builtins.float: ...
+
+@typing.overload
+def manual_overload_example_2(ob: int) -> int:
+    r"""
+    Increments integer by 1
+    """
+
+@typing.overload
+def manual_overload_example_2(ob: float) -> float:
+    r"""
+    Increments float by 1
+    """
 
 @typing.overload
 def overload_example_1(x: builtins.float) -> builtins.float: ...
+
+@typing.overload
+def overload_example_1(x: int) -> int: ...
 
 @typing.overload
 def overload_example_2(ob: int) -> int:

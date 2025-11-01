@@ -252,6 +252,8 @@ pub struct PyFunctionInfo {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Whether this function is marked as an overload variant
+    pub is_overload: bool,
     /// Source file location for deterministic ordering
     pub file: &'static str,
     pub line: u32,

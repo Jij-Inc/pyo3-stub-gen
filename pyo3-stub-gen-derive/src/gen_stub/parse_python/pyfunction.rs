@@ -54,6 +54,7 @@ pub struct PythonFunctionStub {
     pub func_def: ast::StmtFunctionDef,
     pub imports: Vec<String>,
     pub is_async: bool,
+    pub is_overload: bool,
 }
 
 impl TryFrom<PythonFunctionStub> for PyFunctionInfo {
@@ -87,6 +88,7 @@ impl TryFrom<PythonFunctionStub> for PyFunctionInfo {
             is_async: stub.is_async,
             deprecated,
             type_ignored: None,
+            is_overload: stub.is_overload,
         })
     }
 }
@@ -157,13 +159,132 @@ pub fn parse_python_function_stub(input: LitStr) -> Result<PyFunctionInfo> {
     let (func_def, is_async) = function
         .ok_or_else(|| Error::new(input.span(), "No function definition found in Python stub"))?;
 
+    // Check if function has @overload decorator
+    let is_overload = has_overload_decorator(&func_def.decorator_list);
+
     // Generate PyFunctionInfo using TryFrom
     let stub = PythonFunctionStub {
         func_def,
         imports,
         is_async,
+        is_overload,
     };
     PyFunctionInfo::try_from(stub)
+}
+
+/// Check if decorator list contains @overload decorator
+fn has_overload_decorator(decorator_list: &[ast::Expr]) -> bool {
+    decorator_list.iter().any(|decorator| {
+        match decorator {
+            ast::Expr::Name(name) => name.id.as_str() == "overload",
+            ast::Expr::Attribute(attr) => {
+                // Handle typing.overload or t.overload
+                attr.attr.as_str() == "overload"
+            }
+            _ => false,
+        }
+    })
+}
+
+/// Parse multiple overload function definitions from Python stub string
+/// Used for the `python_overload` parameter
+pub fn parse_python_overload_stubs(
+    input: LitStr,
+    expected_function_name: &str,
+) -> Result<Vec<PyFunctionInfo>> {
+    let stub_content = input.value();
+    let dedented_content = dedent(&stub_content);
+
+    // Parse Python code using rustpython-parser
+    let parsed = ast::Suite::parse(&dedented_content, "<stub>")
+        .map_err(|e| Error::new(input.span(), format!("Failed to parse Python stub: {}", e)))?;
+
+    // Extract imports and function definitions
+    let mut imports = Vec::new();
+    let mut functions: Vec<(ast::StmtFunctionDef, bool)> = Vec::new();
+
+    for stmt in parsed {
+        match stmt {
+            ast::Stmt::Import(import_stmt) => {
+                for alias in &import_stmt.names {
+                    imports.push(alias.name.to_string());
+                }
+            }
+            ast::Stmt::ImportFrom(import_from_stmt) => {
+                if let Some(module) = &import_from_stmt.module {
+                    imports.push(module.to_string());
+                }
+            }
+            ast::Stmt::FunctionDef(func_def) => {
+                functions.push((func_def, false));
+            }
+            ast::Stmt::AsyncFunctionDef(func_def) => {
+                // Convert AsyncFunctionDef to FunctionDef for uniform processing
+                let sync_func = ast::StmtFunctionDef {
+                    range: func_def.range,
+                    name: func_def.name,
+                    type_params: func_def.type_params,
+                    args: func_def.args,
+                    body: func_def.body,
+                    decorator_list: func_def.decorator_list,
+                    returns: func_def.returns,
+                    type_comment: func_def.type_comment,
+                };
+                functions.push((sync_func, true));
+            }
+            _ => {
+                // Ignore other statements
+            }
+        }
+    }
+
+    // Check that at least one function is defined
+    if functions.is_empty() {
+        return Err(Error::new(
+            input.span(),
+            "No function definition found in python_overload parameter",
+        ));
+    }
+
+    // Validate all functions
+    let mut result = Vec::new();
+    for (func_def, is_async) in functions {
+        let func_name = func_def.name.to_string();
+
+        // Validate: function name must match expected name
+        if func_name != expected_function_name {
+            return Err(Error::new(
+                input.span(),
+                format!(
+                    "Function name '{}' in python_overload does not match Rust function name '{}'",
+                    func_name, expected_function_name
+                ),
+            ));
+        }
+
+        // Validate: all functions must have @overload decorator
+        let is_overload = has_overload_decorator(&func_def.decorator_list);
+        if !is_overload {
+            return Err(Error::new(
+                input.span(),
+                format!(
+                    "Function '{}' in python_overload must have @overload decorator",
+                    func_name
+                ),
+            ));
+        }
+
+        // Create PyFunctionInfo
+        let stub = PythonFunctionStub {
+            func_def,
+            imports: imports.clone(),
+            is_async,
+            is_overload,
+        };
+        result.push(PyFunctionInfo::try_from(stub)?);
+    }
+
+    Ok(result)
 }
 
 /// Parse gen_function_from_python! input with optional module parameter

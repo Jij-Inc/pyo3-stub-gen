@@ -22,31 +22,42 @@ pub struct PyFunctionInfo {
     pub(crate) is_async: bool,
     pub(crate) deprecated: Option<DeprecatedInfo>,
     pub(crate) type_ignored: Option<IgnoreTarget>,
+    pub(crate) is_overload: bool,
 }
 
-struct PyFunctionAttr {
-    module: Option<String>,
-    python: Option<syn::LitStr>,
+pub struct PyFunctionAttr {
+    pub module: Option<String>,
+    pub python: Option<syn::LitStr>,
+    pub python_overload: Option<syn::LitStr>,
+    pub no_default_overload: bool,
 }
 
 impl Parse for PyFunctionAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut module = None;
         let mut python = None;
+        let mut python_overload = None;
+        let mut no_default_overload = false;
 
         // Parse comma-separated key-value pairs
         while !input.is_empty() {
             let key: syn::Ident = input.parse()?;
-            let _: syn::token::Eq = input.parse()?;
 
             match key.to_string().as_str() {
-                "module" => {
+                "module" | "python" | "python_overload" => {
+                    let _: syn::token::Eq = input.parse()?;
                     let value: syn::LitStr = input.parse()?;
-                    module = Some(value.value());
+                    match key.to_string().as_str() {
+                        "module" => module = Some(value.value()),
+                        "python" => python = Some(value),
+                        "python_overload" => python_overload = Some(value),
+                        _ => unreachable!(),
+                    }
                 }
-                "python" => {
-                    let value: syn::LitStr = input.parse()?;
-                    python = Some(value);
+                "no_default_overload" => {
+                    let _: syn::token::Eq = input.parse()?;
+                    let value: syn::LitBool = input.parse()?;
+                    no_default_overload = value.value();
                 }
                 _ => {
                     return Err(Error::new(
@@ -64,7 +75,20 @@ impl Parse for PyFunctionAttr {
             }
         }
 
-        Ok(Self { module, python })
+        // Validate: cannot mix python and python_overload
+        if python.is_some() && python_overload.is_some() {
+            return Err(Error::new(
+                input.span(),
+                "Cannot specify both 'python' and 'python_overload' parameters",
+            ));
+        }
+
+        Ok(Self {
+            module,
+            python,
+            python_overload,
+            no_default_overload,
+        })
     }
 }
 
@@ -121,6 +145,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             is_async: item.sig.asyncness.is_some(),
             deprecated,
             type_ignored,
+            is_overload: false, // Default to false, will be set by macro if needed
         })
     }
 }
@@ -136,6 +161,7 @@ impl ToTokens for PyFunctionInfo {
             is_async,
             deprecated,
             type_ignored,
+            is_overload,
         } = self;
         let ret_tt = if let Some(ret) = ret {
             match ret {
@@ -189,6 +215,7 @@ impl ToTokens for PyFunctionInfo {
                 is_async: #is_async,
                 deprecated: #deprecated_tt,
                 type_ignored: #type_ignored_tt,
+                is_overload: #is_overload,
                 file: file!(),
                 line: line!(),
                 column: column!(),

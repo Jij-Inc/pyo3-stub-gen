@@ -164,22 +164,86 @@ pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
 pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let mut item_fn = parse2::<ItemFn>(item)?;
     let mut inner = PyFunctionInfo::try_from(item_fn.clone())?;
-    let python_stub = inner.parse_attr(attr)?;
+
+    // Parse attribute to get python, python_overload, and no_default_overload
+    let parsed_attr: Option<pyfunction::PyFunctionAttr> = if attr.is_empty() {
+        None
+    } else {
+        Some(parse2(attr.clone())?)
+    };
+
     pyfunction::prune_attrs(&mut item_fn);
 
-    // If python parameter is provided, use it instead of auto-generated metadata
-    if let Some(stub_str) = python_stub {
-        let mut python_inner = parse_python::parse_python_function_stub(stub_str)?;
-        // Preserve module information from attributes
-        python_inner.module = inner.module;
-        Ok(quote! {
-            #item_fn
-            #[automatically_derived]
-            pyo3_stub_gen::inventory::submit! {
-                #python_inner
+    // Get function name for validation
+    let function_name = inner.name.clone();
+
+    // Handle different attribute combinations
+    if let Some(attr) = parsed_attr {
+        // Set module if provided
+        if let Some(ref module) = attr.module {
+            inner.module = Some(module.clone());
+        }
+
+        if let Some(python_overload) = attr.python_overload {
+            // Parse multiple overload definitions
+            let mut overload_infos = parse_python::parse_python_overload_stubs(
+                python_overload,
+                &function_name,
+            )?;
+
+            // Preserve module information from attributes
+            for info in &mut overload_infos {
+                info.module = inner.module.clone();
             }
-        })
+
+            // If no_default_overload is false (default), also generate from Rust type
+            if !attr.no_default_overload {
+                // Mark the Rust-generated function as overload
+                inner.is_overload = true;
+                overload_infos.push(inner);
+            }
+
+            // Generate multiple submit! blocks
+            // Note: The order of submit! blocks in the generated code doesn't matter.
+            // The actual order in the .pyi file is determined by module.rs sorting based on
+            // file location (file, line, column) from the macro invocation site.
+            let submits = overload_infos.iter().map(|info| {
+                quote! {
+                    #[automatically_derived]
+                    pyo3_stub_gen::inventory::submit! {
+                        #info
+                    }
+                }
+            });
+
+            Ok(quote! {
+                #(#submits)*
+                #item_fn
+            })
+        } else if let Some(python) = attr.python {
+            // Existing python parameter handling
+            let mut python_inner = parse_python::parse_python_function_stub(python)?;
+            // Preserve module information from attributes
+            python_inner.module = inner.module;
+            Ok(quote! {
+                #item_fn
+                #[automatically_derived]
+                pyo3_stub_gen::inventory::submit! {
+                    #python_inner
+                }
+            })
+        } else {
+            // No python or python_overload, use auto-generated
+            Ok(quote! {
+                #item_fn
+                #[automatically_derived]
+                pyo3_stub_gen::inventory::submit! {
+                    #inner
+                }
+            })
+        }
     } else {
+        // No attributes, use auto-generated
         Ok(quote! {
             #item_fn
             #[automatically_derived]

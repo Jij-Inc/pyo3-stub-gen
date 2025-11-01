@@ -131,6 +131,7 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
                         func_def: func_def.clone(),
                         imports: stub.imports.clone(),
                         is_async: false,
+                        is_overload: false, // Methods are not overloads by default
                     };
 
                     // Create PythonMethodStub and convert to MethodInfo
@@ -162,6 +163,7 @@ impl TryFrom<PythonClassStub> for PyMethodsInfo {
                         func_def: sync_func,
                         imports: stub.imports.clone(),
                         is_async: true,
+                        is_overload: false, // Methods are not overloads by default
                     };
 
                     // Create PythonMethodStub and convert to MethodInfo
