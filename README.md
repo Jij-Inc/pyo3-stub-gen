@@ -342,6 +342,14 @@ Benefits:
 - ✅ Deterministic ordering with index-based sorting
 - ✅ `submit!` syntax available for proc-macro/code generation use cases
 
+**Advanced class method patterns:**
+
+For more advanced patterns, see [examples/pure/src/manual_submit.rs](./examples/pure/src/manual_submit.rs):
+- **Fully manual method submission** - Submit all method signatures without `#[gen_stub_pymethods]`
+- **Mixing proc-macro and manual submission** - Use `#[gen_stub(skip)]` for methods that need complex type annotations
+
+For comprehensive documentation, see [Python Stub Syntax Support](./docs/python-stub-syntax.md#advanced-patterns).
+
 ### Advanced: Using `RustType` Marker
 
 Within Python stub syntax, you can reference Rust types directly using the `pyo3_stub_gen.RustType["TypeName"]` marker. This leverages the `PyStubType` trait implementation of the Rust type.

@@ -146,6 +146,10 @@ pub fn fn_with_callback(callback: Bound<'_, PyAny>) -> PyResult<()> { /* ... */ 
 2. **Function Stub Macro**: `gen_function_from_python!` - Best for overloads
 3. **Methods Stub Macro**: `gen_methods_from_python!` - Best for class method overloads
 
+**Advanced Class Method Patterns:**
+- **Fully manual method submission** - See `ManualSubmit` in [`examples/pure/src/manual_submit.rs`](./examples/pure/src/manual_submit.rs)
+- **Mixing proc-macro and manual submission** - See `PartialManualSubmit` in [`examples/pure/src/manual_submit.rs`](./examples/pure/src/manual_submit.rs)
+
 > [!NOTE]
 > For detailed documentation, examples, and implementation details, see [`docs/python-stub-syntax.md`](./docs/python-stub-syntax.md)
 
