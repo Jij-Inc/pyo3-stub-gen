@@ -289,17 +289,7 @@ impl fmt::Display for ClassDef {
                 SetterDisplay(setter).fmt(f)?;
             }
         }
-        for (method_name, methods) in &self.methods {
-            // Validation: Check for multiple non-overload methods (error case)
-            let non_overload_count = methods.iter().filter(|m| !m.is_overload).count();
-            if non_overload_count > 1 {
-                panic!(
-                    "Multiple methods with name '{}' in class '{}' found without @overload decorator. \
-                     Please add @overload decorator to all variants.",
-                    method_name, self.name
-                );
-            }
-
+        for (_method_name, methods) in &self.methods {
             // Check if we should add @overload to all methods
             let has_overload = methods.iter().any(|m| m.is_overload);
             let should_add_overload = methods.len() > 1 && has_overload;

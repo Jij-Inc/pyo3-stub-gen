@@ -100,17 +100,7 @@ impl fmt::Display for Module {
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
             write!(f, "{enum_}")?;
         }
-        for (function_name, functions) in &self.function {
-            // Validation: Check for multiple non-overload functions (error case)
-            let non_overload_count = functions.iter().filter(|func| !func.is_overload).count();
-            if non_overload_count > 1 {
-                panic!(
-                    "Multiple functions with name '{}' found without @overload decorator. \
-                     Please add @overload decorator to all variants.",
-                    function_name
-                );
-            }
-
+        for (_function_name, functions) in &self.function {
             // Check if we should add @overload to all functions
             let has_overload = functions.iter().any(|func| func.is_overload);
             let should_add_overload = functions.len() > 1 && has_overload;

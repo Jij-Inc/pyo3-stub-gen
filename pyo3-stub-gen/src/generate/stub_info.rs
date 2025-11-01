@@ -18,14 +18,14 @@ impl StubInfo {
     /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        Ok(StubInfoBuilder::from_pyproject_toml(pyproject).build())
+        StubInfoBuilder::from_pyproject_toml(pyproject).build()
     }
 
     /// Initialize [StubInfo] with a specific module name and project root.
     /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
     /// not in the `gen_stub` executables due to [inventory]'s mechanism.
     pub fn from_project_root(default_module_name: String, project_root: PathBuf) -> Result<Self> {
-        Ok(StubInfoBuilder::from_project_root(default_module_name, project_root).build())
+        StubInfoBuilder::from_project_root(default_module_name, project_root).build()
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -124,13 +124,28 @@ impl StubInfoBuilder {
             .insert((info.enum_id)(), EnumDef::from(info));
     }
 
-    fn add_function(&mut self, info: &PyFunctionInfo) {
+    fn add_function(&mut self, info: &PyFunctionInfo) -> Result<()> {
         let target = self
             .get_module(info.module)
             .function
             .entry(info.name)
             .or_default();
-        target.push(FunctionDef::from(info));
+
+        // Validation: Check for multiple non-overload functions
+        let new_func = FunctionDef::from(info);
+        if !new_func.is_overload {
+            let non_overload_count = target.iter().filter(|f| !f.is_overload).count();
+            if non_overload_count > 0 {
+                anyhow::bail!(
+                    "Multiple functions with name '{}' found without @overload decorator. \
+                     Please add @overload decorator to all variants.",
+                    info.name
+                );
+            }
+        }
+
+        target.push(new_func);
+        Ok(())
     }
 
     fn add_variable(&mut self, info: &PyVariableInfo) {
@@ -143,7 +158,7 @@ impl StubInfoBuilder {
         self.get_module(Some(info.module)).doc = (info.doc)();
     }
 
-    fn add_methods(&mut self, info: &PyMethodsInfo) {
+    fn add_methods(&mut self, info: &PyMethodsInfo) -> Result<()> {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
             if let Some(entry) = module.class.get_mut(&struct_id) {
@@ -184,9 +199,23 @@ impl StubInfoBuilder {
                 }
                 for method in info.methods {
                     let entries = entry.methods.entry(method.name.to_string()).or_default();
-                    entries.push(MethodDef::from(method));
+
+                    // Validation: Check for multiple non-overload methods
+                    let new_method = MethodDef::from(method);
+                    if !new_method.is_overload {
+                        let non_overload_count = entries.iter().filter(|m| !m.is_overload).count();
+                        if non_overload_count > 0 {
+                            anyhow::bail!(
+                                "Multiple methods with name '{}' in class '{}' found without @overload decorator. \
+                                 Please add @overload decorator to all variants.",
+                                method.name, entry.name
+                            );
+                        }
+                    }
+
+                    entries.push(new_method);
                 }
-                return;
+                return Ok(());
             } else if let Some(entry) = module.enum_.get_mut(&struct_id) {
                 for attr in info.attrs {
                     entry.attrs.push(MemberDef {
@@ -216,15 +245,32 @@ impl StubInfoBuilder {
                     });
                 }
                 for method in info.methods {
-                    entry.methods.push(MethodDef::from(method))
+                    // Validation: Check for multiple non-overload methods
+                    let new_method = MethodDef::from(method);
+                    if !new_method.is_overload {
+                        let non_overload_count = entry
+                            .methods
+                            .iter()
+                            .filter(|m| m.name == method.name && !m.is_overload)
+                            .count();
+                        if non_overload_count > 0 {
+                            anyhow::bail!(
+                                "Multiple methods with name '{}' in enum '{}' found without @overload decorator. \
+                                 Please add @overload decorator to all variants.",
+                                method.name, entry.name
+                            );
+                        }
+                    }
+
+                    entry.methods.push(new_method);
                 }
-                return;
+                return Ok(());
             }
         }
         unreachable!("Missing struct_id/enum_id = {:?}", struct_id);
     }
 
-    fn build(mut self) -> StubInfo {
+    fn build(mut self) -> Result<StubInfo> {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
@@ -235,7 +281,7 @@ impl StubInfoBuilder {
             self.add_enum(info);
         }
         for info in inventory::iter::<PyFunctionInfo> {
-            self.add_function(info);
+            self.add_function(info)?;
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
@@ -247,12 +293,12 @@ impl StubInfoBuilder {
         let mut methods_infos: Vec<&PyMethodsInfo> = inventory::iter::<PyMethodsInfo>().collect();
         methods_infos.sort_by_key(|info| (info.file, info.line, info.column));
         for info in methods_infos {
-            self.add_methods(info);
+            self.add_methods(info)?;
         }
         self.register_submodules();
-        StubInfo {
+        Ok(StubInfo {
             modules: self.modules,
             python_root: self.python_root,
-        }
+        })
     }
 }
