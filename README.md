@@ -286,6 +286,9 @@ def process(x: float) -> float: ...  # Auto-generated from Rust
 **Suppress auto-generation** with `no_default_overload = true`:
 
 ```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
 #[gen_stub_pyfunction(
     python_overload = r#"
     @overload
@@ -298,6 +301,7 @@ def process(x: float) -> float: ...  # Auto-generated from Rust
 #[pyfunction]
 pub fn func(ob: Bound<PyAny>) -> PyResult<PyObject> {
     // Runtime type checking
+    todo!()
 }
 ```
 

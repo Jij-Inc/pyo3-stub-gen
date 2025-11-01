@@ -155,6 +155,7 @@
 //!     deprecated: None,
 //!     is_async: false,
 //!     type_ignored: None,
+//!     is_overload: false,
 //! };
 //!
 //! assert_eq!(
