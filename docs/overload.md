@@ -703,6 +703,8 @@ All planned features have been successfully implemented and tested:
 
 ### Test Results
 
+#### End-to-End Tests (examples/pure)
+
 **pytest**: ✅ All 21 tests passed
 ```
 tests/test_python.py::test_overload_example_1 PASSED
@@ -714,6 +716,31 @@ tests/test_python.py::test_overload_example_2 PASSED
 pure.pyi:472:5 - error: Overload 2 for "overload_example_1" will never be used
 because its parameters overlap overload 1 (reportOverlappingOverload)
 ```
+
+#### Proc-Macro Level Tests (pyo3-stub-gen-derive)
+
+**cargo test**: ✅ All 50 tests passed (2025-11-01)
+
+Added 3 new snapshot tests to verify overload functionality at the code generation level:
+
+1. **`test_single_overload`** - Tests parsing a single function with `@overload` decorator
+   - Verifies `is_overload: true` is correctly set
+   - Confirms `PyFunctionInfo` structure is generated correctly
+
+2. **`test_multiple_overloads`** - Tests parsing multiple overload variants
+   - Verifies `parse_python_overload_stubs()` returns correct number of functions
+   - Confirms both variants have `is_overload: true`
+
+3. **`test_overload_with_literal_types`** - Tests overload with `typing.Literal` types
+   - Verifies Literal types are correctly parsed
+   - Confirms `is_overload: true` is set for Literal-based overloads
+
+All existing 12 snapshot tests updated to include `is_overload: false` for regular functions.
+
+These tests confirm that the proc-macro level code generation is working correctly:
+- `@overload` decorator detection works properly
+- `is_overload` field is set correctly in generated `PyFunctionInfo` structs
+- Generated Rust code (TokenStream) matches expected output
 
 ### Known Issues
 
