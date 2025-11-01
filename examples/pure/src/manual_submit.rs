@@ -74,6 +74,11 @@ pub struct PartialManualSubmit {}
 // Since we also use `#[gen_stub_pymethods]` for this class, what we should submit here are only:
 // - `@overload` entries
 // - Complex type annotations that cannot be expressed in the Rust type system for `#[gen_stub(skip)]`-ed methods
+//
+// Note
+// ----
+// The `submit!` invocation must appear before the `#[gen_stub_pymethods]` impl block when including `@overload` entries,
+// because Python overload resolution depends on definition order and pyo3-stub-gen orders them by source position.
 submit! {
     gen_methods_from_python! {
         r#"
