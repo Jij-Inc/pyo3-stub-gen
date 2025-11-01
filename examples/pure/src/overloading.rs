@@ -3,8 +3,7 @@
 use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt, PyObject};
 use pyo3_stub_gen::{derive::*, inventory::submit};
 
-// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
-// and then manually with `submit!` macro.
+// First example: One manually submitted via `submit!` macro, followed by one generated with `#[gen_stub_pyfunction]`.
 
 // The order of overload definitions is important for Python overload resolution,
 // so `int` must come before `float` in the generated stub.
