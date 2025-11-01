@@ -2,12 +2,14 @@
 
 mod custom_exceptions;
 mod manual_overloading;
+mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
 
 use custom_exceptions::*;
 use manual_overloading::*;
+use manual_submit::*;
 use overloading::*;
 use overriding::*;
 use rust_type_marker::*;
@@ -422,7 +424,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NumberComplex>()?;
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
-    m.add_class::<Incrementer>()?;
+    m.add_class::<ManualSubmit>()?;
+    m.add_class::<PartialManualSubmit>()?;
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;
