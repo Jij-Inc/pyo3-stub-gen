@@ -23,6 +23,7 @@ pub struct PyFunctionInfo {
     pub(crate) deprecated: Option<DeprecatedInfo>,
     pub(crate) type_ignored: Option<IgnoreTarget>,
     pub(crate) is_overload: bool,
+    pub(crate) index: usize,
 }
 
 pub struct PyFunctionAttr {
@@ -128,6 +129,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             deprecated,
             type_ignored,
             is_overload: false, // Default to false, will be set by macro if needed
+            index: 0, // Default to 0, will be set by macro if multiple functions are generated
         })
     }
 }
@@ -144,6 +146,7 @@ impl ToTokens for PyFunctionInfo {
             deprecated,
             type_ignored,
             is_overload,
+            index,
         } = self;
         let ret_tt = if let Some(ret) = ret {
             match ret {
@@ -201,6 +204,7 @@ impl ToTokens for PyFunctionInfo {
                 file: file!(),
                 line: line!(),
                 column: column!(),
+                index: #index,
             }
         })
     }

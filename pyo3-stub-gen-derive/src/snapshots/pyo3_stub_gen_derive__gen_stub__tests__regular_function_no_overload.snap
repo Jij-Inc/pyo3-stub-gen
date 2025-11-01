@@ -15,5 +15,5 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : < i32 as
     pyo3_stub_gen::PyStubType > ::type_output, doc : "", module : None, is_async : false,
     deprecated : None, type_ignored : None, is_overload : false, file : file!(), line :
-    line!(), column : column!(), }
+    line!(), column : column!(), index : 0usize, }
 }

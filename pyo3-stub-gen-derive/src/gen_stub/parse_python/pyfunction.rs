@@ -89,6 +89,7 @@ impl TryFrom<PythonFunctionStub> for PyFunctionInfo {
             deprecated,
             type_ignored: None,
             is_overload: stub.is_overload,
+            index: 0, // Will be set by caller when generating multiple overloads
         })
     }
 }
@@ -344,6 +345,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -395,6 +397,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -446,6 +449,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -507,6 +511,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -546,6 +551,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -588,6 +594,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -634,6 +641,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -680,6 +688,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -716,6 +725,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -752,6 +762,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -828,6 +839,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -888,6 +900,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -931,6 +944,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -980,6 +994,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
 
@@ -1011,6 +1026,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())
@@ -1064,6 +1080,7 @@ mod test {
             file: file!(),
             line: line!(),
             column: column!(),
+            index: 0usize,
         }
         "###);
         Ok(())

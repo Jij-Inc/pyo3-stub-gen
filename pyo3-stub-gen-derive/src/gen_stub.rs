@@ -189,22 +189,24 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
             let mut overload_infos =
                 parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
 
-            // Preserve module information from attributes
-            for info in &mut overload_infos {
+            // Preserve module information from attributes and assign indices
+            for (index, info) in overload_infos.iter_mut().enumerate() {
                 info.module = inner.module.clone();
+                info.index = index;
             }
 
             // If no_default_overload is false (default), also generate from Rust type
             if !attr.no_default_overload {
                 // Mark the Rust-generated function as overload
                 inner.is_overload = true;
+                inner.index = overload_infos.len();
                 overload_infos.push(inner);
             }
 
             // Generate multiple submit! blocks
             // Note: The order of submit! blocks in the generated code doesn't matter.
             // The actual order in the .pyi file is determined by module.rs sorting based on
-            // file location (file, line, column) from the macro invocation site.
+            // file location (file, line, column, index) from the macro invocation site.
             let submits = overload_infos.iter().map(|info| {
                 quote! {
                     #[automatically_derived]

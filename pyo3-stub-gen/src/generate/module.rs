@@ -115,9 +115,9 @@ impl fmt::Display for Module {
             let has_overload = functions.iter().any(|func| func.is_overload);
             let should_add_overload = functions.len() > 1 && has_overload;
 
-            // Sort by source location for deterministic ordering
+            // Sort by source location and index for deterministic ordering
             let mut sorted_functions = functions.clone();
-            sorted_functions.sort_by_key(|func| (func.file, func.line, func.column));
+            sorted_functions.sort_by_key(|func| (func.file, func.line, func.column, func.index));
             for function in sorted_functions {
                 if should_add_overload {
                     writeln!(f, "@typing.overload")?;

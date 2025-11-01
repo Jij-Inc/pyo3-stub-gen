@@ -18,6 +18,8 @@ pub struct FunctionDef {
     pub file: &'static str,
     pub line: u32,
     pub column: u32,
+    /// Index for ordering multiple functions from the same macro invocation
+    pub index: usize,
 }
 
 impl Import for FunctionDef {
@@ -46,6 +48,7 @@ impl From<&PyFunctionInfo> for FunctionDef {
             file: info.file,
             line: info.line,
             column: info.column,
+            index: info.index,
         }
     }
 }

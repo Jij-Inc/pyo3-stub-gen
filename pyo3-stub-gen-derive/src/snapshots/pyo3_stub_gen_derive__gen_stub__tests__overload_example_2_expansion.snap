@@ -13,7 +13,7 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
     ::std::collections::HashSet::from([]) }, doc : "Increments integer by 1", module :
     None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
-    file : file!(), line : line!(), column : column!(), }
+    file : file!(), line : line!(), column : column!(), index : 0usize, }
 }
 #[automatically_derived]
 pyo3_stub_gen::inventory::submit! {
@@ -26,7 +26,7 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), import :
     ::std::collections::HashSet::from([]) }, doc : "Increments float by 1", module :
     None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
-    file : file!(), line : line!(), column : column!(), }
+    file : file!(), line : line!(), column : column!(), index : 1usize, }
 }
 #[pyfunction]
 pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {

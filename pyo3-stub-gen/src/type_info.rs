@@ -258,6 +258,8 @@ pub struct PyFunctionInfo {
     pub file: &'static str,
     pub line: u32,
     pub column: u32,
+    /// Index for ordering multiple functions from the same macro invocation
+    pub index: usize,
 }
 
 inventory::collect!(PyFunctionInfo);

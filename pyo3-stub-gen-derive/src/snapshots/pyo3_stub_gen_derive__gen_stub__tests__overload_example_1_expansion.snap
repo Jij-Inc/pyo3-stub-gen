@@ -13,7 +13,7 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
     ::std::collections::HashSet::from([]) }, doc : "", module : None, is_async : false,
     deprecated : None, type_ignored : None, is_overload : true, file : file!(), line :
-    line!(), column : column!(), }
+    line!(), column : column!(), index : 0usize, }
 }
 #[automatically_derived]
 pyo3_stub_gen::inventory::submit! {
@@ -24,7 +24,7 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : < f64 as
     pyo3_stub_gen::PyStubType > ::type_output, doc : "", module : None, is_async : false,
     deprecated : None, type_ignored : None, is_overload : true, file : file!(), line :
-    line!(), column : column!(), }
+    line!(), column : column!(), index : 1usize, }
 }
 #[pyfunction]
 pub fn overload_example_1(x: f64) -> f64 {
