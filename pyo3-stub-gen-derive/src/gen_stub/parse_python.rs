@@ -7,8 +7,8 @@ mod pyfunction;
 mod pymethods;
 
 pub use pyfunction::{
-    parse_gen_function_from_python_input, parse_python_function_stub,
-    parse_python_overload_stubs, GenFunctionFromPythonInput,
+    parse_gen_function_from_python_input, parse_python_function_stub, parse_python_overload_stubs,
+    GenFunctionFromPythonInput,
 };
 pub use pymethods::parse_python_methods_stub;
 

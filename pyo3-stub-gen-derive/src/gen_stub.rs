@@ -186,10 +186,8 @@ pub fn pyfunction(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2
 
         if let Some(python_overload) = attr.python_overload {
             // Parse multiple overload definitions
-            let mut overload_infos = parse_python::parse_python_overload_stubs(
-                python_overload,
-                &function_name,
-            )?;
+            let mut overload_infos =
+                parse_python::parse_python_overload_stubs(python_overload, &function_name)?;
 
             // Preserve module information from attributes
             for info in &mut overload_infos {

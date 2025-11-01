@@ -92,24 +92,6 @@ impl Parse for PyFunctionAttr {
     }
 }
 
-impl PyFunctionInfo {
-    /// Parse attribute and return python stub string if present
-    pub fn parse_attr(&mut self, attr: TokenStream2) -> Result<Option<syn::LitStr>> {
-        if attr.is_empty() {
-            return Ok(None);
-        }
-        let parsed_attr: PyFunctionAttr = syn::parse2(attr)?;
-
-        // Set module if provided
-        if let Some(module) = parsed_attr.module {
-            self.module = Some(module);
-        }
-
-        // Return python stub string if provided
-        Ok(parsed_attr.python)
-    }
-}
-
 impl TryFrom<ItemFn> for PyFunctionInfo {
     type Error = Error;
     fn try_from(item: ItemFn) -> Result<Self> {

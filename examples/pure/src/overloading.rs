@@ -5,12 +5,10 @@ use pyo3_stub_gen::derive::*;
 
 // Example 1: Using new python_overload parameter
 // This adds an int overload while also generating the float overload from Rust types
-#[gen_stub_pyfunction(
-    python_overload = r#"
+#[gen_stub_pyfunction(python_overload = r#"
     @overload
     def overload_example_1(x: int) -> int: ...
-    "#
-)]
+    "#)]
 #[pyfunction]
 pub fn overload_example_1(x: f64) -> f64 {
     x + 1.0
