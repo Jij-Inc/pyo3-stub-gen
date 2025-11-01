@@ -698,6 +698,9 @@ mod test {
                     type_ignored: None,
                 },
             ],
+            file: file!(),
+            line: line!(),
+            column: column!(),
         }
         "###);
         Ok(())
