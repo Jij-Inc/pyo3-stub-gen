@@ -89,6 +89,15 @@ impl Parse for PyFunctionAttr {
             ));
         }
 
+        // Validate: no_default_overload requires python_overload
+        if no_default_overload && python_overload.is_none() {
+            return Err(Error::new(
+                input.span(),
+                "The 'no_default_overload' parameter can only be used with 'python_overload'. \
+                 Use 'python_overload' to define multiple overload signatures.",
+            ));
+        }
+
         Ok(Self {
             module,
             python,
