@@ -5,12 +5,7 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 
 /// First example: One generated with ordinary `#[gen_stub_pyfunction]`,
 /// and then manually with `submit!` macro.
-#[gen_stub_pyfunction]
-#[pyfunction]
-pub fn overload_example_1(x: f64) -> f64 {
-    x + 1.0
-}
-
+/// Note: More specific type (int) should come first for Python overload rules
 submit! {
     gen_function_from_python! {
         r#"
@@ -18,7 +13,14 @@ submit! {
         "#
     }
 }
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn overload_example_1(x: f64) -> f64 {
+    x + 1.0
+}
 /// Second example: all hints manually `submit!`ed via macro.
+/// Note: More specific type (int) should come first for Python overload rules
 #[pyfunction]
 pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
     let py = ob.py();
@@ -34,8 +36,8 @@ pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
 submit! {
     gen_function_from_python! {
         r#"
-        def overload_example_2(ob: float) -> float:
-            """Increments float by 1"""
+        def overload_example_2(ob: int) -> int:
+            """Increments integer by 1"""
         "#
     }
 }
@@ -43,8 +45,8 @@ submit! {
 submit! {
     gen_function_from_python! {
         r#"
-        def overload_example_2(ob: int) -> int:
-            """Increments integer by 1"""
+        def overload_example_2(ob: float) -> float:
+            """Increments float by 1"""
         "#
     }
 }

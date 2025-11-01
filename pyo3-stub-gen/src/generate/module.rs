@@ -98,7 +98,10 @@ impl fmt::Display for Module {
         }
         for functions in self.function.values() {
             let overloaded = functions.len() > 1;
-            for function in functions {
+            // Sort by source location for deterministic ordering
+            let mut sorted_functions = functions.clone();
+            sorted_functions.sort_by_key(|f| (f.file, f.line, f.column));
+            for function in sorted_functions {
                 if overloaded {
                     writeln!(f, "@typing.overload")?;
                 }
