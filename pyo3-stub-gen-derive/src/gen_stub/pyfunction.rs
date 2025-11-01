@@ -26,6 +26,7 @@ pub struct PyFunctionInfo {
     pub(crate) index: usize,
 }
 
+#[derive(Default)]
 pub(crate) struct PyFunctionAttr {
     pub(crate) module: Option<String>,
     pub(crate) python: Option<syn::LitStr>,
