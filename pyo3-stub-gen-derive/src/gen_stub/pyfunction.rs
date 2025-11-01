@@ -26,11 +26,11 @@ pub struct PyFunctionInfo {
     pub(crate) index: usize,
 }
 
-pub struct PyFunctionAttr {
-    pub module: Option<String>,
-    pub python: Option<syn::LitStr>,
-    pub python_overload: Option<syn::LitStr>,
-    pub no_default_overload: bool,
+pub(crate) struct PyFunctionAttr {
+    pub(crate) module: Option<String>,
+    pub(crate) python: Option<syn::LitStr>,
+    pub(crate) python_overload: Option<syn::LitStr>,
+    pub(crate) no_default_overload: bool,
 }
 
 impl Parse for PyFunctionAttr {
