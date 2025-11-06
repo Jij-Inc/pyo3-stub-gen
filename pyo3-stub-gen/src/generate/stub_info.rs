@@ -33,7 +33,7 @@ impl StubInfo {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
-            let dest = if module.submodules.is_empty() && !self.python_root.join(&path).exists() {
+            let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
                 self.python_root.join(format!("{path}.pyi"))
             } else {
                 self.python_root.join(path).join("__init__.pyi")
