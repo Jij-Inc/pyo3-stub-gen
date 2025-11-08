@@ -410,7 +410,7 @@ uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 
 ### Known limitation: nested submodules
 
-**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed_sub/Taskfile.yml` for an example.
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed/Taskfile.yml` for an example.
 
 # Contribution
 To be written.

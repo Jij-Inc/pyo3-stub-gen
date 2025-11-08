@@ -16,7 +16,6 @@ jobs:
         crate:
           - pure
           - mixed
-          - mixed_sub
           - test-dash-package
           - feature_gated
           - empty_super_module
