@@ -36,6 +36,18 @@ impl StubInfo {
     }
 
     pub fn generate(&self) -> Result<()> {
+        // Validate: Pure Rust layout can only have a single module
+        if !self.is_mixed_layout && self.modules.len() > 1 {
+            let module_names: Vec<_> = self.modules.keys().collect();
+            anyhow::bail!(
+                "Pure Rust layout does not support multiple modules or submodules. Found {} modules: {}. \
+                 Please use mixed Python/Rust layout (add `python-source` to [tool.maturin] in pyproject.toml) \
+                 if you need multiple modules or submodules.",
+                self.modules.len(),
+                module_names.iter().map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(", ")
+            );
+        }
+
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
@@ -406,5 +418,39 @@ mod tests {
         assert!(builder.modules["root.level1.level2"]
             .submodules
             .contains("deep_mod"));
+    }
+
+    #[test]
+    fn test_pure_layout_rejects_multiple_modules() {
+        // Pure Rust layout should reject multiple modules (whether submodules or top-level)
+        let stub_info = StubInfo {
+            modules: {
+                let mut map = BTreeMap::new();
+                map.insert(
+                    "mymodule".to_string(),
+                    Module {
+                        name: "mymodule".to_string(),
+                        default_module_name: "mymodule".to_string(),
+                        ..Default::default()
+                    },
+                );
+                map.insert(
+                    "mymodule.sub".to_string(),
+                    Module {
+                        name: "mymodule.sub".to_string(),
+                        default_module_name: "mymodule".to_string(),
+                        ..Default::default()
+                    },
+                );
+                map
+            },
+            python_root: PathBuf::from("/tmp"),
+            is_mixed_layout: false,
+        };
+
+        let result = stub_info.generate();
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(err_msg.contains("Pure Rust layout does not support multiple modules or submodules"));
     }
 }
