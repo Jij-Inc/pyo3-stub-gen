@@ -26,8 +26,13 @@ impl StubInfo {
     /// Initialize [StubInfo] with a specific module name and project root.
     /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
     /// not in the `gen_stub` executables due to [inventory]'s mechanism.
-    pub fn from_project_root(default_module_name: String, project_root: PathBuf, is_mixed_layout: bool) -> Result<Self> {
-        StubInfoBuilder::from_project_root(default_module_name, project_root, is_mixed_layout).build()
+    pub fn from_project_root(
+        default_module_name: String,
+        project_root: PathBuf,
+        is_mixed_layout: bool,
+    ) -> Result<Self> {
+        StubInfoBuilder::from_project_root(default_module_name, project_root, is_mixed_layout)
+            .build()
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -84,7 +89,11 @@ impl StubInfoBuilder {
         }
     }
 
-    fn from_project_root(default_module_name: String, project_root: PathBuf, is_mixed_layout: bool) -> Self {
+    fn from_project_root(
+        default_module_name: String,
+        project_root: PathBuf,
+        is_mixed_layout: bool,
+    ) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name,
@@ -336,7 +345,7 @@ mod tests {
     #[test]
     fn test_register_submodules_creates_empty_parent_modules() {
         let mut builder =
-            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into());
+            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into(), false);
 
         // Simulate a module with only submodules
         builder.modules.insert(
@@ -362,7 +371,8 @@ mod tests {
 
     #[test]
     fn test_register_submodules_with_multiple_levels() {
-        let mut builder = StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into());
+        let mut builder =
+            StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into(), false);
 
         // Simulate deeply nested modules
         builder.modules.insert(
