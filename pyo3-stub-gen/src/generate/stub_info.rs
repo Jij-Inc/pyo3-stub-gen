@@ -11,6 +11,8 @@ use std::{
 pub struct StubInfo {
     pub modules: BTreeMap<String, Module>,
     pub python_root: PathBuf,
+    /// Whether this is a mixed Python/Rust layout (has `python-source` in pyproject.toml)
+    pub is_mixed_layout: bool,
 }
 
 impl StubInfo {
@@ -24,8 +26,8 @@ impl StubInfo {
     /// Initialize [StubInfo] with a specific module name and project root.
     /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
     /// not in the `gen_stub` executables due to [inventory]'s mechanism.
-    pub fn from_project_root(default_module_name: String, project_root: PathBuf) -> Result<Self> {
-        StubInfoBuilder::from_project_root(default_module_name, project_root).build()
+    pub fn from_project_root(default_module_name: String, project_root: PathBuf, is_mixed_layout: bool) -> Result<Self> {
+        StubInfoBuilder::from_project_root(default_module_name, project_root, is_mixed_layout).build()
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -33,10 +35,15 @@ impl StubInfo {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
-            let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
-                self.python_root.join(format!("{path}.pyi"))
+
+            // Determine destination path based solely on layout type
+            let dest = if self.is_mixed_layout {
+                // Mixed Python/Rust: Always use directory-based structure
+                self.python_root.join(&path).join("__init__.pyi")
             } else {
-                self.python_root.join(path).join("__init__.pyi")
+                // Pure Rust: Always use single file at root (use first segment of module name)
+                let package_name = normalized_name.split('.').next().unwrap();
+                self.python_root.join(format!("{package_name}.pyi"))
             };
 
             let dir = dest.parent().context("Cannot get parent directory")?;
@@ -59,23 +66,30 @@ struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
     python_root: PathBuf,
+    is_mixed_layout: bool,
 }
 
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject) -> Self {
-        StubInfoBuilder::from_project_root(
-            pyproject.module_name().to_string(),
-            pyproject
-                .python_source()
-                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
-        )
+        let is_mixed_layout = pyproject.python_source().is_some();
+        let python_root = pyproject
+            .python_source()
+            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+
+        Self {
+            modules: BTreeMap::new(),
+            default_module_name: pyproject.module_name().to_string(),
+            python_root,
+            is_mixed_layout,
+        }
     }
 
-    fn from_project_root(default_module_name: String, project_root: PathBuf) -> Self {
+    fn from_project_root(default_module_name: String, project_root: PathBuf, is_mixed_layout: bool) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
+            is_mixed_layout,
         }
     }
 
@@ -310,6 +324,7 @@ impl StubInfoBuilder {
         Ok(StubInfo {
             modules: self.modules,
             python_root: self.python_root,
+            is_mixed_layout: self.is_mixed_layout,
         })
     }
 }
