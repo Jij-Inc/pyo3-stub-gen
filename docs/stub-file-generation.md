@@ -53,11 +53,11 @@ features = ["pyo3/extension-module"]
 ```
 → `python_root` = project root (where `pyproject.toml` is located)
 
-**Mixed Python/Rust** (`examples/mixed/pyproject.toml`):
+**Mixed Python/Rust** (`examples/mixed_sub/pyproject.toml`):
 ```toml
 [tool.maturin]
 python-source = "python"
-module-name = "mixed.main_mod"
+module-name = "mixed_sub.main_mod"
 ```
 → `python_root` = `<project_root>/python`
 
@@ -188,57 +188,6 @@ pure/
 **⚠️ Important**: This layout **only supports a single stub file**. If your Rust code defines submodules (e.g., using `#[gen_stub_pyfunction(module = "pure.sub")]`), pyo3-stub-gen will generate multiple stub files, but **maturin will only package `pure.pyi` and ignore the rest**. Use mixed layout instead if you need submodules.
 
 ### Mixed Layout
-
-**Project Structure:**
-```
-mixed/
-├── python/
-│   └── mixed/
-│       ├── __init__.py
-│       ├── main_mod.cpython-313-darwin.so
-│       └── main_mod/
-│           └── __init__.pyi          # Generated stub
-├── src/
-│   └── lib.rs
-└── pyproject.toml
-```
-
-**pyproject.toml:**
-```toml
-[tool.maturin]
-python-source = "python"
-module-name = "mixed.main_mod"
-```
-
-**Rust Code:**
-```rust
-#[gen_stub_pyclass]
-#[pyclass(module = "mixed.main_mod")]
-struct A { x: usize }
-
-#[pymodule]
-fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
-    m.add_class::<A>()?;
-    Ok(())
-}
-```
-
-**Layout Detection:**
-- Has `python-source = "python"` in `pyproject.toml`
-- **Detected as**: Mixed Python/Rust layout
-- **`python_root`**: `<project_root>/python`
-
-**Behavior:**
-- Module name: `mixed.main_mod` (explicit in maturin config)
-- No submodules: All classes/functions in `mixed.main_mod`
-- **Output**: `python/mixed/main_mod/__init__.pyi` (directory-based)
-
-**Coexistence:**
-- `main_mod.cpython-313-darwin.so` (native module **file**)
-- `main_mod/` (stub **directory**)
-- Both coexist in `python/mixed/` thanks to Python's import system
-
-### Mixed Sub Layout
 
 **Project Structure:**
 ```

@@ -565,15 +565,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mixed"
-version = "0.18.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
-]
-
-[[package]]
 name = "mixed_sub"
 version = "0.18.0"
 dependencies = [
