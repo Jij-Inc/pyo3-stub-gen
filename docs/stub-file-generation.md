@@ -28,43 +28,13 @@ The generator automatically detects the project layout by reading `pyproject.tom
 
 ### Detection Logic
 
-**Implementation**: `pyo3-stub-gen/src/pyproject.rs:48-62`
+**Implementation**: `pyo3-stub-gen/src/pyproject.rs:48-62` and `pyo3-stub-gen/src/generate/stub_info.rs:78-90`
 
-```rust
-/// Return `tool.maturin.python_source` if it exists, which means the project is a mixed Rust/Python project.
-pub fn python_source(&self) -> Option<PathBuf> {
-    if let Some(tool) = &self.tool {
-        if let Some(maturin) = &tool.maturin {
-            if let Some(python_source) = &maturin.python_source {
-                if let Some(base) = self.toml_path.parent() {
-                    return Some(base.join(python_source));
-                } else {
-                    return Some(PathBuf::from(python_source));
-                }
-            }
-        }
-    }
-    None
-}
-```
-
-**Usage**: `pyo3-stub-gen/src/generate/stub_info.rs:78-90`
-
-```rust
-fn from_pyproject_toml(pyproject: PyProject) -> Self {
-    let is_mixed_layout = pyproject.python_source().is_some();
-    let python_root = pyproject
-        .python_source()  // Returns Some(path) for mixed, None for pure
-        .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
-
-    Self {
-        modules: BTreeMap::new(),
-        default_module_name: pyproject.module_name().to_string(),
-        python_root,
-        is_mixed_layout,
-    }
-}
-```
+The detection process:
+1. `PyProject::python_source()` returns `Some(path)` if `[tool.maturin]` has `python-source`, otherwise `None`
+2. `StubInfoBuilder::from_pyproject_toml()` sets:
+   - `is_mixed_layout = python_source().is_some()`
+   - `python_root` to the `python-source` path if present, otherwise `CARGO_MANIFEST_DIR`
 
 ### Layout Determination Rules
 
@@ -150,53 +120,16 @@ Example: `my-package.sub_module` → `my_package/sub_module`
 
 Submodules are automatically detected during the build phase to generate proper import statements in stub files. **Note**: This detection does **not** affect the stub file path decision (which is determined solely by layout type), but it controls the content of `__init__.pyi` files.
 
-**Detection Logic** (`register_submodules` method - `pyo3-stub-gen/src/generate/stub_info.rs:113-141`):
+**Detection Logic**: `pyo3-stub-gen/src/generate/stub_info.rs:113-141`
 
-```rust
-fn register_submodules(&mut self) {
-    let mut all_parent_child_pairs: Vec<(String, String)> = Vec::new();
+The `register_submodules` method automatically detects module hierarchies and creates missing parent modules:
 
-    // For each existing module, collect all parent-child relationships
-    for module in self.modules.keys() {
-        let path = module.split('.').collect::<Vec<_>>();
+1. Parses module names by splitting on `.` to identify parent-child relationships
+2. Groups children by their parent modules
+3. Creates empty parent modules as needed (e.g., if only `package.main_mod.sub_a` is defined, it creates `package` and `package.main_mod`)
+4. Registers submodule imports in each parent's `__init__.pyi`
 
-        // Generate all parent paths and their immediate children
-        for i in 1..path.len() {
-            let parent = path[..i].join(".");
-            let child = path[i].to_string();
-            all_parent_child_pairs.push((parent, child));
-        }
-    }
-
-    // Group children by parent
-    let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
-    for (parent, child) in all_parent_child_pairs {
-        parent_to_children.entry(parent).or_default().insert(child);
-    }
-
-    // Create or update all parent modules
-    for (parent, children) in parent_to_children {
-        let module = self.modules.entry(parent.clone()).or_default();
-        module.name = parent;
-        module.default_module_name = self.default_module_name.clone();
-        module.submodules.extend(children);
-    }
-}
-```
-
-**Process:**
-
-1. **Collect parent-child relationships**: For each registered module, split its name by `.` and generate all parent-child pairs
-   - Example: `package.main_mod.sub_a` generates:
-     - `package` → `main_mod`
-     - `package.main_mod` → `sub_a`
-2. **Group children by parent**: Use a map to collect all children for each parent module
-3. **Create or update parent modules**: For each parent:
-   - Create the parent module if it doesn't exist (using `.entry().or_default()`)
-   - Set the module's `name` and `default_module_name`
-   - Extend the `submodules` set with all children
-
-**Key enhancement**: This implementation automatically creates missing parent modules, ensuring that even if only child modules are explicitly defined (e.g., via `#[gen_stub_pyfunction(module = "package.main_mod.sub_a")]`), all intermediate parent modules (`package`, `package.main_mod`) are synthesized with proper submodule imports.
+**Key feature**: Automatically synthesizes intermediate parent modules even when only leaf modules are explicitly defined via `#[gen_stub_pyfunction(module = "...")]`.
 
 **Purpose**: In mixed Python/Rust layout, detected submodules are added as import statements in the parent's `__init__.pyi`:
 
@@ -412,145 +345,43 @@ def greet_main() -> None: ...
 
 **Location**: `pyo3-stub-gen/src/pyproject.rs` and `pyo3-stub-gen/src/generate/stub_info.rs`
 
-The layout detection and `python_root` determination happens in two stages:
+The layout detection happens in three stages:
 
-1. **Parse `pyproject.toml`** (`pyproject.rs:27-35`):
-   ```rust
-   pub fn parse_toml(path: impl AsRef<Path>) -> Result<Self> {
-       let path = path.as_ref();
-       if path.file_name() != Some("pyproject.toml".as_ref()) {
-           bail!("{} is not a pyproject.toml", path.display())
-       }
-       let mut out: PyProject = toml::de::from_str(&fs::read_to_string(path)?)?;
-       out.toml_path = path.to_path_buf();
-       Ok(out)
-   }
-   ```
+1. **Parse `pyproject.toml`** (`pyproject.rs:27-35`): Reads and validates the TOML file
+2. **Extract `python-source`** (`pyproject.rs:48-62`): Returns `Some(path)` if `[tool.maturin]` has `python-source`, otherwise `None`
+3. **Determine layout** (`stub_info.rs:78-90`): Sets `is_mixed_layout` and `python_root` based on `python_source()` result
 
-2. **Extract `python-source` if present** (`pyproject.rs:48-62`):
-   ```rust
-   pub fn python_source(&self) -> Option<PathBuf> {
-       if let Some(tool) = &self.tool {
-           if let Some(maturin) = &tool.maturin {
-               if let Some(python_source) = &maturin.python_source {
-                   if let Some(base) = self.toml_path.parent() {
-                       return Some(base.join(python_source));
-                   } else {
-                       return Some(PathBuf::from(python_source));
-                   }
-               }
-           }
-       }
-       None
-   }
-   ```
+**Result:**
+- Mixed layout: `is_mixed_layout = true`, `python_root = <project>/python-source`
+- Pure layout: `is_mixed_layout = false`, `python_root = CARGO_MANIFEST_DIR`
 
-3. **Determine layout type and `python_root`** (`stub_info.rs:78-90`):
-   ```rust
-   fn from_pyproject_toml(pyproject: PyProject) -> Self {
-       let is_mixed_layout = pyproject.python_source().is_some();
-       let python_root = pyproject
-           .python_source()  // Returns Some(path) for mixed, None for pure
-           .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+### File Creation Process
 
-       Self {
-           modules: BTreeMap::new(),
-           default_module_name: pyproject.module_name().to_string(),
-           python_root,
-           is_mixed_layout,
-       }
-   }
-   ```
+**Location**: `pyo3-stub-gen/src/generate/stub_info.rs:38-67`
 
-**The flow:**
-- Mixed layout: `python_source()` → `Some("python")` → `is_mixed_layout = true`, `python_root = <project>/python`
-- Pure layout: `python_source()` → `None` → `is_mixed_layout = false`, `python_root = CARGO_MANIFEST_DIR`
+The `StubInfo::generate()` method:
 
-### File Creation Process (Simplified)
-
-**Location**: `pyo3-stub-gen/src/generate/stub_info.rs:31-55`
-
-The simplified generation logic:
-
-```rust
-pub fn generate(&self) -> Result<()> {
-    for (name, module) in self.modules.iter() {
-        // Convert dashes to underscores for Python compatibility
-        let normalized_name = name.replace("-", "_");
-        let path = normalized_name.replace(".", "/");
-
-        // Determine destination path based solely on layout type
-        let dest = if self.is_mixed_layout {
-            // Mixed Python/Rust: Always use directory-based structure
-            self.python_root.join(&path).join("__init__.pyi")
-        } else {
-            // Pure Rust: Always use single file at root (use first segment of module name)
-            let package_name = normalized_name.split('.').next().unwrap();
-            self.python_root.join(format!("{package_name}.pyi"))
-        };
-
-        let dir = dest.parent().context("Cannot get parent directory")?;
-        if !dir.exists() {
-            fs::create_dir_all(dir)?;
-        }
-
-        let mut f = fs::File::create(&dest)?;
-        write!(f, "{module}")?;
-        log::info!(
-            "Generate stub file of a module `{name}` at {dest}",
-            dest = dest.display()
-        );
-    }
-    Ok(())
-}
-```
-
-**Key Simplifications:**
-
-1. **Path normalization** happens first (dashes → underscores, dots → slashes)
-2. **Layout-based decision**: No conditional logic based on submodules or directory existence
-3. **Pure Rust**: Always generates `{package_name}.pyi` (uses first segment of module name)
-4. **Mixed**: Always generates `{path}/__init__.pyi` (directory-based)
-5. **Directory creation** is automatic - parent directories are created as needed
-6. **Module formatting** is handled by the `Display` trait implementation of `Module`
+1. **Path normalization**: Converts dashes to underscores and dots to slashes
+2. **Layout-based decision**:
+   - **Pure Rust**: Generates single file `{package_name}.pyi` at project root
+   - **Mixed Python/Rust**: Generates `{module_path}/__init__.pyi` for all modules
+3. **Directory creation**: Automatically creates parent directories as needed
 
 ## Related PRs and Changes
 
 ### Simplified Stub Generation Strategy
 
-**Motivation**: The original PR #348 proposed adding directory existence checking to allow users to control stub file format by pre-creating directories. However, this approach added complexity and didn't fully align with maturin's constraints.
+**Evolution**: The current approach simplifies stub generation by depending **solely on layout type**, superseding PR #348's directory existence checking approach.
 
-**Evolution to current approach**: Instead of checking directory existence, we simplified the logic to depend **solely on layout type**:
-
-**Old (complex) approach:**
-```rust
-// Decision based on: submodules + directory existence
-let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
-    self.python_root.join(format!("{path}.pyi"))
-} else {
-    self.python_root.join(path).join("__init__.pyi")
-};
-```
-
-**New (simplified) approach:**
-```rust
-// Decision based on: layout type only
-let dest = if self.is_mixed_layout {
-    // Mixed: Always directory-based
-    self.python_root.join(&path).join("__init__.pyi")
-} else {
-    // Pure: Always single file
-    let package_name = normalized_name.split('.').next().unwrap();
-    self.python_root.join(format!("{package_name}.pyi"))
-};
-```
+**Key change**: Instead of conditional logic based on runtime state (submodules, directory existence), the generator now uses:
+- **Pure Rust layout** → Always single file
+- **Mixed Python/Rust layout** → Always directory-based `__init__.pyi`
 
 **Benefits:**
-
-1. **Aligns with maturin constraints**: Pure Rust layout always generates single file (what maturin packages), mixed layout always generates directory structure (what maturin supports for submodules)
-2. **Eliminates ambiguity**: No conditional logic based on runtime state (directory existence, submodule count)
-3. **Predictable behavior**: Same configuration always produces same file structure
-4. **Enforces best practices**: Projects with submodules must declare mixed layout, ensuring proper maturin packaging
+1. Aligns with maturin's packaging constraints
+2. Eliminates runtime state dependencies
+3. Predictable behavior
+4. Enforces best practices (submodules require mixed layout)
 
 ## Best Practices
 
