@@ -47,7 +47,15 @@ impl StubInfo {
                 self.python_root.join(&path).join("__init__.pyi")
             } else {
                 // Pure Rust: Always use single file at root (use first segment of module name)
-                let package_name = normalized_name.split('.').next().unwrap();
+                let package_name = normalized_name
+                    .split('.')
+                    .next()
+                    .filter(|s| !s.is_empty())
+                    .ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "Module name is empty after normalization: original name was `{name}`"
+                        )
+                    })?;
                 self.python_root.join(format!("{package_name}.pyi"))
             };
 
