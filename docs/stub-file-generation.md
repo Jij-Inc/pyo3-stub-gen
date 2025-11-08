@@ -93,30 +93,30 @@ module-name = "mixed.main_mod"
 
 ## Stub File Generation Logic
 
-The stub file generation logic is implemented in `pyo3-stub-gen/src/generate/stub_info.rs`. For each module, the generator determines the output path based on two factors:
+The stub file generation logic is implemented in `pyo3-stub-gen/src/generate/stub_info.rs`. The output path is determined **solely by the layout type** detected from `pyproject.toml`:
 
-1. **Submodule existence**: Whether the module has submodules defined in Rust code
-2. **Directory existence**: Whether a directory already exists at the target path
+### Simplified Generation Rules
 
-### Decision Tree
+| Layout Type | Output Path | Format |
+|-------------|-------------|---------|
+| **Pure Rust** | `$CARGO_MANIFEST_DIR/{package_name}.pyi` | Single file |
+| **Mixed Python/Rust** | `{python-source}/{module_name}/__init__.pyi` | Directory-based |
 
-```rust
-let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
-    self.python_root.join(format!("{path}.pyi"))
-} else {
-    self.python_root.join(path).join("__init__.pyi")
-};
-```
+**Key simplification**: The layout type (presence/absence of `python-source`) **entirely determines** the stub file format. There is no conditional logic based on submodules or directory existence.
 
-The generator creates:
+### Rationale
 
-- **Single-file stub** (`module.pyi`): When **both** conditions are true:
-  - The module has no submodules (`module.submodules.is_empty()`)
-  - No directory exists at the module path (`!self.python_root.join(&path).is_dir()`)
+This simplified approach:
 
-- **Directory-based stub** (`module/__init__.pyi`): When **either** condition is true:
-  - The module has submodules, **OR**
-  - A directory already exists at the module path
+1. **Aligns with maturin's constraints**:
+   - Pure Rust: maturin only packages single stub files → always generate single file
+   - Mixed: maturin supports full hierarchies → always use directory structure
+
+2. **Eliminates ambiguity**: No need to check for pre-existing directories or count submodules
+
+3. **Enforces best practices**: Projects with submodules must use mixed layout (where maturin properly packages them)
+
+4. **Consistent behavior**: Same layout type always produces same file structure
 
 ### Path Normalization
 
@@ -134,9 +134,11 @@ Before determining the output path, the module name undergoes normalization:
 
 Example: `my-package.sub_module` → `my_package/sub_module`
 
-## Submodule Detection
+## Submodule Detection and Import Generation
 
-Submodules are automatically detected during the build phase in the `register_submodules` method:
+Submodules are automatically detected during the build phase to generate proper import statements in stub files. **Note**: This detection does **not** affect the stub file path decision (which is determined solely by layout type), but it controls the content of `__init__.pyi` files.
+
+**Detection Logic** (`register_submodules` method):
 
 ```rust
 fn register_submodules(&mut self) {
@@ -159,13 +161,22 @@ fn register_submodules(&mut self) {
 }
 ```
 
-**Detection Logic:**
+**Process:**
 
 1. Parse all registered module names by splitting on `.`
 2. For modules with 2+ segments (e.g., `package.main_mod.sub_a`):
    - Parent: All segments except the last (`package.main_mod`)
    - Child: Last segment (`sub_a`)
 3. Register each child in its parent's `submodules` set
+
+**Purpose**: In mixed Python/Rust layout, detected submodules are added as import statements in the parent's `__init__.pyi`:
+
+```python
+# mixed_sub/main_mod/__init__.pyi
+from . import mod_a
+from . import mod_b
+from . import int
+```
 
 **Example:**
 
@@ -177,6 +188,10 @@ Given these modules registered via `#[gen_stub_pyfunction(module = "...")]`:
 
 The detector creates:
 - `mixed_sub.main_mod.submodules = {"mod_a", "mod_b", "int"}`
+
+This results in:
+- **Files generated**: `main_mod/__init__.pyi`, `main_mod/mod_a.pyi`, `main_mod/mod_b.pyi`, `main_mod/int.pyi`
+- **Imports in `__init__.pyi`**: `from . import mod_a`, etc.
 
 ## Maturin Layout Examples
 
@@ -359,44 +374,6 @@ class A:
 def greet_main() -> None: ...
 ```
 
-## Directory Pre-creation Pattern
-
-The directory existence check (`!self.python_root.join(&path).is_dir()`) enables a powerful pattern: **users can control stub generation format by pre-creating directories**.
-
-### Use Case
-
-Even without Rust-defined submodules, you can force `__init__.pyi` generation for better IDE support:
-
-**Before:**
-```
-python/
-└── my_package/
-    └── my_module.pyi      # Single file stub
-```
-
-**After creating directory:**
-```bash
-mkdir -p python/my_package/my_module
-```
-
-**Result:**
-```
-python/
-└── my_package/
-    ├── my_module.cpython-313-darwin.so
-    └── my_module/
-        └── __init__.pyi   # Directory-based stub
-```
-
-**Benefits:**
-- Better organization for future submodules
-- Improved static analyzer understanding (Pylance, Pyright)
-- Consistent structure across mixed Python/Rust projects
-
-### Why This Matters
-
-Some static analysis tools (like Pylance) better understand module hierarchies when they follow directory structures, even for single-file modules. Pre-creating directories reduces "source cannot be found" warnings.
-
 ## Implementation Details
 
 ### Layout Detection Implementation
@@ -452,9 +429,11 @@ The layout detection and `python_root` determination happens in two stages:
 - Mixed layout: `python_source()` → `Some("python")` → `python_root = <project>/python`
 - Pure layout: `python_source()` → `None` → `python_root = CARGO_MANIFEST_DIR`
 
-### File Creation Process
+### File Creation Process (Simplified)
 
 **Location**: `pyo3-stub-gen/src/generate/stub_info.rs:31-55`
+
+The simplified generation logic:
 
 ```rust
 pub fn generate(&self) -> Result<()> {
@@ -463,10 +442,12 @@ pub fn generate(&self) -> Result<()> {
         let normalized_name = name.replace("-", "_");
         let path = normalized_name.replace(".", "/");
 
-        // 2. Determine destination path
-        let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
-            self.python_root.join(format!("{path}.pyi"))
+        // 2. Determine destination path based on layout type
+        let dest = if self.is_pure_rust_layout() {
+            // Pure Rust: Always single file at root
+            self.python_root.join(format!("{}.pyi", normalized_name.split('.').next().unwrap()))
         } else {
+            // Mixed: Always directory-based
             self.python_root.join(path).join("__init__.pyi")
         };
 
@@ -485,30 +466,26 @@ pub fn generate(&self) -> Result<()> {
 }
 ```
 
-**Key Points:**
+**Key Simplifications:**
 
 1. **Path normalization** happens first (dashes → underscores, dots → slashes)
-2. **Decision logic** considers both submodules and directory existence
-3. **Directory creation** is automatic - parent directories are created as needed
-4. **Module formatting** is handled by the `Display` trait implementation of `Module`
+2. **Layout-based decision**: No conditional logic based on submodules or directory existence
+3. **Pure Rust**: Always generates `{package_name}.pyi` (uses first segment of module name)
+4. **Mixed**: Always generates `{path}/__init__.pyi` (directory-based)
+5. **Directory creation** is automatic - parent directories are created as needed
+6. **Module formatting** is handled by the `Display` trait implementation of `Module`
 
 ## Related PRs and Changes
 
-### PR #348: Directory-aware stub generation
+### Simplified Stub Generation Strategy
 
-**Change:** Added directory existence check to generation logic
+**Motivation**: The original PR #348 proposed adding directory existence checking to allow users to control stub file format by pre-creating directories. However, this approach added complexity and didn't fully align with maturin's constraints.
 
-**Before:**
+**Evolution to current approach**: Instead of checking directory existence, we simplified the logic to depend **solely on layout type**:
+
+**Old (complex) approach:**
 ```rust
-let dest = if module.submodules.is_empty() {
-    self.python_root.join(format!("{path}.pyi"))
-} else {
-    self.python_root.join(path).join("__init__.pyi")
-};
-```
-
-**After:**
-```rust
+// Decision based on: submodules + directory existence
 let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_dir() {
     self.python_root.join(format!("{path}.pyi"))
 } else {
@@ -516,13 +493,24 @@ let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_d
 };
 ```
 
-**Impact:**
+**New (simplified) approach:**
+```rust
+// Decision based on: layout type only
+let dest = if self.is_pure_rust_layout() {
+    // Pure: Always single file
+    self.python_root.join(format!("{package_name}.pyi"))
+} else {
+    // Mixed: Always directory-based
+    self.python_root.join(path).join("__init__.pyi")
+};
+```
 
-- **Pure layout**: No change (no directories exist)
-- **Mixed layout without submodules**: Can be controlled by pre-creating directories
-- **Mixed layout with submodules**: No change (already generates `__init__.pyi`)
+**Benefits:**
 
-**Motivation:** Allows users to pre-create project hierarchies that static analysis tools understand better, reducing warnings about missing sources.
+1. **Aligns with maturin constraints**: Pure Rust layout always generates single file (what maturin packages), mixed layout always generates directory structure (what maturin supports for submodules)
+2. **Eliminates ambiguity**: No conditional logic based on runtime state (directory existence, submodule count)
+3. **Predictable behavior**: Same configuration always produces same file structure
+4. **Enforces best practices**: Projects with submodules must declare mixed layout, ensuring proper maturin packaging
 
 ## Best Practices
 
@@ -591,11 +579,9 @@ let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_d
    fn greet_a() { ... }
    ```
 
-7. **Pre-create directories for IDE support**: If your IDE shows warnings, create module directories before stub generation
-
 ### Layout Detection Verification
 
-8. **Verify your layout is correctly detected**: Check where stub files are generated
+7. **Verify your layout is correctly detected**: Check where stub files are generated
    ```bash
    # Pure Rust: stubs at project root
    ls *.pyi
@@ -604,7 +590,7 @@ let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_d
    ls python/**/*.pyi
    ```
 
-9. **If stubs are in the wrong location**: Check your `pyproject.toml` configuration
+8. **If stubs are in the wrong location**: Check your `pyproject.toml` configuration
    ```toml
    [tool.maturin]
    python-source = "python"  # Add this for mixed layout
@@ -612,21 +598,32 @@ let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_d
 
 ### Common Pitfalls
 
-10. **❌ Do NOT use pure Rust layout with submodules**
+9. **❌ Do NOT use pure Rust layout with submodules**
     ```rust
-    // This will generate stubs, but maturin will NOT package them!
+    // This will generate incomplete stubs!
     #[gen_stub_pyfunction(module = "mymodule.sub")]
     #[pyfunction]
     fn my_function() { ... }
     ```
 
-    **Problem**: pyo3-stub-gen will generate `mymodule/__init__.pyi` and `mymodule/sub.pyi`, but maturin will only package `mymodule.pyi` (if it exists) and ignore the directory.
+    **Problem**: With pure Rust layout, pyo3-stub-gen will **only generate `mymodule.pyi`** (single file). All submodule definitions will be merged into this single file, which doesn't match the runtime module structure created by PyO3's `add_submodule`.
 
-    **Solution**: Add `python-source = "python"` to your `pyproject.toml` and move your project to mixed layout:
+    **Result**: Type checkers won't find `mymodule.sub` as a separate module, causing import errors.
+
+    **Solution**: Use mixed Python/Rust layout for any project with submodules:
+    ```toml
+    # pyproject.toml
+    [tool.maturin]
+    python-source = "python"
+    module-name = "mymodule"
+    ```
+
+    Then re-run stub generation:
     ```bash
-    mkdir -p python/mymodule
-    # Re-run stub generation - stubs will now be in python/mymodule/
     cargo run --bin stub_gen
+    # Stubs will now be generated at:
+    # python/mymodule/__init__.pyi
+    # python/mymodule/sub.pyi
     ```
 
 ## See Also
