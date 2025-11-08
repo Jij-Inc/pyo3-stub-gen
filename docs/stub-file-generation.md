@@ -48,16 +48,21 @@ pub fn python_source(&self) -> Option<PathBuf> {
 }
 ```
 
-**Usage**: `pyo3-stub-gen/src/generate/stub_info.rs:65-72`
+**Usage**: `pyo3-stub-gen/src/generate/stub_info.rs:78-90`
 
 ```rust
 fn from_pyproject_toml(pyproject: PyProject) -> Self {
-    StubInfoBuilder::from_project_root(
-        pyproject.module_name().to_string(),
-        pyproject
-            .python_source()
-            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
-    )
+    let is_mixed_layout = pyproject.python_source().is_some();
+    let python_root = pyproject
+        .python_source()  // Returns Some(path) for mixed, None for pure
+        .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+
+    Self {
+        modules: BTreeMap::new(),
+        default_module_name: pyproject.module_name().to_string(),
+        python_root,
+        is_mixed_layout,
+    }
 }
 ```
 
@@ -145,36 +150,53 @@ Example: `my-package.sub_module` → `my_package/sub_module`
 
 Submodules are automatically detected during the build phase to generate proper import statements in stub files. **Note**: This detection does **not** affect the stub file path decision (which is determined solely by layout type), but it controls the content of `__init__.pyi` files.
 
-**Detection Logic** (`register_submodules` method):
+**Detection Logic** (`register_submodules` method - `pyo3-stub-gen/src/generate/stub_info.rs:113-141`):
 
 ```rust
 fn register_submodules(&mut self) {
-    let mut map: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    let mut all_parent_child_pairs: Vec<(String, String)> = Vec::new();
+
+    // For each existing module, collect all parent-child relationships
     for module in self.modules.keys() {
         let path = module.split('.').collect::<Vec<_>>();
-        let n = path.len();
-        if n <= 1 {
-            continue;
+
+        // Generate all parent paths and their immediate children
+        for i in 1..path.len() {
+            let parent = path[..i].join(".");
+            let child = path[i].to_string();
+            all_parent_child_pairs.push((parent, child));
         }
-        map.entry(path[..n - 1].join("."))
-            .or_default()
-            .insert(path[n - 1].to_string());
     }
-    for (parent, children) in map {
-        if let Some(module) = self.modules.get_mut(&parent) {
-            module.submodules.extend(children);
-        }
+
+    // Group children by parent
+    let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    for (parent, child) in all_parent_child_pairs {
+        parent_to_children.entry(parent).or_default().insert(child);
+    }
+
+    // Create or update all parent modules
+    for (parent, children) in parent_to_children {
+        let module = self.modules.entry(parent.clone()).or_default();
+        module.name = parent;
+        module.default_module_name = self.default_module_name.clone();
+        module.submodules.extend(children);
     }
 }
 ```
 
 **Process:**
 
-1. Parse all registered module names by splitting on `.`
-2. For modules with 2+ segments (e.g., `package.main_mod.sub_a`):
-   - Parent: All segments except the last (`package.main_mod`)
-   - Child: Last segment (`sub_a`)
-3. Register each child in its parent's `submodules` set
+1. **Collect parent-child relationships**: For each registered module, split its name by `.` and generate all parent-child pairs
+   - Example: `package.main_mod.sub_a` generates:
+     - `package` → `main_mod`
+     - `package.main_mod` → `sub_a`
+2. **Group children by parent**: Use a map to collect all children for each parent module
+3. **Create or update parent modules**: For each parent:
+   - Create the parent module if it doesn't exist (using `.entry().or_default()`)
+   - Set the module's `name` and `default_module_name`
+   - Extend the `submodules` set with all children
+
+**Key enhancement**: This implementation automatically creates missing parent modules, ensuring that even if only child modules are explicitly defined (e.g., via `#[gen_stub_pyfunction(module = "package.main_mod.sub_a")]`), all intermediate parent modules (`package`, `package.main_mod`) are synthesized with proper submodule imports.
 
 **Purpose**: In mixed Python/Rust layout, detected submodules are added as import statements in the parent's `__init__.pyi`:
 
@@ -423,21 +445,26 @@ The layout detection and `python_root` determination happens in two stages:
    }
    ```
 
-3. **Determine `python_root`** (`stub_info.rs:65-72`):
+3. **Determine layout type and `python_root`** (`stub_info.rs:78-90`):
    ```rust
    fn from_pyproject_toml(pyproject: PyProject) -> Self {
-       StubInfoBuilder::from_project_root(
-           pyproject.module_name().to_string(),
-           pyproject
-               .python_source()  // Returns Some(path) for mixed, None for pure
-               .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
-       )
+       let is_mixed_layout = pyproject.python_source().is_some();
+       let python_root = pyproject
+           .python_source()  // Returns Some(path) for mixed, None for pure
+           .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+
+       Self {
+           modules: BTreeMap::new(),
+           default_module_name: pyproject.module_name().to_string(),
+           python_root,
+           is_mixed_layout,
+       }
    }
    ```
 
 **The flow:**
-- Mixed layout: `python_source()` → `Some("python")` → `python_root = <project>/python`
-- Pure layout: `python_source()` → `None` → `python_root = CARGO_MANIFEST_DIR`
+- Mixed layout: `python_source()` → `Some("python")` → `is_mixed_layout = true`, `python_root = <project>/python`
+- Pure layout: `python_source()` → `None` → `is_mixed_layout = false`, `python_root = CARGO_MANIFEST_DIR`
 
 ### File Creation Process (Simplified)
 
