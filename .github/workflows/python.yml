@@ -19,6 +19,7 @@ jobs:
           - mixed_sub
           - test-dash-package
           - feature_gated
+          - empty_super_module
         python-version:
           - "3.10"
           - "3.11"

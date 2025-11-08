@@ -88,21 +88,32 @@ impl StubInfoBuilder {
     }
 
     fn register_submodules(&mut self) {
-        let mut map: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        let mut all_parent_child_pairs: Vec<(String, String)> = Vec::new();
+
+        // For each existing module, collect all parent-child relationships
         for module in self.modules.keys() {
             let path = module.split('.').collect::<Vec<_>>();
-            let n = path.len();
-            if n <= 1 {
-                continue;
+
+            // Generate all parent paths and their immediate children
+            for i in 1..path.len() {
+                let parent = path[..i].join(".");
+                let child = path[i].to_string();
+                all_parent_child_pairs.push((parent, child));
             }
-            map.entry(path[..n - 1].join("."))
-                .or_default()
-                .insert(path[n - 1].to_string());
         }
-        for (parent, children) in map {
-            if let Some(module) = self.modules.get_mut(&parent) {
-                module.submodules.extend(children);
-            }
+
+        // Group children by parent
+        let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for (parent, child) in all_parent_child_pairs {
+            parent_to_children.entry(parent).or_default().insert(child);
+        }
+
+        // Create or update all parent modules
+        for (parent, children) in parent_to_children {
+            let module = self.modules.entry(parent.clone()).or_default();
+            module.name = parent;
+            module.default_module_name = self.default_module_name.clone();
+            module.submodules.extend(children);
         }
     }
 
@@ -300,5 +311,67 @@ impl StubInfoBuilder {
             modules: self.modules,
             python_root: self.python_root,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_register_submodules_creates_empty_parent_modules() {
+        let mut builder =
+            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into());
+
+        // Simulate a module with only submodules
+        builder.modules.insert(
+            "test_module.sub_mod".to_string(),
+            Module {
+                name: "test_module.sub_mod".to_string(),
+                default_module_name: "test_module".to_string(),
+                ..Default::default()
+            },
+        );
+
+        builder.register_submodules();
+
+        // Check that the empty parent module was created
+        assert!(builder.modules.contains_key("test_module"));
+        let parent_module = &builder.modules["test_module"];
+        assert_eq!(parent_module.name, "test_module");
+        assert!(parent_module.submodules.contains("sub_mod"));
+
+        // Verify the submodule still exists
+        assert!(builder.modules.contains_key("test_module.sub_mod"));
+    }
+
+    #[test]
+    fn test_register_submodules_with_multiple_levels() {
+        let mut builder = StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into());
+
+        // Simulate deeply nested modules
+        builder.modules.insert(
+            "root.level1.level2.deep_mod".to_string(),
+            Module {
+                name: "root.level1.level2.deep_mod".to_string(),
+                default_module_name: "root".to_string(),
+                ..Default::default()
+            },
+        );
+
+        builder.register_submodules();
+
+        // Check that all intermediate parent modules were created
+        assert!(builder.modules.contains_key("root"));
+        assert!(builder.modules.contains_key("root.level1"));
+        assert!(builder.modules.contains_key("root.level1.level2"));
+        assert!(builder.modules.contains_key("root.level1.level2.deep_mod"));
+
+        // Check submodule relationships
+        assert!(builder.modules["root"].submodules.contains("level1"));
+        assert!(builder.modules["root.level1"].submodules.contains("level2"));
+        assert!(builder.modules["root.level1.level2"]
+            .submodules
+            .contains("deep_mod"));
     }
 }

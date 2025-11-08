@@ -5,6 +5,7 @@ members = [
     "examples/mixed_sub",
     "examples/test-dash-package",
     "examples/feature_gated",
+    "examples/empty_super_module",
 ]
 
 [dependency-groups]

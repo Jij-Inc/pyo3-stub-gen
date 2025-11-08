@@ -18,6 +18,9 @@ includes:
   feature_gated:
     taskfile: examples/feature_gated/Taskfile.yml
     dir: examples/feature_gated
+  empty_super_module:
+    taskfile: examples/empty_super_module/Taskfile.yml
+    dir: examples/empty_super_module
 
 tasks:
   stub-gen:
@@ -27,6 +30,7 @@ tasks:
       - task: mixed_sub:stub-gen
       - task: test-dash-package:stub-gen
       - task: feature_gated:stub-gen
+      - task: empty_super_module:stub-gen
 
   test:
     cmds:
@@ -35,3 +39,4 @@ tasks:
       - task: mixed_sub:test
       - task: test-dash-package:test
       - task: feature_gated:test
+      - task: empty_super_module:test
