@@ -40,12 +40,10 @@ If you are looking for a working example, please see the [examples](./examples/)
 | Example          | Description |
 |:-----------------|:------------|
 | [examples/pure]  | Example for [Pure Rust maturin project](https://www.maturin.rs/project_layout#pure-rust-project) |
-| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) |
-| [examples/mixed_sub] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
+| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
 
 [examples/pure]: ./examples/pure/
 [examples/mixed]: ./examples/mixed/
-[examples/mixed_sub]: ./examples/mixed_sub/
 
 Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure] example.
 
@@ -412,7 +410,7 @@ uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 
 ### Known limitation: nested submodules
 
-**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed_sub/Taskfile.yml` for an example.
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed/Taskfile.yml` for an example.
 
 # Contribution
 To be written.

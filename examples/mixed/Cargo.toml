@@ -1,6 +1,6 @@
 [package]
 name = "mixed"
-description = "Example for Mixed Rust/Python layout"
+description = "Example for Mixed Rust/Python layout with submodule"
 version.workspace = true
 edition.workspace = true
 

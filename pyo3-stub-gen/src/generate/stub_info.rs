@@ -11,6 +11,8 @@ use std::{
 pub struct StubInfo {
     pub modules: BTreeMap<String, Module>,
     pub python_root: PathBuf,
+    /// Whether this is a mixed Python/Rust layout (has `python-source` in pyproject.toml)
+    pub is_mixed_layout: bool,
 }
 
 impl StubInfo {
@@ -24,19 +26,49 @@ impl StubInfo {
     /// Initialize [StubInfo] with a specific module name and project root.
     /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
     /// not in the `gen_stub` executables due to [inventory]'s mechanism.
-    pub fn from_project_root(default_module_name: String, project_root: PathBuf) -> Result<Self> {
-        StubInfoBuilder::from_project_root(default_module_name, project_root).build()
+    pub fn from_project_root(
+        default_module_name: String,
+        project_root: PathBuf,
+        is_mixed_layout: bool,
+    ) -> Result<Self> {
+        StubInfoBuilder::from_project_root(default_module_name, project_root, is_mixed_layout)
+            .build()
     }
 
     pub fn generate(&self) -> Result<()> {
+        // Validate: Pure Rust layout can only have a single module
+        if !self.is_mixed_layout && self.modules.len() > 1 {
+            let module_names: Vec<_> = self.modules.keys().collect();
+            anyhow::bail!(
+                "Pure Rust layout does not support multiple modules or submodules. Found {} modules: {}. \
+                 Please use mixed Python/Rust layout (add `python-source` to [tool.maturin] in pyproject.toml) \
+                 if you need multiple modules or submodules.",
+                self.modules.len(),
+                module_names.iter().map(|s| format!("'{}'", s)).collect::<Vec<_>>().join(", ")
+            );
+        }
+
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
-            let dest = if module.submodules.is_empty() {
-                self.python_root.join(format!("{path}.pyi"))
+
+            // Determine destination path based solely on layout type
+            let dest = if self.is_mixed_layout {
+                // Mixed Python/Rust: Always use directory-based structure
+                self.python_root.join(&path).join("__init__.pyi")
             } else {
-                self.python_root.join(path).join("__init__.pyi")
+                // Pure Rust: Always use single file at root (use first segment of module name)
+                let package_name = normalized_name
+                    .split('.')
+                    .next()
+                    .filter(|s| !s.is_empty())
+                    .ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "Module name is empty after normalization: original name was `{name}`"
+                        )
+                    })?;
+                self.python_root.join(format!("{package_name}.pyi"))
             };
 
             let dir = dest.parent().context("Cannot get parent directory")?;
@@ -59,23 +91,34 @@ struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
     python_root: PathBuf,
+    is_mixed_layout: bool,
 }
 
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject) -> Self {
-        StubInfoBuilder::from_project_root(
-            pyproject.module_name().to_string(),
-            pyproject
-                .python_source()
-                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
-        )
+        let is_mixed_layout = pyproject.python_source().is_some();
+        let python_root = pyproject
+            .python_source()
+            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+
+        Self {
+            modules: BTreeMap::new(),
+            default_module_name: pyproject.module_name().to_string(),
+            python_root,
+            is_mixed_layout,
+        }
     }
 
-    fn from_project_root(default_module_name: String, project_root: PathBuf) -> Self {
+    fn from_project_root(
+        default_module_name: String,
+        project_root: PathBuf,
+        is_mixed_layout: bool,
+    ) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
+            is_mixed_layout,
         }
     }
 
@@ -88,21 +131,32 @@ impl StubInfoBuilder {
     }
 
     fn register_submodules(&mut self) {
-        let mut map: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        let mut all_parent_child_pairs: Vec<(String, String)> = Vec::new();
+
+        // For each existing module, collect all parent-child relationships
         for module in self.modules.keys() {
             let path = module.split('.').collect::<Vec<_>>();
-            let n = path.len();
-            if n <= 1 {
-                continue;
+
+            // Generate all parent paths and their immediate children
+            for i in 1..path.len() {
+                let parent = path[..i].join(".");
+                let child = path[i].to_string();
+                all_parent_child_pairs.push((parent, child));
             }
-            map.entry(path[..n - 1].join("."))
-                .or_default()
-                .insert(path[n - 1].to_string());
         }
-        for (parent, children) in map {
-            if let Some(module) = self.modules.get_mut(&parent) {
-                module.submodules.extend(children);
-            }
+
+        // Group children by parent
+        let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for (parent, child) in all_parent_child_pairs {
+            parent_to_children.entry(parent).or_default().insert(child);
+        }
+
+        // Create or update all parent modules
+        for (parent, children) in parent_to_children {
+            let module = self.modules.entry(parent.clone()).or_default();
+            module.name = parent;
+            module.default_module_name = self.default_module_name.clone();
+            module.submodules.extend(children);
         }
     }
 
@@ -299,6 +353,106 @@ impl StubInfoBuilder {
         Ok(StubInfo {
             modules: self.modules,
             python_root: self.python_root,
+            is_mixed_layout: self.is_mixed_layout,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_register_submodules_creates_empty_parent_modules() {
+        let mut builder =
+            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into(), false);
+
+        // Simulate a module with only submodules
+        builder.modules.insert(
+            "test_module.sub_mod".to_string(),
+            Module {
+                name: "test_module.sub_mod".to_string(),
+                default_module_name: "test_module".to_string(),
+                ..Default::default()
+            },
+        );
+
+        builder.register_submodules();
+
+        // Check that the empty parent module was created
+        assert!(builder.modules.contains_key("test_module"));
+        let parent_module = &builder.modules["test_module"];
+        assert_eq!(parent_module.name, "test_module");
+        assert!(parent_module.submodules.contains("sub_mod"));
+
+        // Verify the submodule still exists
+        assert!(builder.modules.contains_key("test_module.sub_mod"));
+    }
+
+    #[test]
+    fn test_register_submodules_with_multiple_levels() {
+        let mut builder =
+            StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into(), false);
+
+        // Simulate deeply nested modules
+        builder.modules.insert(
+            "root.level1.level2.deep_mod".to_string(),
+            Module {
+                name: "root.level1.level2.deep_mod".to_string(),
+                default_module_name: "root".to_string(),
+                ..Default::default()
+            },
+        );
+
+        builder.register_submodules();
+
+        // Check that all intermediate parent modules were created
+        assert!(builder.modules.contains_key("root"));
+        assert!(builder.modules.contains_key("root.level1"));
+        assert!(builder.modules.contains_key("root.level1.level2"));
+        assert!(builder.modules.contains_key("root.level1.level2.deep_mod"));
+
+        // Check submodule relationships
+        assert!(builder.modules["root"].submodules.contains("level1"));
+        assert!(builder.modules["root.level1"].submodules.contains("level2"));
+        assert!(builder.modules["root.level1.level2"]
+            .submodules
+            .contains("deep_mod"));
+    }
+
+    #[test]
+    fn test_pure_layout_rejects_multiple_modules() {
+        // Pure Rust layout should reject multiple modules (whether submodules or top-level)
+        let stub_info = StubInfo {
+            modules: {
+                let mut map = BTreeMap::new();
+                map.insert(
+                    "mymodule".to_string(),
+                    Module {
+                        name: "mymodule".to_string(),
+                        default_module_name: "mymodule".to_string(),
+                        ..Default::default()
+                    },
+                );
+                map.insert(
+                    "mymodule.sub".to_string(),
+                    Module {
+                        name: "mymodule.sub".to_string(),
+                        default_module_name: "mymodule".to_string(),
+                        ..Default::default()
+                    },
+                );
+                map
+            },
+            python_root: PathBuf::from("/tmp"),
+            is_mixed_layout: false,
+        };
+
+        let result = stub_info.generate();
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(
+            err_msg.contains("Pure Rust layout does not support multiple modules or submodules")
+        );
     }
 }

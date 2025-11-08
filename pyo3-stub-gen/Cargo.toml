@@ -26,7 +26,7 @@ serde.workspace = true
 toml.workspace = true
 
 [dependencies.pyo3-stub-gen-derive]
-version = "0.17.1"
+version = "0.18.0"
 path = "../pyo3-stub-gen-derive"
 
 [dev-dependencies]
