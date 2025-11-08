@@ -100,9 +100,16 @@ The stub file generation logic is implemented in `pyo3-stub-gen/src/generate/stu
 | Layout Type | Output Path | Format |
 |-------------|-------------|---------|
 | **Pure Rust** | `$CARGO_MANIFEST_DIR/{package_name}.pyi` | Single file |
-| **Mixed Python/Rust** | `{python-source}/{module_name}/__init__.pyi` | Directory-based |
+| **Mixed Python/Rust** | `{python-source}/{module_path}/__init__.pyi` | Directory-based (all modules) |
 
-**Key simplification**: The layout type (presence/absence of `python-source`) **entirely determines** the stub file format. There is no conditional logic based on submodules or directory existence.
+**Key simplification**: The layout type (presence/absence of `python-source`) **entirely determines** the stub file format:
+
+- **Pure Rust**: Always generates a single `.pyi` file at the project root (e.g., `mymodule.pyi`)
+- **Mixed Python/Rust**: Always generates `__init__.pyi` files in directories for **every module** (including submodules)
+  - Top-level module: `{python-source}/mypackage/mymodule/__init__.pyi`
+  - Submodules: `{python-source}/mypackage/mymodule/sub_a/__init__.pyi`, etc.
+
+There is no conditional logic based on submodules or directory existence.
 
 ### Rationale
 
@@ -190,7 +197,7 @@ The detector creates:
 - `mixed_sub.main_mod.submodules = {"mod_a", "mod_b", "int"}`
 
 This results in:
-- **Files generated**: `main_mod/__init__.pyi`, `main_mod/mod_a.pyi`, `main_mod/mod_b.pyi`, `main_mod/int.pyi`
+- **Files generated**: `main_mod/__init__.pyi`, `main_mod/mod_a/__init__.pyi`, `main_mod/mod_b/__init__.pyi`, `main_mod/int/__init__.pyi`
 - **Imports in `__init__.pyi`**: `from . import mod_a`, etc.
 
 ## Maturin Layout Examples
@@ -234,7 +241,8 @@ mixed/
 │   └── mixed/
 │       ├── __init__.py
 │       ├── main_mod.cpython-313-darwin.so
-│       └── main_mod.pyi              # Generated stub
+│       └── main_mod/
+│           └── __init__.pyi          # Generated stub
 ├── src/
 │   └── lib.rs
 └── pyproject.toml
@@ -268,13 +276,12 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 **Behavior:**
 - Module name: `mixed.main_mod` (explicit in maturin config)
 - No submodules: All classes/functions in `mixed.main_mod`
-- No pre-existing `python/mixed/main_mod/` directory
-- **Output**: `python/mixed/main_mod.pyi` (single file)
+- **Output**: `python/mixed/main_mod/__init__.pyi` (directory-based)
 
 **Coexistence:**
-- `main_mod.cpython-313-darwin.so` (native module file)
-- `main_mod.pyi` (stub file)
-- Both exist as files in the same directory
+- `main_mod.cpython-313-darwin.so` (native module **file**)
+- `main_mod/` (stub **directory**)
+- Both coexist in `python/mixed/` thanks to Python's import system
 
 ### Mixed Sub Layout
 
@@ -286,9 +293,12 @@ mixed_sub/
 │       ├── main_mod.cpython-313-darwin.so
 │       └── main_mod/                  # Directory for stubs
 │           ├── __init__.pyi           # Generated stub
-│           ├── mod_a.pyi              # Generated stub
-│           ├── mod_b.pyi              # Generated stub
-│           └── int.pyi                # Generated stub
+│           ├── mod_a/
+│           │   └── __init__.pyi       # Generated stub
+│           ├── mod_b/
+│           │   └── __init__.pyi       # Generated stub
+│           └── int/
+│               └── __init__.pyi       # Generated stub
 ├── src/
 │   └── lib.rs
 └── pyproject.toml
@@ -347,9 +357,9 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 - **Has submodules**: `mod_a`, `mod_b`, `int` detected via module paths
 - **Output**:
   - `python/mixed_sub/main_mod/__init__.pyi` (main module)
-  - `python/mixed_sub/main_mod/mod_a.pyi` (submodule)
-  - `python/mixed_sub/main_mod/mod_b.pyi` (submodule)
-  - `python/mixed_sub/main_mod/int.pyi` (submodule)
+  - `python/mixed_sub/main_mod/mod_a/__init__.pyi` (submodule)
+  - `python/mixed_sub/main_mod/mod_b/__init__.pyi` (submodule)
+  - `python/mixed_sub/main_mod/int/__init__.pyi` (submodule)
 
 **Coexistence:**
 - `main_mod.cpython-313-darwin.so` (native module **file**)
@@ -438,29 +448,31 @@ The simplified generation logic:
 ```rust
 pub fn generate(&self) -> Result<()> {
     for (name, module) in self.modules.iter() {
-        // 1. Normalize module name
+        // Convert dashes to underscores for Python compatibility
         let normalized_name = name.replace("-", "_");
         let path = normalized_name.replace(".", "/");
 
-        // 2. Determine destination path based on layout type
-        let dest = if self.is_pure_rust_layout() {
-            // Pure Rust: Always single file at root
-            self.python_root.join(format!("{}.pyi", normalized_name.split('.').next().unwrap()))
+        // Determine destination path based solely on layout type
+        let dest = if self.is_mixed_layout {
+            // Mixed Python/Rust: Always use directory-based structure
+            self.python_root.join(&path).join("__init__.pyi")
         } else {
-            // Mixed: Always directory-based
-            self.python_root.join(path).join("__init__.pyi")
+            // Pure Rust: Always use single file at root (use first segment of module name)
+            let package_name = normalized_name.split('.').next().unwrap();
+            self.python_root.join(format!("{package_name}.pyi"))
         };
 
-        // 3. Create parent directories if needed
         let dir = dest.parent().context("Cannot get parent directory")?;
         if !dir.exists() {
             fs::create_dir_all(dir)?;
         }
 
-        // 4. Write stub file
         let mut f = fs::File::create(&dest)?;
         write!(f, "{module}")?;
-        log::info!("Generate stub file of a module `{name}` at {dest}", dest = dest.display());
+        log::info!(
+            "Generate stub file of a module `{name}` at {dest}",
+            dest = dest.display()
+        );
     }
     Ok(())
 }
@@ -496,12 +508,13 @@ let dest = if module.submodules.is_empty() && !self.python_root.join(&path).is_d
 **New (simplified) approach:**
 ```rust
 // Decision based on: layout type only
-let dest = if self.is_pure_rust_layout() {
-    // Pure: Always single file
-    self.python_root.join(format!("{package_name}.pyi"))
-} else {
+let dest = if self.is_mixed_layout {
     // Mixed: Always directory-based
-    self.python_root.join(path).join("__init__.pyi")
+    self.python_root.join(&path).join("__init__.pyi")
+} else {
+    // Pure: Always single file
+    let package_name = normalized_name.split('.').next().unwrap();
+    self.python_root.join(format!("{package_name}.pyi"))
 };
 ```
 
@@ -623,7 +636,7 @@ let dest = if self.is_pure_rust_layout() {
     cargo run --bin stub_gen
     # Stubs will now be generated at:
     # python/mymodule/__init__.pyi
-    # python/mymodule/sub.pyi
+    # python/mymodule/sub/__init__.pyi
     ```
 
 ## See Also
