@@ -40,10 +40,10 @@ If you are looking for a working example, please see the [examples](./examples/)
 | Example          | Description |
 |:-----------------|:------------|
 | [examples/pure]  | Example for [Pure Rust maturin project](https://www.maturin.rs/project_layout#pure-rust-project) |
-| [examples/mixed_sub] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
+| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
 
 [examples/pure]: ./examples/pure/
-[examples/mixed_sub]: ./examples/mixed_sub/
+[examples/mixed]: ./examples/mixed/
 
 Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure] example.
 

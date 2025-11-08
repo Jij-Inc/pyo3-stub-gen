@@ -6,7 +6,7 @@ requires-python = ">=3.10"
 members = [
     "empty-super-module",
     "feature-gated",
-    "mixed-sub",
+    "mixed",
     "pure",
     "test-dash-package",
 ]
@@ -79,9 +79,9 @@ wheels = [
 ]
 
 [[package]]
-name = "mixed-sub"
+name = "mixed"
 version = "0.1"
-source = { editable = "examples/mixed_sub" }
+source = { editable = "examples/mixed" }
 
 [[package]]
 name = "mypy"

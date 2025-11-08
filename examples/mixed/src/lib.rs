@@ -1,9 +1,9 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
-// Classes that can be cross-referenced between modules (from mixed_sub_import_type)
+// Classes that can be cross-referenced between modules (from mixed_import_type)
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed_sub.main_mod")]
+#[pyclass(module = "mixed.main_mod")]
 #[derive(Debug, Clone)]
 struct A {
     x: usize,
@@ -17,7 +17,7 @@ impl A {
     }
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod")]
+#[gen_stub_pyfunction(module = "mixed.main_mod")]
 #[pyfunction]
 fn create_a(x: usize) -> A {
     A { x }
@@ -45,20 +45,20 @@ fn create_b(x: usize) -> B {
     B { x }
 }
 
-// Original functions from mixed_sub
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_a")]
+// Original functions from mixed
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_a")]
 #[pyfunction(name = "greet_a")]
 pub fn greet_a() {
     println!("Hello from mod_A!")
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod")]
+#[gen_stub_pyfunction(module = "mixed.main_mod")]
 #[pyfunction(name = "greet_main")]
 pub fn greet_main() {
     println!("Hello from main_mod!")
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_b")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_b")]
 #[pyfunction(name = "greet_b")]
 pub fn greet_b() {
     println!("Hello from mod_B!")
@@ -66,7 +66,7 @@ pub fn greet_b() {
 
 // Class C in mod_a that references A and B (demonstrates cross-module type references)
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed_sub.main_mod.mod_a")]
+#[pyclass(module = "mixed.main_mod.mod_a")]
 #[derive(Debug)]
 struct C {
     a: A,
@@ -84,15 +84,15 @@ impl C {
     }
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_a")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_a")]
 #[pyfunction]
 fn create_c(a: A, b: B) -> C {
     C { a, b }
 }
 
-// Simple class in mod_b (from mixed_sub)
+// Simple class in mod_b (from mixed)
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed_sub.main_mod.mod_b")]
+#[pyclass(module = "mixed.main_mod.mod_b")]
 #[derive(Debug)]
 struct D {
     x: usize,
@@ -106,14 +106,14 @@ impl D {
     }
 }
 
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_b")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_b")]
 #[pyfunction]
 fn create_d(x: usize) -> D {
     D { x }
 }
 
 // Function in int submodule to test namespace collision
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.int")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.int")]
 #[pyfunction]
 fn dummy_int_fun(x: usize) -> usize {
     x
@@ -122,7 +122,7 @@ fn dummy_int_fun(x: usize) -> usize {
 // Test function with both module and python parameters (bug reproduction case)
 // This should be placed in mod_a submodule
 #[gen_stub_pyfunction(
-    module = "mixed_sub.main_mod.mod_a",
+    module = "mixed.main_mod.mod_a",
     python = r#"
     import typing
 
@@ -186,7 +186,7 @@ use pyo3_stub_gen::inventory::submit;
 
 submit! {
     gen_function_from_python! {
-        module = "mixed_sub.main_mod.mod_b",
+        module = "mixed.main_mod.mod_b",
         r#"
         import typing
 

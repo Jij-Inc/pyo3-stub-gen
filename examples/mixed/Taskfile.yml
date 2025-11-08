@@ -14,6 +14,6 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run mypy --show-error-codes -p mixed_sub.main_mod
+      - uv run mypy --show-error-codes -p mixed.main_mod
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details

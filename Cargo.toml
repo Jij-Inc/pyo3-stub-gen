@@ -3,7 +3,7 @@ members = [
   "pyo3-stub-gen",
   "pyo3-stub-gen-derive",
   "examples/pure",
-  "examples/mixed_sub",
+  "examples/mixed",
   "examples/empty_super_module",
   "examples/test-dash-package",
   "examples/feature_gated",

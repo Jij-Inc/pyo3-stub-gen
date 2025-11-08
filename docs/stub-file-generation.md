@@ -53,11 +53,11 @@ features = ["pyo3/extension-module"]
 ```
 → `python_root` = project root (where `pyproject.toml` is located)
 
-**Mixed Python/Rust** (`examples/mixed_sub/pyproject.toml`):
+**Mixed Python/Rust** (`examples/mixed/pyproject.toml`):
 ```toml
 [tool.maturin]
 python-source = "python"
-module-name = "mixed_sub.main_mod"
+module-name = "mixed.main_mod"
 ```
 → `python_root` = `<project_root>/python`
 
@@ -134,7 +134,7 @@ The `register_submodules` method automatically detects module hierarchies and cr
 **Purpose**: In mixed Python/Rust layout, detected submodules are added as import statements in the parent's `__init__.pyi`:
 
 ```python
-# mixed_sub/main_mod/__init__.pyi
+# mixed/main_mod/__init__.pyi
 from . import mod_a
 from . import mod_b
 from . import int
@@ -143,13 +143,13 @@ from . import int
 **Example:**
 
 Given these modules registered via `#[gen_stub_pyfunction(module = "...")]`:
-- `mixed_sub.main_mod`
-- `mixed_sub.main_mod.mod_a`
-- `mixed_sub.main_mod.mod_b`
-- `mixed_sub.main_mod.int`
+- `mixed.main_mod`
+- `mixed.main_mod.mod_a`
+- `mixed.main_mod.mod_b`
+- `mixed.main_mod.int`
 
 The detector creates:
-- `mixed_sub.main_mod.submodules = {"mod_a", "mod_b", "int"}`
+- `mixed.main_mod.submodules = {"mod_a", "mod_b", "int"}`
 
 This results in:
 - **Files generated**: `main_mod/__init__.pyi`, `main_mod/mod_a/__init__.pyi`, `main_mod/mod_b/__init__.pyi`, `main_mod/int/__init__.pyi`
@@ -191,9 +191,9 @@ pure/
 
 **Project Structure:**
 ```
-mixed_sub/
+mixed/
 ├── python/
-│   └── mixed_sub/
+│   └── mixed/
 │       ├── main_mod.cpython-313-darwin.so
 │       └── main_mod/                  # Directory for stubs
 │           ├── __init__.pyi           # Generated stub
@@ -212,28 +212,28 @@ mixed_sub/
 ```toml
 [tool.maturin]
 python-source = "python"
-module-name = "mixed_sub.main_mod"
+module-name = "mixed.main_mod"
 ```
 
 **Rust Code:**
 ```rust
 // Main module
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod")]
+#[gen_stub_pyfunction(module = "mixed.main_mod")]
 #[pyfunction]
 fn greet_main() { ... }
 
 // Submodule A
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_a")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_a")]
 #[pyfunction]
 fn greet_a() { ... }
 
 // Submodule B
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.mod_b")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.mod_b")]
 #[pyfunction]
 fn greet_b() { ... }
 
 // Submodule int
-#[gen_stub_pyfunction(module = "mixed_sub.main_mod.int")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.int")]
 #[pyfunction]
 fn dummy_int_fun(x: usize) -> usize { ... }
 
@@ -257,18 +257,18 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 - **`python_root`**: `<project_root>/python`
 
 **Behavior:**
-- Module name: `mixed_sub.main_mod`
+- Module name: `mixed.main_mod`
 - **Has submodules**: `mod_a`, `mod_b`, `int` detected via module paths
 - **Output**:
-  - `python/mixed_sub/main_mod/__init__.pyi` (main module)
-  - `python/mixed_sub/main_mod/mod_a/__init__.pyi` (submodule)
-  - `python/mixed_sub/main_mod/mod_b/__init__.pyi` (submodule)
-  - `python/mixed_sub/main_mod/int/__init__.pyi` (submodule)
+  - `python/mixed/main_mod/__init__.pyi` (main module)
+  - `python/mixed/main_mod/mod_a/__init__.pyi` (submodule)
+  - `python/mixed/main_mod/mod_b/__init__.pyi` (submodule)
+  - `python/mixed/main_mod/int/__init__.pyi` (submodule)
 
 **Coexistence:**
 - `main_mod.cpython-313-darwin.so` (native module **file**)
 - `main_mod/` (stub **directory**)
-- Both coexist in `python/mixed_sub/` thanks to Python's import system
+- Both coexist in `python/mixed/` thanks to Python's import system
 
 **Generated `__init__.pyi`:**
 ```python

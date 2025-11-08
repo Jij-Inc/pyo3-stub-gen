@@ -1,5 +1,5 @@
 [package]
-name = "mixed_sub"
+name = "mixed"
 description = "Example for Mixed Rust/Python layout with submodule"
 version.workspace = true
 edition.workspace = true

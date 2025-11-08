@@ -1,4 +1,4 @@
-from mixed_sub import main_mod
+from mixed import main_mod
 
 
 def test_main_mod():

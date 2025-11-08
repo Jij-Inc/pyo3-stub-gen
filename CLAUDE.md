@@ -11,7 +11,7 @@ This is a Python stub file (*.pyi) generator for PyO3-based Rust projects. It au
 ### Workspace Structure
 - `pyo3-stub-gen/` - Core library for stub generation
 - `pyo3-stub-gen-derive/` - Procedural macros for automatic metadata collection
-- `examples/` - Example projects showing different maturin layouts (pure, mixed_sub, etc.)
+- `examples/` - Example projects showing different maturin layouts (pure, mixed, etc.)
 
 ### Three-Phase Generation Process
 1. **Compile-time**: Procedural macros (`#[gen_stub_pyclass]`, `#[gen_stub_pyfunction]`) extract type information using the `inventory` crate
@@ -47,14 +47,14 @@ task stub-gen
 # Run comprehensive tests (pytest + pyright + ruff) for all examples  
 task test
 
-# Work with specific example (replace 'pure' with mixed_sub, etc.)
+# Work with specific example (replace 'pure' with mixed, etc.)
 task pure:stub-gen
 task pure:test
 ```
 
 ### Individual Example Commands
 ```bash
-cd examples/pure  # or mixed_sub, etc.
+cd examples/pure  # or mixed, etc.
 
 # Generate stub files
 cargo run --bin stub_gen
