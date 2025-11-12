@@ -19,8 +19,8 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn gen_stub_pyclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    gen_stub::pyclass(item.into())
+pub fn gen_stub_pyclass(attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pyclass(attr.into(), item.into())
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }

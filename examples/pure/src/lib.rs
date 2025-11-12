@@ -6,6 +6,7 @@ mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
+mod skip_stub_type_test;
 
 use custom_exceptions::*;
 use manual_overloading::*;
@@ -13,6 +14,7 @@ use manual_submit::*;
 use overloading::*;
 use overriding::*;
 use rust_type_marker::*;
+use skip_stub_type_test::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
@@ -435,6 +437,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Calculator>()?;
     m.add_class::<InstanceValue>()?;
     m.add_class::<Problem>()?;
+    m.add_class::<CustomStubType>()?;
+    m.add_class::<NormalClass>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;

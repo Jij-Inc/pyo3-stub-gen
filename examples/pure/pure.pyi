@@ -101,6 +101,18 @@ class ComparableStruct:
     def __new__(cls, value: builtins.int) -> ComparableStruct: ...
 
 @typing.final
+class CustomStubType:
+    r"""
+    Test class with manually defined PyStubType
+    """
+    @property
+    def value(self) -> builtins.int: ...
+    @value.setter
+    def value(self, value: builtins.int) -> None: ...
+    def __new__(cls, value: builtins.int) -> CustomStubType: ...
+    def increment(self) -> builtins.int: ...
+
+@typing.final
 class DataContainer:
     @property
     def value(self) -> builtins.int: ...
@@ -164,6 +176,17 @@ class MyDate(datetime.date):
 
 class MyError(builtins.RuntimeError):
     ...
+
+@typing.final
+class NormalClass:
+    r"""
+    Test class without skip_stub_type (normal behavior)
+    """
+    @property
+    def value(self) -> builtins.str: ...
+    @value.setter
+    def value(self, value: builtins.str) -> None: ...
+    def __new__(cls, value: builtins.str) -> NormalClass: ...
 
 @typing.final
 class NotIntError(builtins.TypeError):

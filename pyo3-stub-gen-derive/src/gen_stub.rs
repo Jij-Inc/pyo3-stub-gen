@@ -109,18 +109,29 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result};
 
-pub fn pyclass(item: TokenStream2) -> Result<TokenStream2> {
+pub fn pyclass(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+    let attr = parse2::<pyclass::PyClassAttr>(attr)?;
     let mut item_struct = parse2::<ItemStruct>(item)?;
     let inner = PyClassInfo::try_from(item_struct.clone())?;
     let derive_stub_type = StubType::from(&inner);
     pyclass::prune_attrs(&mut item_struct);
-    Ok(quote! {
-        #item_struct
-        #derive_stub_type
-        pyo3_stub_gen::inventory::submit! {
-            #inner
-        }
-    })
+
+    if attr.skip_stub_type {
+        Ok(quote! {
+            #item_struct
+            pyo3_stub_gen::inventory::submit! {
+                #inner
+            }
+        })
+    } else {
+        Ok(quote! {
+            #item_struct
+            #derive_stub_type
+            pyo3_stub_gen::inventory::submit! {
+                #inner
+            }
+        })
+    }
 }
 
 pub fn pyclass_enum(item: TokenStream2) -> Result<TokenStream2> {
