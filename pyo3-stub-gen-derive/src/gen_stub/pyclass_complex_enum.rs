@@ -2,21 +2,7 @@ use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubT
 use crate::gen_stub::variant::VariantInfo;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
-use syn::parse::{Parse, ParseStream};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
-
-/// Attributes for `#[gen_stub_pyclass_complex_enum(...)]`
-#[derive(Default)]
-pub(crate) struct PyComplexEnumAttr {
-    pub(crate) skip_stub_type: bool,
-}
-
-impl Parse for PyComplexEnumAttr {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let skip_stub_type = super::attr::parse_flag_attribute(input, "skip_stub_type")?;
-        Ok(Self { skip_stub_type })
-    }
-}
 
 pub struct PyComplexEnumInfo {
     pyclass_name: String,

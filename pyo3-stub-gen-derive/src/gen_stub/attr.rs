@@ -541,46 +541,43 @@ impl Parse for OverrideTypeAttribute {
     }
 }
 
-/// Parse a single boolean flag attribute (like `skip_stub_type`)
-///
-/// This is a common helper function used across PyClassAttr, PyEnumAttr, and PyComplexEnumAttr
-/// to parse flag-style attributes that don't take values.
-///
-/// # Arguments
-/// * `input` - The ParseStream to parse from
-/// * `flag_name` - The name of the flag to check for (e.g., "skip_stub_type")
-///
-/// # Returns
-/// * `Ok(true)` if the flag was found
-/// * `Err` if an unknown parameter was encountered
-pub(crate) fn parse_flag_attribute(input: ParseStream, flag_name: &str) -> Result<bool> {
-    let mut flag_found = false;
+/// Common attributes for `#[gen_stub_pyclass(...)]`, `#[gen_stub_pyclass_enum(...)]`,
+/// and `#[gen_stub_pyclass_complex_enum(...)]` macros
+#[derive(Default)]
+pub struct PyClassAttr {
+    pub skip_stub_type: bool,
+}
 
-    // Parse comma-separated key-value pairs or flags
-    while !input.is_empty() {
-        let key: Ident = input.parse()?;
+impl Parse for PyClassAttr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut skip_stub_type = false;
 
-        match key.to_string().as_str() {
-            name if name == flag_name => {
-                flag_found = true;
+        // Parse comma-separated flags
+        while !input.is_empty() {
+            let key: Ident = input.parse()?;
+
+            match key.to_string().as_str() {
+                "skip_stub_type" => {
+                    skip_stub_type = true;
+                }
+                _ => {
+                    return Err(syn::Error::new(
+                        key.span(),
+                        format!("Unknown parameter: {}", key),
+                    ));
+                }
             }
-            _ => {
-                return Err(syn::Error::new(
-                    key.span(),
-                    format!("Unknown parameter: {}", key),
-                ));
+
+            // Check for comma separator
+            if input.peek(Token![,]) {
+                let _: Token![,] = input.parse()?;
+            } else {
+                break;
             }
         }
 
-        // Check for comma separator
-        if input.peek(Token![,]) {
-            let _: Token![,] = input.parse()?;
-        } else {
-            break;
-        }
+        Ok(Self { skip_stub_type })
     }
-
-    Ok(flag_found)
 }
 
 #[cfg(test)]
