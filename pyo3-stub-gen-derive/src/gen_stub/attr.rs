@@ -541,6 +541,48 @@ impl Parse for OverrideTypeAttribute {
     }
 }
 
+/// Parse a single boolean flag attribute (like `skip_stub_type`)
+///
+/// This is a common helper function used across PyClassAttr, PyEnumAttr, and PyComplexEnumAttr
+/// to parse flag-style attributes that don't take values.
+///
+/// # Arguments
+/// * `input` - The ParseStream to parse from
+/// * `flag_name` - The name of the flag to check for (e.g., "skip_stub_type")
+///
+/// # Returns
+/// * `Ok(true)` if the flag was found
+/// * `Err` if an unknown parameter was encountered
+pub(crate) fn parse_flag_attribute(input: ParseStream, flag_name: &str) -> Result<bool> {
+    let mut flag_found = false;
+
+    // Parse comma-separated key-value pairs or flags
+    while !input.is_empty() {
+        let key: Ident = input.parse()?;
+
+        match key.to_string().as_str() {
+            name if name == flag_name => {
+                flag_found = true;
+            }
+            _ => {
+                return Err(syn::Error::new(
+                    key.span(),
+                    format!("Unknown parameter: {}", key),
+                ));
+            }
+        }
+
+        // Check for comma separator
+        if input.peek(Token![,]) {
+            let _: Token![,] = input.parse()?;
+        } else {
+            break;
+        }
+    }
+
+    Ok(flag_found)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

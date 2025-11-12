@@ -13,32 +13,7 @@ pub(crate) struct PyEnumAttr {
 
 impl Parse for PyEnumAttr {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut skip_stub_type = false;
-
-        // Parse comma-separated key-value pairs or flags
-        while !input.is_empty() {
-            let key: syn::Ident = input.parse()?;
-
-            match key.to_string().as_str() {
-                "skip_stub_type" => {
-                    skip_stub_type = true;
-                }
-                _ => {
-                    return Err(Error::new(
-                        key.span(),
-                        format!("Unknown parameter: {}", key),
-                    ));
-                }
-            }
-
-            // Check for comma separator
-            if input.peek(syn::token::Comma) {
-                let _: syn::token::Comma = input.parse()?;
-            } else {
-                break;
-            }
-        }
-
+        let skip_stub_type = super::attr::parse_flag_attribute(input, "skip_stub_type")?;
         Ok(Self { skip_stub_type })
     }
 }
