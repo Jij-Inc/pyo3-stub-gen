@@ -541,6 +541,45 @@ impl Parse for OverrideTypeAttribute {
     }
 }
 
+/// Common attributes for `#[gen_stub_pyclass(...)]`, `#[gen_stub_pyclass_enum(...)]`,
+/// and `#[gen_stub_pyclass_complex_enum(...)]` macros
+#[derive(Default)]
+pub struct PyClassAttr {
+    pub skip_stub_type: bool,
+}
+
+impl Parse for PyClassAttr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut skip_stub_type = false;
+
+        // Parse comma-separated flags
+        while !input.is_empty() {
+            let key: Ident = input.parse()?;
+
+            match key.to_string().as_str() {
+                "skip_stub_type" => {
+                    skip_stub_type = true;
+                }
+                _ => {
+                    return Err(syn::Error::new(
+                        key.span(),
+                        format!("Unknown parameter: {}", key),
+                    ));
+                }
+            }
+
+            // Check for comma separator
+            if input.peek(Token![,]) {
+                let _: Token![,] = input.parse()?;
+            } else {
+                break;
+            }
+        }
+
+        Ok(Self { skip_stub_type })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
