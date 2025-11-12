@@ -39,8 +39,8 @@ pub fn gen_stub_pyclass(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    gen_stub::pyclass_enum(item.into())
+pub fn gen_stub_pyclass_enum(attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pyclass_enum(attr.into(), item.into())
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
@@ -59,8 +59,8 @@ pub fn gen_stub_pyclass_enum(_attr: TokenStream, item: TokenStream) -> TokenStre
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn gen_stub_pyclass_complex_enum(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    gen_stub::pyclass_complex_enum(item.into())
+pub fn gen_stub_pyclass_complex_enum(attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::pyclass_complex_enum(attr.into(), item.into())
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }

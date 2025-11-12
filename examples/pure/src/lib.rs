@@ -439,6 +439,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Problem>()?;
     m.add_class::<CustomStubType>()?;
     m.add_class::<NormalClass>()?;
+    m.add_class::<CustomEnum>()?;
+    m.add_class::<CustomComplexEnum>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;

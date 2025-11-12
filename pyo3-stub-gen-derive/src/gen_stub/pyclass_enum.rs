@@ -1,8 +1,47 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
+use syn::parse::{Parse, ParseStream};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
 
 use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
+
+/// Attributes for `#[gen_stub_pyclass_enum(...)]`
+#[derive(Default)]
+pub(crate) struct PyEnumAttr {
+    pub(crate) skip_stub_type: bool,
+}
+
+impl Parse for PyEnumAttr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut skip_stub_type = false;
+
+        // Parse comma-separated key-value pairs or flags
+        while !input.is_empty() {
+            let key: syn::Ident = input.parse()?;
+
+            match key.to_string().as_str() {
+                "skip_stub_type" => {
+                    skip_stub_type = true;
+                }
+                _ => {
+                    return Err(Error::new(
+                        key.span(),
+                        format!("Unknown parameter: {}", key),
+                    ));
+                }
+            }
+
+            // Check for comma separator
+            if input.peek(syn::token::Comma) {
+                let _: syn::token::Comma = input.parse()?;
+            } else {
+                break;
+            }
+        }
+
+        Ok(Self { skip_stub_type })
+    }
+}
 
 pub struct PyEnumInfo {
     pyclass_name: String,

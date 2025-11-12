@@ -50,3 +50,37 @@ impl NormalClass {
         Self { value }
     }
 }
+
+/// Test enum with skip_stub_type
+#[gen_stub_pyclass_enum(skip_stub_type)]
+#[pyclass]
+pub enum CustomEnum {
+    #[pyo3(name = "OPTION_A")]
+    OptionA,
+    #[pyo3(name = "OPTION_B")]
+    OptionB,
+}
+
+// Manually implement PyStubType for the enum
+impl pyo3_stub_gen::PyStubType for CustomEnum {
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        pyo3_stub_gen::TypeInfo::with_module("CustomEnum", "pure".into())
+    }
+}
+
+/// Test complex enum with skip_stub_type
+#[gen_stub_pyclass_complex_enum(skip_stub_type)]
+#[pyclass]
+pub enum CustomComplexEnum {
+    #[pyo3(name = "VARIANT_A")]
+    VariantA { value: i32 },
+    #[pyo3(name = "VARIANT_B")]
+    VariantB(String),
+}
+
+// Manually implement PyStubType for the complex enum
+impl pyo3_stub_gen::PyStubType for CustomComplexEnum {
+    fn type_output() -> pyo3_stub_gen::TypeInfo {
+        pyo3_stub_gen::TypeInfo::with_module("CustomComplexEnum", "pure".into())
+    }
+}
