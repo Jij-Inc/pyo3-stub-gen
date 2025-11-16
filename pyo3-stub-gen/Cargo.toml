@@ -31,6 +31,7 @@ path = "../pyo3-stub-gen-derive"
 
 [dev-dependencies]
 test-case.workspace = true
+tempfile = "3.10"
 
 [features]
 default = ["numpy", "either", "infer_signature", "ordered-float"]

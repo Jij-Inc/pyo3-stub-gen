@@ -97,10 +97,11 @@ struct StubInfoBuilder {
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject) -> Self {
         let is_mixed_layout = pyproject.python_source().is_some();
-        let python_root = pyproject
-            .python_source()
-            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
-
+        let python_root = pyproject.output_dir().unwrap_or(
+            pyproject
+                .python_source()
+                .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())),
+        );
         Self {
             modules: BTreeMap::new(),
             default_module_name: pyproject.module_name().to_string(),
@@ -454,5 +455,66 @@ mod tests {
         assert!(
             err_msg.contains("Pure Rust layout does not support multiple modules or submodules")
         );
+    }
+
+    #[test]
+    fn test_stub_info_uses_pyo3_stub_gen_output_dir() {
+        use std::fs;
+        use std::io::Write;
+        use tempfile::TempDir;
+
+        // Create a temporary directory with a pyproject.toml
+        let temp_dir = TempDir::new().unwrap();
+        let toml_path = temp_dir.path().join("pyproject.toml");
+
+        let toml_content = r#"
+[project]
+name = "test-package"
+
+[tool.maturin]
+python-source = "python"
+
+[tool.pyo3-stub-gen]
+output-dir = "stubs"
+"#;
+
+        let mut file = fs::File::create(&toml_path).unwrap();
+        file.write_all(toml_content.as_bytes()).unwrap();
+        drop(file);
+
+        // Create the stub info from pyproject.toml
+        let stub_info = StubInfo::from_pyproject_toml(&toml_path).unwrap();
+
+        // Verify that python_root points to the output-dir, not python-source
+        assert_eq!(stub_info.python_root, temp_dir.path().join("stubs"));
+    }
+
+    #[test]
+    fn test_stub_info_falls_back_to_python_source() {
+        use std::fs;
+        use std::io::Write;
+        use tempfile::TempDir;
+
+        // Create a temporary directory with a pyproject.toml
+        let temp_dir = TempDir::new().unwrap();
+        let toml_path = temp_dir.path().join("pyproject.toml");
+
+        let toml_content = r#"
+[project]
+name = "test-package"
+
+[tool.maturin]
+python-source = "python"
+"#;
+
+        let mut file = fs::File::create(&toml_path).unwrap();
+        file.write_all(toml_content.as_bytes()).unwrap();
+        drop(file);
+
+        // Create the stub info from pyproject.toml
+        let stub_info = StubInfo::from_pyproject_toml(&toml_path).unwrap();
+
+        // Verify that python_root falls back to python-source
+        assert_eq!(stub_info.python_root, temp_dir.path().join("python"));
     }
 }
