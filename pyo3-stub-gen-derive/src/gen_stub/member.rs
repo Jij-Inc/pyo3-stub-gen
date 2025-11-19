@@ -257,7 +257,7 @@ impl MemberInfo {
             .to_string();
 
         Ok(Self {
-            name: name,
+            name,
             r#type: TypeOrOverride::RustType { r#type: ty },
             doc,
             default,
