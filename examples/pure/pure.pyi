@@ -100,6 +100,40 @@ class ComparableStruct:
     def __ge__(self, other: builtins.object) -> builtins.bool: ...
     def __new__(cls, value: builtins.int) -> ComparableStruct: ...
 
+class CustomComplexEnum:
+    r"""
+    Test complex enum with skip_stub_type
+    """
+    @typing.final
+    class VARIANT_A(CustomComplexEnum):
+        __match_args__ = ("value",)
+        @property
+        def value(self) -> builtins.int: ...
+        def __new__(cls, value: builtins.int) -> CustomComplexEnum.VARIANT_A: ...
+    
+    @typing.final
+    class VARIANT_B(CustomComplexEnum):
+        __match_args__ = ("_0",)
+        @property
+        def _0(self) -> builtins.str: ...
+        def __new__(cls, _0: builtins.str) -> CustomComplexEnum.VARIANT_B: ...
+        def __len__(self) -> builtins.int: ...
+        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+    
+    ...
+
+@typing.final
+class CustomStubType:
+    r"""
+    Test class with manually defined PyStubType
+    """
+    @property
+    def value(self) -> builtins.int: ...
+    @value.setter
+    def value(self, value: builtins.int) -> None: ...
+    def __new__(cls, value: builtins.int) -> CustomStubType: ...
+    def increment(self) -> builtins.int: ...
+
 @typing.final
 class DataContainer:
     @property
@@ -164,6 +198,17 @@ class MyDate(datetime.date):
 
 class MyError(builtins.RuntimeError):
     ...
+
+@typing.final
+class NormalClass:
+    r"""
+    Test class without skip_stub_type (normal behavior)
+    """
+    @property
+    def value(self) -> builtins.str: ...
+    @value.setter
+    def value(self, value: builtins.str) -> None: ...
+    def __new__(cls, value: builtins.str) -> NormalClass: ...
 
 @typing.final
 class NotIntError(builtins.TypeError):
@@ -357,6 +402,14 @@ class TypeIgnoreTest:
         r"""
         Test method with type: ignore (without equals for catch-all)
         """
+
+@typing.final
+class CustomEnum(enum.Enum):
+    r"""
+    Test enum with skip_stub_type
+    """
+    OPTION_A = ...
+    OPTION_B = ...
 
 @typing.final
 class Number(enum.Enum):
