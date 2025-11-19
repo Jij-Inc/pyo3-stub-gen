@@ -180,8 +180,14 @@ impl TryFrom<Field> for MemberInfo {
         let doc = extract_documents(&attrs).join("\n");
         let default = parse_gen_stub_default(&attrs)?;
         let deprecated = crate::gen_stub::attr::extract_deprecated(&attrs);
+        let base_name = field_name.unwrap_or_else(|| ident.unwrap().to_string());
+        let name = base_name
+            .strip_prefix("r#")
+            .unwrap_or(&base_name)
+            .to_string();
+
         Ok(Self {
-            name: field_name.unwrap_or(ident.unwrap().to_string()),
+            name: name,
             r#type: TypeOrOverride::RustType { r#type: ty },
             doc,
             default,
