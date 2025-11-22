@@ -7,10 +7,10 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "overload_example_1", parameters
     : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "x", kind :
     ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, default :
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, doc : "", module : None, is_async : false,
     deprecated : None, type_ignored : None, is_overload : true, file : file!(), line :
     line!(), column : column!(), index : 0usize, }

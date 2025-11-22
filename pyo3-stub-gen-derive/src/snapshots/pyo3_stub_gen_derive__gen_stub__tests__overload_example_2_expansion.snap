@@ -7,10 +7,10 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "overload_example_2", parameters
     : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "ob", kind :
     ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, default :
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, doc : "Increments integer by 1", module :
     None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
     file : file!(), line : line!(), column : column!(), index : 0usize, }
@@ -20,10 +20,10 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "overload_example_2", parameters
     : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "ob", kind :
     ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : ||
-    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, default :
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : ||
-    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), import :
+    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, import :
     ::std::collections::HashSet::from([]) }, doc : "Increments float by 1", module :
     None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
     file : file!(), line : line!(), column : column!(), index : 1usize, }

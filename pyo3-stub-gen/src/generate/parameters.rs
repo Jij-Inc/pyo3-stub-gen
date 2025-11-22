@@ -54,13 +54,13 @@ impl fmt::Display for Parameter {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             ParameterKind::VarPositional => {
-                write!(f, "*{}: {}", self.name, self.type_info)
+                write!(f, "*{}: {}", self.name, self.type_info.as_annotation())
             }
             ParameterKind::VarKeyword => {
-                write!(f, "**{}: {}", self.name, self.type_info)
+                write!(f, "**{}: {}", self.name, self.type_info.as_annotation())
             }
             _ => {
-                write!(f, "{}: {}", self.name, self.type_info)?;
+                write!(f, "{}: {}", self.name, self.type_info.as_annotation())?;
                 match &self.default {
                     ParameterDefault::None => Ok(()),
                     ParameterDefault::Expr(expr) => write!(f, " = {}", expr),

@@ -3,18 +3,28 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
+            quote,
             import,
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_output();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
+            quote,
             import,
         }
     }
@@ -40,10 +50,15 @@ impl<T: PyStubType, E> PyStubType for Result<T, E> {
 
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
+            quote,
             import,
         }
     }
@@ -54,10 +69,15 @@ impl<T: PyStubType> PyStubType for Vec<T> {
 
 impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
+            quote,
             import,
         }
     }
@@ -89,32 +109,38 @@ macro_rules! impl_map_inner {
         fn type_input() -> TypeInfo {
             let TypeInfo {
                 name: key_name,
+                quote: key_quote,
                 mut import,
             } = Key::type_input();
             let TypeInfo {
                 name: value_name,
+                quote: value_quote,
                 import: value_import,
             } = Value::type_input();
             import.extend(value_import);
             import.insert("typing".into());
             TypeInfo {
                 name: format!("typing.Mapping[{}, {}]", key_name, value_name),
+                quote: key_quote || value_quote,
                 import,
             }
         }
         fn type_output() -> TypeInfo {
             let TypeInfo {
                 name: key_name,
+                quote: key_quote,
                 mut import,
             } = Key::type_output();
             let TypeInfo {
                 name: value_name,
+                quote: value_quote,
                 import: value_import,
             } = Value::type_output();
             import.extend(value_import);
             import.insert("builtins".into());
             TypeInfo {
                 name: format!("builtins.dict[{}, {}]", key_name, value_name),
+                quote: key_quote || value_quote,
                 import,
             }
         }
@@ -140,27 +166,33 @@ macro_rules! impl_tuple {
         impl<$($T: PyStubType),*> PyStubType for ($($T),* ,) {
             fn type_output() -> TypeInfo {
                 let mut merged = HashSet::new();
+                let mut quote_any = false;
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_output();
+                let TypeInfo { name, quote, import } = $T::type_output();
                 names.push(name);
+                quote_any = quote_any || quote;
                 merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
+                    quote: quote_any,
                     import: merged,
                 }
             }
             fn type_input() -> TypeInfo {
                 let mut merged = HashSet::new();
+                let mut quote_any = false;
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_input();
+                let TypeInfo { name, quote, import } = $T::type_input();
                 names.push(name);
+                quote_any = quote_any || quote;
                 merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
+                    quote: quote_any,
                     import: merged,
                 }
             }

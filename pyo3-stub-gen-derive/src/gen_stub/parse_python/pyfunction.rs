@@ -313,6 +313,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -320,6 +321,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "A simple function",
@@ -359,6 +361,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
@@ -369,6 +372,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "typing.Optional[int]".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([
                     "typing".into(),
                     "collections.abc".into(),
@@ -411,6 +415,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "collections.abc.Callable[[str], typing.Any]".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([
                             "collections.abc".into(),
                             "typing".into(),
@@ -421,6 +426,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "collections.abc.Callable[[str], typing.Any]".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([
                     "collections.abc".into(),
                     "typing".into(),
@@ -461,6 +467,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -470,6 +477,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -479,6 +487,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "typing.Optional[int]".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -486,6 +495,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from(["typing".into()]),
             },
             doc: "",
@@ -522,6 +532,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -562,6 +573,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -569,6 +581,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "str".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Fetch data from URL",
@@ -606,6 +619,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -613,6 +627,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "This function is deprecated",
@@ -653,6 +668,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -660,6 +676,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "This function is deprecated",
@@ -775,6 +792,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -784,6 +802,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -793,6 +812,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -802,6 +822,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "bool".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
@@ -814,6 +835,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "None".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from(["typing".into()]),
             },
             doc: "Test keyword-only parameters",
@@ -850,6 +872,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -859,6 +882,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -868,6 +892,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -875,6 +900,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Test positional-only parameters",
@@ -912,6 +938,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -919,6 +946,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Integer overload",
@@ -962,6 +990,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -969,6 +998,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Integer overload",
@@ -994,6 +1024,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "float".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -1001,6 +1032,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "float".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Float overload",
@@ -1039,6 +1071,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "list[int]".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -1048,6 +1081,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "typing.Literal[True]".to_string(),
+                        quote: false,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -1055,6 +1089,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "tuple[int, ...]".to_string(),
+                quote: false,
                 import: ::std::collections::HashSet::from(["typing".into()]),
             },
             doc: "Return as tuple",
