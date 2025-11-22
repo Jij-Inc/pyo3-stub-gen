@@ -114,6 +114,7 @@ impl ToTokens for ParameterWithKind {
                         kind: #kind,
                         type_info: || ::pyo3_stub_gen::TypeInfo {
                             name: #type_repr.to_string(),
+                            quote: false,
                             import: ::std::collections::HashSet::from([#(#imports.into(),)*])
                         },
                         default: #default_tokens,

@@ -73,7 +73,8 @@ impl fmt::Display for GetterDisplay<'_> {
         write!(
             f,
             "{indent}@property\n{indent}def {}(self) -> {}:",
-            self.0.name, self.0.r#type
+            self.0.name,
+            self.0.r#type.as_annotation()
         )?;
         let doc = if let Some(default) = &self.0.default {
             if default == "..." {
