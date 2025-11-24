@@ -30,6 +30,7 @@ pub struct MethodInfo {
     pub(super) is_async: bool,
     pub(super) deprecated: Option<DeprecatedInfo>,
     pub(super) type_ignored: Option<IgnoreTarget>,
+    pub(super) is_overload: bool,
 }
 
 fn replace_inner(ty: &mut Type, self_: &Type) {
@@ -130,6 +131,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
             is_async: sig.asyncness.is_some(),
             deprecated,
             type_ignored,
+            is_overload: false,
         })
     }
 }
@@ -145,6 +147,7 @@ impl ToTokens for MethodInfo {
             is_async,
             deprecated,
             type_ignored,
+            is_overload,
         } = self;
 
         let ret_tt = if let Some(ret) = ret {
@@ -202,6 +205,7 @@ impl ToTokens for MethodInfo {
                 is_async: #is_async,
                 deprecated: #deprecated_tt,
                 type_ignored: #type_ignored_tt,
+                is_overload: #is_overload,
             }
         })
     }

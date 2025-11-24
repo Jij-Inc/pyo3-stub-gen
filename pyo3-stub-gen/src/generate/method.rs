@@ -16,6 +16,8 @@ pub struct MethodDef {
     pub is_async: bool,
     pub deprecated: Option<DeprecatedInfo>,
     pub type_ignored: Option<IgnoreTarget>,
+    /// Whether this method is marked as an overload variant
+    pub is_overload: bool,
 }
 
 impl Import for MethodDef {
@@ -41,6 +43,7 @@ impl From<&MethodInfo> for MethodDef {
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
             type_ignored: info.type_ignored,
+            is_overload: info.is_overload,
         }
     }
 }

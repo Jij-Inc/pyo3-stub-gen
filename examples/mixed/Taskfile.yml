@@ -15,4 +15,5 @@ tasks:
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes -p mixed.main_mod
-      - uv run stubtest mixed.main_mod --ignore-missing-stub --ignore-disjoint-bases
+      # stubtest is disabled for this example due to PyO3 nested submodule limitations
+      # See README.md for details

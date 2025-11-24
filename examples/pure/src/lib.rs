@@ -1,16 +1,20 @@
 #![allow(deprecated)]
 
 mod custom_exceptions;
+mod manual_overloading;
 mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
+mod skip_stub_type_test;
 
 use custom_exceptions::*;
+use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
 use overriding::*;
 use rust_type_marker::*;
+use skip_stub_type_test::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
@@ -179,9 +183,11 @@ fn print_c(c: Option<C>) {
         println!("None");
     }
 }
-impl FromPyObject<'_> for C {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Ok(C { x: ob.extract()? })
+impl FromPyObject<'_, '_> for C {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, '_, PyAny>) -> Result<Self, Self::Error> {
+        Ok(C { x: obj.extract()? })
     }
 }
 impl pyo3_stub_gen::PyStubType for C {
@@ -422,8 +428,8 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NumberComplex>()?;
     m.add_class::<Shape1>()?;
     m.add_class::<Shape2>()?;
-    m.add_class::<Incrementer>()?;
-    m.add_class::<Incrementer2>()?;
+    m.add_class::<ManualSubmit>()?;
+    m.add_class::<PartialManualSubmit>()?;
     m.add_class::<OverrideType>()?;
     m.add_class::<ComparableStruct>()?;
     m.add_class::<HashableStruct>()?;
@@ -433,6 +439,10 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<Calculator>()?;
     m.add_class::<InstanceValue>()?;
     m.add_class::<Problem>()?;
+    m.add_class::<CustomStubType>()?;
+    m.add_class::<NormalClass>()?;
+    m.add_class::<CustomEnum>()?;
+    m.add_class::<CustomComplexEnum>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -450,6 +460,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(overload_example_1, m)?)?;
     m.add_function(wrap_pyfunction!(overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(as_tuple, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_example_1, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_example_2, m)?)?;
+    m.add_function(wrap_pyfunction!(manual_overload_as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;

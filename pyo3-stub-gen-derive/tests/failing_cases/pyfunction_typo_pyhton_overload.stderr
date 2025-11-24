@@ -1,0 +1,19 @@
+error: Unknown parameter: pyhton_overload
+ --> tests/failing_cases/pyfunction_typo_pyhton_overload.rs:4:23
+  |
+4 | #[gen_stub_pyfunction(pyhton_overload = r#"
+  |                       ^^^^^^^^^^^^^^^
+
+warning: unused import: `pyo3::prelude::*`
+ --> tests/failing_cases/pyfunction_typo_pyhton_overload.rs:1:5
+  |
+1 | use pyo3::prelude::*;
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0601]: `main` function not found in crate `$CRATE`
+  --> tests/failing_cases/pyfunction_typo_pyhton_overload.rs:10:2
+   |
+10 | }
+   |  ^ consider adding a `main` function to `$DIR/tests/failing_cases/pyfunction_typo_pyhton_overload.rs`

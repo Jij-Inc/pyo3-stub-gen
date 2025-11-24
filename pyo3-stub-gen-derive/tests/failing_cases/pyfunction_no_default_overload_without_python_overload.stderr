@@ -1,0 +1,21 @@
+error: The 'no_default_overload' parameter can only be used with 'python_overload'. Use 'python_overload' to define multiple overload signatures.
+ --> tests/failing_cases/pyfunction_no_default_overload_without_python_overload.rs:4:1
+  |
+4 | #[gen_stub_pyfunction(no_default_overload = true)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `gen_stub_pyfunction` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused import: `pyo3::prelude::*`
+ --> tests/failing_cases/pyfunction_no_default_overload_without_python_overload.rs:1:5
+  |
+1 | use pyo3::prelude::*;
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0601]: `main` function not found in crate `$CRATE`
+ --> tests/failing_cases/pyfunction_no_default_overload_without_python_overload.rs:8:2
+  |
+8 | }
+  |  ^ consider adding a `main` function to `$DIR/tests/failing_cases/pyfunction_no_default_overload_without_python_overload.rs`

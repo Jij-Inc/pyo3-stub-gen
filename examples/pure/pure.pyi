@@ -77,14 +77,14 @@ class B(A):
 
 @typing.final
 class Calculator:
+    def __new__(cls) -> Calculator: ...
+    def add(self, value: builtins.float) -> builtins.float: ...
     def multiply(self, other: Calculator) -> Calculator:
         r"""
         Multiply this calculator's result by another calculator's result.
         
         Using RustType marker for both input and output types.
         """
-    def __new__(cls) -> Calculator: ...
-    def add(self, value: builtins.float) -> builtins.float: ...
 
 @typing.final
 class ComparableStruct:
@@ -99,6 +99,40 @@ class ComparableStruct:
     def __gt__(self, other: builtins.object) -> builtins.bool: ...
     def __ge__(self, other: builtins.object) -> builtins.bool: ...
     def __new__(cls, value: builtins.int) -> ComparableStruct: ...
+
+class CustomComplexEnum:
+    r"""
+    Test complex enum with skip_stub_type
+    """
+    @typing.final
+    class VARIANT_A(CustomComplexEnum):
+        __match_args__ = ("value",)
+        @property
+        def value(self) -> builtins.int: ...
+        def __new__(cls, value: builtins.int) -> CustomComplexEnum.VARIANT_A: ...
+    
+    @typing.final
+    class VARIANT_B(CustomComplexEnum):
+        __match_args__ = ("_0",)
+        @property
+        def _0(self) -> builtins.str: ...
+        def __new__(cls, _0: builtins.str) -> CustomComplexEnum.VARIANT_B: ...
+        def __len__(self) -> builtins.int: ...
+        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+    
+    ...
+
+@typing.final
+class CustomStubType:
+    r"""
+    Test class with manually defined PyStubType
+    """
+    @property
+    def value(self) -> builtins.int: ...
+    @value.setter
+    def value(self, value: builtins.int) -> None: ...
+    def __new__(cls, value: builtins.int) -> CustomStubType: ...
+    def increment(self) -> builtins.int: ...
 
 @typing.final
 class DataContainer:
@@ -127,37 +161,6 @@ class HashableStruct:
     def __new__(cls, name: builtins.str) -> HashableStruct: ...
 
 @typing.final
-class Incrementer:
-    @typing.overload
-    def increment_1(self, x: int) -> int:
-        r"""
-        And this is for the second comment
-        """
-    @typing.overload
-    def increment_1(self, x: builtins.float) -> builtins.float:
-        r"""
-        This is the original doc comment
-        """
-    def __new__(cls) -> Incrementer: ...
-
-@typing.final
-class Incrementer2:
-    @typing.overload
-    def increment_2(self, x: int) -> int:
-        r"""
-        increment_2 for integers, submitted by hands
-        """
-    @typing.overload
-    def increment_2(self, x: float) -> float:
-        r"""
-        increment_2 for floats, submitted by hands
-        """
-    def __new__(cls) -> Incrementer2:
-        r"""
-        Constructor for Incrementer2
-        """
-
-@typing.final
 class InstanceValue:
     @property
     def data(self) -> builtins.str: ...
@@ -166,11 +169,46 @@ class InstanceValue:
     def __new__(cls, data: builtins.str) -> InstanceValue: ...
 
 @typing.final
+class ManualSubmit:
+    r"""
+    Demonstrates manual submission of class methods using the `submit!` macro
+    """
+    def __new__(cls) -> ManualSubmit:
+        r"""
+        Constructor for ManualSubmit class
+        """
+    def increment(self, x: float) -> float:
+        r"""
+        Add 1.0 to the input float
+        """
+    @typing.overload
+    def echo(self, obj: int) -> int:
+        r"""
+        If the input is an int, returns int
+        """
+    @typing.overload
+    def echo(self, obj: float) -> float:
+        r"""
+        If the input is a float, returns float
+        """
+
+@typing.final
 class MyDate(datetime.date):
     ...
 
 class MyError(builtins.RuntimeError):
     ...
+
+@typing.final
+class NormalClass:
+    r"""
+    Test class without skip_stub_type (normal behavior)
+    """
+    @property
+    def value(self) -> builtins.str: ...
+    @value.setter
+    def value(self, value: builtins.str) -> None: ...
+    def __new__(cls, value: builtins.str) -> NormalClass: ...
 
 @typing.final
 class NotIntError(builtins.TypeError):
@@ -227,11 +265,34 @@ class OverrideType:
     def error(self) -> typing_extensions.Never: ...
 
 @typing.final
+class PartialManualSubmit:
+    r"""
+    Example demonstrating manual submission mixed with proc-macro generated method info
+    """
+    @typing.overload
+    def echo_overloaded(self, obj: int) -> int:
+        r"""
+        Overloaded version for int input
+        """
+    @typing.overload
+    def echo_overloaded(self, obj: typing.Any) -> typing.Any: ...
+    def fn_override_type(self, cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+        r"""
+        Example method with complex type annotation, skipped from #[gen_stub_pymethods]
+        """
+    def __new__(cls) -> PartialManualSubmit:
+        r"""
+        The constructor for PartialManualSubmit
+        """
+    def echo(self, obj: typing.Any) -> typing.Any: ...
+
+@typing.final
 class Placeholder:
     @property
     def name(self) -> builtins.str: ...
     @name.setter
     def name(self, value: builtins.str) -> None: ...
+    def __new__(cls, name: builtins.str) -> Placeholder: ...
     def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
@@ -239,10 +300,10 @@ class Placeholder:
         This demonstrates keyword-only parameters (after *) which should be
         preserved in the generated stub file.
         """
-    def __new__(cls, name: builtins.str) -> Placeholder: ...
 
 @typing.final
 class Problem:
+    def __new__(cls) -> Problem: ...
     def evaluate(self, instance_data: builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
@@ -250,7 +311,6 @@ class Problem:
         This example demonstrates RustType marker usage within nested generic types
         such as dict value types. The marker should expand to the correct Python type.
         """
-    def __new__(cls) -> Problem: ...
 
 class Shape1:
     r"""
@@ -344,6 +404,14 @@ class TypeIgnoreTest:
         """
 
 @typing.final
+class CustomEnum(enum.Enum):
+    r"""
+    Test enum with skip_stub_type
+    """
+    OPTION_A = ...
+    OPTION_B = ...
+
+@typing.final
 class Number(enum.Enum):
     FLOAT = ...
     INTEGER = ...
@@ -375,15 +443,15 @@ def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
 @typing.overload
-def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
-    r"""
-    Convert sequence to list when tuple_out is False
-    """
-
-@typing.overload
 def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
     r"""
     Convert sequence to tuple when tuple_out is True
+    """
+
+@typing.overload
+def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
     """
 
 async def async_num() -> builtins.int: ...
@@ -436,14 +504,40 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     """
 
 @typing.overload
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+    r"""
+    Convert sequence to tuple when tuple_out is True
+    """
+
+@typing.overload
+def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+    r"""
+    Convert sequence to list when tuple_out is False
+    """
+
+@typing.overload
+def manual_overload_example_1(x: int) -> int: ...
+
+@typing.overload
+def manual_overload_example_1(x: builtins.float) -> builtins.float: ...
+
+@typing.overload
+def manual_overload_example_2(ob: int) -> int:
+    r"""
+    Increments integer by 1
+    """
+
+@typing.overload
+def manual_overload_example_2(ob: float) -> float:
+    r"""
+    Increments float by 1
+    """
+
+@typing.overload
 def overload_example_1(x: int) -> int: ...
 
 @typing.overload
-def overload_example_1(x: builtins.float) -> builtins.float:
-    r"""
-    First example: One generated with ordinary `#[gen_stub_pyfunction]`,
-    and then manually with `submit!` macro.
-    """
+def overload_example_1(x: builtins.float) -> builtins.float: ...
 
 @typing.overload
 def overload_example_2(ob: int) -> int:

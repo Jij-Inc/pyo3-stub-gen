@@ -2,7 +2,7 @@
 # ruff: noqa: E501, F401
 
 import typing
-from mixed_sub.main_mod import A, B
+from mixed.main_mod import A, B
 
 @typing.final
 class C:

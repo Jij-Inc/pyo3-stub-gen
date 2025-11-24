@@ -15,7 +15,6 @@ pyo3-stub-gen/
 └── examples/               # Example projects
     ├── pure/              # Pure Rust project with Python bindings
     ├── mixed/             # Mixed Rust/Python project
-    ├── mixed_sub/         # Mixed project with submodules
     └── ...                # Other maturin layout examples
 ```
 
@@ -269,7 +268,7 @@ pyo3-stub-gen/src/
 
 - **Build Integration**: Stub generation typically runs as part of the build process
 - **Package Inclusion**: Generated `.pyi` files are automatically included in wheels
-- **Project Layouts**: Supports all maturin layouts (pure, mixed, mixed_sub, etc.)
+- **Project Layouts**: Supports all maturin layouts (pure, mixed, etc.)
 
 ### With Python Type Checkers
 

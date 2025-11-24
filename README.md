@@ -40,12 +40,10 @@ If you are looking for a working example, please see the [examples](./examples/)
 | Example          | Description |
 |:-----------------|:------------|
 | [examples/pure]  | Example for [Pure Rust maturin project](https://www.maturin.rs/project_layout#pure-rust-project) |
-| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) |
-| [examples/mixed_sub] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
+| [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
 
 [examples/pure]: ./examples/pure/
 [examples/mixed]: ./examples/mixed/
-[examples/mixed_sub]: ./examples/mixed_sub/
 
 Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure] example.
 
@@ -244,34 +242,64 @@ This approach:
 
 The `#[gen_stub_pyfunction]` and `#[gen_stub_pyclass]` macros automatically generate `submit!` blocks internally to register type information. You can also manually add `submit!` blocks to supplement or override this automatic registration.
 
-When multiple `submit!` blocks exist for the same function or method, the stub generator interprets them as overloads and generates `@overload` decorators in the `.pyi` file. This enables proper type checking for functions that accept multiple type signatures.
+When multiple type signatures exist for the same function or method, the stub generator automatically generates `@overload` decorators in the `.pyi` file. This enables proper type checking for functions that accept multiple type signatures.
 
-**Use cases:**
+**Two approaches for overloads:**
 
-For function overloads or when you want to keep the Python stub definition separate from the Rust implementation, use `gen_function_from_python!` or `gen_methods_from_python!` macros with `submit!` blocks.
+1. **`python_overload` parameter**: Define overloads inline with the function
+2. **`submit!` blocks**: Keep stub definitions separate - useful for proc-macro/code generation
 
 **Function overloads:**
 
+Use the `python_overload` parameter to define multiple type signatures inline:
+
 ```rust
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::*, inventory::submit};
+use pyo3_stub_gen::derive::*;
 
-// #[gen_stub_pyfunction] automatically generates one submit! for float signature
-#[gen_stub_pyfunction]
+// Define overloads inline with python_overload parameter
+#[gen_stub_pyfunction(
+    python_overload = r#"
+    @overload
+    def process(x: int) -> int:
+        """Process integer input"""
+    "#
+)]
 #[pyfunction]
 pub fn process(x: f64) -> f64 {
     x + 1.0
 }
+```
 
-// Manual submit! for integer overload
-// Now we have 2 submit! blocks for "process" → generates @overload decorators
-submit! {
-    gen_function_from_python! {
-        r#"
-        def process(x: int) -> int:
-            """Process integer input"""
-        "#
-    }
+Generated stub:
+```python
+@overload
+def process(x: int) -> int:
+    """Process integer input"""
+
+@overload
+def process(x: float) -> float: ...  # Auto-generated from Rust
+```
+
+**Suppress auto-generation** with `no_default_overload = true`:
+
+```rust
+use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
+
+#[gen_stub_pyfunction(
+    python_overload = r#"
+    @overload
+    def func(x: int) -> int: ...
+    @overload
+    def func(x: str) -> str: ...
+    "#,
+    no_default_overload = true  // Don't generate from Rust signature
+)]
+#[pyfunction]
+pub fn func(ob: Bound<PyAny>) -> PyResult<PyObject> {
+    // Runtime type checking
+    todo!()
 }
 ```
 
@@ -285,7 +313,6 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 #[pyclass]
 pub struct Calculator {}
 
-// #[gen_stub_pymethods] automatically generates submit! for float signature
 #[gen_stub_pymethods]
 #[pymethods]
 impl Calculator {
@@ -294,12 +321,12 @@ impl Calculator {
     }
 }
 
-// Manual submit! for integer overload
-// Now Calculator.add has 2 submit! blocks → generates @overload decorators
+// Alternative: Use submit! for method overloads (useful for proc-macro/code generation)
 submit! {
     gen_methods_from_python! {
         r#"
         class Calculator:
+            @overload
             def add(self, x: int) -> int:
                 """Add integer (overload)"""
         "#
@@ -307,10 +334,19 @@ submit! {
 }
 ```
 
-This approach:
-- ✅ Ideal for `@overload` decorator support
-- ✅ Keeps type definitions organized separately
-- ✅ Allows multiple signatures for the same function
+Benefits:
+- ✅ Inline overload definitions with `python_overload` parameter
+- ✅ Automatic `@overload` decorator generation
+- ✅ Deterministic ordering with index-based sorting
+- ✅ `submit!` syntax available for proc-macro/code generation use cases
+
+**Advanced class method patterns:**
+
+For more advanced patterns, see [examples/pure/src/manual_submit.rs](./examples/pure/src/manual_submit.rs):
+- **Fully manual method submission** - Submit all method signatures without `#[gen_stub_pymethods]`
+- **Mixing proc-macro and manual submission** - Use `#[gen_stub(skip)]` for methods that need complex type annotations
+
+For comprehensive documentation, see [Python Stub Syntax Support](./docs/python-stub-syntax.md#advanced-patterns).
 
 ### Advanced: Using `RustType` Marker
 
@@ -350,7 +386,7 @@ This is particularly useful for:
 |----------|-------------------|
 | Complex types (e.g., `Callable`, `Protocol`) | Method 1: `python = "..."` parameter |
 | Override one or two arguments | Method 2: `#[gen_stub(override_type(...))]` |
-| Function overloads (`@overload`) | Method 3: `gen_function_from_python!` |
+| Function overloads (`@overload`) | `python_overload = "..."` parameter |
 | Reference Rust types in Python syntax | Use `RustType["..."]` marker |
 | Complete function signature replacement | Method 1: `python = "..."` parameter |
 
@@ -374,7 +410,7 @@ uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 
 ### Known limitation: nested submodules
 
-**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed_sub/Taskfile.yml` for an example.
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed/Taskfile.yml` for an example.
 
 # Contribution
 To be written.

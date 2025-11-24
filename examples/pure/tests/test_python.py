@@ -137,22 +137,36 @@ def test_overload_example_2():
     assert overload_example_2(1.5) == 2.5
 
 
-def test_overload_incrementer():
-    from pure import Incrementer
+def test_manual_submit():
+    from pure import ManualSubmit
 
-    incr = Incrementer()
+    ms = ManualSubmit()
 
-    assert incr.increment_1(1.5) == 2.5
-    assert incr.increment_1(1) == 2
+    assert ms.increment(1.5) == 2.5
+    # Test overloaded echo method
+    assert ms.echo(1) == 1
+    assert ms.echo(1.5) == 1.5
 
 
-def test_overload_incrementer_2():
-    from pure import Incrementer2
+def test_partial_manual_submit():
+    from pure import PartialManualSubmit
 
-    incr = Incrementer2()
+    pms = PartialManualSubmit()
 
-    assert incr.increment_2(1.5) == 3.5
-    assert incr.increment_2(1) == 3
+    # Test echo method (from proc-macro)
+    assert pms.echo(1) == 1
+    assert pms.echo(1.5) == 1.5
+
+    # Test overloaded echo_overloaded method
+    assert pms.echo_overloaded(1) == 1
+    assert pms.echo_overloaded(1.5) == 1.5
+
+    # Test fn_override_type with callback
+    def callback(s: str) -> str:
+        return s.upper()
+
+    result = pms.fn_override_type(callback)
+    assert callable(result)
 
 
 @pytest.mark.asyncio

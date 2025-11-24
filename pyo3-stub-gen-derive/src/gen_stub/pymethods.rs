@@ -80,6 +80,9 @@ impl ToTokens for PyMethodsInfo {
                 getters: &[ #(#getters),* ],
                 setters: &[ #(#setters),* ],
                 methods: &[ #(#methods),* ],
+                file: file!(),
+                line: line!(),
+                column: column!(),
             }
         })
     }
