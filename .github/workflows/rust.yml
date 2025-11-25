@@ -66,6 +66,16 @@ jobs:
           command: test
           args: --no-default-features -p pyo3-stub-gen
 
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Check licenses
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check licenses
+
   semver-check:
     runs-on: ubuntu-latest
     steps:
