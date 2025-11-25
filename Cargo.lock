@@ -209,7 +209,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "feature_gated"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -460,7 +460,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -469,7 +469,7 @@ dependencies = [
 
 [[package]]
 name = "mixed_sub"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -648,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "ahash",
  "env_logger",
@@ -721,7 +721,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "anyhow",
  "chrono",
@@ -744,7 +744,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "heck",
  "indexmap",
@@ -1074,7 +1074,7 @@ dependencies = [
 
 [[package]]
 name = "test-dash-package"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
