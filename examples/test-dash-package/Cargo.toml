@@ -2,6 +2,7 @@
 name = "test-dash-package"
 version.workspace = true
 edition.workspace = true
+publish = false
 
 [lib]
 name = "test_dash_package"
