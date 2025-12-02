@@ -3,6 +3,7 @@ name = "mixed"
 description = "Example for Mixed Rust/Python layout with submodule"
 version.workspace = true
 edition.workspace = true
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
