@@ -64,7 +64,9 @@ impl fmt::Display for FunctionDef {
         write!(
             f,
             "{async_}def {}({}) -> {}:",
-            self.name, self.parameters, self.r#return
+            self.name,
+            self.parameters,
+            self.r#return.as_annotation(),
         )?;
 
         // Calculate type: ignore comment once

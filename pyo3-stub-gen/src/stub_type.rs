@@ -102,11 +102,25 @@ pub struct TypeInfo {
     /// The Python type name.
     pub name: String,
 
+    /// Whether its usage as an annotation requires quotes.
+    pub quote: bool,
+
     /// Python modules must be imported in the stub file.
     ///
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
     pub import: HashSet<ImportRef>,
+}
+
+impl TypeInfo {
+    /// The type annotation for the given type.
+    pub fn as_annotation(&self) -> String {
+        if self.quote {
+            format!("'{}'", self.name)
+        } else {
+            self.name.clone()
+        }
+    }
 }
 
 impl fmt::Display for TypeInfo {
@@ -122,6 +136,7 @@ impl TypeInfo {
         // but there is no corresponding definitions prior to 3.10.
         Self {
             name: "None".to_string(),
+            quote: false,
             import: HashSet::new(),
         }
     }
@@ -130,26 +145,37 @@ impl TypeInfo {
     pub fn any() -> Self {
         Self {
             name: "typing.Any".to_string(),
+            quote: false,
             import: hashset! { "typing".into() },
         }
     }
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.list[{name}]"),
+            quote,
             import,
         }
     }
 
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo {
+            name,
+            quote,
+            mut import,
+        } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.set[{name}]"),
+            quote,
             import,
         }
     }
@@ -158,16 +184,19 @@ impl TypeInfo {
     pub fn dict_of<K: PyStubType, V: PyStubType>() -> Self {
         let TypeInfo {
             name: name_k,
+            quote: quote_k,
             mut import,
         } = K::type_output();
         let TypeInfo {
             name: name_v,
+            quote: quote_v,
             import: import_v,
         } = V::type_output();
         import.extend(import_v);
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.dict[{name_k}, {name_v}]"),
+            quote: quote_k || quote_v,
             import,
         }
     }
@@ -176,6 +205,7 @@ impl TypeInfo {
     pub fn builtin(name: &str) -> Self {
         Self {
             name: format!("builtins.{name}"),
+            quote: false,
             import: hashset! { "builtins".into() },
         }
     }
@@ -184,6 +214,7 @@ impl TypeInfo {
     pub fn unqualified(name: &str) -> Self {
         Self {
             name: name.to_string(),
+            quote: false,
             import: hashset! {},
         }
     }
@@ -198,6 +229,7 @@ impl TypeInfo {
         import.insert(ImportRef::Module(module));
         Self {
             name: name.to_string(),
+            quote: false,
             import,
         }
     }
@@ -219,6 +251,7 @@ impl TypeInfo {
 
         Self {
             name: type_name.to_string(),
+            quote: true,
             import,
         }
     }
@@ -231,6 +264,7 @@ impl ops::BitOr for TypeInfo {
         self.import.extend(rhs.import);
         Self {
             name: format!("{} | {}", self.name, rhs.name),
+            quote: self.quote || rhs.quote,
             import: self.import,
         }
     }
@@ -325,6 +359,7 @@ mod test {
     #[test_case(TypeInfo::dict_of::<u32, String>(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "dict_of_u32_String")]
     fn test(tinfo: TypeInfo, name: &str, import: HashSet<ImportRef>) {
         assert_eq!(tinfo.name, name);
+        assert!(!tinfo.quote);
         if import.is_empty() {
             assert!(tinfo.import.is_empty());
         } else {
