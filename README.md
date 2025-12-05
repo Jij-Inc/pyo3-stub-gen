@@ -12,8 +12,8 @@ Python stub file (`*.pyi`) generator for [PyO3] with [maturin] projects.
 | [pyo3-stub-gen] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen.svg)](https://crates.io/crates/pyo3-stub-gen)  | [![docs.rs](https://docs.rs/pyo3-stub-gen/badge.svg)](https://docs.rs/pyo3-stub-gen) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen/index.html) |
 | [pyo3-stub-gen-derive] | [![crate](https://img.shields.io/crates/v/pyo3-stub-gen-derive.svg)](https://crates.io/crates/pyo3-stub-gen-derive)  | [![docs.rs](https://docs.rs/pyo3-stub-gen-derive/badge.svg)](https://docs.rs/pyo3-stub-gen-derive) | [![doc (main)](https://img.shields.io/badge/doc-main-blue?logo=github)](https://jij-inc.github.io/pyo3-stub-gen/pyo3_stub_gen_derive/index.html) |
 
-[pyo3-stub-gen]: ./pyo3-stub-gen/
-[pyo3-stub-gen-derive]: ./pyo3-stub-gen-derive/
+[pyo3-stub-gen]: ../pyo3-stub-gen/
+[pyo3-stub-gen-derive]: ../pyo3-stub-gen-derive/
 
 > [!NOTE]
 > Minimum supported Python version is 3.10. Do not enable 3.9 or older in PyO3 setting.
@@ -38,17 +38,17 @@ and [pyo3-stub-gen-derive] crate provides the default translator as proc-macro b
 
 # Usage
 
-If you are looking for a working example, please see the [examples](./examples/) directory.
+If you are looking for a working example, please see the [examples](../examples/) directory.
 
 | Example          | Description |
 |:-----------------|:------------|
 | [examples/pure]  | Example for [Pure Rust maturin project](https://www.maturin.rs/project_layout#pure-rust-project) |
 | [examples/mixed] | Example for [Mixed Rust/Python maturin project](https://www.maturin.rs/project_layout#mixed-rustpython-project) with submodule |
 
-[examples/pure]: ./examples/pure/
-[examples/mixed]: ./examples/mixed/
+[examples/pure]: ../examples/pure/
+[examples/mixed]: ../examples/mixed/
 
-Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure] example.
+Here we describe basic usage of [pyo3-stub-gen] crate based on [examples/pure](../examples/pure) example.
 
 ## Annotate Rust code with proc-macro
 
@@ -152,7 +152,7 @@ impl Config {
 
 ## Generate a stub file
 
-And then, create an executable target in [`src/bin/stub_gen.rs`](./examples/pure/src/bin/stub_gen.rs) to generate a stub file:
+And then, create an executable target in [`src/bin/stub_gen.rs`](../examples/pure/src/bin/stub_gen.rs) to generate a stub file:
 
 ```rust:ignore
 use pyo3_stub_gen::Result;
@@ -172,7 +172,7 @@ and add `rlib` in addition to `cdylib` in `[lib]` section of `Cargo.toml`:
 crate-type = ["cdylib", "rlib"]
 ```
 
-This target generates a stub file [`pure.pyi`](./examples/pure/pure.pyi) when executed.
+This target generates a stub file [`pure.pyi`](../examples/pure/pure.pyi) when executed.
 
 ```shell
 cargo run --bin stub_gen
@@ -345,11 +345,11 @@ Benefits:
 
 **Advanced class method patterns:**
 
-For more advanced patterns, see [examples/pure/src/manual_submit.rs](./examples/pure/src/manual_submit.rs):
+For more advanced patterns, see [examples/pure/src/manual_submit.rs](../examples/pure/src/manual_submit.rs):
 - **Fully manual method submission** - Submit all method signatures without `#[gen_stub_pymethods]`
 - **Mixing proc-macro and manual submission** - Use `#[gen_stub(skip)]` for methods that need complex type annotations
 
-For comprehensive documentation, see [Python Stub Syntax Support](./docs/python-stub-syntax.md#advanced-patterns).
+For comprehensive documentation, see [Python Stub Syntax Support](../docs/python-stub-syntax.md#advanced-patterns).
 
 ### Advanced: Using `RustType` Marker
 
@@ -393,7 +393,7 @@ This is particularly useful for:
 | Reference Rust types in Python syntax | Use `RustType["..."]` marker |
 | Complete function signature replacement | Method 1: `python = "..."` parameter |
 
-For complete examples, see the [examples/pure](./examples/pure/) directory, particularly:
+For complete examples, see the [examples/pure](../examples/pure/) directory, particularly:
 - `overriding.rs` - Type override examples
 - `overloading.rs` - Function overload examples
 - `rust_type_marker.rs` - RustType marker examples
@@ -580,7 +580,7 @@ uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 
 ### Known limitation: nested submodules
 
-**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed/Taskfile.yml` for an example.
+**Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See [`examples/mixed/Taskfile.yml`](../examples/mixed/Taskfile.yml) for an example.
 
 # Contribution
 To be written.
