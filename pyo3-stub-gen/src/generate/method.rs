@@ -80,7 +80,7 @@ impl fmt::Display for MethodDef {
                 write!(f, "{indent}{async_}def {}(self{})", self.name, params_str)?;
             }
         }
-        write!(f, " -> {}:", self.r#return)?;
+        write!(f, " -> {}:", self.r#return.as_annotation())?;
 
         // Calculate type: ignore comment once
         let type_ignore_comment = if let Some(target) = &self.type_ignored {
