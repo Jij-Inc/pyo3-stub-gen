@@ -1,21 +1,31 @@
-[tool.uv.workspace]
-members = [
-    "examples/pure",
-    "examples/mixed",
-    "examples/test-dash-package",
-    "examples/feature_gated",
-    "examples/empty_super_module",
-]
-
 [dependency-groups]
 dev = [
-    "mypy",
-    "pydantic>=2.11.9",
-    "pyright>=1.1.400",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=1.1.0",
-    "pytest-insta>=0.3.0",
+  "mypy",
+  "pydantic>=2.11.9",
+  "pyrefly>=0.46.1",
+  "pyright>=1.1.400",
+  "pytest>=8.3.5",
+  "pytest-asyncio>=1.1.0",
+  "pytest-insta>=0.3.0",
+  "ty>=0.0.7",
 ]
+
+[tool.pyrefly]
+project-excludes = ["**/type_error_cases/*.py"]
 
 [tool.pyright]
 ignore = ["**/type_error_cases/*.py"]
+
+[tool.ty.src]
+exclude = ["**/type_error_cases/*.py"]
+
+[tool.uv.workspace]
+members = [
+  "examples/pure",
+  "examples/mixed",
+  "examples/test-dash-package",
+  "examples/feature_gated",
+  "examples/empty_super_module",
+  "examples/simple_name_collision",
+  "examples/avoid_name_collision_with_submod",
+]

@@ -19,6 +19,8 @@ jobs:
           - test-dash-package
           - feature_gated
           - empty_super_module
+          - simple_name_collision
+          - avoid_name_collision_with_submod
         python-version:
           - "3.10"
           - "3.11"

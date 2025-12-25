@@ -1,0 +1,11 @@
+[project]
+name = "simple_name_collision"
+version = "0.1"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+python-source = "python"

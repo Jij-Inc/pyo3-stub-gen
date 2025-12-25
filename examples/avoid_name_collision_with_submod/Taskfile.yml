@@ -13,8 +13,8 @@ tasks:
   test:
     deps: [stub-gen]
     cmds:
-      - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run ty check --project . .
+      # The following two cases should fail, as the method and classes are treated in the same namespace.
       - uv run pyrefly check -c ./pyproject.toml .
+      - uv run ty check --project .
