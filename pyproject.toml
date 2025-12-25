@@ -26,4 +26,5 @@ members = [
   "examples/test-dash-package",
   "examples/feature_gated",
   "examples/empty_super_module",
+  "examples/simple_name_collision",
 ]

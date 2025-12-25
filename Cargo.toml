@@ -1,24 +1,24 @@
 [workspace]
-members = [
-  "pyo3-stub-gen",
-  "pyo3-stub-gen-derive",
-  "examples/pure",
-  "examples/mixed",
-  "examples/empty_super_module",
-  "examples/test-dash-package",
-  "examples/feature_gated",
-]
 resolver = "2"
+members = [
+  "examples/empty_super_module",
+  "examples/feature_gated",
+  "examples/mixed",
+  "examples/pure",
+  "examples/simple_name_collision",
+  "examples/test-dash-package",
+  "pyo3-stub-gen",
+  "pyo3-stub-gen-derive"
+]
 
 [workspace.package]
 version = "0.18.0"
 edition = "2021"
-
 description = "Stub file (*.pyi) generator for PyO3"
-repository = "https://github.com/Jij-Inc/pyo3-stub-gen"
-keywords = ["pyo3"]
-license = "MIT OR Apache-2.0"
 readme = "README.md"
+repository = "https://github.com/Jij-Inc/pyo3-stub-gen"
+license = "MIT OR Apache-2.0"
+keywords = ["pyo3"]
 
 [workspace.dependencies]
 ahash = "0.8.11"
@@ -39,8 +39,8 @@ ordered-float = { version = "5.1", default-features = false }
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.103"
 pyo3 = ">= 0.26.0"
-rust_decimal = { version = "1.39", default-features = false }
 quote = "1.0.42"
+rust_decimal = { version = "1.39", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
 syn = "2.0.111"
 test-case = "3.3.1"
