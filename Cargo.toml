@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "examples/avoid_name_collision_with_submod",
   "examples/empty_super_module",
   "examples/feature_gated",
   "examples/mixed",

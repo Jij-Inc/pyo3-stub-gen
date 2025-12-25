@@ -21,6 +21,9 @@ includes:
   simple_name_collision:
     taskfile: examples/simple_name_collision/Taskfile.yml
     dir: examples/simple_name_collision
+  avoid_name_collision_with_submod:
+    taskfile: examples/avoid_name_collision_with_submod/Taskfile.yml
+    dir: examples/avoid_name_collision_with_submod
 
 tasks:
   stub-gen:

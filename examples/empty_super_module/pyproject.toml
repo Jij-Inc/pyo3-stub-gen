@@ -17,4 +17,7 @@ module = "empty_super_module"
 
 [tool.pyrefly]
 project-excludes = ["**/type_error_cases/*.py"]
-search-path = ["python/empty_super_module"]
+search-path = ["python"]
+
+[tool.ty.environment]
+root = ["./python"]
