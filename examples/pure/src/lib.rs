@@ -183,9 +183,11 @@ fn print_c(c: Option<C>) {
         println!("None");
     }
 }
-impl FromPyObject<'_> for C {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Ok(C { x: ob.extract()? })
+impl FromPyObject<'_, '_> for C {
+    type Error = PyErr;
+
+    fn extract(obj: Borrowed<'_, '_, PyAny>) -> Result<Self, Self::Error> {
+        Ok(C { x: obj.extract()? })
     }
 }
 impl pyo3_stub_gen::PyStubType for C {
