@@ -22,6 +22,7 @@ macro_rules! impl_numpy_scalar {
     };
 }
 
+impl_numpy_scalar!(bool, "bool");
 impl_numpy_scalar!(i8, "int8");
 impl_numpy_scalar!(i16, "int16");
 impl_numpy_scalar!(i32, "int32");
