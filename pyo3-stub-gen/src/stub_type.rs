@@ -204,21 +204,38 @@ impl TypeInfo {
 
     /// A type defined in the PyO3 module.
     ///
-    /// - Types defined in the same module can be referenced without import.
-    ///   But when it is used in another submodule, it must be imported.
-    /// - For example, if `A` is defined in `submod1`, it can be used as `A` in `submod1`.
-    ///   In `submod2`, it must be imported as `from submod1 import A`.
+    /// - Types are referenced using fully qualified names to avoid symbol collision when used across modules.
+    /// - For example, if `A` is defined in `package.submod1`, it will be referenced as `submod1.A` when used in other modules.
+    /// - The module will be imported as `from package import submod1`.
+    /// - When used in the same module where it's defined, it will be automatically de-qualified during stub generation.
     ///
     /// ```
     /// pyo3_stub_gen::TypeInfo::locally_defined("A", "submod1".into());
     /// ```
     pub fn locally_defined(type_name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
-        let type_ref = TypeRef::new(module, type_name.to_string());
-        import.insert(ImportRef::Type(type_ref));
+
+        // Determine qualified name and import based on module
+        // We qualify all named modules; de-qualification for same-module usage happens during stub generation
+        let qualified_name = match module.get() {
+            Some(module_name) if !module_name.is_empty() => {
+                // Extract the last component of the module path for qualification
+                // e.g., "package.module.submodule" -> "submodule"
+                let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
+                // Use Module import for cross-module references
+                import.insert(ImportRef::Module(module.clone()));
+                format!("{}.{}", module_component, type_name)
+            }
+            _ => {
+                // Default/empty module - use unqualified name
+                let type_ref = TypeRef::new(module.clone(), type_name.to_string());
+                import.insert(ImportRef::Type(type_ref));
+                type_name.to_string()
+            }
+        };
 
         Self {
-            name: type_name.to_string(),
+            name: qualified_name,
             import,
         }
     }

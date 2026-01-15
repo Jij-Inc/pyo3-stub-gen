@@ -61,8 +61,31 @@ impl fmt::Display for Module {
             match import_ref {
                 ImportRef::Module(module_ref) => {
                     let name = module_ref.get().unwrap_or(&self.default_module_name);
-                    if name != self.name {
-                        writeln!(f, "import {name}")?;
+                    if name != self.name && !name.is_empty() {
+                        // Check if this is a module within the current package
+                        // by checking if the module name starts with the package name
+                        let is_internal_module = if let Some(root) = self.default_module_name.split('.').next() {
+                            name.starts_with(root)
+                        } else {
+                            false
+                        };
+
+                        // For nested modules like "package.module.submodule" within the current package
+                        // Generate: from package.module import submodule
+                        // For external modules like "collections.abc", use: import collections.abc
+                        if is_internal_module && name.contains('.') {
+                            let last_dot_pos = name.rfind('.').unwrap();
+                            let parent_module = &name[..last_dot_pos];
+                            let child_module = &name[last_dot_pos + 1..];
+
+                            // Skip if this is a direct submodule (already imported via submodule imports)
+                            if !self.submodules.contains(child_module) {
+                                writeln!(f, "from {} import {}", parent_module, child_module)?;
+                            }
+                        } else {
+                            // External module or top-level module - use standard import
+                            writeln!(f, "import {name}")?;
+                        }
                     }
                 }
                 ImportRef::Type(type_ref) => {

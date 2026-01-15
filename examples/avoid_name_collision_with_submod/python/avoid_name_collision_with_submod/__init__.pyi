@@ -2,11 +2,10 @@
 # ruff: noqa: E501, F401
 
 import typing
-from avoid_name_collision_with_submod.sub_mod import ClassA
 from . import sub_mod
 
 @typing.final
 class ClassB:
-    def ClassA(self) -> ClassA: ...
-    def collision(self, a: ClassA) -> ClassA: ...
+    def ClassA(self) -> sub_mod.ClassA: ...
+    def collision(self, a: sub_mod.ClassA) -> sub_mod.ClassA: ...
 
