@@ -16,5 +16,5 @@ tasks:
       - uv run pytest
       - uv run pyright
       - uvx ruff check
-      - uv run ty check --project . .
       - uv run pyrefly check -c ./pyproject.toml .
+      - uv run ty check .
