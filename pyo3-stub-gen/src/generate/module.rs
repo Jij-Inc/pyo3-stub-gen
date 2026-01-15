@@ -70,11 +70,12 @@ impl fmt::Display for Module {
                     if name != self.name && !name.is_empty() {
                         // Check if this is a module within the current package
                         // by checking if the module name starts with the package name
-                        let is_internal_module = if let Some(root) = self.default_module_name.split('.').next() {
-                            name.starts_with(root)
-                        } else {
-                            false
-                        };
+                        let is_internal_module =
+                            if let Some(root) = self.default_module_name.split('.').next() {
+                                name.starts_with(root)
+                            } else {
+                                false
+                            };
 
                         // For nested modules like "package.module.submodule" within the current package
                         // Generate: from package.module import submodule
@@ -86,7 +87,11 @@ impl fmt::Display for Module {
 
                             // Skip if this is a direct submodule (already imported via submodule imports)
                             if !self.submodules.contains(child_module) {
-                                writeln!(&mut buffer, "from {} import {}", parent_module, child_module)?;
+                                writeln!(
+                                    &mut buffer,
+                                    "from {} import {}",
+                                    parent_module, child_module
+                                )?;
                             }
                         } else {
                             // External module or top-level module - use standard import
