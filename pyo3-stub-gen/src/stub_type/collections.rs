@@ -3,18 +3,20 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo { name, mut import, .. } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
+            source_module: None,
             import,
         }
     }
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo { name, mut import, .. } = T::type_output();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
+            source_module: None,
             import,
         }
     }
@@ -40,10 +42,11 @@ impl<T: PyStubType, E> PyStubType for Result<T, E> {
 
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo { name, mut import, .. } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
+            source_module: None,
             import,
         }
     }
@@ -54,10 +57,11 @@ impl<T: PyStubType> PyStubType for Vec<T> {
 
 impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
     fn type_input() -> TypeInfo {
-        let TypeInfo { name, mut import } = T::type_input();
+        let TypeInfo { name, mut import, .. } = T::type_input();
         import.insert("typing".into());
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
+            source_module: None,
             import,
         }
     }
@@ -90,15 +94,18 @@ macro_rules! impl_map_inner {
             let TypeInfo {
                 name: key_name,
                 mut import,
+                ..
             } = Key::type_input();
             let TypeInfo {
                 name: value_name,
                 import: value_import,
+                ..
             } = Value::type_input();
             import.extend(value_import);
             import.insert("typing".into());
             TypeInfo {
                 name: format!("typing.Mapping[{}, {}]", key_name, value_name),
+                source_module: None,
                 import,
             }
         }
@@ -106,15 +113,18 @@ macro_rules! impl_map_inner {
             let TypeInfo {
                 name: key_name,
                 mut import,
+                ..
             } = Key::type_output();
             let TypeInfo {
                 name: value_name,
                 import: value_import,
+                ..
             } = Value::type_output();
             import.extend(value_import);
             import.insert("builtins".into());
             TypeInfo {
                 name: format!("builtins.dict[{}, {}]", key_name, value_name),
+                source_module: None,
                 import,
             }
         }
@@ -142,12 +152,13 @@ macro_rules! impl_tuple {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_output();
+                let TypeInfo { name, import, .. } = $T::type_output();
                 names.push(name);
                 merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
+                    source_module: None,
                     import: merged,
                 }
             }
@@ -155,12 +166,13 @@ macro_rules! impl_tuple {
                 let mut merged = HashSet::new();
                 let mut names = Vec::new();
                 $(
-                let TypeInfo { name, import } = $T::type_input();
+                let TypeInfo { name, import, .. } = $T::type_input();
                 names.push(name);
                 merged.extend(import);
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
+                    source_module: None,
                     import: merged,
                 }
             }

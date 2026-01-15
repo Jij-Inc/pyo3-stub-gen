@@ -21,6 +21,7 @@ pub(super) fn get_variant_methods(
             parameters: Parameters::from_infos(info.constr_args),
             r#return: TypeInfo {
                 name: full_class_name,
+                source_module: None,
                 import: HashSet::new(),
             },
             doc: "",

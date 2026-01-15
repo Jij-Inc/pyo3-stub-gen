@@ -269,7 +269,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "increment",
             parameters: &[
@@ -278,6 +278,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -285,6 +286,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Increment by one",
@@ -294,7 +296,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -332,7 +334,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "create",
             parameters: &[
@@ -341,6 +343,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -348,6 +351,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "str".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Create something",
@@ -357,7 +361,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -375,7 +379,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "from_string",
             parameters: &[
@@ -384,6 +388,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -391,6 +396,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Create from string",
@@ -400,7 +406,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -417,12 +423,13 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "__new__",
             parameters: &[],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "object".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Constructor",
@@ -432,7 +439,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -452,7 +459,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "process",
             parameters: &[
@@ -461,6 +468,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
@@ -471,6 +479,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "typing.Optional[int]".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([
                     "typing".into(),
                     "collections.abc".into(),
@@ -483,7 +492,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -500,7 +509,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.methods[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::MethodInfo {
             name: "fetch_data",
             parameters: &[
@@ -509,6 +518,7 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
@@ -516,6 +526,7 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "str".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
             },
             doc: "Fetch data asynchronously",
@@ -525,7 +536,7 @@ mod test {
             type_ignored: None,
             is_overload: false,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -596,7 +607,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyMethodsInfo {
             struct_id: std::any::TypeId::of::<Placeholder>,
             attrs: &[],
@@ -611,6 +622,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "builtins.str".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -623,6 +635,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "builtins.str".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -635,6 +648,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "builtins.int".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -647,6 +661,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "typing.Optional[builtins.str]".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -659,6 +674,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "builtins.bool".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -676,6 +692,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "typing.Optional[builtins.str]".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -693,6 +710,7 @@ mod test {
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
                                 name: "typing.Optional[builtins.str]".to_string(),
+                                source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
                                     "typing".into(),
@@ -719,7 +737,7 @@ mod test {
             line: line!(),
             column: column!(),
         }
-        "###);
+        "#);
         Ok(())
     }
 

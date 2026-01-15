@@ -102,6 +102,13 @@ pub struct TypeInfo {
     /// The Python type name.
     pub name: String,
 
+    /// The module this type belongs to.
+    ///
+    /// - `None`: Type has no source module (e.g., `typing.Any`, primitives, generic container types)
+    /// - `Some(ModuleRef::Default)`: Type from current package's default module
+    /// - `Some(ModuleRef::Named(path))`: Type from specific module (e.g., `"package.sub_mod"`)
+    pub source_module: Option<ModuleRef>,
+
     /// Python modules must be imported in the stub file.
     ///
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
@@ -122,6 +129,7 @@ impl TypeInfo {
         // but there is no corresponding definitions prior to 3.10.
         Self {
             name: "None".to_string(),
+            source_module: None,
             import: HashSet::new(),
         }
     }
@@ -130,26 +138,29 @@ impl TypeInfo {
     pub fn any() -> Self {
         Self {
             name: "typing.Any".to_string(),
+            source_module: None,
             import: hashset! { "typing".into() },
         }
     }
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo { name, mut import, .. } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.list[{name}]"),
+            source_module: None,
             import,
         }
     }
 
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import } = T::type_output();
+        let TypeInfo { name, mut import, .. } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.set[{name}]"),
+            source_module: None,
             import,
         }
     }
@@ -159,15 +170,18 @@ impl TypeInfo {
         let TypeInfo {
             name: name_k,
             mut import,
+            ..
         } = K::type_output();
         let TypeInfo {
             name: name_v,
             import: import_v,
+            ..
         } = V::type_output();
         import.extend(import_v);
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.dict[{name_k}, {name_v}]"),
+            source_module: None,
             import,
         }
     }
@@ -176,6 +190,7 @@ impl TypeInfo {
     pub fn builtin(name: &str) -> Self {
         Self {
             name: format!("builtins.{name}"),
+            source_module: None,
             import: hashset! { "builtins".into() },
         }
     }
@@ -184,6 +199,7 @@ impl TypeInfo {
     pub fn unqualified(name: &str) -> Self {
         Self {
             name: name.to_string(),
+            source_module: None,
             import: hashset! {},
         }
     }
@@ -195,9 +211,10 @@ impl TypeInfo {
     /// ```
     pub fn with_module(name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
-        import.insert(ImportRef::Module(module));
+        import.insert(ImportRef::Module(module.clone()));
         Self {
             name: name.to_string(),
+            source_module: Some(module),
             import,
         }
     }
@@ -208,9 +225,10 @@ impl TypeInfo {
     /// - For example, if `A` is defined in `package.submod1`, it will be referenced as `submod1.A` when used in other modules.
     /// - The module will be imported as `from package import submod1`.
     /// - When used in the same module where it's defined, it will be automatically de-qualified during stub generation.
+    /// - The `source_module` field tracks which module the type belongs to for future use.
     ///
     /// ```
-    /// pyo3_stub_gen::TypeInfo::locally_defined("A", "submod1".into());
+    /// pyo3_stub_gen::TypeInfo::locally_defined("A", "package.submod1".into());
     /// ```
     pub fn locally_defined(type_name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
@@ -236,7 +254,54 @@ impl TypeInfo {
 
         Self {
             name: qualified_name,
+            source_module: Some(module),
             import,
+        }
+    }
+
+    /// Get the qualified name for use in a specific target module.
+    ///
+    /// - If the type has no source module, returns the name as-is
+    /// - If the type is from the same module as the target, returns unqualified name
+    /// - If the type is from a different module, returns qualified name with module component
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Type A from "package.sub_mod" used in "package.sub_mod" -> "A"
+    /// // Type A from "package.sub_mod" used in "package.main_mod" -> "sub_mod.A"
+    /// ```
+    pub fn qualified_name(&self, target_module: &str) -> String {
+        match &self.source_module {
+            None => self.name.clone(),
+            Some(module_ref) => {
+                let source = module_ref.get().unwrap_or(target_module);
+                if source == target_module {
+                    // Same module: unqualified
+                    self.name.clone()
+                } else {
+                    // Different module: qualify with last module component
+                    let module_component = source.rsplit('.').next().unwrap_or(source);
+                    format!("{}.{}", module_component, self.name)
+                }
+            }
+        }
+    }
+
+    /// Check if this type is from the same module as the target module.
+    pub fn is_same_module(&self, target_module: &str) -> bool {
+        self.source_module
+            .as_ref()
+            .and_then(|m| m.get())
+            .map_or(false, |m| m == target_module)
+    }
+
+    /// Check if this type is internal to the package (starts with package root).
+    pub fn is_internal_to_package(&self, package_root: &str) -> bool {
+        match &self.source_module {
+            Some(ModuleRef::Named(path)) => path.starts_with(package_root),
+            Some(ModuleRef::Default) => true,
+            None => false,
         }
     }
 }
@@ -248,6 +313,7 @@ impl ops::BitOr for TypeInfo {
         self.import.extend(rhs.import);
         Self {
             name: format!("{} | {}", self.name, rhs.name),
+            source_module: None, // Union types are synthetic, have no source module
             import: self.import,
         }
     }

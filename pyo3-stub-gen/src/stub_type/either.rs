@@ -7,10 +7,12 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
         let TypeInfo {
             name: name_l,
             import: import_l,
+            ..
         } = L::type_input();
         let TypeInfo {
             name: name_r,
             import: import_r,
+            ..
         } = R::type_input();
 
         let mut import: HashSet<_> = import_l.into_iter().chain(import_r).collect();
@@ -19,6 +21,7 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
 
         TypeInfo {
             name: format!("typing.Union[{name_l}, {name_r}]"),
+            source_module: None,
             import,
         }
     }
@@ -26,10 +29,12 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
         let TypeInfo {
             name: name_l,
             import: import_l,
+            ..
         } = L::type_output();
         let TypeInfo {
             name: name_r,
             import: import_r,
+            ..
         } = R::type_output();
 
         let mut import: HashSet<_> = import_l.into_iter().chain(import_r).collect();
@@ -38,6 +43,7 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
 
         TypeInfo {
             name: format!("typing.Union[{name_l}, {name_r}]"),
+            source_module: None,
             import,
         }
     }

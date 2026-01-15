@@ -251,7 +251,7 @@ impl ToTokens for MemberInfo {
                 tokens.append_all(quote! {
                     ::pyo3_stub_gen::type_info::MemberInfo {
                         name: #name,
-                        r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
+                        r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), source_module: None, import: ::std::collections::HashSet::from([#(#imports.into(),)*]) },
                         doc: #doc,
                         default: #default,
                         deprecated: #deprecated_info,
