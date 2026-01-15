@@ -1,15 +1,19 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::*, *};
 
-#[gen_stub_pyclass]
+#[gen_stub_pyclass_enum]
 #[pyclass]
-#[pyo3(module = "avoid_name_collision_with_submod.sub_mod")]
-#[derive(Clone)]
-pub struct ClassA {}
+#[pyo3(eq, module = "avoid_name_collision_with_submod.sub_mod")]
+#[derive(Clone, PartialEq, Eq)]
+pub enum ClassA {
+    Option1,
+    Option2,
+}
 
 #[gen_stub_pyclass]
 #[pyclass]
 #[derive(Clone)]
+#[pyo3(module = "avoid_name_collision_with_submod")]
 pub struct ClassB {}
 
 #[gen_stub_pymethods]
@@ -17,10 +21,15 @@ pub struct ClassB {}
 impl ClassB {
     #[allow(non_snake_case)]
     pub fn ClassA(&self) -> ClassA {
-        ClassA {}
+        ClassA::Option1
     }
 
     pub fn collision(&self, a: ClassA) -> ClassA {
+        a
+    }
+
+    #[pyo3(signature = (a = ClassA::Option1))]
+    pub fn collision_with_def(&self, a: ClassA) -> ClassA {
         a
     }
 }
