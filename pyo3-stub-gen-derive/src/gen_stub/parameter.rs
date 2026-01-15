@@ -45,8 +45,46 @@ impl ToTokens for ParameterWithKind {
                             quote! { "None".to_string() }
                         } else {
                             quote! {
-                                let v: #r#type = #expr;
-                                ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                {
+                                    let v: #r#type = #expr;
+                                    let repr = ::pyo3_stub_gen::util::fmt_py_obj(v);
+                                    let type_info = <#r#type as ::pyo3_stub_gen::PyStubType>::type_output();
+
+                                    // Check if the type is defined in another module within the current package.
+                                    // For locally-defined types: qualified name is "sub_mod.ClassA" and
+                                    // import is Module("package.sub_mod"). The import ends with the module prefix.
+                                    // For external types: qualified name is "numpy.ndarray" and
+                                    // import is Module("numpy"). The import equals the module prefix.
+                                    let should_add_prefix = if let Some(dot_pos) = type_info.name.rfind('.') {
+                                        let module_prefix = &type_info.name[..dot_pos];
+                                        type_info.import.iter().any(|imp| {
+                                            if let ::pyo3_stub_gen::ImportRef::Module(module_ref) = imp {
+                                                if let Some(module_name) = module_ref.get() {
+                                                    // Local cross-module ref: full path ends with module prefix
+                                                    // e.g., "package.sub_mod" ends with ".sub_mod"
+                                                    module_name.ends_with(&format!(".{}", module_prefix))
+                                                } else {
+                                                    false
+                                                }
+                                            } else {
+                                                false
+                                            }
+                                        })
+                                    } else {
+                                        false
+                                    };
+
+                                    if should_add_prefix {
+                                        if let Some(dot_pos) = type_info.name.rfind('.') {
+                                            let module_prefix = &type_info.name[..dot_pos];
+                                            format!("{}.{}", module_prefix, repr)
+                                        } else {
+                                            repr
+                                        }
+                                    } else {
+                                        repr
+                                    }
+                                }
                             }
                         };
                         quote! {

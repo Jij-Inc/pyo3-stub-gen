@@ -120,7 +120,7 @@ mod test {
             "#,
         )?;
         let out = PyComplexEnumInfo::try_from(input)?.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyComplexEnumInfo {
             pyclass_name: "Placeholder",
             enum_id: std::any::TypeId::of::<PyPlaceholder>,
@@ -182,8 +182,43 @@ mod test {
                             type_info: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
                             default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                                 fn _fmt() -> String {
-                                    let v: f64 = 1.0;
-                                    ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                    {
+                                        let v: f64 = 1.0;
+                                        let repr = ::pyo3_stub_gen::util::fmt_py_obj(v);
+                                        let type_info = <f64 as ::pyo3_stub_gen::PyStubType>::type_output();
+                                        let should_add_prefix = if let Some(dot_pos) = type_info
+                                            .name
+                                            .rfind('.')
+                                        {
+                                            let module_prefix = &type_info.name[..dot_pos];
+                                            type_info
+                                                .import
+                                                .iter()
+                                                .any(|imp| {
+                                                    if let ::pyo3_stub_gen::ImportRef::Module(module_ref) = imp {
+                                                        if let Some(module_name) = module_ref.get() {
+                                                            module_name.ends_with(&format!(".{}", module_prefix))
+                                                        } else {
+                                                            false
+                                                        }
+                                                    } else {
+                                                        false
+                                                    }
+                                                })
+                                        } else {
+                                            false
+                                        };
+                                        if should_add_prefix {
+                                            if let Some(dot_pos) = type_info.name.rfind('.') {
+                                                let module_prefix = &type_info.name[..dot_pos];
+                                                format!("{}.{}", module_prefix, repr)
+                                            } else {
+                                                repr
+                                            }
+                                        } else {
+                                            repr
+                                        }
+                                    }
                                 }
                                 _fmt
                             }),
@@ -225,7 +260,7 @@ mod test {
             module: Some("my_module"),
             doc: "",
         }
-        "###);
+        "#);
         Ok(())
     }
 
