@@ -15,6 +15,6 @@ tasks:
     cmds:
       - uv run pyright
       - uvx ruff check
-      # The following two cases should fail, as the method and classes are treated in the same namespace.
+      # The following two cases should pass, as types are fully qualified to avoid namespace collision.
       - uv run pyrefly check -c ./pyproject.toml .
-      - uv run ty check --project .
+      - uv run ty check .
