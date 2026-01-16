@@ -47,10 +47,6 @@ impl fmt::Display for Module {
         }
         writeln!(f)?;
 
-        // Use a temporary buffer for the rest to enable de-qualification
-        use std::fmt::Write as _;
-        let mut buffer = String::new();
-
         let mut imports = self.import();
         // Check if any function group needs @overload decorator
         let any_overloaded = self.function.values().any(|functions| {
@@ -87,15 +83,11 @@ impl fmt::Display for Module {
 
                             // Skip if this is a direct submodule (already imported via submodule imports)
                             if !self.submodules.contains(child_module) {
-                                writeln!(
-                                    &mut buffer,
-                                    "from {} import {}",
-                                    parent_module, child_module
-                                )?;
+                                writeln!(f, "from {} import {}", parent_module, child_module)?;
                             }
                         } else {
                             // External module or top-level module - use standard import
-                            writeln!(&mut buffer, "import {name}")?;
+                            writeln!(f, "import {name}")?;
                         }
                     }
                 }
@@ -114,25 +106,26 @@ impl fmt::Display for Module {
             let mut sorted_type_names = type_names.clone();
             sorted_type_names.sort();
             writeln!(
-                &mut buffer,
+                f,
                 "from {} import {}",
                 module_name,
                 sorted_type_names.join(", ")
             )?;
         }
         for submod in &self.submodules {
-            writeln!(&mut buffer, "from . import {submod}")?;
+            writeln!(f, "from . import {submod}")?;
         }
-        writeln!(&mut buffer)?;
+        writeln!(f)?;
 
         for var in self.variables.values() {
-            writeln!(&mut buffer, "{var}")?;
+            var.fmt_for_module(&self.name, f)?;
+            writeln!(f)?;
         }
         for class in self.class.values().sorted_by_key(|class| class.name) {
-            write!(&mut buffer, "{class}")?;
+            class.fmt_for_module(&self.name, f)?;
         }
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
-            write!(&mut buffer, "{enum_}")?;
+            enum_.fmt_for_module(&self.name, f)?;
         }
         for functions in self.function.values() {
             // Check if we should add @overload to all functions
@@ -144,23 +137,11 @@ impl fmt::Display for Module {
             sorted_functions.sort_by_key(|func| (func.file, func.line, func.column, func.index));
             for function in sorted_functions {
                 if should_add_overload {
-                    writeln!(&mut buffer, "@typing.overload")?;
+                    writeln!(f, "@typing.overload")?;
                 }
-                write!(&mut buffer, "{function}")?;
+                function.fmt_for_module(&self.name, f)?;
             }
         }
-
-        // De-qualify local type references
-        // If current module is "package.main_mod", replace "main_mod.TypeName" with "TypeName"
-        let final_output = if let Some(module_component) = self.name.rsplit('.').next() {
-            let qualifier = format!("{}.", module_component);
-            buffer.replace(&qualifier, "")
-        } else {
-            buffer
-        };
-
-        // Write the final de-qualified output
-        write!(f, "{}", final_output)?;
         Ok(())
     }
 }

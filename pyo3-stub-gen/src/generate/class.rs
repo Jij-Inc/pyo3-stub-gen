@@ -283,10 +283,24 @@ impl fmt::Display for ClassDef {
         }
         for (getter, setter) in self.getter_setters.values() {
             if let Some(getter) = getter {
-                GetterDisplay(getter).fmt(f)?;
+                write!(
+                    f,
+                    "{}",
+                    GetterDisplay {
+                        member: getter,
+                        target_module: self.name
+                    }
+                )?;
             }
             if let Some(setter) = setter {
-                SetterDisplay(setter).fmt(f)?;
+                write!(
+                    f,
+                    "{}",
+                    SetterDisplay {
+                        member: setter,
+                        target_module: self.name
+                    }
+                )?;
             }
         }
         for (_method_name, methods) in &self.methods {
@@ -307,6 +321,117 @@ impl fmt::Display for ClassDef {
                 writeln!(f, "{indent}{line}")?;
             }
         }
+        if self.attrs.is_empty() && self.getter_setters.is_empty() && self.methods.is_empty() {
+            writeln!(f, "{indent}...")?;
+        }
+        writeln!(f)?;
+        Ok(())
+    }
+}
+
+impl ClassDef {
+    /// Format class with module-qualified type names
+    ///
+    /// This method uses the target module context to qualify type identifiers
+    /// within compound type expressions based on their source modules.
+    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        // Qualify base classes
+        let bases = self
+            .bases
+            .iter()
+            .map(|i| i.qualified_for_module(target_module))
+            .reduce(|acc, path| format!("{acc}, {path}"))
+            .map(|bases| format!("({bases})"))
+            .unwrap_or_default();
+
+        if !self.subclass {
+            writeln!(f, "@typing.final")?;
+        }
+        writeln!(f, "class {}{}:", self.name, bases)?;
+
+        let indent = indent();
+        let doc = self.doc.trim();
+        docstring::write_docstring(f, doc, indent)?;
+
+        if let Some(match_args) = &self.match_args {
+            if match_args.is_empty() {
+                writeln!(f, "{indent}__match_args__ = ()")?;
+            } else {
+                let match_args_txt = match_args
+                    .iter()
+                    .map(|a| format!(r##""{a}""##))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                writeln!(f, "{indent}__match_args__ = ({match_args_txt},)")?;
+            }
+        }
+
+        // Format attributes with qualified types
+        for attr in &self.attrs {
+            attr.fmt_for_module(target_module, f, indent)?;
+        }
+
+        // Format properties with qualified types
+        for (getter, setter) in self.getter_setters.values() {
+            if let Some(getter) = getter {
+                write!(
+                    f,
+                    "{}",
+                    GetterDisplay {
+                        member: getter,
+                        target_module
+                    }
+                )?;
+            }
+            if let Some(setter) = setter {
+                write!(
+                    f,
+                    "{}",
+                    SetterDisplay {
+                        member: setter,
+                        target_module
+                    }
+                )?;
+            }
+        }
+
+        // Format methods with qualified types
+        for (_method_name, methods) in &self.methods {
+            let has_overload = methods.iter().any(|m| m.is_overload);
+            let should_add_overload = methods.len() > 1 && has_overload;
+
+            for method in methods {
+                if should_add_overload {
+                    writeln!(f, "{indent}@typing.overload")?;
+                }
+                method.fmt_for_module(target_module, f, indent)?;
+            }
+        }
+
+        // Format nested classes recursively
+        for class in &self.classes {
+            // Create a temporary formatter to capture nested class output
+            struct FmtAdapter<'a, 'b> {
+                class: &'a ClassDef,
+                target_module: &'b str,
+            }
+            impl<'a, 'b> fmt::Display for FmtAdapter<'a, 'b> {
+                fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                    self.class.fmt_for_module(self.target_module, f)
+                }
+            }
+            let emit = format!(
+                "{}",
+                FmtAdapter {
+                    class,
+                    target_module
+                }
+            );
+            for line in emit.lines() {
+                writeln!(f, "{indent}{line}")?;
+            }
+        }
+
         if self.attrs.is_empty() && self.getter_setters.is_empty() && self.methods.is_empty() {
             writeln!(f, "{indent}...")?;
         }

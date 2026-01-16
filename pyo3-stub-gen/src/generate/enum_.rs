@@ -70,13 +70,81 @@ impl fmt::Display for EnumDef {
                 attr.fmt(f)?;
             }
             for getter in &self.getters {
-                GetterDisplay(getter).fmt(f)?;
+                write!(
+                    f,
+                    "{}",
+                    GetterDisplay {
+                        member: getter,
+                        target_module: self.name
+                    }
+                )?;
             }
             for setter in &self.setters {
-                SetterDisplay(setter).fmt(f)?;
+                write!(
+                    f,
+                    "{}",
+                    SetterDisplay {
+                        member: setter,
+                        target_module: self.name
+                    }
+                )?;
             }
             for methods in &self.methods {
                 methods.fmt(f)?;
+            }
+        }
+        writeln!(f)?;
+        Ok(())
+    }
+}
+
+impl EnumDef {
+    /// Format enum with module-qualified type names
+    ///
+    /// This method uses the target module context to qualify type identifiers
+    /// within compound type expressions based on their source modules.
+    /// Note: Enums currently don't have TypeInfo in their base classes, so this
+    /// mostly delegates to Display, but is provided for API consistency.
+    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "@typing.final")?;
+        writeln!(f, "class {}(enum.Enum):", self.name)?;
+        let indent = indent();
+        docstring::write_docstring(f, self.doc, indent)?;
+        for (variant, variant_doc) in self.variants {
+            writeln!(f, "{indent}{variant} = ...")?;
+            docstring::write_docstring(f, variant_doc, indent)?;
+        }
+        if !(self.attrs.is_empty()
+            && self.getters.is_empty()
+            && self.setters.is_empty()
+            && self.methods.is_empty())
+        {
+            writeln!(f)?;
+            for attr in &self.attrs {
+                attr.fmt_for_module(target_module, f, indent)?;
+            }
+            for getter in &self.getters {
+                write!(
+                    f,
+                    "{}",
+                    GetterDisplay {
+                        member: getter,
+                        target_module
+                    }
+                )?;
+            }
+            for setter in &self.setters {
+                write!(
+                    f,
+                    "{}",
+                    SetterDisplay {
+                        member: setter,
+                        target_module
+                    }
+                )?;
+            }
+            for methods in &self.methods {
+                methods.fmt_for_module(target_module, f, indent)?;
             }
         }
         writeln!(f)?;

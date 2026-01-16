@@ -60,7 +60,7 @@ impl PyStubType for ClassACallback {
             type_refs: [(
                 "ClassA".to_string(),
                 TypeIdentifierRef {
-                    module: "avoid_name_collision_with_submod.submod".into(),
+                    module: "avoid_name_collision_with_submod.sub_mod".into(),
                     import_kind: ImportKind::Module,
                 },
             )]

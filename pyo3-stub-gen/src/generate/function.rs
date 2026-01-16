@@ -109,3 +109,67 @@ impl fmt::Display for FunctionDef {
         Ok(())
     }
 }
+
+impl FunctionDef {
+    /// Format function with module-qualified type names
+    ///
+    /// This method uses the target module context to qualify type identifiers
+    /// within compound type expressions based on their source modules.
+    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        // Add deprecated decorator if present
+        if let Some(deprecated) = &self.deprecated {
+            writeln!(f, "{deprecated}")?;
+        }
+
+        let async_ = if self.is_async { "async " } else { "" };
+        let params_str = self.parameters.fmt_for_module(target_module);
+        let return_type = self.r#return.qualified_for_module(target_module);
+
+        write!(
+            f,
+            "{async_}def {}({}) -> {}:",
+            self.name, params_str, return_type
+        )?;
+
+        // Calculate type: ignore comment once
+        let type_ignore_comment = if let Some(target) = &self.type_ignored {
+            match target {
+                IgnoreTarget::All => Some("  # type: ignore".to_string()),
+                IgnoreTarget::Specified(rules) => {
+                    let rules_str = rules
+                        .iter()
+                        .map(|r| {
+                            let result = r.parse::<RuleName>().unwrap();
+                            if let RuleName::Custom(custom) = &result {
+                                log::warn!("Unknown custom rule name '{custom}' used in type ignore. Ensure this is intended.");
+                            }
+                            result
+                        })
+                        .join(",");
+                    Some(format!("  # type: ignore[{rules_str}]"))
+                }
+            }
+        } else {
+            None
+        };
+
+        let doc = self.doc;
+        if !doc.is_empty() {
+            // Add type: ignore comment for functions with docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{comment}")?;
+            }
+            writeln!(f)?;
+            docstring::write_docstring(f, self.doc, indent())?;
+        } else {
+            write!(f, " ...")?;
+            // Add type: ignore comment for functions without docstrings
+            if let Some(comment) = &type_ignore_comment {
+                write!(f, "{comment}")?;
+            }
+            writeln!(f)?;
+        }
+        writeln!(f)?;
+        Ok(())
+    }
+}

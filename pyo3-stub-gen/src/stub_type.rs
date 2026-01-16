@@ -326,11 +326,25 @@ impl TypeInfo {
                 let source = module_ref.get().unwrap_or(target_module);
                 if source == target_module {
                     // Same module: unqualified
-                    self.name.clone()
+                    // Strip module prefix if present (handles pre-qualified names from macros)
+                    let module_component = source.rsplit('.').next().unwrap_or(source);
+                    let prefix = format!("{}.", module_component);
+                    if let Some(stripped) = self.name.strip_prefix(&prefix) {
+                        stripped.to_string()
+                    } else {
+                        self.name.clone()
+                    }
                 } else {
                     // Different module: qualify with last module component
                     let module_component = source.rsplit('.').next().unwrap_or(source);
-                    format!("{}.{}", module_component, self.name)
+                    // Strip existing module prefix if present (handles pre-qualified names from macros)
+                    let prefix = format!("{}.", module_component);
+                    let base_name = if let Some(stripped) = self.name.strip_prefix(&prefix) {
+                        stripped
+                    } else {
+                        &self.name
+                    };
+                    format!("{}.{}", module_component, base_name)
                 }
             }
         }
