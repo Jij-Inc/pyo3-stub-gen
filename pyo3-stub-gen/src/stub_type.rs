@@ -355,32 +355,24 @@ impl TypeInfo {
     /// Get the qualified name for use in a specific target module with context-aware rewriting.
     ///
     /// This method handles compound type expressions by rewriting nested identifiers
-    /// based on the import context. For example:
+    /// based on the type_refs tracking information. For example:
     /// - `typing.Optional[ClassA]` becomes `typing.Optional[sub_mod.ClassA]` when ClassA
     ///   is from a different module.
     ///
     /// # Arguments
     /// * `target_module` - The module where this type will be used
-    /// * `imported_types` - Set of types imported by name in the target module
     ///
     /// # Returns
     /// The qualified type name string with identifiers properly qualified
-    pub fn qualified_for_module(
-        &self,
-        target_module: &str,
-        imported_types: &HashSet<String>,
-    ) -> String {
+    pub fn qualified_for_module(&self, target_module: &str) -> String {
         // If no type_refs, use the simpler qualified_name method
         if self.type_refs.is_empty() {
             return self.qualified_name(target_module);
         }
 
-        // Build qualifier with import context
-        use crate::generate::qualifier::TypeExpressionQualifier;
-        let qualifier = TypeExpressionQualifier::new(target_module, imported_types);
-
         // Rewrite the expression with context-aware qualification
-        qualifier.qualify_expression(&self.name, &self.type_refs)
+        use crate::generate::qualifier::TypeExpressionQualifier;
+        TypeExpressionQualifier::qualify_expression(&self.name, &self.type_refs)
     }
 }
 

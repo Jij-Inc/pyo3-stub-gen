@@ -5,7 +5,7 @@
 //! `typing.Optional[sub_mod.ClassA]` when ClassA is from a different module.
 
 use crate::stub_type::{ImportKind, TypeIdentifierRef};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 /// Token types in Python type expressions
 #[derive(Debug, Clone, PartialEq)]
@@ -195,28 +195,14 @@ fn tokenize(expr: &str) -> Vec<Token> {
 }
 
 /// Type expression qualifier that rewrites identifiers based on module context.
-pub(crate) struct TypeExpressionQualifier<'a> {
-    /// The target module where the type will be used
-    target_module: &'a str,
-    /// Types that are imported by name in the target module (can be used unqualified)
-    imported_types: &'a HashSet<String>,
-}
+pub(crate) struct TypeExpressionQualifier;
 
-impl<'a> TypeExpressionQualifier<'a> {
-    /// Create a new qualifier for a specific target module
-    pub(crate) fn new(target_module: &'a str, imported_types: &'a HashSet<String>) -> Self {
-        Self {
-            target_module,
-            imported_types,
-        }
-    }
-
+impl TypeExpressionQualifier {
     /// Qualify a type expression based on the type references
     ///
     /// This rewrites bare identifiers in the expression to add module qualifiers
     /// when necessary, based on the import context.
     pub(crate) fn qualify_expression(
-        &self,
         expr: &str,
         type_refs: &HashMap<String, TypeIdentifierRef>,
     ) -> String {
@@ -248,7 +234,7 @@ impl<'a> TypeExpressionQualifier<'a> {
                                 }
                             }
                         }
-                    } else if self.is_python_builtin(name) {
+                    } else if Self::is_python_builtin(name) {
                         // Known Python builtin or typing construct - use as-is
                         result.push_str(name);
                     } else {
@@ -279,7 +265,7 @@ impl<'a> TypeExpressionQualifier<'a> {
     }
 
     /// Check if an identifier is a known Python builtin or typing construct
-    fn is_python_builtin(&self, identifier: &str) -> bool {
+    fn is_python_builtin(identifier: &str) -> bool {
         matches!(
             identifier,
             // typing module types
@@ -371,9 +357,7 @@ mod tests {
             },
         );
 
-        let imported_types = HashSet::new();
-        let qualifier = TypeExpressionQualifier::new("package.main", &imported_types);
-        let result = qualifier.qualify_expression("ClassA", &type_refs);
+        let result = TypeExpressionQualifier::qualify_expression("ClassA", &type_refs);
         assert_eq!(result, "sub_mod.ClassA");
     }
 
@@ -388,9 +372,8 @@ mod tests {
             },
         );
 
-        let imported_types = HashSet::new();
-        let qualifier = TypeExpressionQualifier::new("package.main", &imported_types);
-        let result = qualifier.qualify_expression("typing.Optional[ClassA]", &type_refs);
+        let result =
+            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs);
         assert_eq!(result, "typing.Optional[sub_mod.ClassA]");
     }
 
@@ -405,9 +388,8 @@ mod tests {
             },
         );
 
-        let imported_types = HashSet::new();
-        let qualifier = TypeExpressionQualifier::new("package.sub_mod", &imported_types);
-        let result = qualifier.qualify_expression("typing.Optional[ClassA]", &type_refs);
+        let result =
+            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs);
         assert_eq!(result, "typing.Optional[ClassA]");
     }
 
@@ -429,9 +411,7 @@ mod tests {
             },
         );
 
-        let imported_types = HashSet::new();
-        let qualifier = TypeExpressionQualifier::new("package.main", &imported_types);
-        let result = qualifier.qualify_expression(
+        let result = TypeExpressionQualifier::qualify_expression(
             "collections.abc.Callable[[ClassA, str], ClassB]",
             &type_refs,
         );
