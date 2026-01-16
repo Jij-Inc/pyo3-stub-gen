@@ -14,11 +14,25 @@ pub enum PyClassA {
     Option2,
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl PyClassA {
+    pub fn bitor_type_info(&self) -> ClassAOrPyType {
+        ClassAOrPyType
+    }
+}
+
 #[gen_stub_pyclass]
 #[pyclass]
 #[derive(Clone)]
 #[pyo3(module = "avoid_name_collision_with_submod")]
 pub struct ClassB {}
+
+#[derive(Debug, Clone)]
+#[pyclass]
+pub struct ClassAOrPyType;
+
+pyo3_stub_gen::impl_stub_type!(ClassAOrPyType = PyClassA | pyo3::types::PyType);
 
 #[gen_stub_pymethods]
 #[pymethods]
