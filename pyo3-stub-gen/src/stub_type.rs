@@ -13,7 +13,10 @@ mod rust_decimal;
 
 use maplit::hashset;
 use std::cmp::Ordering;
-use std::{collections::{HashMap, HashSet}, fmt, ops};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt, ops,
+};
 
 /// Indicates what to import.
 /// Module: The purpose is to import the entire module(eg import builtins).
@@ -181,7 +184,9 @@ impl TypeInfo {
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import, .. } = T::type_output();
+        let TypeInfo {
+            name, mut import, ..
+        } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.list[{name}]"),
@@ -193,7 +198,9 @@ impl TypeInfo {
 
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo { name, mut import, .. } = T::type_output();
+        let TypeInfo {
+            name, mut import, ..
+        } = T::type_output();
         import.insert("builtins".into());
         TypeInfo {
             name: format!("builtins.set[{name}]"),
@@ -333,10 +340,7 @@ impl TypeInfo {
 
     /// Check if this type is from the same module as the target module.
     pub fn is_same_module(&self, target_module: &str) -> bool {
-        self.source_module
-            .as_ref()
-            .and_then(|m| m.get())
-            .map_or(false, |m| m == target_module)
+        self.source_module.as_ref().and_then(|m| m.get()) == Some(target_module)
     }
 
     /// Check if this type is internal to the package (starts with package root).

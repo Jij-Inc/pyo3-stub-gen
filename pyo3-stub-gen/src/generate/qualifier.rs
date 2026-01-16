@@ -237,10 +237,8 @@ impl<'a> TypeExpressionQualifier<'a> {
                                 // Need to qualify with module component
                                 if let Some(module_name) = type_ref.module.get() {
                                     // Extract last component of module path
-                                    let module_component = module_name
-                                        .rsplit('.')
-                                        .next()
-                                        .unwrap_or(module_name);
+                                    let module_component =
+                                        module_name.rsplit('.').next().unwrap_or(module_name);
                                     result.push_str(module_component);
                                     result.push('.');
                                     result.push_str(name);
@@ -435,8 +433,11 @@ mod tests {
         let qualifier = TypeExpressionQualifier::new("package.main", &imported_types);
         let result = qualifier.qualify_expression(
             "collections.abc.Callable[[ClassA, str], ClassB]",
-            &type_refs
+            &type_refs,
         );
-        assert_eq!(result, "collections.abc.Callable[[sub_mod.ClassA, str], other_mod.ClassB]");
+        assert_eq!(
+            result,
+            "collections.abc.Callable[[sub_mod.ClassA, str], other_mod.ClassB]"
+        );
     }
 }

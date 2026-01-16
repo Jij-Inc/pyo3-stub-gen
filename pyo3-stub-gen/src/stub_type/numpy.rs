@@ -40,7 +40,9 @@ impl_numpy_scalar!(num_complex::Complex64, "complex128");
 
 impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
     fn type_output() -> TypeInfo {
-        let TypeInfo { name, mut import, .. } = T::type_();
+        let TypeInfo {
+            name, mut import, ..
+        } = T::type_();
         import.insert("numpy.typing".into());
         TypeInfo {
             name: format!("numpy.typing.NDArray[{name}]"),

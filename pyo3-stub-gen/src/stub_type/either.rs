@@ -40,7 +40,10 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
         let info_l = L::type_input();
         let info_r = R::type_input();
 
-        let mut import: HashSet<_> = info_l.import.iter().cloned()
+        let mut import: HashSet<_> = info_l
+            .import
+            .iter()
+            .cloned()
             .chain(info_r.import.iter().cloned())
             .collect();
         import.insert("typing".into());
@@ -59,7 +62,10 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
         let info_l = L::type_output();
         let info_r = R::type_output();
 
-        let mut import: HashSet<_> = info_l.import.iter().cloned()
+        let mut import: HashSet<_> = info_l
+            .import
+            .iter()
+            .cloned()
             .chain(info_r.import.iter().cloned())
             .collect();
         import.insert("typing".into());

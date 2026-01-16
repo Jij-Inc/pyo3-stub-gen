@@ -27,7 +27,7 @@ fn build_type_refs_from_inner(inner: &TypeInfo) -> HashMap<String, TypeIdentifie
 
     // If inner type is locally defined with a module, track it
     if let Some(ref source_module) = inner.source_module {
-        if let Some(module_name) = source_module.get() {
+        if let Some(_module_name) = source_module.get() {
             // Extract bare type identifier from the (potentially qualified) name
             if let Some(bare_name) = extract_type_identifier(&inner.name) {
                 type_refs.insert(
