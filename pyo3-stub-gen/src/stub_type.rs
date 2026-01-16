@@ -317,10 +317,8 @@ impl TypeInfo {
     ///
     /// # Examples
     ///
-    /// ```
-    /// // Type A from "package.sub_mod" used in "package.sub_mod" -> "A"
-    /// // Type A from "package.sub_mod" used in "package.main_mod" -> "sub_mod.A"
-    /// ```
+    /// - Type A from "package.sub_mod" used in "package.sub_mod" -> "A"
+    /// - Type A from "package.sub_mod" used in "package.main_mod" -> "sub_mod.A"
     pub fn qualified_name(&self, target_module: &str) -> String {
         match &self.source_module {
             None => self.name.clone(),
