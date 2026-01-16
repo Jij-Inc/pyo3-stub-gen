@@ -34,6 +34,7 @@ tasks:
       - task: feature_gated:stub-gen
       - task: empty_super_module:stub-gen
       - task: simple_name_collision:stub-gen
+      - task: avoid_name_collision_with_submod:stub-gen
 
   test:
     cmds:
@@ -43,3 +44,4 @@ tasks:
       - task: feature_gated:test
       - task: empty_super_module:test
       - task: simple_name_collision:test
+      - task: avoid_name_collision_with_submod:test
