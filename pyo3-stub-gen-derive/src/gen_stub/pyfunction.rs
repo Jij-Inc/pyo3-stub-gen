@@ -174,7 +174,7 @@ impl ToTokens for PyFunctionInfo {
                 } => {
                     let imports = imports.iter().collect::<Vec<&String>>();
                     quote! {
-                        || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), source_module: None, import: ::std::collections::HashSet::from([#(#imports.into(),)*]) }
+                        || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), source_module: None, import: ::std::collections::HashSet::from([#(#imports.into(),)*]), type_refs: ::std::collections::HashMap::new() }
                     }
                 }
             }

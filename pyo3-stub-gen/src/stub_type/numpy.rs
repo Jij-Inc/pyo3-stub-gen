@@ -4,6 +4,7 @@ use numpy::{
     ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
     PyUntypedArray,
 };
+use std::collections::HashMap;
 
 trait NumPyScalar {
     fn type_() -> TypeInfo;
@@ -17,6 +18,7 @@ macro_rules! impl_numpy_scalar {
                     name: format!("numpy.{}", $name),
                     source_module: None,
                     import: hashset!["numpy".into()],
+                    type_refs: HashMap::new(),
                 }
             }
         }
@@ -44,6 +46,7 @@ impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
             name: format!("numpy.typing.NDArray[{name}]"),
             source_module: None,
             import,
+            type_refs: HashMap::new(), // TODO: Track type refs for compound types
         }
     }
 }
@@ -54,6 +57,7 @@ impl PyStubType for PyUntypedArray {
             name: "numpy.typing.NDArray[typing.Any]".into(),
             source_module: None,
             import: hashset!["numpy.typing".into(), "typing".into()],
+            type_refs: HashMap::new(),
         }
     }
 }
@@ -84,6 +88,7 @@ impl PyStubType for PyArrayDescr {
             name: "numpy.dtype".into(),
             source_module: None,
             import: hashset!["numpy".into()],
+            type_refs: HashMap::new(),
         }
     }
 }

@@ -13,7 +13,7 @@ mod rust_decimal;
 
 use maplit::hashset;
 use std::cmp::Ordering;
-use std::{collections::HashSet, fmt, ops};
+use std::{collections::{HashMap, HashSet}, fmt, ops};
 
 /// Indicates what to import.
 /// Module: The purpose is to import the entire module(eg import builtins).
@@ -96,6 +96,30 @@ impl TypeRef {
     }
 }
 
+/// Represents how a type identifier should be qualified in stub files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ImportKind {
+    /// Type is imported by name (from module import Type).
+    /// It can be used unqualified in the target module.
+    ByName,
+    /// Type is from a module import (from package import module).
+    /// It must be qualified as module.Type.
+    Module,
+    /// Type is defined in the same module as the usage site.
+    /// It can be used unqualified.
+    SameModule,
+}
+
+/// Represents a reference to a type identifier within a compound type expression.
+/// Tracks which module the type comes from and how it should be qualified.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TypeIdentifierRef {
+    /// The module where this type is defined.
+    pub module: ModuleRef,
+    /// How this type should be qualified in stub files.
+    pub import_kind: ImportKind,
+}
+
 /// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
@@ -114,6 +138,16 @@ pub struct TypeInfo {
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
     pub import: HashSet<ImportRef>,
+
+    /// Track all type identifiers referenced in the name expression.
+    ///
+    /// This enables context-aware qualification of identifiers within compound type expressions.
+    /// For example, in `typing.Optional[ClassA]`, we need to track that `ClassA` is from a specific module
+    /// and qualify it appropriately based on the target module context.
+    ///
+    /// - Key: bare identifier (e.g., "ClassA")
+    /// - Value: TypeIdentifierRef containing module and import kind
+    pub type_refs: HashMap<String, TypeIdentifierRef>,
 }
 
 impl fmt::Display for TypeInfo {
@@ -131,6 +165,7 @@ impl TypeInfo {
             name: "None".to_string(),
             source_module: None,
             import: HashSet::new(),
+            type_refs: HashMap::new(),
         }
     }
 
@@ -140,6 +175,7 @@ impl TypeInfo {
             name: "typing.Any".to_string(),
             source_module: None,
             import: hashset! { "typing".into() },
+            type_refs: HashMap::new(),
         }
     }
 
@@ -151,6 +187,7 @@ impl TypeInfo {
             name: format!("builtins.list[{name}]"),
             source_module: None,
             import,
+            type_refs: HashMap::new(),
         }
     }
 
@@ -162,6 +199,7 @@ impl TypeInfo {
             name: format!("builtins.set[{name}]"),
             source_module: None,
             import,
+            type_refs: HashMap::new(),
         }
     }
 
@@ -183,6 +221,7 @@ impl TypeInfo {
             name: format!("builtins.dict[{name_k}, {name_v}]"),
             source_module: None,
             import,
+            type_refs: HashMap::new(),
         }
     }
 
@@ -192,6 +231,7 @@ impl TypeInfo {
             name: format!("builtins.{name}"),
             source_module: None,
             import: hashset! { "builtins".into() },
+            type_refs: HashMap::new(),
         }
     }
 
@@ -201,6 +241,7 @@ impl TypeInfo {
             name: name.to_string(),
             source_module: None,
             import: hashset! {},
+            type_refs: HashMap::new(),
         }
     }
 
@@ -216,6 +257,7 @@ impl TypeInfo {
             name: name.to_string(),
             source_module: Some(module),
             import,
+            type_refs: HashMap::new(),
         }
     }
 
@@ -256,6 +298,7 @@ impl TypeInfo {
             name: qualified_name,
             source_module: Some(module),
             import,
+            type_refs: HashMap::new(),
         }
     }
 
@@ -304,6 +347,37 @@ impl TypeInfo {
             None => false,
         }
     }
+
+    /// Get the qualified name for use in a specific target module with context-aware rewriting.
+    ///
+    /// This method handles compound type expressions by rewriting nested identifiers
+    /// based on the import context. For example:
+    /// - `typing.Optional[ClassA]` becomes `typing.Optional[sub_mod.ClassA]` when ClassA
+    ///   is from a different module.
+    ///
+    /// # Arguments
+    /// * `target_module` - The module where this type will be used
+    /// * `imported_types` - Set of types imported by name in the target module
+    ///
+    /// # Returns
+    /// The qualified type name string with identifiers properly qualified
+    pub fn qualified_for_module(
+        &self,
+        target_module: &str,
+        imported_types: &HashSet<String>,
+    ) -> String {
+        // If no type_refs, use the simpler qualified_name method
+        if self.type_refs.is_empty() {
+            return self.qualified_name(target_module);
+        }
+
+        // Build qualifier with import context
+        use crate::generate::qualifier::TypeExpressionQualifier;
+        let qualifier = TypeExpressionQualifier::new(target_module, imported_types);
+
+        // Rewrite the expression with context-aware qualification
+        qualifier.qualify_expression(&self.name, &self.type_refs)
+    }
 }
 
 impl ops::BitOr for TypeInfo {
@@ -311,10 +385,14 @@ impl ops::BitOr for TypeInfo {
 
     fn bitor(mut self, rhs: Self) -> Self {
         self.import.extend(rhs.import);
+        // Merge type_refs from both sides
+        let mut merged_type_refs = self.type_refs.clone();
+        merged_type_refs.extend(rhs.type_refs);
         Self {
             name: format!("{} | {}", self.name, rhs.name),
             source_module: None, // Union types are synthetic, have no source module
             import: self.import,
+            type_refs: merged_type_refs,
         }
     }
 }

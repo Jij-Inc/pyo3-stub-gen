@@ -7,6 +7,7 @@ use ::pyo3::{
     Bound, Py, PyClass, PyRef, PyRefMut,
 };
 use maplit::hashset;
+use std::collections::HashMap;
 
 impl PyStubType for PyAny {
     fn type_output() -> TypeInfo {
@@ -14,6 +15,7 @@ impl PyStubType for PyAny {
             name: "typing.Any".to_string(),
             source_module: None,
             import: hashset! { "typing".into() },
+            type_refs: HashMap::new(),
         }
     }
 }
@@ -62,6 +64,7 @@ macro_rules! impl_builtin {
                     name: $pytype.to_string(),
                     source_module: None,
                     import: HashSet::new(),
+                    type_refs: HashMap::new(),
                 }
             }
         }
@@ -93,6 +96,7 @@ macro_rules! impl_simple {
                     name: concat!($mod, ".", $pytype).to_string(),
                     source_module: None,
                     import: hashset! { $mod.into() },
+                    type_refs: HashMap::new(),
                 }
             }
         }

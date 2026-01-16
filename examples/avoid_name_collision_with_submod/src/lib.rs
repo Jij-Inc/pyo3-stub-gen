@@ -32,6 +32,10 @@ impl ClassB {
     pub fn collision_with_def(&self, a: ClassA) -> ClassA {
         a
     }
+
+    pub fn test_optional(&self, a: Option<ClassA>) -> Option<ClassA> {
+        a
+    }
 }
 
 #[pymodule]

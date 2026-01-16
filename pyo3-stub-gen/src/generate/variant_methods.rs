@@ -3,7 +3,7 @@ use indexmap::IndexMap;
 use crate::generate::{MethodDef, MethodType, Parameter, ParameterDefault, Parameters};
 use crate::type_info::{ParameterKind, PyComplexEnumInfo, VariantForm, VariantInfo};
 use crate::TypeInfo;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub(super) fn get_variant_methods(
     enum_info: &PyComplexEnumInfo,
@@ -23,6 +23,7 @@ pub(super) fn get_variant_methods(
                 name: full_class_name,
                 source_module: None,
                 import: HashSet::new(),
+                type_refs: HashMap::new(),
             },
             doc: "",
             r#type: MethodType::New,
