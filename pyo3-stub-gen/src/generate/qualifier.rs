@@ -202,9 +202,15 @@ impl TypeExpressionQualifier {
     ///
     /// This rewrites bare identifiers in the expression to add module qualifiers
     /// when necessary, based on the import context.
+    ///
+    /// # Parameters
+    /// - `expr`: The type expression to qualify
+    /// - `type_refs`: Map of type names to their module references
+    /// - `target_module`: The module where this type expression will be used
     pub(crate) fn qualify_expression(
         expr: &str,
         type_refs: &HashMap<String, TypeIdentifierRef>,
+        target_module: &str,
     ) -> String {
         let tokens = tokenize(expr);
         let mut result = String::new();
@@ -222,12 +228,18 @@ impl TypeExpressionQualifier {
                             ImportKind::Module => {
                                 // Need to qualify with module component
                                 if let Some(module_name) = type_ref.module.get() {
-                                    // Extract last component of module path
-                                    let module_component =
-                                        module_name.rsplit('.').next().unwrap_or(module_name);
-                                    result.push_str(module_component);
-                                    result.push('.');
-                                    result.push_str(name);
+                                    // Check if type is from same module as target
+                                    if module_name == target_module {
+                                        // Same module - use unqualified name
+                                        result.push_str(name);
+                                    } else {
+                                        // Different module - qualify with last component
+                                        let module_component =
+                                            module_name.rsplit('.').next().unwrap_or(module_name);
+                                        result.push_str(module_component);
+                                        result.push('.');
+                                        result.push_str(name);
+                                    }
                                 } else {
                                     // No module info, use as-is
                                     result.push_str(name);
@@ -243,8 +255,29 @@ impl TypeExpressionQualifier {
                     }
                 }
                 Token::DottedPath(parts) => {
-                    // Dotted paths are module.Type - don't modify
-                    result.push_str(&parts.join("."));
+                    // Check if this is an over-qualified path (e.g., "my_module.Type" when we're already in "my_module")
+                    // If the dotted path is module.Type and module matches target_module, simplify to just Type
+                    if parts.len() == 2 {
+                        let module_path = &parts[0];
+                        let type_name = &parts[1];
+
+                        // Check if target_module matches or ends with the module_path
+                        // E.g., target="pkg.sub_mod" matches module_path="sub_mod"
+                        let is_same_module = module_path == target_module
+                            || target_module.ends_with(&format!(".{}", module_path))
+                            || (target_module == module_path);
+
+                        if is_same_module {
+                            // Over-qualified - just use the type name
+                            result.push_str(type_name);
+                        } else {
+                            // Different module - keep the qualification
+                            result.push_str(&parts.join("."));
+                        }
+                    } else {
+                        // More complex path - preserve as-is
+                        result.push_str(&parts.join("."));
+                    }
                 }
                 Token::OpenBracket(ch) => result.push(ch),
                 Token::CloseBracket(ch) => result.push(ch),
@@ -352,12 +385,12 @@ mod tests {
         type_refs.insert(
             "ClassA".to_string(),
             TypeIdentifierRef {
-                module: ModuleRef::Named("package.sub_mod".into()),
+                module: ModuleRef::Named("test_package.sub_mod".into()),
                 import_kind: ImportKind::Module,
             },
         );
 
-        let result = TypeExpressionQualifier::qualify_expression("ClassA", &type_refs);
+        let result = TypeExpressionQualifier::qualify_expression("ClassA", &type_refs, "test_package");
         assert_eq!(result, "sub_mod.ClassA");
     }
 
@@ -367,13 +400,13 @@ mod tests {
         type_refs.insert(
             "ClassA".to_string(),
             TypeIdentifierRef {
-                module: ModuleRef::Named("package.sub_mod".into()),
+                module: ModuleRef::Named("test_package.sub_mod".into()),
                 import_kind: ImportKind::Module,
             },
         );
 
         let result =
-            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs);
+            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs, "test_package");
         assert_eq!(result, "typing.Optional[sub_mod.ClassA]");
     }
 
@@ -383,13 +416,13 @@ mod tests {
         type_refs.insert(
             "ClassA".to_string(),
             TypeIdentifierRef {
-                module: ModuleRef::Named("package.sub_mod".into()),
+                module: ModuleRef::Named("test_package.sub_mod".into()),
                 import_kind: ImportKind::SameModule,
             },
         );
 
         let result =
-            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs);
+            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs, "test_package.sub_mod");
         assert_eq!(result, "typing.Optional[ClassA]");
     }
 
@@ -399,14 +432,14 @@ mod tests {
         type_refs.insert(
             "ClassA".to_string(),
             TypeIdentifierRef {
-                module: ModuleRef::Named("package.sub_mod".into()),
+                module: ModuleRef::Named("test_package.sub_mod".into()),
                 import_kind: ImportKind::Module,
             },
         );
         type_refs.insert(
             "ClassB".to_string(),
             TypeIdentifierRef {
-                module: ModuleRef::Named("package.other_mod".into()),
+                module: ModuleRef::Named("test_package.other_mod".into()),
                 import_kind: ImportKind::Module,
             },
         );
@@ -414,6 +447,7 @@ mod tests {
         let result = TypeExpressionQualifier::qualify_expression(
             "collections.abc.Callable[[ClassA, str], ClassB]",
             &type_refs,
+            "test_package",
         );
         assert_eq!(
             result,

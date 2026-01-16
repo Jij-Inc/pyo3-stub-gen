@@ -99,6 +99,7 @@ impl MemberInfo {
                                         r#type: *t.ty.clone(),
                                         type_repr,
                                         imports,
+                                        rust_type_markers: vec![],
                                     }
                                 }
                                 _ => TypeOrOverride::RustType {
@@ -245,13 +246,62 @@ impl ToTokens for MemberInfo {
                 }
             }),
             TypeOrOverride::OverrideType {
-                type_repr, imports, ..
+                type_repr, imports, rust_type_markers, ..
             } => {
                 let imports = imports.iter().collect::<Vec<&String>>();
+
+                // Generate code to process RustType markers
+                let (type_name_code, type_refs_code) = if rust_type_markers.is_empty() {
+                    (
+                        quote! { #type_repr.to_string() },
+                        quote! { ::std::collections::HashMap::new() },
+                    )
+                } else {
+                    // Parse rust_type_markers as syn::Type
+                    let marker_types: Vec<syn::Type> = rust_type_markers
+                        .iter()
+                        .filter_map(|s| syn::parse_str(s).ok())
+                        .collect();
+
+                    let rust_names = rust_type_markers.iter().collect::<Vec<_>>();
+
+                    (
+                        quote! {
+                            {
+                                let mut type_name = #type_repr.to_string();
+                                #(
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    type_name = type_name.replace(#rust_names, &type_info.name);
+                                )*
+                                type_name
+                            }
+                        },
+                        quote! {
+                            {
+                                let mut type_refs = ::std::collections::HashMap::new();
+                                #(
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    if let Some(module) = type_info.source_module {
+                                        type_refs.insert(
+                                            type_info.name.split('[').next().unwrap_or(&type_info.name).split('.').last().unwrap_or(&type_info.name).to_string(),
+                                            ::pyo3_stub_gen::TypeIdentifierRef {
+                                                module: module.into(),
+                                                import_kind: ::pyo3_stub_gen::ImportKind::Module,
+                                            }
+                                        );
+                                    }
+                                    type_refs.extend(type_info.type_refs);
+                                )*
+                                type_refs
+                            }
+                        },
+                    )
+                };
+
                 tokens.append_all(quote! {
                     ::pyo3_stub_gen::type_info::MemberInfo {
                         name: #name,
-                        r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_repr.to_string(), source_module: None, import: ::std::collections::HashSet::from([#(#imports.into(),)*]), type_refs: ::std::collections::HashMap::new() },
+                        r#type: || ::pyo3_stub_gen::TypeInfo { name: #type_name_code, source_module: None, import: ::std::collections::HashSet::from([#(#imports.into(),)*]), type_refs: #type_refs_code },
                         doc: #doc,
                         default: #default,
                         deprecated: #deprecated_info,

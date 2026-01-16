@@ -184,51 +184,102 @@ impl TypeInfo {
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo {
-            name, mut import, ..
-        } = T::type_output();
+        let inner = T::type_output();
+        let mut import = inner.import.clone();
         import.insert("builtins".into());
+
+        // Build type_refs from inner type
+        let mut type_refs = HashMap::new();
+        if let Some(ref source_module) = inner.source_module {
+            if let Some(_module_name) = source_module.get() {
+                // Extract bare type identifier from the (potentially qualified) name
+                let bare_name = inner.name
+                    .split('[').next().unwrap_or(&inner.name)
+                    .split('.').last().unwrap_or(&inner.name);
+                type_refs.insert(
+                    bare_name.to_string(),
+                    TypeIdentifierRef {
+                        module: source_module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+            }
+        }
+        type_refs.extend(inner.type_refs);
+
         TypeInfo {
-            name: format!("builtins.list[{name}]"),
+            name: format!("builtins.list[{}]", inner.name),
             source_module: None,
             import,
-            type_refs: HashMap::new(),
+            type_refs,
         }
     }
 
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo {
-            name, mut import, ..
-        } = T::type_output();
+        let inner = T::type_output();
+        let mut import = inner.import.clone();
         import.insert("builtins".into());
+
+        // Build type_refs from inner type
+        let mut type_refs = HashMap::new();
+        if let Some(ref source_module) = inner.source_module {
+            if let Some(_module_name) = source_module.get() {
+                let bare_name = inner.name
+                    .split('[').next().unwrap_or(&inner.name)
+                    .split('.').last().unwrap_or(&inner.name);
+                type_refs.insert(
+                    bare_name.to_string(),
+                    TypeIdentifierRef {
+                        module: source_module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+            }
+        }
+        type_refs.extend(inner.type_refs);
+
         TypeInfo {
-            name: format!("builtins.set[{name}]"),
+            name: format!("builtins.set[{}]", inner.name),
             source_module: None,
             import,
-            type_refs: HashMap::new(),
+            type_refs,
         }
     }
 
     /// A `dict[Type]` type annotation.
     pub fn dict_of<K: PyStubType, V: PyStubType>() -> Self {
-        let TypeInfo {
-            name: name_k,
-            mut import,
-            ..
-        } = K::type_output();
-        let TypeInfo {
-            name: name_v,
-            import: import_v,
-            ..
-        } = V::type_output();
-        import.extend(import_v);
+        let inner_k = K::type_output();
+        let inner_v = V::type_output();
+        let mut import = inner_k.import.clone();
+        import.extend(inner_v.import.clone());
         import.insert("builtins".into());
+
+        // Build type_refs from both inner types
+        let mut type_refs = HashMap::new();
+        for inner in [&inner_k, &inner_v] {
+            if let Some(ref source_module) = inner.source_module {
+                if let Some(_module_name) = source_module.get() {
+                    let bare_name = inner.name
+                        .split('[').next().unwrap_or(&inner.name)
+                        .split('.').last().unwrap_or(&inner.name);
+                    type_refs.insert(
+                        bare_name.to_string(),
+                        TypeIdentifierRef {
+                            module: source_module.clone(),
+                            import_kind: ImportKind::Module,
+                        },
+                    );
+                }
+            }
+            type_refs.extend(inner.type_refs.clone());
+        }
+
         TypeInfo {
-            name: format!("builtins.dict[{name_k}, {name_v}]"),
+            name: format!("builtins.dict[{}, {}]", inner_k.name, inner_v.name),
             source_module: None,
             import,
-            type_refs: HashMap::new(),
+            type_refs,
         }
     }
 
@@ -384,7 +435,7 @@ impl TypeInfo {
 
         // Rewrite the expression with context-aware qualification
         use crate::generate::qualifier::TypeExpressionQualifier;
-        TypeExpressionQualifier::qualify_expression(&self.name, &self.type_refs)
+        TypeExpressionQualifier::qualify_expression(&self.name, &self.type_refs, target_module)
     }
 }
 

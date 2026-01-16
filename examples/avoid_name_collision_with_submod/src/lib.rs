@@ -3,7 +3,11 @@ use pyo3_stub_gen::{derive::*, *};
 
 #[gen_stub_pyclass_enum]
 #[pyclass]
-#[pyo3(eq, module = "avoid_name_collision_with_submod.sub_mod")]
+#[pyo3(
+    eq,
+    module = "avoid_name_collision_with_submod.sub_mod",
+    name = "ClassA"
+)]
 #[derive(Clone, PartialEq, Eq)]
 pub enum PyClassA {
     Option1,
@@ -13,7 +17,7 @@ pub enum PyClassA {
 #[gen_stub_pyclass]
 #[pyclass]
 #[derive(Clone)]
-#[pyo3(module = "avoid_name_collision_with_submod", name = "ClassA")]
+#[pyo3(module = "avoid_name_collision_with_submod")]
 pub struct ClassB {}
 
 #[gen_stub_pymethods]
@@ -90,6 +94,7 @@ impl PyStubType for ClassACallback {
             type_refs: [(
                 "ClassA".to_string(),
                 TypeIdentifierRef {
+                    // ClassA is the Python name for PyClassA (Rust enum) in sub_mod
                     module: "avoid_name_collision_with_submod.sub_mod".into(),
                     import_kind: ImportKind::Module,
                 },

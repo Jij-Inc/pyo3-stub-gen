@@ -5,6 +5,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub struct EnumDef {
     pub name: &'static str,
+    pub module: Option<&'static str>,
     pub doc: &'static str,
     pub variants: &'static [(&'static str, &'static str)],
     pub methods: Vec<MethodDef>,
@@ -17,6 +18,7 @@ impl From<&PyEnumInfo> for EnumDef {
     fn from(info: &PyEnumInfo) -> Self {
         Self {
             name: info.pyclass_name,
+            module: info.module,
             doc: info.doc,
             variants: info.variants,
             methods: Vec::new(),
@@ -75,7 +77,7 @@ impl fmt::Display for EnumDef {
                     "{}",
                     GetterDisplay {
                         member: getter,
-                        target_module: self.name
+                        target_module: self.module.unwrap_or(self.name)
                     }
                 )?;
             }
@@ -85,7 +87,7 @@ impl fmt::Display for EnumDef {
                     "{}",
                     SetterDisplay {
                         member: setter,
-                        target_module: self.name
+                        target_module: self.module.unwrap_or(self.name)
                     }
                 )?;
             }

@@ -17,6 +17,7 @@ use std::{fmt, vec};
 #[derive(Debug, Clone, PartialEq)]
 pub struct ClassDef {
     pub name: &'static str,
+    pub module: Option<&'static str>,
     pub doc: &'static str,
     pub attrs: Vec<MemberDef>,
     pub getter_setters: IndexMap<String, (Option<MemberDef>, Option<MemberDef>)>,
@@ -71,6 +72,7 @@ impl From<&PyComplexEnumInfo> for ClassDef {
 
         let enum_info = Self {
             name: info.pyclass_name,
+            module: info.module,
             doc: info.doc,
             getter_setters: IndexMap::new(),
             methods: IndexMap::new(),
@@ -95,6 +97,7 @@ impl ClassDef {
 
         Self {
             name: info.pyclass_name,
+            module: enum_info.module,
             doc: info.doc,
             getter_setters: info
                 .fields
@@ -131,6 +134,7 @@ impl From<&PyClassInfo> for ClassDef {
         }
         let mut new = Self {
             name: info.pyclass_name,
+            module: info.module,
             doc: info.doc,
             attrs: Vec::new(),
             getter_setters,
@@ -288,7 +292,7 @@ impl fmt::Display for ClassDef {
                     "{}",
                     GetterDisplay {
                         member: getter,
-                        target_module: self.name
+                        target_module: self.module.unwrap_or(self.name)
                     }
                 )?;
             }
@@ -298,7 +302,7 @@ impl fmt::Display for ClassDef {
                     "{}",
                     SetterDisplay {
                         member: setter,
-                        target_module: self.name
+                        target_module: self.module.unwrap_or(self.name)
                     }
                 )?;
             }
