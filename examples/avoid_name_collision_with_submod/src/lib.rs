@@ -5,7 +5,7 @@ use pyo3_stub_gen::{derive::*, *};
 #[pyclass]
 #[pyo3(eq, module = "avoid_name_collision_with_submod.sub_mod")]
 #[derive(Clone, PartialEq, Eq)]
-pub enum ClassA {
+pub enum PyClassA {
     Option1,
     Option2,
 }
@@ -13,32 +13,58 @@ pub enum ClassA {
 #[gen_stub_pyclass]
 #[pyclass]
 #[derive(Clone)]
-#[pyo3(module = "avoid_name_collision_with_submod")]
+#[pyo3(module = "avoid_name_collision_with_submod", name = "ClassA")]
 pub struct ClassB {}
 
 #[gen_stub_pymethods]
 #[pymethods]
 impl ClassB {
     #[allow(non_snake_case)]
-    pub fn ClassA(&self) -> ClassA {
-        ClassA::Option1
+    pub fn ClassA(&self) -> PyClassA {
+        PyClassA::Option1
     }
 
-    pub fn collision(&self, a: ClassA) -> ClassA {
+    pub fn collision(&self, a: PyClassA) -> PyClassA {
         a
     }
 
-    #[pyo3(signature = (a = ClassA::Option1))]
-    pub fn collision_with_def(&self, a: ClassA) -> ClassA {
+    #[pyo3(signature = (a = PyClassA::Option1))]
+    pub fn collision_with_def(&self, a: PyClassA) -> PyClassA {
         a
     }
 
-    pub fn test_optional(&self, a: Option<ClassA>) -> Option<ClassA> {
+    pub fn test_optional(&self, a: Option<PyClassA>) -> Option<PyClassA> {
         a
     }
 
     pub fn with_callback(&self, callback: ClassACallback) {
         let _ = callback;
+    }
+
+    pub fn classes_b(&self) -> Vec<PyClassA> {
+        vec![]
+    }
+}
+
+inventory::submit! {
+    derive::gen_methods_from_python! {
+        r#"
+        class PyClassA:
+            @property
+            def my_elements(self) -> pyo3_stub_gen.RustType["Vec<PyClassA>"]:
+                pass
+        "#
+    }
+}
+
+inventory::submit! {
+    derive::gen_methods_from_python! {
+        r#"
+        class ClassB:
+            @property
+            def classes_b_manual(self) -> pyo3_stub_gen.RustType["Vec<PyClassA>"]:
+                pass
+        "#
     }
 }
 
@@ -80,7 +106,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
 fn sub_mod(m: &Bound<PyModule>) -> PyResult<()> {
     let py = m.py();
     let sub = PyModule::new(py, "sub_mod")?;
-    sub.add_class::<ClassA>()?;
+    sub.add_class::<PyClassA>()?;
     m.add_submodule(&sub)?;
     Ok(())
 }
