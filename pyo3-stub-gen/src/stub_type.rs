@@ -193,9 +193,14 @@ impl TypeInfo {
         if let Some(ref source_module) = inner.source_module {
             if let Some(_module_name) = source_module.get() {
                 // Extract bare type identifier from the (potentially qualified) name
-                let bare_name = inner.name
-                    .split('[').next().unwrap_or(&inner.name)
-                    .split('.').last().unwrap_or(&inner.name);
+                let bare_name = inner
+                    .name
+                    .split('[')
+                    .next()
+                    .unwrap_or(&inner.name)
+                    .split('.')
+                    .next_back()
+                    .unwrap_or(&inner.name);
                 type_refs.insert(
                     bare_name.to_string(),
                     TypeIdentifierRef {
@@ -225,9 +230,14 @@ impl TypeInfo {
         let mut type_refs = HashMap::new();
         if let Some(ref source_module) = inner.source_module {
             if let Some(_module_name) = source_module.get() {
-                let bare_name = inner.name
-                    .split('[').next().unwrap_or(&inner.name)
-                    .split('.').last().unwrap_or(&inner.name);
+                let bare_name = inner
+                    .name
+                    .split('[')
+                    .next()
+                    .unwrap_or(&inner.name)
+                    .split('.')
+                    .next_back()
+                    .unwrap_or(&inner.name);
                 type_refs.insert(
                     bare_name.to_string(),
                     TypeIdentifierRef {
@@ -260,9 +270,14 @@ impl TypeInfo {
         for inner in [&inner_k, &inner_v] {
             if let Some(ref source_module) = inner.source_module {
                 if let Some(_module_name) = source_module.get() {
-                    let bare_name = inner.name
-                        .split('[').next().unwrap_or(&inner.name)
-                        .split('.').last().unwrap_or(&inner.name);
+                    let bare_name = inner
+                        .name
+                        .split('[')
+                        .next()
+                        .unwrap_or(&inner.name)
+                        .split('.')
+                        .next_back()
+                        .unwrap_or(&inner.name);
                     type_refs.insert(
                         bare_name.to_string(),
                         TypeIdentifierRef {
@@ -332,6 +347,7 @@ impl TypeInfo {
     /// ```
     pub fn locally_defined(type_name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
+        let mut type_refs = HashMap::new();
 
         // Determine qualified name and import based on module
         // We qualify all named modules; de-qualification for same-module usage happens during stub generation
@@ -342,6 +358,16 @@ impl TypeInfo {
                 let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
                 // Use Module import for cross-module references
                 import.insert(ImportRef::Module(module.clone()));
+
+                // Populate type_refs with the bare identifier for context-aware qualification
+                type_refs.insert(
+                    type_name.to_string(),
+                    TypeIdentifierRef {
+                        module: module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+
                 format!("{}.{}", module_component, type_name)
             }
             _ => {
@@ -356,7 +382,7 @@ impl TypeInfo {
             name: qualified_name,
             source_module: Some(module),
             import,
-            type_refs: HashMap::new(),
+            type_refs,
         }
     }
 

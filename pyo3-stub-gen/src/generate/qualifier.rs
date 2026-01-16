@@ -264,8 +264,7 @@ impl TypeExpressionQualifier {
                         // Check if target_module matches or ends with the module_path
                         // E.g., target="pkg.sub_mod" matches module_path="sub_mod"
                         let is_same_module = module_path == target_module
-                            || target_module.ends_with(&format!(".{}", module_path))
-                            || (target_module == module_path);
+                            || target_module.ends_with(&format!(".{}", module_path));
 
                         if is_same_module {
                             // Over-qualified - just use the type name
@@ -390,7 +389,8 @@ mod tests {
             },
         );
 
-        let result = TypeExpressionQualifier::qualify_expression("ClassA", &type_refs, "test_package");
+        let result =
+            TypeExpressionQualifier::qualify_expression("ClassA", &type_refs, "test_package");
         assert_eq!(result, "sub_mod.ClassA");
     }
 
@@ -405,8 +405,11 @@ mod tests {
             },
         );
 
-        let result =
-            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs, "test_package");
+        let result = TypeExpressionQualifier::qualify_expression(
+            "typing.Optional[ClassA]",
+            &type_refs,
+            "test_package",
+        );
         assert_eq!(result, "typing.Optional[sub_mod.ClassA]");
     }
 
@@ -421,8 +424,11 @@ mod tests {
             },
         );
 
-        let result =
-            TypeExpressionQualifier::qualify_expression("typing.Optional[ClassA]", &type_refs, "test_package.sub_mod");
+        let result = TypeExpressionQualifier::qualify_expression(
+            "typing.Optional[ClassA]",
+            &type_refs,
+            "test_package.sub_mod",
+        );
         assert_eq!(result, "typing.Optional[ClassA]");
     }
 

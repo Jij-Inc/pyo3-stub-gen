@@ -157,7 +157,10 @@ impl ToTokens for MethodInfo {
                     quote! { <#ty as pyo3_stub_gen::PyStubType>::type_output }
                 }
                 TypeOrOverride::OverrideType {
-                    type_repr, imports, rust_type_markers, ..
+                    type_repr,
+                    imports,
+                    rust_type_markers,
+                    ..
                 } => {
                     let imports = imports.iter().collect::<Vec<&String>>();
 

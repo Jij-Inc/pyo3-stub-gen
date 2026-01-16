@@ -143,7 +143,10 @@ impl ToTokens for ParameterWithKind {
                 }
             }
             TypeOrOverride::OverrideType {
-                type_repr, imports, rust_type_markers, ..
+                type_repr,
+                imports,
+                rust_type_markers,
+                ..
             } => {
                 let imports = imports.iter().collect::<Vec<&String>>();
 
