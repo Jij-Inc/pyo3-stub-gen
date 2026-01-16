@@ -43,6 +43,7 @@ impl ClassB {
 }
 
 #[pyclass]
+#[allow(dead_code)]
 pub struct ClassACallback(Py<PyAny>);
 
 impl FromPyObject<'_> for ClassACallback {
