@@ -36,6 +36,37 @@ impl ClassB {
     pub fn test_optional(&self, a: Option<ClassA>) -> Option<ClassA> {
         a
     }
+
+    pub fn with_callback(&self, callback: ClassACallback) {
+        let _ = callback;
+    }
+}
+
+#[pyclass]
+pub struct ClassACallback(Py<PyAny>);
+
+impl FromPyObject<'_> for ClassACallback {
+    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+        Ok(ClassACallback(ob.clone().unbind()))
+    }
+}
+
+impl PyStubType for ClassACallback {
+    fn type_output() -> TypeInfo {
+        TypeInfo {
+            name: "typing.Callable[[ClassA], ClassA]".to_string(),
+            source_module: None,
+            import: [].into(),
+            type_refs: [(
+                "ClassA".to_string(),
+                TypeIdentifierRef {
+                    module: "avoid_name_collision_with_submod.submod".into(),
+                    import_kind: ImportKind::Module,
+                },
+            )]
+            .into(),
+        }
+    }
 }
 
 #[pymodule]
