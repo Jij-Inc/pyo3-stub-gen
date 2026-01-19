@@ -251,6 +251,58 @@ impl ClassDef {
             .or_default()
             .push(method);
     }
+
+    /// Resolve all ModuleRef::Default to actual module name.
+    /// Called after construction, before formatting.
+    pub fn resolve_default_modules(&mut self, default_module_name: &str) {
+        // Resolve in getter/setter types
+        for (getter, setter) in self.getter_setters.values_mut() {
+            if let Some(getter) = getter {
+                getter.r#type.resolve_default_module(default_module_name);
+            }
+            if let Some(setter) = setter {
+                setter.r#type.resolve_default_module(default_module_name);
+            }
+        }
+
+        // Resolve in method parameter and return types
+        for methods in self.methods.values_mut() {
+            for method in methods {
+                // Resolve all parameter types
+                for param in &mut method.parameters.positional_only {
+                    param.type_info.resolve_default_module(default_module_name);
+                }
+                for param in &mut method.parameters.positional_or_keyword {
+                    param.type_info.resolve_default_module(default_module_name);
+                }
+                for param in &mut method.parameters.keyword_only {
+                    param.type_info.resolve_default_module(default_module_name);
+                }
+                if let Some(varargs) = &mut method.parameters.varargs {
+                    varargs.type_info.resolve_default_module(default_module_name);
+                }
+                if let Some(varkw) = &mut method.parameters.varkw {
+                    varkw.type_info.resolve_default_module(default_module_name);
+                }
+                method.r#return.resolve_default_module(default_module_name);
+            }
+        }
+
+        // Resolve in base classes
+        for base in &mut self.bases {
+            base.resolve_default_module(default_module_name);
+        }
+
+        // Resolve in class attributes
+        for attr in &mut self.attrs {
+            attr.r#type.resolve_default_module(default_module_name);
+        }
+
+        // Recursively resolve in nested classes
+        for class in &mut self.classes {
+            class.resolve_default_modules(default_module_name);
+        }
+    }
 }
 
 impl fmt::Display for ClassDef {

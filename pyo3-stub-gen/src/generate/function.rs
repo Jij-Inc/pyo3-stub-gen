@@ -111,6 +111,30 @@ impl fmt::Display for FunctionDef {
 }
 
 impl FunctionDef {
+    /// Resolve all ModuleRef::Default to actual module name.
+    /// Called after construction, before formatting.
+    pub fn resolve_default_modules(&mut self, default_module_name: &str) {
+        // Resolve all parameter types
+        for param in &mut self.parameters.positional_only {
+            param.type_info.resolve_default_module(default_module_name);
+        }
+        for param in &mut self.parameters.positional_or_keyword {
+            param.type_info.resolve_default_module(default_module_name);
+        }
+        for param in &mut self.parameters.keyword_only {
+            param.type_info.resolve_default_module(default_module_name);
+        }
+        if let Some(varargs) = &mut self.parameters.varargs {
+            varargs.type_info.resolve_default_module(default_module_name);
+        }
+        if let Some(varkw) = &mut self.parameters.varkw {
+            varkw.type_info.resolve_default_module(default_module_name);
+        }
+        self.r#return.resolve_default_module(default_module_name);
+    }
+}
+
+impl FunctionDef {
     /// Format function with module-qualified type names
     ///
     /// This method uses the target module context to qualify type identifiers

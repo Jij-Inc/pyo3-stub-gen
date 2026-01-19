@@ -161,15 +161,19 @@ impl StubInfoBuilder {
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
+        let mut class_def = ClassDef::from(info);
+        class_def.resolve_default_modules(&self.default_module_name);
         self.get_module(info.module)
             .class
-            .insert((info.struct_id)(), ClassDef::from(info));
+            .insert((info.struct_id)(), class_def);
     }
 
     fn add_complex_enum(&mut self, info: &PyComplexEnumInfo) {
+        let mut class_def = ClassDef::from(info);
+        class_def.resolve_default_modules(&self.default_module_name);
         self.get_module(info.module)
             .class
-            .insert((info.enum_id)(), ClassDef::from(info));
+            .insert((info.enum_id)(), class_def);
     }
 
     fn add_enum(&mut self, info: &PyEnumInfo) {
@@ -179,6 +183,9 @@ impl StubInfoBuilder {
     }
 
     fn add_function(&mut self, info: &PyFunctionInfo) -> Result<()> {
+        // Clone default_module_name to avoid borrow checker issues
+        let default_module_name = self.default_module_name.clone();
+
         let target = self
             .get_module(info.module)
             .function
@@ -186,7 +193,9 @@ impl StubInfoBuilder {
             .or_default();
 
         // Validation: Check for multiple non-overload functions
-        let new_func = FunctionDef::from(info);
+        let mut new_func = FunctionDef::from(info);
+        new_func.resolve_default_modules(&default_module_name);
+
         if !new_func.is_overload {
             let non_overload_count = target.iter().filter(|f| !f.is_overload).count();
             if non_overload_count > 0 {

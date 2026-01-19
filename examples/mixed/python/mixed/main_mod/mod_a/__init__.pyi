@@ -3,13 +3,12 @@
 
 from mixed import main_mod
 import typing
-from mixed.main_mod import B
 
 @typing.final
 class C:
     def show_x(self) -> None: ...
 
-def create_c(a: main_mod.A, b: B) -> C: ...
+def create_c(a: main_mod.A, b: main_mod.B) -> C: ...
 
 def greet_a() -> None: ...
 

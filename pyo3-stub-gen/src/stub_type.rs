@@ -371,9 +371,16 @@ impl TypeInfo {
                 format!("{}.{}", module_component, type_name)
             }
             _ => {
-                // Default/empty module - use unqualified name
-                let type_ref = TypeRef::new(module.clone(), type_name.to_string());
-                import.insert(ImportRef::Type(type_ref));
+                // Default/empty module - treat like named modules but keep name unqualified
+                // Will be resolved to actual module name at runtime
+                import.insert(ImportRef::Module(module.clone()));
+                type_refs.insert(
+                    type_name.to_string(),
+                    TypeIdentifierRef {
+                        module: module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
                 type_name.to_string()
             }
         };
@@ -462,6 +469,42 @@ impl TypeInfo {
         // Rewrite the expression with context-aware qualification
         use crate::generate::qualifier::TypeExpressionQualifier;
         TypeExpressionQualifier::qualify_expression(&self.name, &self.type_refs, target_module)
+    }
+
+    /// Resolve ModuleRef::Default to the actual module name.
+    /// Called at runtime when default module name is known.
+    pub fn resolve_default_module(&mut self, default_module_name: &str) {
+        // Resolve source_module
+        if let Some(ModuleRef::Default) = &self.source_module {
+            self.source_module = Some(ModuleRef::Named(default_module_name.to_string()));
+
+            // Update qualified name if needed
+            let module_component = default_module_name.rsplit('.').next().unwrap_or(default_module_name);
+            if !self.name.contains('.') {
+                self.name = format!("{}.{}", module_component, self.name);
+            }
+        }
+
+        // Resolve import refs
+        let mut new_import = std::collections::HashSet::new();
+        for import_ref in &self.import {
+            match import_ref {
+                ImportRef::Module(ModuleRef::Default) => {
+                    new_import.insert(ImportRef::Module(ModuleRef::Named(default_module_name.to_string())));
+                }
+                other => {
+                    new_import.insert(other.clone());
+                }
+            }
+        }
+        self.import = new_import;
+
+        // Resolve type_refs
+        for type_ref in self.type_refs.values_mut() {
+            if let ModuleRef::Default = &type_ref.module {
+                type_ref.module = ModuleRef::Named(default_module_name.to_string());
+            }
+        }
     }
 }
 
