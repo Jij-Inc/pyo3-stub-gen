@@ -221,6 +221,80 @@ impl StubInfoBuilder {
         self.get_module(Some(info.module)).doc = (info.doc)();
     }
 
+    fn add_module_export(&mut self, info: &AllModuleExport) {
+        self.get_module(Some(info.target_module))
+            .module_re_exports
+            .push(ModuleReExport {
+                source_module: info.source_module.to_string(),
+                items: info
+                    .items
+                    .map(|items| items.iter().map(|s| s.to_string()).collect()),
+            });
+    }
+
+    fn add_verbatim_export(&mut self, info: &AllVerbatimExport) {
+        self.get_module(Some(info.target_module))
+            .verbatim_all_entries
+            .insert(info.name.to_string());
+    }
+
+    fn resolve_wildcard_re_exports(&mut self) -> Result<()> {
+        // Collect wildcard re-exports and their resolved items
+        let mut resolutions: Vec<(String, usize, Vec<String>)> = Vec::new();
+
+        for (module_name, module) in &self.modules {
+            for (idx, re_export) in module.module_re_exports.iter().enumerate() {
+                if re_export.items.is_none() {
+                    // Wildcard - resolve it
+                    if let Some(source_mod) = self.modules.get(&re_export.source_module) {
+                        let mut items = Vec::new();
+                        for class in source_mod.class.values() {
+                            if !class.name.starts_with('_') {
+                                items.push(class.name.to_string());
+                            }
+                        }
+                        for enum_ in source_mod.enum_.values() {
+                            if !enum_.name.starts_with('_') {
+                                items.push(enum_.name.to_string());
+                            }
+                        }
+                        for func_name in source_mod.function.keys() {
+                            if !func_name.starts_with('_') {
+                                items.push(func_name.to_string());
+                            }
+                        }
+                        for var_name in source_mod.variables.keys() {
+                            if !var_name.starts_with('_') {
+                                items.push(var_name.to_string());
+                            }
+                        }
+                        for submod in &source_mod.submodules {
+                            items.push(submod.to_string());
+                        }
+                        resolutions.push((module_name.clone(), idx, items));
+                    } else {
+                        // Source module not found - error!
+                        anyhow::bail!(
+                            "Cannot resolve wildcard re-export in module '{}': source module '{}' not found. \
+                             Only internal modules can be used with wildcard re-exports.",
+                            module_name,
+                            re_export.source_module
+                        );
+                    }
+                }
+            }
+        }
+
+        // Apply resolutions (replace None with Some(items))
+        for (module_name, idx, items) in resolutions {
+            if let Some(module) = self.modules.get_mut(&module_name) {
+                module.module_re_exports[idx].items = Some(items);
+            }
+        }
+
+        Ok(())
+    }
+
     fn add_methods(&mut self, info: &PyMethodsInfo) -> Result<()> {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
@@ -358,7 +432,18 @@ impl StubInfoBuilder {
         for info in methods_infos {
             self.add_methods(info)?;
         }
+        // Collect __all__ export directives
+        for info in inventory::iter::<AllModuleExport> {
+            self.add_module_export(info);
+        }
+        for info in inventory::iter::<AllVerbatimExport> {
+            self.add_verbatim_export(info);
+        }
         self.register_submodules();
+
+        // Resolve wildcard re-exports
+        self.resolve_wildcard_re_exports()?;
+
         Ok(StubInfo {
             modules: self.modules,
             python_root: self.python_root,

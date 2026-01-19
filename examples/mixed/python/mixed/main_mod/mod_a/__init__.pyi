@@ -3,6 +3,12 @@
 
 from mixed import main_mod
 import typing
+__all__ = [
+    "C",
+    "create_c",
+    "greet_a",
+    "test_module_with_python",
+]
 
 @typing.final
 class C:

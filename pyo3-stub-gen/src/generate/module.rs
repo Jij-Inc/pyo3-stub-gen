@@ -7,6 +7,13 @@ use std::{
     fmt,
 };
 
+/// Re-export from another module for __all__
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModuleReExport {
+    pub source_module: String,
+    pub items: Option<Vec<String>>,
+}
+
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Module {
@@ -19,6 +26,64 @@ pub struct Module {
     pub default_module_name: String,
     /// Direct submodules of this module.
     pub submodules: BTreeSet<String>,
+    /// Module re-exports for __all__
+    pub module_re_exports: Vec<ModuleReExport>,
+    /// Verbatim entries to add to __all__
+    pub verbatim_all_entries: BTreeSet<String>,
+}
+
+impl Module {
+    fn write_all_list(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut all_items: BTreeSet<String> = BTreeSet::new();
+
+        // Collect public items from this module
+        for class in self.class.values() {
+            if !class.name.starts_with('_') {
+                all_items.insert(class.name.to_string());
+            }
+        }
+        for enum_ in self.enum_.values() {
+            if !enum_.name.starts_with('_') {
+                all_items.insert(enum_.name.to_string());
+            }
+        }
+        for func_name in self.function.keys() {
+            if !func_name.starts_with('_') {
+                all_items.insert(func_name.to_string());
+            }
+        }
+        for var_name in self.variables.keys() {
+            if !var_name.starts_with('_') {
+                all_items.insert(var_name.to_string());
+            }
+        }
+        for submod in &self.submodules {
+            all_items.insert(submod.to_string());
+        }
+
+        // Add items from re-exports (all resolved to Some(items) by now)
+        for re_export in &self.module_re_exports {
+            if let Some(items) = &re_export.items {
+                all_items.extend(items.iter().cloned());
+            }
+        }
+
+        // Add verbatim entries
+        all_items.extend(self.verbatim_all_entries.iter().cloned());
+
+        // Always write __all__ list (even if empty for consistency)
+        if all_items.is_empty() {
+            writeln!(f, "__all__ = []")?;
+        } else {
+            writeln!(f, "__all__ = [")?;
+            for item in all_items {
+                writeln!(f, "    \"{}\",", item)?;
+            }
+            writeln!(f, "]")?;
+        }
+
+        Ok(())
+    }
 }
 
 impl Import for Module {
@@ -112,9 +177,30 @@ impl fmt::Display for Module {
                 sorted_type_names.join(", ")
             )?;
         }
+        // Add imports for module re-exports
+        for re_export in &self.module_re_exports {
+            if let Some(items) = &re_export.items {
+                // Specific items: from source import item1, item2
+                let mut sorted_items = items.clone();
+                sorted_items.sort();
+                writeln!(
+                    f,
+                    "from {} import {}",
+                    re_export.source_module,
+                    sorted_items.join(", ")
+                )?;
+            } else {
+                // Wildcard: from source import *
+                writeln!(f, "from {} import *", re_export.source_module)?;
+            }
+        }
         for submod in &self.submodules {
             writeln!(f, "from . import {submod}")?;
         }
+
+        // Generate __all__ list
+        self.write_all_list(f)?;
+
         writeln!(f)?;
 
         for var in self.variables.values() {

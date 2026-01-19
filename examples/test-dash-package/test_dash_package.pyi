@@ -2,6 +2,9 @@
 # ruff: noqa: E501, F401
 
 import builtins
+__all__ = [
+    "test_function",
+]
 
 def test_function() -> builtins.int: ...
 

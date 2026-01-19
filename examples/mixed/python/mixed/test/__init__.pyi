@@ -3,4 +3,8 @@
 
 from . import from_inline
 from . import from_pyo3
+__all__ = [
+    "from_inline",
+    "from_pyo3",
+]
 

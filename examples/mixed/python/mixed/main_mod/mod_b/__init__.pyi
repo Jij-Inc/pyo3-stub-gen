@@ -3,6 +3,12 @@
 
 import builtins
 import typing
+__all__ = [
+    "D",
+    "create_d",
+    "greet_b",
+    "test_submit_with_module",
+]
 
 @typing.final
 class D:

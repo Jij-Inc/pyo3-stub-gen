@@ -275,5 +275,58 @@ macro_rules! module_variable {
     };
 }
 
+/// Re-export items from another module into __all__
+///
+/// # Wildcard re-export
+/// ```rust
+/// pyo3_stub_gen::all_module_export!("target.module", "source.module");
+/// ```
+///
+/// # Specific items re-export
+/// ```rust
+/// pyo3_stub_gen::all_module_export!("target.module", "source.module", "item1", "item2");
+/// ```
+#[macro_export]
+macro_rules! all_module_export {
+    // Wildcard: all_module_export!("target", "source")
+    ($target:expr, $source:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::AllModuleExport {
+                target_module: $target,
+                source_module: $source,
+                items: None,
+            }
+        }
+    };
+    // Specific items: all_module_export!("target", "source", "item1", "item2")
+    ($target:expr, $source:expr, $($item:expr),+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::AllModuleExport {
+                target_module: $target,
+                source_module: $source,
+                items: Some(&[$($item),+]),
+            }
+        }
+    };
+}
+
+/// Add verbatim entry to __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::all_verbatim_export!("my.module", "my_name");
+/// ```
+#[macro_export]
+macro_rules! all_verbatim_export {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::AllVerbatimExport {
+                target_module: $module,
+                name: $name,
+            }
+        }
+    };
+}
+
 #[doc = include_str!("../README.md")]
 mod readme {}

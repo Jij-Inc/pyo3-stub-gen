@@ -4,6 +4,13 @@
 import builtins
 import enum
 import typing
+__all__ = [
+    "InlineOverridesPyo3Class",
+    "InlineOverridesPyo3Enum",
+    "OnlyInlineClass",
+    "OnlyInlineEnum",
+    "only_inline_fn",
+]
 
 @typing.final
 class InlineOverridesPyo3Class:

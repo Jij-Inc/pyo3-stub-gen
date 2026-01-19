@@ -3,6 +3,10 @@
 
 import builtins
 import typing
+__all__ = [
+    "A",
+    "sum_as_string",
+]
 
 @typing.final
 class A:

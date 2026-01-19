@@ -3,6 +3,10 @@
 
 import enum
 import typing
+__all__ = [
+    "OnlyPyo3Enum",
+    "OnlyPyo3Module",
+]
 
 @typing.final
 class OnlyPyo3Module:

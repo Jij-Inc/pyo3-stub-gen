@@ -3,4 +3,8 @@
 
 from . import main_mod
 from . import test
+__all__ = [
+    "main_mod",
+    "test",
+]
 
