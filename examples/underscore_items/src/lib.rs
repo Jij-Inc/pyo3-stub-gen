@@ -30,12 +30,12 @@ struct PublicClass {}
 #[pyfunction]
 fn public_but_hidden() {}
 
-// 6. Test: Explicit inclusion of underscore items via all_verbatim_export!
-pyo3_stub_gen::all_verbatim_export!("underscore_items", "_private_function");
-pyo3_stub_gen::all_verbatim_export!("underscore_items", "_PrivateClass");
+// 6. Test: Explicit inclusion of underscore items via export_verbatim!
+pyo3_stub_gen::export_verbatim!("underscore_items", "_private_function");
+pyo3_stub_gen::export_verbatim!("underscore_items", "_PrivateClass");
 
-// 7. Test: Explicit exclusion of public items via all_exclude!
-pyo3_stub_gen::all_exclude!("underscore_items", "public_but_hidden");
+// 7. Test: Explicit exclusion of public items via exclude_from_all!
+pyo3_stub_gen::exclude_from_all!("underscore_items", "public_but_hidden");
 
 /// Initializes the Python module
 #[pymodule]

@@ -203,16 +203,16 @@ submit! {
 // Test 1: Wildcard re-export from mod_a to main_mod (internal module)
 // This will add all public items from mod_a to main_mod's __all__
 // Since mod_a is an internal module, the wildcard will be resolved to specific items
-pyo3_stub_gen::all_module_export!("mixed.main_mod", "mixed.main_mod.mod_a");
+pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_a");
 
 // Test 2: Specific items re-export from mod_b to main_mod
 // This will add only D and greet_b to main_mod's __all__
-pyo3_stub_gen::all_module_export!("mixed.main_mod", "mixed.main_mod.mod_b", "D", "greet_b");
+pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_b", "D", "greet_b");
 
 // Test 3: Verbatim entry to root mixed module
 // This adds a custom entry. For testing, we define it as a module variable.
 pyo3_stub_gen::module_variable!("mixed", "custom_export_name", &str, "test_value");
-pyo3_stub_gen::all_verbatim_export!("mixed", "custom_export_name");
+pyo3_stub_gen::export_verbatim!("mixed", "custom_export_name");
 
 define_stub_info_gatherer!(stub_info);
 

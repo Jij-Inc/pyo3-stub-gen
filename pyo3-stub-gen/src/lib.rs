@@ -279,29 +279,29 @@ macro_rules! module_variable {
 ///
 /// # Wildcard re-export
 /// ```rust
-/// pyo3_stub_gen::all_module_export!("target.module", "source.module");
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module");
 /// ```
 ///
 /// # Specific items re-export
 /// ```rust
-/// pyo3_stub_gen::all_module_export!("target.module", "source.module", "item1", "item2");
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module", "item1", "item2");
 /// ```
 #[macro_export]
-macro_rules! all_module_export {
-    // Wildcard: all_module_export!("target", "source")
+macro_rules! reexport_module_members {
+    // Wildcard: reexport_module_members!("target", "source")
     ($target:expr, $source:expr) => {
         $crate::inventory::submit! {
-            $crate::type_info::AllModuleExport {
+            $crate::type_info::ReexportModuleMembers {
                 target_module: $target,
                 source_module: $source,
                 items: None,
             }
         }
     };
-    // Specific items: all_module_export!("target", "source", "item1", "item2")
+    // Specific items: reexport_module_members!("target", "source", "item1", "item2")
     ($target:expr, $source:expr, $($item:expr),+) => {
         $crate::inventory::submit! {
-            $crate::type_info::AllModuleExport {
+            $crate::type_info::ReexportModuleMembers {
                 target_module: $target,
                 source_module: $source,
                 items: Some(&[$($item),+]),
@@ -314,13 +314,13 @@ macro_rules! all_module_export {
 ///
 /// # Example
 /// ```rust
-/// pyo3_stub_gen::all_verbatim_export!("my.module", "my_name");
+/// pyo3_stub_gen::export_verbatim!("my.module", "my_name");
 /// ```
 #[macro_export]
-macro_rules! all_verbatim_export {
+macro_rules! export_verbatim {
     ($module:expr, $name:expr) => {
         $crate::inventory::submit! {
-            $crate::type_info::AllVerbatimExport {
+            $crate::type_info::ExportVerbatim {
                 target_module: $module,
                 name: $name,
             }
@@ -332,13 +332,13 @@ macro_rules! all_verbatim_export {
 ///
 /// # Example
 /// ```rust
-/// pyo3_stub_gen::all_exclude!("my.module", "internal_function");
+/// pyo3_stub_gen::exclude_from_all!("my.module", "internal_function");
 /// ```
 #[macro_export]
-macro_rules! all_exclude {
+macro_rules! exclude_from_all {
     ($module:expr, $name:expr) => {
         $crate::inventory::submit! {
-            $crate::type_info::AllExclude {
+            $crate::type_info::ExcludeFromAll {
                 target_module: $module,
                 name: $name,
             }

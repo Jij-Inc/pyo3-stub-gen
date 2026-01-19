@@ -221,7 +221,7 @@ impl StubInfoBuilder {
         self.get_module(Some(info.module)).doc = (info.doc)();
     }
 
-    fn add_module_export(&mut self, info: &AllModuleExport) {
+    fn add_module_export(&mut self, info: &ReexportModuleMembers) {
         let use_wildcard = info.items.is_none();
         let items = info
             .items
@@ -237,13 +237,13 @@ impl StubInfoBuilder {
             });
     }
 
-    fn add_verbatim_export(&mut self, info: &AllVerbatimExport) {
+    fn add_verbatim_export(&mut self, info: &ExportVerbatim) {
         self.get_module(Some(info.target_module))
             .verbatim_all_entries
             .insert(info.name.to_string());
     }
 
-    fn add_exclude(&mut self, info: &AllExclude) {
+    fn add_exclude(&mut self, info: &ExcludeFromAll) {
         self.get_module(Some(info.target_module))
             .excluded_all_entries
             .insert(info.name.to_string());
@@ -448,13 +448,13 @@ impl StubInfoBuilder {
             self.add_methods(info)?;
         }
         // Collect __all__ export directives
-        for info in inventory::iter::<AllModuleExport> {
+        for info in inventory::iter::<ReexportModuleMembers> {
             self.add_module_export(info);
         }
-        for info in inventory::iter::<AllVerbatimExport> {
+        for info in inventory::iter::<ExportVerbatim> {
             self.add_verbatim_export(info);
         }
-        for info in inventory::iter::<AllExclude> {
+        for info in inventory::iter::<ExcludeFromAll> {
             self.add_exclude(info);
         }
         self.register_submodules();
