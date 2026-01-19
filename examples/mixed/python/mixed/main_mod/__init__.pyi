@@ -3,8 +3,8 @@
 
 import builtins
 import typing
-from mixed.main_mod.mod_b import D, greet_b
 from mixed.main_mod.mod_a import *
+from mixed.main_mod.mod_b import D, greet_b
 from . import int
 from . import mod_a
 from . import mod_b

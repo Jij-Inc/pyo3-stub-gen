@@ -179,8 +179,10 @@ impl fmt::Display for Module {
                 sorted_type_names.join(", ")
             )?;
         }
-        // Add imports for module re-exports
-        for re_export in &self.module_re_exports {
+        // Add imports for module re-exports (sorted for deterministic output)
+        let mut sorted_re_exports = self.module_re_exports.clone();
+        sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
+        for re_export in &sorted_re_exports {
             if re_export.use_wildcard_import {
                 // Wildcard: from source import *
                 writeln!(f, "from {} import *", re_export.source_module)?;
