@@ -48,6 +48,7 @@ pub struct OnlyInlineClass {
 // ============================================================================
 
 /// Test 1: No module → uses default
+#[allow(dead_code)]
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn no_module_fn() -> usize {
@@ -55,6 +56,7 @@ pub fn no_module_fn() -> usize {
 }
 
 /// Test 2: Only inline module
+#[allow(dead_code)]
 #[gen_stub_pyfunction(module = "mixed.test.from_inline")]
 #[pyfunction]
 pub fn only_inline_fn() -> usize {
