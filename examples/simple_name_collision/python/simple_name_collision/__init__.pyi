@@ -2,6 +2,10 @@
 # ruff: noqa: E501, F401
 
 import typing
+__all__ = [
+    "ClassA",
+    "ClassB",
+]
 
 @typing.final
 class ClassA:

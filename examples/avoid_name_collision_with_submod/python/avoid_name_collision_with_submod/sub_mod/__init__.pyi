@@ -4,6 +4,9 @@
 import builtins
 import enum
 import typing
+__all__ = [
+    "ClassA",
+]
 
 @typing.final
 class ClassA(enum.Enum):

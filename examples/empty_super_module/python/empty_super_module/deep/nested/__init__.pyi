@@ -2,4 +2,7 @@
 # ruff: noqa: E501, F401
 
 from . import module
+__all__ = [
+    "module",
+]
 

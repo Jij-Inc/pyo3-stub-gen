@@ -4,6 +4,10 @@
 import builtins
 import typing
 from . import sub_mod
+__all__ = [
+    "ClassB",
+    "sub_mod",
+]
 
 @typing.final
 class ClassB:
