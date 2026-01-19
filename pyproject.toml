@@ -28,4 +28,5 @@ members = [
   "examples/empty_super_module",
   "examples/simple_name_collision",
   "examples/avoid_name_collision_with_submod",
+  "examples/underscore_items",
 ]

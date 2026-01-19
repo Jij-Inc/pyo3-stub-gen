@@ -1214,6 +1214,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "underscore_items"
+version = "0.18.0"
+dependencies = [
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "unic-char-property"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -31,6 +31,8 @@ pub struct Module {
     pub module_re_exports: Vec<ModuleReExport>,
     /// Verbatim entries to add to __all__
     pub verbatim_all_entries: BTreeSet<String>,
+    /// Explicitly excluded entries from __all__
+    pub excluded_all_entries: BTreeSet<String>,
 }
 
 impl Module {
@@ -58,8 +60,11 @@ impl Module {
                 all_items.insert(var_name.to_string());
             }
         }
+        // FIX: Add underscore filtering for submodules
         for submod in &self.submodules {
-            all_items.insert(submod.to_string());
+            if !submod.starts_with('_') {
+                all_items.insert(submod.to_string());
+            }
         }
 
         // Add items from re-exports
@@ -67,8 +72,13 @@ impl Module {
             all_items.extend(re_export.items.iter().cloned());
         }
 
-        // Add verbatim entries
+        // Add verbatim entries (allows explicit inclusion of underscore items)
         all_items.extend(self.verbatim_all_entries.iter().cloned());
+
+        // Remove explicitly excluded items
+        for excluded in &self.excluded_all_entries {
+            all_items.remove(excluded);
+        }
 
         // Always write __all__ list (even if empty for consistency)
         if all_items.is_empty() {

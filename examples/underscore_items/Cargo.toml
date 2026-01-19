@@ -1,0 +1,17 @@
+[package]
+name = "underscore_items"
+description = "Test example for underscore-prefixed items in __all__ generation"
+edition.workspace = true
+version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+pyo3.workspace = true
+
+[[bin]]
+name = "stub_gen"
+doc = false

@@ -302,3 +302,12 @@ pub struct AllVerbatimExport {
 }
 
 inventory::collect!(AllVerbatimExport);
+
+/// Exclude specific items from __all__
+#[derive(Debug)]
+pub struct AllExclude {
+    pub target_module: &'static str,
+    pub name: &'static str,
+}
+
+inventory::collect!(AllExclude);

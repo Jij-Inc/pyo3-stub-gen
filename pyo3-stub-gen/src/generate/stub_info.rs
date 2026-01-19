@@ -243,6 +243,12 @@ impl StubInfoBuilder {
             .insert(info.name.to_string());
     }
 
+    fn add_exclude(&mut self, info: &AllExclude) {
+        self.get_module(Some(info.target_module))
+            .excluded_all_entries
+            .insert(info.name.to_string());
+    }
+
     fn resolve_wildcard_re_exports(&mut self) -> Result<()> {
         // Collect wildcard re-exports and their resolved items for __all__
         let mut resolutions: Vec<(String, usize, Vec<String>)> = Vec::new();
@@ -274,8 +280,11 @@ impl StubInfoBuilder {
                                 items.push(var_name.to_string());
                             }
                         }
+                        // FIX: Add underscore filtering for submodules in wildcard resolution
                         for submod in &source_mod.submodules {
-                            items.push(submod.to_string());
+                            if !submod.starts_with('_') {
+                                items.push(submod.to_string());
+                            }
                         }
                         resolutions.push((module_name.clone(), idx, items));
                     } else {
@@ -444,6 +453,9 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<AllVerbatimExport> {
             self.add_verbatim_export(info);
+        }
+        for info in inventory::iter::<AllExclude> {
+            self.add_exclude(info);
         }
         self.register_submodules();
 

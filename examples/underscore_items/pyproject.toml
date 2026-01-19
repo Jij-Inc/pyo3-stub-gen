@@ -1,0 +1,12 @@
+[project]
+name = "underscore_items"
+version = "0.1"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"

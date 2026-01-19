@@ -328,5 +328,23 @@ macro_rules! all_verbatim_export {
     };
 }
 
+/// Exclude specific items from __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::all_exclude!("my.module", "internal_function");
+/// ```
+#[macro_export]
+macro_rules! all_exclude {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::AllExclude {
+                target_module: $module,
+                name: $name,
+            }
+        }
+    };
+}
+
 #[doc = include_str!("../README.md")]
 mod readme {}
