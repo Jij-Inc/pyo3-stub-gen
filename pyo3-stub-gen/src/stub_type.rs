@@ -479,7 +479,10 @@ impl TypeInfo {
             self.source_module = Some(ModuleRef::Named(default_module_name.to_string()));
 
             // Update qualified name if needed
-            let module_component = default_module_name.rsplit('.').next().unwrap_or(default_module_name);
+            let module_component = default_module_name
+                .rsplit('.')
+                .next()
+                .unwrap_or(default_module_name);
             if !self.name.contains('.') {
                 self.name = format!("{}.{}", module_component, self.name);
             }
@@ -490,7 +493,9 @@ impl TypeInfo {
         for import_ref in &self.import {
             match import_ref {
                 ImportRef::Module(ModuleRef::Default) => {
-                    new_import.insert(ImportRef::Module(ModuleRef::Named(default_module_name.to_string())));
+                    new_import.insert(ImportRef::Module(ModuleRef::Named(
+                        default_module_name.to_string(),
+                    )));
                 }
                 other => {
                     new_import.insert(other.clone());

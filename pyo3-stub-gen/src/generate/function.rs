@@ -125,7 +125,9 @@ impl FunctionDef {
             param.type_info.resolve_default_module(default_module_name);
         }
         if let Some(varargs) = &mut self.parameters.varargs {
-            varargs.type_info.resolve_default_module(default_module_name);
+            varargs
+                .type_info
+                .resolve_default_module(default_module_name);
         }
         if let Some(varkw) = &mut self.parameters.varkw {
             varkw.type_info.resolve_default_module(default_module_name);
