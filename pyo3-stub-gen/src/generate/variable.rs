@@ -1,6 +1,6 @@
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
-use crate::{type_info::PyVariableInfo, TypeInfo};
+use crate::{generate::Import, stub_type::ImportRef, type_info::PyVariableInfo, TypeInfo};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableDef {
@@ -16,6 +16,12 @@ impl From<&PyVariableInfo> for VariableDef {
             type_: (info.r#type)(),
             default: info.default.map(|f| f()),
         }
+    }
+}
+
+impl Import for VariableDef {
+    fn import(&self) -> HashSet<ImportRef> {
+        self.type_.import.clone()
     }
 }
 

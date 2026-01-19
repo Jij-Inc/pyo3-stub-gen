@@ -222,13 +222,18 @@ impl StubInfoBuilder {
     }
 
     fn add_module_export(&mut self, info: &AllModuleExport) {
+        let use_wildcard = info.items.is_none();
+        let items = info
+            .items
+            .map(|items| items.iter().map(|s| s.to_string()).collect())
+            .unwrap_or_default();
+
         self.get_module(Some(info.target_module))
             .module_re_exports
             .push(ModuleReExport {
                 source_module: info.source_module.to_string(),
-                items: info
-                    .items
-                    .map(|items| items.iter().map(|s| s.to_string()).collect()),
+                items,
+                use_wildcard_import: use_wildcard,
             });
     }
 
@@ -239,14 +244,15 @@ impl StubInfoBuilder {
     }
 
     fn resolve_wildcard_re_exports(&mut self) -> Result<()> {
-        // Collect wildcard re-exports and their resolved items
+        // Collect wildcard re-exports and their resolved items for __all__
         let mut resolutions: Vec<(String, usize, Vec<String>)> = Vec::new();
 
         for (module_name, module) in &self.modules {
             for (idx, re_export) in module.module_re_exports.iter().enumerate() {
-                if re_export.items.is_none() {
-                    // Wildcard - resolve it
+                if re_export.use_wildcard_import && re_export.items.is_empty() {
+                    // Wildcard - resolve items for __all__
                     if let Some(source_mod) = self.modules.get(&re_export.source_module) {
+                        // Internal module - collect all public items that would be in __all__
                         let mut items = Vec::new();
                         for class in source_mod.class.values() {
                             if !class.name.starts_with('_') {
@@ -273,10 +279,10 @@ impl StubInfoBuilder {
                         }
                         resolutions.push((module_name.clone(), idx, items));
                     } else {
-                        // Source module not found - error!
+                        // External module - cannot resolve, error
                         anyhow::bail!(
                             "Cannot resolve wildcard re-export in module '{}': source module '{}' not found. \
-                             Only internal modules can be used with wildcard re-exports.",
+                             Wildcard re-exports only work with internal modules.",
                             module_name,
                             re_export.source_module
                         );
@@ -285,10 +291,10 @@ impl StubInfoBuilder {
             }
         }
 
-        // Apply resolutions (replace None with Some(items))
+        // Apply resolutions (populate items for wildcard imports)
         for (module_name, idx, items) in resolutions {
             if let Some(module) = self.modules.get_mut(&module_name) {
-                module.module_re_exports[idx].items = Some(items);
+                module.module_re_exports[idx].items = items;
             }
         }
 
