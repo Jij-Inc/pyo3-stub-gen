@@ -6,6 +6,7 @@ members = [
   "examples/feature_gated",
   "examples/mixed",
   "examples/pure",
+  "examples/same_name_submod",
   "examples/simple_name_collision",
   "examples/test-dash-package",
   "pyo3-stub-gen",

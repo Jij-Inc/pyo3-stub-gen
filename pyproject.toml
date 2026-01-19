@@ -26,6 +26,7 @@ members = [
   "examples/test-dash-package",
   "examples/feature_gated",
   "examples/empty_super_module",
+  "examples/same_name_submod",
   "examples/simple_name_collision",
   "examples/avoid_name_collision_with_submod",
 ]

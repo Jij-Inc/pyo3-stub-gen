@@ -18,6 +18,9 @@ includes:
   empty_super_module:
     taskfile: examples/empty_super_module/Taskfile.yml
     dir: examples/empty_super_module
+  same_name_submod:
+    taskfile: examples/same_name_submod/Taskfile.yml
+    dir: examples/same_name_submod
   simple_name_collision:
     taskfile: examples/simple_name_collision/Taskfile.yml
     dir: examples/simple_name_collision
@@ -33,6 +36,7 @@ tasks:
       - task: test-dash-package:stub-gen
       - task: feature_gated:stub-gen
       - task: empty_super_module:stub-gen
+      - task: same_name_submod:stub-gen
       - task: simple_name_collision:stub-gen
       - task: avoid_name_collision_with_submod:stub-gen
 
@@ -43,5 +47,6 @@ tasks:
       - task: test-dash-package:test
       - task: feature_gated:test
       - task: empty_super_module:test
+      - task: same_name_submod:test
       - task: simple_name_collision:test
       - task: avoid_name_collision_with_submod:test
