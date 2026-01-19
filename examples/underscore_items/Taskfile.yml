@@ -1,0 +1,14 @@
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  stub-gen:
+    desc: Generate stub file
+    cmds:
+      - cargo run --bin stub_gen
+
+  test:
+    desc: Run tests
+    cmds:
+      - uv run pytest

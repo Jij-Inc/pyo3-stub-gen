@@ -24,6 +24,9 @@ includes:
   avoid_name_collision_with_submod:
     taskfile: examples/avoid_name_collision_with_submod/Taskfile.yml
     dir: examples/avoid_name_collision_with_submod
+  underscore_items:
+    taskfile: examples/underscore_items/Taskfile.yml
+    dir: examples/underscore_items
 
 tasks:
   stub-gen:
@@ -35,6 +38,7 @@ tasks:
       - task: empty_super_module:stub-gen
       - task: simple_name_collision:stub-gen
       - task: avoid_name_collision_with_submod:stub-gen
+      - task: underscore_items:stub-gen
 
   test:
     cmds:
@@ -45,3 +49,4 @@ tasks:
       - task: empty_super_module:test
       - task: simple_name_collision:test
       - task: avoid_name_collision_with_submod:test
+      - task: underscore_items:test

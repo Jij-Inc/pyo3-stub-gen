@@ -221,6 +221,95 @@ impl StubInfoBuilder {
         self.get_module(Some(info.module)).doc = (info.doc)();
     }
 
+    fn add_module_export(&mut self, info: &ReexportModuleMembers) {
+        let use_wildcard = info.items.is_none();
+        let items = info
+            .items
+            .map(|items| items.iter().map(|s| s.to_string()).collect())
+            .unwrap_or_default();
+
+        self.get_module(Some(info.target_module))
+            .module_re_exports
+            .push(ModuleReExport {
+                source_module: info.source_module.to_string(),
+                items,
+                use_wildcard_import: use_wildcard,
+            });
+    }
+
+    fn add_verbatim_export(&mut self, info: &ExportVerbatim) {
+        self.get_module(Some(info.target_module))
+            .verbatim_all_entries
+            .insert(info.name.to_string());
+    }
+
+    fn add_exclude(&mut self, info: &ExcludeFromAll) {
+        self.get_module(Some(info.target_module))
+            .excluded_all_entries
+            .insert(info.name.to_string());
+    }
+
+    fn resolve_wildcard_re_exports(&mut self) -> Result<()> {
+        // Collect wildcard re-exports and their resolved items for __all__
+        let mut resolutions: Vec<(String, usize, Vec<String>)> = Vec::new();
+
+        for (module_name, module) in &self.modules {
+            for (idx, re_export) in module.module_re_exports.iter().enumerate() {
+                if re_export.use_wildcard_import && re_export.items.is_empty() {
+                    // Wildcard - resolve items for __all__
+                    if let Some(source_mod) = self.modules.get(&re_export.source_module) {
+                        // Internal module - collect all public items that would be in __all__
+                        let mut items = Vec::new();
+                        for class in source_mod.class.values() {
+                            if !class.name.starts_with('_') {
+                                items.push(class.name.to_string());
+                            }
+                        }
+                        for enum_ in source_mod.enum_.values() {
+                            if !enum_.name.starts_with('_') {
+                                items.push(enum_.name.to_string());
+                            }
+                        }
+                        for func_name in source_mod.function.keys() {
+                            if !func_name.starts_with('_') {
+                                items.push(func_name.to_string());
+                            }
+                        }
+                        for var_name in source_mod.variables.keys() {
+                            if !var_name.starts_with('_') {
+                                items.push(var_name.to_string());
+                            }
+                        }
+                        // FIX: Add underscore filtering for submodules in wildcard resolution
+                        for submod in &source_mod.submodules {
+                            if !submod.starts_with('_') {
+                                items.push(submod.to_string());
+                            }
+                        }
+                        resolutions.push((module_name.clone(), idx, items));
+                    } else {
+                        // External module - cannot resolve, error
+                        anyhow::bail!(
+                            "Cannot resolve wildcard re-export in module '{}': source module '{}' not found. \
+                             Wildcard re-exports only work with internal modules.",
+                            module_name,
+                            re_export.source_module
+                        );
+                    }
+                }
+            }
+        }
+
+        // Apply resolutions (populate items for wildcard imports)
+        for (module_name, idx, items) in resolutions {
+            if let Some(module) = self.modules.get_mut(&module_name) {
+                module.module_re_exports[idx].items = items;
+            }
+        }
+
+        Ok(())
+    }
+
     fn add_methods(&mut self, info: &PyMethodsInfo) -> Result<()> {
         let struct_id = (info.struct_id)();
         for module in self.modules.values_mut() {
@@ -358,7 +447,21 @@ impl StubInfoBuilder {
         for info in methods_infos {
             self.add_methods(info)?;
         }
+        // Collect __all__ export directives
+        for info in inventory::iter::<ReexportModuleMembers> {
+            self.add_module_export(info);
+        }
+        for info in inventory::iter::<ExportVerbatim> {
+            self.add_verbatim_export(info);
+        }
+        for info in inventory::iter::<ExcludeFromAll> {
+            self.add_exclude(info);
+        }
         self.register_submodules();
+
+        // Resolve wildcard re-exports
+        self.resolve_wildcard_re_exports()?;
+
         Ok(StubInfo {
             modules: self.modules,
             python_root: self.python_root,

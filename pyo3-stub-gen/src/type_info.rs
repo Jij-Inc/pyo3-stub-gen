@@ -283,3 +283,31 @@ pub struct ModuleDocInfo {
 }
 
 inventory::collect!(ModuleDocInfo);
+
+/// Re-export items from another module into __all__
+#[derive(Debug)]
+pub struct ReexportModuleMembers {
+    pub target_module: &'static str,
+    pub source_module: &'static str,
+    pub items: Option<&'static [&'static str]>,
+}
+
+inventory::collect!(ReexportModuleMembers);
+
+/// Add verbatim entry to __all__
+#[derive(Debug)]
+pub struct ExportVerbatim {
+    pub target_module: &'static str,
+    pub name: &'static str,
+}
+
+inventory::collect!(ExportVerbatim);
+
+/// Exclude specific items from __all__
+#[derive(Debug)]
+pub struct ExcludeFromAll {
+    pub target_module: &'static str,
+    pub name: &'static str,
+}
+
+inventory::collect!(ExcludeFromAll);
