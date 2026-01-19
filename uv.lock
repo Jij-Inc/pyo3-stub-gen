@@ -9,6 +9,7 @@ members = [
     "feature-gated",
     "mixed",
     "pure",
+    "same-name-submod",
     "simple-name-collision",
     "test-dash-package",
 ]
@@ -402,6 +403,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/d0/5b/6ca4baca60c3f8361
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/d5/1459b2861cf703cf49d96b6f29731ee74f4ac7e34b0c60b0ff75bdd318bc/pytest_insta-0.3.0-py3-none-any.whl", hash = "sha256:93a105e3850f2887b120a581923b10bb313d722e00d369377a1d91aa535df704", size = 13660, upload-time = "2024-02-19T23:00:20.054Z" },
 ]
+
+[[package]]
+name = "same-name-submod"
+version = "0.1"
+source = { editable = "examples/same_name_submod" }
 
 [[package]]
 name = "simple-name-collision"
