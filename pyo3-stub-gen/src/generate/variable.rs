@@ -28,3 +28,18 @@ impl fmt::Display for VariableDef {
         Ok(())
     }
 }
+
+impl VariableDef {
+    /// Format variable with module-qualified type names
+    ///
+    /// This method uses the target module context to qualify type identifiers
+    /// within compound type expressions based on their source modules.
+    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        let qualified_type = self.type_.qualified_for_module(target_module);
+        write!(f, "{}: {}", self.name, qualified_type)?;
+        if let Some(default) = &self.default {
+            write!(f, " = {default}")?;
+        }
+        Ok(())
+    }
+}

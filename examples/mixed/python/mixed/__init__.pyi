@@ -2,4 +2,5 @@
 # ruff: noqa: E501, F401
 
 from . import main_mod
+from . import test
 

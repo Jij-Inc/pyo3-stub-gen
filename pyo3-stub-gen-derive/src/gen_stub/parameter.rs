@@ -45,8 +45,46 @@ impl ToTokens for ParameterWithKind {
                             quote! { "None".to_string() }
                         } else {
                             quote! {
-                                let v: #r#type = #expr;
-                                ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                {
+                                    let v: #r#type = #expr;
+                                    let repr = ::pyo3_stub_gen::util::fmt_py_obj(v);
+                                    let type_info = <#r#type as ::pyo3_stub_gen::PyStubType>::type_output();
+
+                                    // Check if the type is defined in another module within the current package.
+                                    // For locally-defined types: qualified name is "sub_mod.ClassA" and
+                                    // import is Module("package.sub_mod"). The import ends with the module prefix.
+                                    // For external types: qualified name is "numpy.ndarray" and
+                                    // import is Module("numpy"). The import equals the module prefix.
+                                    let should_add_prefix = if let Some(dot_pos) = type_info.name.rfind('.') {
+                                        let module_prefix = &type_info.name[..dot_pos];
+                                        type_info.import.iter().any(|imp| {
+                                            if let ::pyo3_stub_gen::ImportRef::Module(module_ref) = imp {
+                                                if let Some(module_name) = module_ref.get() {
+                                                    // Local cross-module ref: full path ends with module prefix
+                                                    // e.g., "package.sub_mod" ends with ".sub_mod"
+                                                    module_name.ends_with(&format!(".{}", module_prefix))
+                                                } else {
+                                                    false
+                                                }
+                                            } else {
+                                                false
+                                            }
+                                        })
+                                    } else {
+                                        false
+                                    };
+
+                                    if should_add_prefix {
+                                        if let Some(dot_pos) = type_info.name.rfind('.') {
+                                            let module_prefix = &type_info.name[..dot_pos];
+                                            format!("{}.{}", module_prefix, repr)
+                                        } else {
+                                            repr
+                                        }
+                                    } else {
+                                        repr
+                                    }
+                                }
                             }
                         };
                         quote! {
@@ -105,16 +143,72 @@ impl ToTokens for ParameterWithKind {
                 }
             }
             TypeOrOverride::OverrideType {
-                type_repr, imports, ..
+                type_repr,
+                imports,
+                rust_type_markers,
+                ..
             } => {
                 let imports = imports.iter().collect::<Vec<&String>>();
+
+                // Generate code to process RustType markers
+                let (type_name_code, type_refs_code) = if rust_type_markers.is_empty() {
+                    (
+                        quote! { #type_repr.to_string() },
+                        quote! { ::std::collections::HashMap::new() },
+                    )
+                } else {
+                    // Parse rust_type_markers as syn::Type
+                    let marker_types: Vec<syn::Type> = rust_type_markers
+                        .iter()
+                        .filter_map(|s| syn::parse_str(s).ok())
+                        .collect();
+
+                    let rust_names = rust_type_markers.iter().collect::<Vec<_>>();
+
+                    (
+                        quote! {
+                            {
+                                let mut type_name = #type_repr.to_string();
+                                #(
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    // Replace Rust type name with Python type name in the expression
+                                    type_name = type_name.replace(#rust_names, &type_info.name);
+                                )*
+                                type_name
+                            }
+                        },
+                        quote! {
+                            {
+                                let mut type_refs = ::std::collections::HashMap::new();
+                                #(
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    // Add mapping from Python name to module
+                                    if let Some(module) = type_info.source_module {
+                                        type_refs.insert(
+                                            type_info.name.split('[').next().unwrap_or(&type_info.name).split('.').last().unwrap_or(&type_info.name).to_string(),
+                                            ::pyo3_stub_gen::TypeIdentifierRef {
+                                                module: module.into(),
+                                                import_kind: ::pyo3_stub_gen::ImportKind::Module,
+                                            }
+                                        );
+                                    }
+                                    type_refs.extend(type_info.type_refs);
+                                )*
+                                type_refs
+                            }
+                        },
+                    )
+                };
+
                 quote! {
                     ::pyo3_stub_gen::type_info::ParameterInfo {
                         name: #name,
                         kind: #kind,
                         type_info: || ::pyo3_stub_gen::TypeInfo {
-                            name: #type_repr.to_string(),
-                            import: ::std::collections::HashSet::from([#(#imports.into(),)*])
+                            name: #type_name_code,
+                            source_module: None,
+                            import: ::std::collections::HashSet::from([#(#imports.into(),)*]),
+                            type_refs: #type_refs_code,
                         },
                         default: #default_tokens,
                     }
@@ -313,6 +407,7 @@ impl Parameters {
                             r#type: syn::parse_quote!(()), // Dummy type, won't be used
                             type_repr: "typing.Any".to_string(),
                             imports: ["typing".to_string()].into_iter().collect(),
+                            rust_type_markers: vec![],
                         };
                     }
 
@@ -340,6 +435,7 @@ impl Parameters {
                             r#type: syn::parse_quote!(()), // Dummy type, won't be used
                             type_repr: "typing.Any".to_string(),
                             imports: ["typing".to_string()].into_iter().collect(),
+                            rust_type_markers: vec![],
                         };
                     }
 

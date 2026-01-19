@@ -304,7 +304,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
             parameters: &[
@@ -313,14 +313,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "A simple function",
             module: None,
@@ -333,7 +337,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -350,7 +354,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "process",
             parameters: &[
@@ -359,20 +363,24 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "Callable[[str], int]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([
                             "typing".into(),
                             "collections.abc".into(),
                         ]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "typing.Optional[int]".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([
                     "typing".into(),
                     "collections.abc".into(),
                 ]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Process a callback function",
             module: None,
@@ -385,7 +393,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -402,7 +410,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "fn_override_type",
             parameters: &[
@@ -411,20 +419,24 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "collections.abc.Callable[[str], typing.Any]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([
                             "collections.abc".into(),
                             "typing".into(),
                         ]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "collections.abc.Callable[[str], typing.Any]".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([
                     "collections.abc".into(),
                     "typing".into(),
                 ]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Example function with complex types",
             module: None,
@@ -437,7 +449,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -452,7 +464,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "add",
             parameters: &[
@@ -461,7 +473,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -470,7 +484,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -479,14 +495,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "typing.Optional[int]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from(["typing".into()]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "",
             module: None,
@@ -499,7 +519,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -513,7 +533,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "print_hello",
             parameters: &[
@@ -522,7 +542,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -539,7 +561,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -553,7 +575,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "fetch_data",
             parameters: &[
@@ -562,14 +584,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "str".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Fetch data from URL",
             module: None,
@@ -582,7 +608,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -597,7 +623,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "old_function",
             parameters: &[
@@ -606,14 +632,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "This function is deprecated",
             module: None,
@@ -629,7 +659,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -644,7 +674,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "old_function",
             parameters: &[
@@ -653,14 +683,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "This function is deprecated",
             module: None,
@@ -676,7 +710,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -766,7 +800,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "configure",
             parameters: &[
@@ -775,7 +809,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -784,7 +820,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "str".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -793,7 +831,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -802,7 +842,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "bool".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                         fn _fmt() -> String {
@@ -814,7 +856,9 @@ mod test {
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "None".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from(["typing".into()]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Test keyword-only parameters",
             module: None,
@@ -827,7 +871,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -841,7 +885,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "func",
             parameters: &[
@@ -850,7 +894,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -859,7 +905,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -868,14 +916,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Test positional-only parameters",
             module: None,
@@ -888,7 +940,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -903,7 +955,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
             parameters: &[
@@ -912,14 +964,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Integer overload",
             module: None,
@@ -932,7 +988,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -953,7 +1009,7 @@ mod test {
         assert_eq!(infos.len(), 2);
 
         let out1 = infos[0].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out1), @r###"
+        insta::assert_snapshot!(format_as_value(out1), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
             parameters: &[
@@ -962,14 +1018,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "int".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "int".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Integer overload",
             module: None,
@@ -982,10 +1042,10 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
 
         let out2 = infos[1].to_token_stream();
-        insta::assert_snapshot!(format_as_value(out2), @r###"
+        insta::assert_snapshot!(format_as_value(out2), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "foo",
             parameters: &[
@@ -994,14 +1054,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "float".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from([]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "float".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from([]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Float overload",
             module: None,
@@ -1014,7 +1078,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 
@@ -1030,7 +1094,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "as_tuple",
             parameters: &[
@@ -1039,7 +1103,9 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "list[int]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
@@ -1048,14 +1114,18 @@ mod test {
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
                         name: "typing.Literal[True]".to_string(),
+                        source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
+                        type_refs: ::std::collections::HashMap::new(),
                     },
                     default: ::pyo3_stub_gen::type_info::ParameterDefault::None,
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
                 name: "tuple[int, ...]".to_string(),
+                source_module: None,
                 import: ::std::collections::HashSet::from(["typing".into()]),
+                type_refs: ::std::collections::HashMap::new(),
             },
             doc: "Return as tuple",
             module: None,
@@ -1068,7 +1138,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "###);
+        "#);
         Ok(())
     }
 

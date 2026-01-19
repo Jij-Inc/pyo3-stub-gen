@@ -112,7 +112,7 @@ use syn::{parse2, ItemEnum, ItemFn, ItemImpl, ItemStruct, LitStr, Result};
 pub fn pyclass(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let attr = parse2::<attr::PyClassAttr>(attr)?;
     let mut item_struct = parse2::<ItemStruct>(item)?;
-    let inner = PyClassInfo::try_from(item_struct.clone())?;
+    let inner = PyClassInfo::from_item_with_attr(item_struct.clone(), &attr)?;
     pyclass::prune_attrs(&mut item_struct);
 
     if attr.skip_stub_type {
@@ -136,7 +136,7 @@ pub fn pyclass(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
 
 pub fn pyclass_enum(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let attr = parse2::<attr::PyClassAttr>(attr)?;
-    let inner = PyEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let inner = PyEnumInfo::from_item_with_attr(parse2::<ItemEnum>(item.clone())?, &attr)?;
 
     if attr.skip_stub_type {
         Ok(quote! {
@@ -159,7 +159,7 @@ pub fn pyclass_enum(attr: TokenStream2, item: TokenStream2) -> Result<TokenStrea
 
 pub fn pyclass_complex_enum(attr: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
     let attr = parse2::<attr::PyClassAttr>(attr)?;
-    let inner = PyComplexEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let inner = PyComplexEnumInfo::from_item_with_attr(parse2::<ItemEnum>(item.clone())?, &attr)?;
 
     if attr.skip_stub_type {
         Ok(quote! {

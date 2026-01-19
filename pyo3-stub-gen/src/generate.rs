@@ -9,6 +9,7 @@ mod member;
 mod method;
 mod module;
 mod parameters;
+pub(crate) mod qualifier;
 mod stub_info;
 mod variable;
 mod variant_methods;
