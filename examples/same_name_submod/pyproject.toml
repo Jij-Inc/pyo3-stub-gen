@@ -1,0 +1,16 @@
+[project]
+name = "same_name_submod"
+version = "0.1"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "same_name_submod._same_name_submod"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
