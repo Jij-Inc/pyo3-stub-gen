@@ -15,9 +15,21 @@ class A:
 class B:
     def show_x(self) -> None: ...
 
+@typing.final
+class NoModuleAttr:
+    r"""
+    Test 1: No module attribute → uses default
+    """
+    ...
+
 def create_a(x: builtins.int) -> A: ...
 
 def create_b(x: builtins.int) -> B: ...
 
 def greet_main() -> None: ...
+
+def no_module_fn() -> builtins.int:
+    r"""
+    Test 1: No module → uses default
+    """
 

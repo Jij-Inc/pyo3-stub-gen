@@ -1,6 +1,8 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
+mod module_override_tests;
+
 // Classes that can be cross-referenced between modules (from mixed_import_type)
 #[gen_stub_pyclass]
 #[pyclass(module = "mixed.main_mod")]

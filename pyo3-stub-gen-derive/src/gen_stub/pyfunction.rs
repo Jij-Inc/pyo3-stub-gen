@@ -118,10 +118,12 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
         let r#return = extract_return_type(&item.sig.output, &item.attrs)?;
         let mut name = None;
         let mut sig = None;
+        let mut pyo3_module = None;
         for attr in parse_pyo3_attrs(&item.attrs)? {
             match attr {
                 Attr::Name(function_name) => name = Some(function_name),
                 Attr::Signature(signature) => sig = Some(signature),
+                Attr::Module(module_name) => pyo3_module = Some(module_name),
                 _ => {}
             }
         }
@@ -139,7 +141,7 @@ impl TryFrom<ItemFn> for PyFunctionInfo {
             parameters,
             r#return,
             doc,
-            module: None,
+            module: pyo3_module,
             is_async: item.sig.asyncness.is_some(),
             deprecated,
             type_ignored,
@@ -298,10 +300,41 @@ pub struct PyFunctionInfos {
 impl PyFunctionInfos {
     /// Create PyFunctionInfos from ItemFn and PyFunctionAttr
     pub fn from_parts(mut item_fn: ItemFn, attr: PyFunctionAttr) -> Result<Self> {
+        // Extract standalone gen_stub module from item attributes
+        let mut gen_stub_standalone_module = None;
+        for attr_item in parse_pyo3_attrs(&item_fn.attrs)? {
+            if let Attr::GenStubModule(module_name) = attr_item {
+                gen_stub_standalone_module = Some(module_name);
+            }
+        }
+
+        // Validate: inline and standalone gen_stub modules must not conflict
+        if let (Some(inline_mod), Some(standalone_mod)) =
+            (&attr.module, &gen_stub_standalone_module)
+        {
+            if inline_mod != standalone_mod {
+                return Err(Error::new(
+                    item_fn.sig.ident.span(),
+                    format!(
+                        "Conflicting module specifications: #[gen_stub_pyfunction(module = \"{}\")] \
+                         and #[gen_stub(module = \"{}\")]. Please use only one.",
+                        inline_mod, standalone_mod
+                    ),
+                ));
+            }
+        }
+
         // Handle python stub syntax early (doesn't need base_info)
         if let Some(python) = attr.python {
             let mut python_info = parse_python::parse_python_function_stub(python)?;
-            python_info.module = attr.module;
+            // Priority: inline > standalone > pyo3 (pyo3 already in python_info from python stub)
+            python_info.module = if let Some(inline_mod) = attr.module {
+                Some(inline_mod) // Priority 1
+            } else if let Some(standalone_mod) = gen_stub_standalone_module {
+                Some(standalone_mod) // Priority 2
+            } else {
+                python_info.module // Priority 3: from Python stub or None
+            };
             prune_attrs(&mut item_fn);
             return Ok(Self {
                 item_fn,
@@ -311,7 +344,17 @@ impl PyFunctionInfos {
 
         // Convert ItemFn to base PyFunctionInfo for Rust-based generation
         let mut base_info = PyFunctionInfo::try_from(item_fn.clone())?;
-        base_info.module = attr.module;
+
+        // Priority: inline > standalone > pyo3 > default
+        // base_info.module already contains pyo3 module from try_from
+        let pyo3_module = base_info.module.clone();
+        base_info.module = if let Some(inline_mod) = attr.module {
+            Some(inline_mod) // Priority 1: #[gen_stub_pyfunction(module = "...")]
+        } else if let Some(standalone_mod) = gen_stub_standalone_module {
+            Some(standalone_mod) // Priority 2: #[gen_stub(module = "...")]
+        } else {
+            pyo3_module // Priority 3: #[pyo3(module = "...")]
+        };
 
         let infos = if let Some(python_overload) = attr.python_overload {
             // Get function name for validation
