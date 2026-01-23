@@ -398,6 +398,104 @@ For complete examples, see the [examples/pure](./examples/pure/) directory, part
 - `overloading.rs` - Function overload examples
 - `rust_type_marker.rs` - RustType marker examples
 
+## Type Aliases
+
+Type aliases allow you to define semantic names for complex or frequently used types in your stub files. They improve code readability and maintainability by providing meaningful names for type combinations.
+
+### Basic Usage
+
+Use the `type_alias!` macro to define type aliases:
+
+```rust
+use pyo3_stub_gen::type_alias;
+
+// Simple type alias
+type_alias!("your_module", SimpleAlias = Option<usize>);
+
+// Collection types
+type_alias!("your_module", StrIntMap = HashMap<String, i32>);
+
+// References to locally defined classes
+type_alias!("your_module", MaybeDecimal = Option<Bound<'static, DecimalHolder>>);
+```
+
+### Using with `impl_stub_type!`
+
+Type aliases work seamlessly with custom union types defined via `impl_stub_type!`:
+
+```rust
+use pyo3_stub_gen::{impl_stub_type, type_alias};
+
+// Define a custom union type
+struct NumberOrString;
+impl_stub_type!(NumberOrString = i32 | String);
+
+// Create an alias for it
+type_alias!("your_module", NumberOrStringAlias = NumberOrString);
+```
+
+This is particularly useful for union types of locally defined classes:
+
+```rust
+struct ComparableOrHashable;
+impl_stub_type!(ComparableOrHashable = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
+type_alias!("your_module", StructUnion = ComparableOrHashable);
+```
+
+### Generated Output
+
+Type aliases are rendered in Python stub files using the `TypeAlias` annotation (Python 3.11+ compatible):
+
+```python
+from typing import TypeAlias
+
+__all__ = [
+    "MaybeDecimal",
+    "NumberOrStringAlias",
+    "SimpleAlias",
+    "StrIntMap",
+    "StructUnion",
+]
+
+MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
+SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
+StructUnion: TypeAlias = ComparableStruct | HashableStruct
+```
+
+### Python Stub Syntax for Type Aliases
+
+For complex type aliases that require Python-specific syntax, you can use `gen_type_alias_from_python!`:
+
+```rust
+use pyo3_stub_gen::derive::gen_type_alias_from_python;
+
+gen_type_alias_from_python!(
+    "your_module",
+    r#"
+    import collections.abc
+    CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+    "#
+);
+```
+
+This approach is useful for:
+- Types requiring specific imports (e.g., `collections.abc.Callable`)
+- Complex generic types
+- Types that are difficult to express with `PyStubType`
+
+### Benefits
+
+- **Readability**: Provide semantic names for complex types
+- **Consistency**: Ensure the same type combination is used throughout
+- **Maintainability**: Update the type definition in one place
+- **Integration**: Works with automatic `__all__` generation and type checkers (mypy, pyright, ruff)
+
+### Note
+
+Type aliases are stub-only constructs and do not exist at runtime. They are purely for static type checking and IDE support.
+
 ## Advanced: mypy.stubtest integration
 
 [mypy stubtest](https://mypy.readthedocs.io/en/stable/stubtest.html) validates that stub files match runtime behavior. You can add it to your test suite:
