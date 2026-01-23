@@ -15,6 +15,6 @@ tasks:
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes -p pure
-      - uv run stubtest pure --ignore-missing-stub --ignore-disjoint-bases
+      - uv run stubtest pure --ignore-missing-stub --ignore-disjoint-bases --allowlist .stubtest-allowlist
       - uv run pyrefly check ./pure.pyi
       - uv run ty check .

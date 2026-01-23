@@ -275,6 +275,25 @@ macro_rules! module_variable {
     };
 }
 
+/// Add module-level type alias using TypeInfo
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", "MyAlias", Option<usize>);
+/// ```
+#[macro_export]
+macro_rules! type_alias {
+    ($module:expr, $name:expr, $ty:ty) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: $name,
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+            }
+        }
+    };
+}
+
 /// Re-export items from another module into __all__
 ///
 /// # Wildcard re-export

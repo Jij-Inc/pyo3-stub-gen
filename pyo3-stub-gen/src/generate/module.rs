@@ -23,6 +23,7 @@ pub struct Module {
     pub enum_: BTreeMap<TypeId, EnumDef>,
     pub function: BTreeMap<&'static str, Vec<FunctionDef>>,
     pub variables: BTreeMap<&'static str, VariableDef>,
+    pub type_aliases: BTreeMap<&'static str, TypeAliasDef>,
     pub name: String,
     pub default_module_name: String,
     /// Direct submodules of this module.
@@ -58,6 +59,11 @@ impl Module {
         for var_name in self.variables.keys() {
             if !var_name.starts_with('_') {
                 all_items.insert(var_name.to_string());
+            }
+        }
+        for alias_name in self.type_aliases.keys() {
+            if !alias_name.starts_with('_') {
+                all_items.insert(alias_name.to_string());
             }
         }
         // FIX: Add underscore filtering for submodules
@@ -109,6 +115,9 @@ impl Import for Module {
         }
         for variable in self.variables.values() {
             imports.extend(variable.import());
+        }
+        for type_alias in self.type_aliases.values() {
+            imports.extend(type_alias.import());
         }
         imports
     }
@@ -217,6 +226,10 @@ impl fmt::Display for Module {
 
         writeln!(f)?;
 
+        for alias in self.type_aliases.values() {
+            alias.fmt_for_module(&self.name, f)?;
+            writeln!(f)?;
+        }
         for var in self.variables.values() {
             var.fmt_for_module(&self.name, f)?;
             writeln!(f)?;

@@ -13,6 +13,7 @@ import os
 import pathlib
 import typing
 import typing_extensions
+from typing import TypeAlias
 __all__ = [
     "A",
     "B",
@@ -28,12 +29,14 @@ __all__ = [
     "MY_CONSTANT1",
     "MY_CONSTANT2",
     "ManualSubmit",
+    "MaybeDecimal",
     "MyDate",
     "MyError",
     "NormalClass",
     "NotIntError",
     "Number",
     "NumberComplex",
+    "NumberOrStringAlias",
     "NumberRenameAll",
     "OverrideType",
     "PartialManualSubmit",
@@ -41,6 +44,9 @@ __all__ = [
     "Problem",
     "Shape1",
     "Shape2",
+    "SimpleAlias",
+    "StrIntMap",
+    "StructUnion",
     "TypeIgnoreTest",
     "add_decimals",
     "ahash_dict",
@@ -77,6 +83,11 @@ __all__ = [
     "test_type_ignore_specific",
 ]
 
+MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
+SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
+StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
 class A:
