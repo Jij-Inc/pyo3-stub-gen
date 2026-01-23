@@ -279,14 +279,14 @@ macro_rules! module_variable {
 ///
 /// # Example
 /// ```rust
-/// pyo3_stub_gen::type_alias!("module.name", "MyAlias", Option<usize>);
+/// pyo3_stub_gen::type_alias!("module.name", MyAlias = Option<usize>);
 /// ```
 #[macro_export]
 macro_rules! type_alias {
-    ($module:expr, $name:expr, $ty:ty) => {
+    ($module:expr, $name:ident = $ty:ty) => {
         $crate::inventory::submit! {
             $crate::type_info::TypeAliasInfo {
-                name: $name,
+                name: stringify!($name),
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
             }

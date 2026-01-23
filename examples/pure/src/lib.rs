@@ -564,25 +564,24 @@ impl TypeIgnoreTest {
 }
 
 // Test type aliases
-pyo3_stub_gen::type_alias!("pure", "SimpleAlias", Option<usize>);
-pyo3_stub_gen::type_alias!("pure", "StrIntMap", HashMap<String, i32>);
+pyo3_stub_gen::type_alias!("pure", SimpleAlias = Option<usize>);
+pyo3_stub_gen::type_alias!("pure", StrIntMap = HashMap<String, i32>);
 
 // Type alias referring to locally defined class
 pyo3_stub_gen::type_alias!(
     "pure",
-    "MaybeDecimal",
-    Option<Bound<'static, DecimalHolder>>
+    MaybeDecimal = Option<Bound<'static, DecimalHolder>>
 );
 
 // Custom union type using impl_stub_type! macro
 struct NumberOrString;
 pyo3_stub_gen::impl_stub_type!(NumberOrString = i32 | String);
-pyo3_stub_gen::type_alias!("pure", "NumberOrStringAlias", NumberOrString);
+pyo3_stub_gen::type_alias!("pure", NumberOrStringAlias = NumberOrString);
 
 // Union of locally defined types
 struct ComparableOrHashable;
 pyo3_stub_gen::impl_stub_type!(ComparableOrHashable = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
-pyo3_stub_gen::type_alias!("pure", "StructUnion", ComparableOrHashable);
+pyo3_stub_gen::type_alias!("pure", StructUnion = ComparableOrHashable);
 
 // Test type aliases using Python syntax
 pyo3_stub_gen::derive::gen_type_alias_from_python!(
