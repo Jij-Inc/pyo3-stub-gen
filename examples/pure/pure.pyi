@@ -18,6 +18,7 @@ __all__ = [
     "A",
     "B",
     "Calculator",
+    "CallbackType",
     "ComparableStruct",
     "CustomComplexEnum",
     "CustomEnum",
@@ -38,10 +39,12 @@ __all__ = [
     "NumberComplex",
     "NumberOrStringAlias",
     "NumberRenameAll",
+    "OptionalCallback",
     "OverrideType",
     "PartialManualSubmit",
     "Placeholder",
     "Problem",
+    "SequenceOfInts",
     "Shape1",
     "Shape2",
     "SimpleAlias",
@@ -83,8 +86,11 @@ __all__ = [
     "test_type_ignore_specific",
 ]
 
+CallbackType: TypeAlias = collections.abc.Callable[[str], None]
 MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
+OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
+SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct  |  HashableStruct

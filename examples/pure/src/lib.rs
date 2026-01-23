@@ -584,6 +584,19 @@ struct ComparableOrHashable;
 pyo3_stub_gen::impl_stub_type!(ComparableOrHashable = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
 pyo3_stub_gen::type_alias!("pure", "StructUnion", ComparableOrHashable);
 
+// Test type aliases using Python syntax
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+    import collections.abc
+
+    CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+    OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
+    SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
+    "#
+);
+
 define_stub_info_gatherer!(stub_info);
 
 /// Test of unit test for testing link problem
