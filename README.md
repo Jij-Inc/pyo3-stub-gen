@@ -408,6 +408,7 @@ Use the `type_alias!` macro to define type aliases:
 
 ```rust
 use pyo3_stub_gen::type_alias;
+use std::collections::HashMap;
 
 // Simple type alias
 type_alias!("your_module", SimpleAlias = Option<usize>);
@@ -415,32 +416,47 @@ type_alias!("your_module", SimpleAlias = Option<usize>);
 // Collection types
 type_alias!("your_module", StrIntMap = HashMap<String, i32>);
 
-// References to locally defined classes
-type_alias!("your_module", MaybeDecimal = Option<Bound<'static, DecimalHolder>>);
+// Nested option types
+type_alias!("your_module", MaybeString = Option<Option<String>>);
 ```
 
-### Using with `impl_stub_type!`
+### Direct Union Syntax
 
-Type aliases work seamlessly with custom union types defined via `impl_stub_type!`:
+The `type_alias!` macro supports direct union syntax, eliminating the need for a separate `impl_stub_type!` declaration in most cases:
+
+```rust
+use pyo3_stub_gen::type_alias;
+
+// Simple union types
+type_alias!("your_module", NumberOrStringAlias = i32 | String);
+
+// Multiple types in a union
+type_alias!("your_module", TripleUnion = i32 | String | bool);
+
+// Unions of generic types
+type_alias!("your_module", GenericUnion = Option<i32> | Vec<String>);
+
+// Complex nested unions
+type_alias!("your_module", ComplexUnion = Option<Vec<i32>> | Option<Vec<String>>);
+```
+
+### Alternative: Using with `impl_stub_type!`
+
+For reusable union types that you want to reference in multiple places, you can still use the two-step `impl_stub_type!` + `type_alias!` pattern:
 
 ```rust
 use pyo3_stub_gen::{impl_stub_type, type_alias};
 
-// Define a custom union type
+// Define a reusable union type
 struct NumberOrString;
 impl_stub_type!(NumberOrString = i32 | String);
 
-// Create an alias for it
+// Use it in multiple type aliases
 type_alias!("your_module", NumberOrStringAlias = NumberOrString);
+type_alias!("your_module", AnotherAlias = NumberOrString);
 ```
 
-This is particularly useful for union types of locally defined classes:
-
-```rust
-struct ComparableOrHashable;
-impl_stub_type!(ComparableOrHashable = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
-type_alias!("your_module", StructUnion = ComparableOrHashable);
-```
+This approach is useful when you need to use the same union type in multiple contexts, avoiding repetition.
 
 ### Generated Output
 

@@ -277,12 +277,49 @@ macro_rules! module_variable {
 
 /// Add module-level type alias using TypeInfo
 ///
-/// # Example
+/// This macro supports both single types and union types.
+///
+/// # Examples
+///
+/// Single type:
 /// ```rust
 /// pyo3_stub_gen::type_alias!("module.name", MyAlias = Option<usize>);
 /// ```
+///
+/// Union type (direct syntax):
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", MyUnion = i32 | String);
+/// ```
+/// ```rust,ignore
+/// pyo3_stub_gen::type_alias!("module.name", StructUnion = Bound<'static, TypeA> | Bound<'static, TypeB>);
+/// ```
 #[macro_export]
 macro_rules! type_alias {
+    // Pattern 1: Union types - MUST come first for proper pattern matching
+    ($module:expr, $name:ident = $($base:ty)|+) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                }
+            }
+        };
+    };
+
+    // Pattern 2: Single types - existing behavior
     ($module:expr, $name:ident = $ty:ty) => {
         $crate::inventory::submit! {
             $crate::type_info::TypeAliasInfo {

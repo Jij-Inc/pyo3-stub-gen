@@ -25,6 +25,7 @@ __all__ = [
     "CustomStubType",
     "DataContainer",
     "DecimalHolder",
+    "GenericUnion",
     "HashableStruct",
     "InstanceValue",
     "MY_CONSTANT1",
@@ -48,8 +49,10 @@ __all__ = [
     "Shape1",
     "Shape2",
     "SimpleAlias",
+    "SingleTypeAlias",
     "StrIntMap",
     "StructUnion",
+    "TripleUnion",
     "TypeIgnoreTest",
     "add_decimals",
     "ahash_dict",
@@ -87,13 +90,16 @@ __all__ = [
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+GenericUnion: TypeAlias = typing.Optional[builtins.int] | builtins.list[builtins.str]
 MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SingleTypeAlias: TypeAlias = typing.Optional[builtins.int]
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
+TripleUnion: TypeAlias = builtins.int | builtins.str | builtins.bool
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
 class A:

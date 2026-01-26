@@ -573,15 +573,16 @@ pyo3_stub_gen::type_alias!(
     MaybeDecimal = Option<Bound<'static, DecimalHolder>>
 );
 
-// Custom union type using impl_stub_type! macro
-struct NumberOrString;
-pyo3_stub_gen::impl_stub_type!(NumberOrString = i32 | String);
-pyo3_stub_gen::type_alias!("pure", NumberOrStringAlias = NumberOrString);
+// Direct union type syntax (no impl_stub_type! needed)
+pyo3_stub_gen::type_alias!("pure", NumberOrStringAlias = i32 | String);
 
-// Union of locally defined types
-struct ComparableOrHashable;
-pyo3_stub_gen::impl_stub_type!(ComparableOrHashable = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
-pyo3_stub_gen::type_alias!("pure", StructUnion = ComparableOrHashable);
+// Union of locally defined types using direct syntax
+pyo3_stub_gen::type_alias!("pure", StructUnion = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
+
+// Additional test cases for the new syntax
+pyo3_stub_gen::type_alias!("pure", TripleUnion = i32 | String | bool);
+pyo3_stub_gen::type_alias!("pure", GenericUnion = Option<i32> | Vec<String>);
+pyo3_stub_gen::type_alias!("pure", SingleTypeAlias = Option<usize>); // Backward compatibility test
 
 // Test type aliases using Python syntax
 pyo3_stub_gen::derive::gen_type_alias_from_python!(

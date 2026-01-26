@@ -1,9 +1,12 @@
 # Type aliases are purely for static type checking and don't exist at runtime
 pure.CallbackType
+pure.GenericUnion
 pure.MaybeDecimal
 pure.NumberOrStringAlias
 pure.OptionalCallback
 pure.SequenceOfInts
 pure.SimpleAlias
+pure.SingleTypeAlias
 pure.StrIntMap
 pure.StructUnion
+pure.TripleUnion
