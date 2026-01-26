@@ -286,6 +286,11 @@ impl StubInfoBuilder {
                                 items.push(var_name.to_string());
                             }
                         }
+                        for alias_name in source_mod.type_aliases.keys() {
+                            if !alias_name.starts_with('_') {
+                                items.push(alias_name.to_string());
+                            }
+                        }
                         // FIX: Add underscore filtering for submodules in wildcard resolution
                         for submod in &source_mod.submodules {
                             if !submod.starts_with('_') {

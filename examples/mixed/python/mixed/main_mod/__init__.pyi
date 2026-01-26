@@ -13,6 +13,7 @@ __all__ = [
     "B",
     "C",
     "D",
+    "ModAAlias",
     "NoModuleAttr",
     "create_a",
     "create_b",
