@@ -597,6 +597,28 @@ pyo3_stub_gen::derive::gen_type_alias_from_python!(
     "#
 );
 
+// Test RustType markers in type aliases (TypeAlias syntax)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+
+    SimpleContainer: TypeAlias = pyo3_stub_gen.RustType["DataContainer"]
+    ContainerList: TypeAlias = list[pyo3_stub_gen.RustType["DataContainer"]]
+    ContainerMap: TypeAlias = dict[str, pyo3_stub_gen.RustType["DataContainer"]]
+    OptionalContainer: TypeAlias = pyo3_stub_gen.RustType["DataContainer"] | None
+    "#
+);
+
+// Test RustType markers in type aliases (Python 3.12+ type statement syntax)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    type ContainerTuple = tuple[pyo3_stub_gen.RustType["DataContainer"], pyo3_stub_gen.RustType["DataContainer"]]
+    type NestedContainer = list[list[pyo3_stub_gen.RustType["DataContainer"]]]
+    "#
+);
+
 define_stub_info_gatherer!(stub_info);
 
 /// Test of unit test for testing link problem

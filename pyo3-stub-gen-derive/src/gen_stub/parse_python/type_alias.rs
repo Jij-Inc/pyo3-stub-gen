@@ -5,7 +5,7 @@ use quote::quote;
 use rustpython_parser::{ast, Parse};
 use syn::{parse::Parse as SynParse, parse::ParseStream, Error, LitStr, Result};
 
-use super::{dedent, expr_to_type_string};
+use super::{collect_rust_type_markers, dedent, expr_to_type_string};
 
 /// Input for gen_type_alias_from_python! macro
 pub struct GenTypeAliasFromPythonInput {
@@ -34,6 +34,7 @@ pub struct PythonTypeAliasStub {
     pub name: String,
     pub type_expr: String,
     pub imports: Vec<String>,
+    pub rust_type_markers: Vec<String>,
 }
 
 /// Parse Python type alias stub string and return Vec<TypeAliasInfo> as TokenStream
@@ -89,10 +90,12 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                     // Extract the actual type from the value
                     if let Some(value) = &ann_assign.value {
                         let type_str = expr_to_type_string(value)?;
+                        let rust_type_markers = collect_rust_type_markers(value)?;
                         type_aliases.push(PythonTypeAliasStub {
                             name: alias_name,
                             type_expr: type_str,
                             imports: imports.clone(),
+                            rust_type_markers,
                         });
                     } else {
                         return Err(Error::new(
@@ -107,10 +110,12 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                 if let ast::Expr::Name(name_expr) = &*type_alias_stmt.name {
                     let alias_name = name_expr.id.to_string();
                     let type_str = expr_to_type_string(&type_alias_stmt.value)?;
+                    let rust_type_markers = collect_rust_type_markers(&type_alias_stmt.value)?;
                     type_aliases.push(PythonTypeAliasStub {
                         name: alias_name,
                         type_expr: type_str,
                         imports: imports.clone(),
+                        rust_type_markers,
                     });
                 }
             }
@@ -134,6 +139,8 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
         .map(|alias| {
             let name = alias.name;
             let type_repr = alias.type_expr;
+            let has_rust_markers = !alias.rust_type_markers.is_empty();
+
             let import_refs: Vec<TokenStream2> = alias
                 .imports
                 .iter()
@@ -146,20 +153,71 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                 })
                 .collect();
 
+            // Generate code for processing RustType markers at runtime
+            let (type_name_code, type_refs_code) = if has_rust_markers {
+                // Parse rust_type_markers as syn::Type
+                let marker_types: Vec<syn::Type> = alias
+                    .rust_type_markers
+                    .iter()
+                    .filter_map(|s| syn::parse_str(s).ok())
+                    .collect();
+
+                let rust_names = alias.rust_type_markers.iter().collect::<Vec<_>>();
+
+                (
+                    quote! {
+                        {
+                            let mut type_name = #type_repr.to_string();
+                            #(
+                                let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                type_name = type_name.replace(#rust_names, &type_info.name);
+                            )*
+                            type_name
+                        }
+                    },
+                    quote! {
+                        {
+                            let mut type_refs = ::std::collections::HashMap::new();
+                            #(
+                                let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                if let Some(module) = type_info.source_module {
+                                    type_refs.insert(
+                                        type_info.name.split('[').next().unwrap_or(&type_info.name)
+                                            .split('.').last().unwrap_or(&type_info.name).to_string(),
+                                        ::pyo3_stub_gen::TypeIdentifierRef {
+                                            module: module.into(),
+                                            import_kind: ::pyo3_stub_gen::ImportKind::Module,
+                                        }
+                                    );
+                                }
+                                type_refs.extend(type_info.type_refs);
+                            )*
+                            type_refs
+                        }
+                    },
+                )
+            } else {
+                // No RustType markers - use simple static values
+                (
+                    quote! { #type_repr.to_string() },
+                    quote! { ::std::collections::HashMap::new() },
+                )
+            };
+
             quote! {
                 pyo3_stub_gen::inventory::submit! {
                     pyo3_stub_gen::type_info::TypeAliasInfo {
                         name: #name,
                         module: #module,
                         r#type: || pyo3_stub_gen::TypeInfo {
-                            name: #type_repr.to_string(),
+                            name: #type_name_code,
                             source_module: None,
                             import: {
                                 let mut set = std::collections::HashSet::new();
                                 #(set.insert(#import_refs);)*
                                 set
                             },
-                            type_refs: std::collections::HashMap::new(),
+                            type_refs: #type_refs_code,
                         },
                     }
                 }

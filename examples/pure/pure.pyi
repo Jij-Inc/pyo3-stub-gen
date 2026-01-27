@@ -20,6 +20,9 @@ __all__ = [
     "Calculator",
     "CallbackType",
     "ComparableStruct",
+    "ContainerList",
+    "ContainerMap",
+    "ContainerTuple",
     "CustomComplexEnum",
     "CustomEnum",
     "CustomStubType",
@@ -34,6 +37,7 @@ __all__ = [
     "MaybeDecimal",
     "MyDate",
     "MyError",
+    "NestedContainer",
     "NormalClass",
     "NotIntError",
     "Number",
@@ -41,6 +45,7 @@ __all__ = [
     "NumberOrStringAlias",
     "NumberRenameAll",
     "OptionalCallback",
+    "OptionalContainer",
     "OverrideType",
     "PartialManualSubmit",
     "Placeholder",
@@ -49,6 +54,7 @@ __all__ = [
     "Shape1",
     "Shape2",
     "SimpleAlias",
+    "SimpleContainer",
     "SingleTypeAlias",
     "StrIntMap",
     "StructUnion",
@@ -90,12 +96,18 @@ __all__ = [
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+ContainerList: TypeAlias = list[DataContainer]
+ContainerMap: TypeAlias = dict[str, DataContainer]
+ContainerTuple: TypeAlias = tuple[DataContainer, DataContainer]
 GenericUnion: TypeAlias = typing.Optional[builtins.int] | builtins.list[builtins.str]
 MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+NestedContainer: TypeAlias = list[list[DataContainer]]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
+OptionalContainer: TypeAlias = DataContainer  |  None
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SimpleContainer: TypeAlias = DataContainer
 SingleTypeAlias: TypeAlias = typing.Optional[builtins.int]
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
