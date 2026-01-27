@@ -5,15 +5,15 @@ edition = "2021"
 publish = false
 
 [lib]
-name = "type_statement_alias"
 crate-type = ["cdylib", "rlib"]
+name = "type_statement_alias"
+
+[[bin]]
+doc = false
+name = "stub_gen"
 
 [dependencies]
+env_logger = { workspace = true }
 pyo3 = { workspace = true }
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
 pyo3-stub-gen-derive = { path = "../../pyo3-stub-gen-derive" }
-env_logger = { workspace = true }
-
-[[bin]]
-name = "stub_gen"
-path = "src/bin/stub_gen.rs"
