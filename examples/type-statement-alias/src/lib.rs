@@ -41,6 +41,36 @@ pyo3_stub_gen::derive::gen_type_alias_from_python!(
     "#
 );
 
+// Test type aliases WITH docstrings using type_alias! macro
+pyo3_stub_gen::type_alias!(
+    "type_statement_alias",
+    DocumentedModernAlias = i32 | String,
+    "A modern type alias with documentation"
+);
+
+pyo3_stub_gen::type_alias!(
+    "type_statement_alias",
+    UndocumentedModernAlias = Vec<String>
+);
+
+// Test type aliases using Python 3.12+ syntax with docstrings
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "type_statement_alias",
+    r#"
+    type DocumentedTypeStatement = int | str
+    """A type statement with documentation"""
+
+    type UndocumentedTypeStatement = list[str]
+
+    type MultiLineDocTypeStatement = dict[str, int]
+    """
+    A type statement with multi-line documentation.
+
+    This is useful for complex types that need detailed explanation.
+    """
+    "#
+);
+
 #[pymodule]
 fn type_statement_alias(_m: &Bound<PyModule>) -> PyResult<()> {
     Ok(())

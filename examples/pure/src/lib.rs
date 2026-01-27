@@ -563,7 +563,7 @@ impl TypeIgnoreTest {
     }
 }
 
-// Test type aliases
+// Test type aliases WITHOUT docstrings (backward compatibility)
 pyo3_stub_gen::type_alias!("pure", SimpleAlias = Option<usize>);
 pyo3_stub_gen::type_alias!("pure", StrIntMap = HashMap<String, i32>);
 
@@ -584,7 +584,26 @@ pyo3_stub_gen::type_alias!("pure", TripleUnion = i32 | String | bool);
 pyo3_stub_gen::type_alias!("pure", GenericUnion = Option<i32> | Vec<String>);
 pyo3_stub_gen::type_alias!("pure", SingleTypeAlias = Option<usize>); // Backward compatibility test
 
-// Test type aliases using Python syntax
+// Test type aliases WITH docstrings
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedAlias = Option<usize>,
+    "This is a simple type alias with documentation"
+);
+
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedUnion = i32 | String,
+    "A union type with documentation"
+);
+
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedMap = HashMap<String, Vec<i32>>,
+    "A map type alias with detailed documentation.\n\nThis can have multiple lines of documentation."
+);
+
+// Test type aliases using Python syntax (without docstrings)
 pyo3_stub_gen::derive::gen_type_alias_from_python!(
     "pure",
     r#"
@@ -594,6 +613,27 @@ pyo3_stub_gen::derive::gen_type_alias_from_python!(
     CallbackType: TypeAlias = collections.abc.Callable[[str], None]
     OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
     SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
+    "#
+);
+
+// Test type aliases using Python syntax (with docstrings)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+    import collections.abc
+
+    DocumentedCallback: TypeAlias = collections.abc.Callable[[str], None]
+    """A callback function that takes a string and returns nothing"""
+
+    UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
+
+    MultiLineDocCallback: TypeAlias = collections.abc.Callable[[str, int], bool]
+    """
+    A callback with multi-line documentation.
+
+    This callback takes a string and an integer, and returns a boolean.
+    """
     "#
 );
 

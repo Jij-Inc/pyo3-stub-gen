@@ -281,6 +281,7 @@ pub struct TypeAliasInfo {
     pub name: &'static str,
     pub module: &'static str,
     pub r#type: fn() -> TypeInfo,
+    pub doc: &'static str,
 }
 
 inventory::collect!(TypeAliasInfo);

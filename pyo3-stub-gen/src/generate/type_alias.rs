@@ -1,11 +1,17 @@
 use std::{collections::HashSet, fmt};
 
-use crate::{generate::Import, stub_type::ImportRef, type_info::TypeAliasInfo, TypeInfo};
+use crate::{
+    generate::{docstring, Import},
+    stub_type::ImportRef,
+    type_info::TypeAliasInfo,
+    TypeInfo,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeAliasDef {
     pub name: &'static str,
     pub type_: TypeInfo,
+    pub doc: &'static str,
 }
 
 impl From<&TypeAliasInfo> for TypeAliasDef {
@@ -13,6 +19,7 @@ impl From<&TypeAliasInfo> for TypeAliasDef {
         Self {
             name: info.name,
             type_: (info.r#type)(),
+            doc: info.doc,
         }
     }
 }
@@ -43,11 +50,18 @@ impl TypeAliasDef {
 
         if use_type_statement {
             // Python 3.12+ syntax
-            write!(f, "type {} = {}", self.name, qualified_type)
+            write!(f, "type {} = {}", self.name, qualified_type)?;
         } else {
             // Pre-3.12 syntax (default)
-            write!(f, "{}: TypeAlias = {}", self.name, qualified_type)
+            write!(f, "{}: TypeAlias = {}", self.name, qualified_type)?;
         }
+
+        // Add docstring on next line if present
+        if !self.doc.is_empty() {
+            writeln!(f)?;
+            docstring::write_docstring(f, self.doc, "")?;
+        }
+        Ok(())
     }
 
     /// Existing method for backward compatibility (uses pre-3.12 syntax)
@@ -66,6 +80,7 @@ mod tests {
         let alias = TypeAliasDef {
             name: "MyAlias",
             type_: TypeInfo::builtin("int"),
+            doc: "",
         };
         let mut output = String::new();
         write!(
@@ -82,6 +97,7 @@ mod tests {
         let alias = TypeAliasDef {
             name: "MyAlias",
             type_: TypeInfo::builtin("int"),
+            doc: "",
         };
         let mut output = String::new();
         write!(

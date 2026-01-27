@@ -35,6 +35,20 @@ pub struct PythonTypeAliasStub {
     pub type_expr: String,
     pub imports: Vec<String>,
     pub rust_type_markers: Vec<String>,
+    pub doc: String,
+}
+
+/// Extract next-line docstring for type alias (Pyright's convention)
+fn extract_type_alias_docstring(stmts: &[ast::Stmt], current_index: usize) -> String {
+    // Check if next statement is a string literal
+    if let Some(ast::Stmt::Expr(expr_stmt)) = stmts.get(current_index + 1) {
+        if let ast::Expr::Constant(constant) = &*expr_stmt.value {
+            if let ast::Constant::Str(s) = &constant.value {
+                return s.to_string();
+            }
+        }
+    }
+    String::new()
 }
 
 /// Parse Python type alias stub string and return Vec<TypeAliasInfo> as TokenStream
@@ -56,7 +70,7 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
     let mut imports = Vec::new();
     let mut type_aliases = Vec::new();
 
-    for stmt in parsed {
+    for (idx, stmt) in parsed.iter().enumerate() {
         match stmt {
             ast::Stmt::Import(import_stmt) => {
                 for alias in &import_stmt.names {
@@ -91,11 +105,13 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                     if let Some(value) = &ann_assign.value {
                         let type_str = expr_to_type_string(value)?;
                         let rust_type_markers = collect_rust_type_markers(value)?;
+                        let doc = extract_type_alias_docstring(&parsed, idx);
                         type_aliases.push(PythonTypeAliasStub {
                             name: alias_name,
                             type_expr: type_str,
                             imports: imports.clone(),
                             rust_type_markers,
+                            doc,
                         });
                     } else {
                         return Err(Error::new(
@@ -111,11 +127,13 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                     let alias_name = name_expr.id.to_string();
                     let type_str = expr_to_type_string(&type_alias_stmt.value)?;
                     let rust_type_markers = collect_rust_type_markers(&type_alias_stmt.value)?;
+                    let doc = extract_type_alias_docstring(&parsed, idx);
                     type_aliases.push(PythonTypeAliasStub {
                         name: alias_name,
                         type_expr: type_str,
                         imports: imports.clone(),
                         rust_type_markers,
+                        doc,
                     });
                 }
             }
@@ -139,6 +157,7 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
         .map(|alias| {
             let name = alias.name;
             let type_repr = alias.type_expr;
+            let doc = alias.doc;
             let has_rust_markers = !alias.rust_type_markers.is_empty();
 
             let import_refs: Vec<TokenStream2> = alias
@@ -219,6 +238,7 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                             },
                             type_refs: #type_refs_code,
                         },
+                        doc: #doc,
                     }
                 }
             }

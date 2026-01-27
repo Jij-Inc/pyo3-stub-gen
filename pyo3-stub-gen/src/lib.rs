@@ -295,7 +295,32 @@ macro_rules! module_variable {
 /// ```
 #[macro_export]
 macro_rules! type_alias {
-    // Pattern 1: Union types - MUST come first for proper pattern matching
+    // Pattern 1: Union types with docstring - must come first
+    ($module:expr, $name:ident = $($base:ty)|+, $doc:expr) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: $doc,
+                }
+            }
+        };
+    };
+
+    // Pattern 2: Union types without docstring (backward compatible)
     ($module:expr, $name:ident = $($base:ty)|+) => {
         const _: () = {
             struct __TypeAliasImpl;
@@ -314,18 +339,32 @@ macro_rules! type_alias {
                     name: stringify!($name),
                     module: $module,
                     r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: "",
                 }
             }
         };
     };
 
-    // Pattern 2: Single types - existing behavior
+    // Pattern 3: Single types with docstring
+    ($module:expr, $name:ident = $ty:ty, $doc:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: stringify!($name),
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: $doc,
+            }
+        }
+    };
+
+    // Pattern 4: Single types without docstring (backward compatible)
     ($module:expr, $name:ident = $ty:ty) => {
         $crate::inventory::submit! {
             $crate::type_info::TypeAliasInfo {
                 name: stringify!($name),
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: "",
             }
         }
     };
