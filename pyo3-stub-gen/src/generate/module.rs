@@ -84,12 +84,13 @@ impl Module {
                         ImportRef::Module(module_ref) => {
                             let name = module_ref.get().unwrap_or(&self.module.default_module_name);
                             if name != self.module.name && !name.is_empty() {
-                                let is_internal_module =
-                                    if let Some(root) = self.module.default_module_name.split('.').next() {
-                                        name.starts_with(root)
-                                    } else {
-                                        false
-                                    };
+                                let is_internal_module = if let Some(root) =
+                                    self.module.default_module_name.split('.').next()
+                                {
+                                    name.starts_with(root)
+                                } else {
+                                    false
+                                };
 
                                 if is_internal_module && name.contains('.') {
                                     let last_dot_pos = name.rfind('.').unwrap();
@@ -97,7 +98,11 @@ impl Module {
                                     let child_module = &name[last_dot_pos + 1..];
 
                                     if !self.module.submodules.contains(child_module) {
-                                        writeln!(f, "from {} import {}", parent_module, child_module)?;
+                                        writeln!(
+                                            f,
+                                            "from {} import {}",
+                                            parent_module, child_module
+                                        )?;
                                     }
                                 } else {
                                     writeln!(f, "import {name}")?;
@@ -105,7 +110,10 @@ impl Module {
                             }
                         }
                         ImportRef::Type(type_ref) => {
-                            let module_name = type_ref.module.get().unwrap_or(&self.module.default_module_name);
+                            let module_name = type_ref
+                                .module
+                                .get()
+                                .unwrap_or(&self.module.default_module_name);
                             if module_name != self.module.name {
                                 type_ref_grouped
                                     .entry(module_name.to_string())
@@ -180,7 +188,8 @@ impl Module {
                     let should_add_overload = functions.len() > 1 && has_overload;
 
                     let mut sorted_functions = functions.clone();
-                    sorted_functions.sort_by_key(|func| (func.file, func.line, func.column, func.index));
+                    sorted_functions
+                        .sort_by_key(|func| (func.file, func.line, func.column, func.index));
                     for function in sorted_functions {
                         if should_add_overload {
                             writeln!(f, "@typing.overload")?;
@@ -193,7 +202,15 @@ impl Module {
             }
         }
 
-        write!(&mut output, "{}", ModuleFormatter { module: self, use_type_statement }).unwrap();
+        write!(
+            &mut output,
+            "{}",
+            ModuleFormatter {
+                module: self,
+                use_type_statement
+            }
+        )
+        .unwrap();
         output
     }
 

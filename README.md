@@ -526,6 +526,8 @@ gen_type_alias_from_python!(
 The parser accepts **both** the pre-3.12 and 3.12+ syntaxes:
 
 ```rust
+use pyo3_stub_gen::derive::gen_type_alias_from_python;
+
 // Pre-3.12 syntax
 gen_type_alias_from_python!(
     "your_module",

@@ -1,11 +1,6 @@
 use std::{collections::HashSet, fmt};
 
-use crate::{
-    generate::Import,
-    stub_type::ImportRef,
-    type_info::TypeAliasInfo,
-    TypeInfo,
-};
+use crate::{generate::Import, stub_type::ImportRef, type_info::TypeAliasInfo, TypeInfo};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeAliasDef {
@@ -73,7 +68,12 @@ mod tests {
             type_: TypeInfo::builtin("int"),
         };
         let mut output = String::new();
-        write!(&mut output, "{}", FormatterWrapper(&alias, "test_module", false)).unwrap();
+        write!(
+            &mut output,
+            "{}",
+            FormatterWrapper(&alias, "test_module", false)
+        )
+        .unwrap();
         assert!(output.contains("MyAlias: TypeAlias = builtins.int"));
     }
 
@@ -84,7 +84,12 @@ mod tests {
             type_: TypeInfo::builtin("int"),
         };
         let mut output = String::new();
-        write!(&mut output, "{}", FormatterWrapper(&alias, "test_module", true)).unwrap();
+        write!(
+            &mut output,
+            "{}",
+            FormatterWrapper(&alias, "test_module", true)
+        )
+        .unwrap();
         assert!(output.contains("type MyAlias = builtins.int"));
         assert!(!output.contains("TypeAlias"));
     }

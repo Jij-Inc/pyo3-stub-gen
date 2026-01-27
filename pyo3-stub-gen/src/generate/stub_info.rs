@@ -503,8 +503,12 @@ mod tests {
 
     #[test]
     fn test_register_submodules_creates_empty_parent_modules() {
-        let mut builder =
-            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into(), false, false);
+        let mut builder = StubInfoBuilder::from_project_root(
+            "test_module".to_string(),
+            "/tmp".into(),
+            false,
+            false,
+        );
 
         // Simulate a module with only submodules
         builder.modules.insert(
