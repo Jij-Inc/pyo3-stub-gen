@@ -480,6 +480,32 @@ StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct | HashableStruct
 ```
 
+### Type Alias Syntax Configuration
+
+By default, pyo3-stub-gen generates type aliases using the pre-Python 3.12 syntax with `TypeAlias`:
+
+```python
+from typing import TypeAlias
+
+MyAlias: TypeAlias = int | str
+```
+
+For projects targeting Python 3.12 or higher, you can use the newer `type` statement syntax by adding the following to your `pyproject.toml`:
+
+```toml
+[tool.pyo3-stub-gen]
+use-type-statement = true
+```
+
+This will generate:
+
+```python
+type MyAlias = int | str
+```
+
+> [!NOTE]
+> When using `use-type-statement = true`, ensure your project's minimum Python version is 3.12 or higher. The `type` statement is not available in earlier Python versions.
+
 ### Python Stub Syntax for Type Aliases
 
 For complex type aliases that require Python-specific syntax, you can use `gen_type_alias_from_python!`:
@@ -491,10 +517,35 @@ gen_type_alias_from_python!(
     "your_module",
     r#"
     import collections.abc
+    from typing import TypeAlias
     CallbackType: TypeAlias = collections.abc.Callable[[str], None]
     "#
 );
 ```
+
+The parser accepts **both** the pre-3.12 and 3.12+ syntaxes:
+
+```rust
+// Pre-3.12 syntax
+gen_type_alias_from_python!(
+    "your_module",
+    r#"
+    from typing import TypeAlias
+    CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+    "#
+);
+
+// Python 3.12+ syntax
+gen_type_alias_from_python!(
+    "your_module",
+    r#"
+    import collections.abc
+    type OptionalCallback = collections.abc.Callable[[str], None] | None
+    "#
+);
+```
+
+The output format is controlled by the `use-type-statement` configuration, regardless of which syntax you use in the input.
 
 This approach is useful for:
 - Types requiring specific imports (e.g., `collections.abc.Callable`)

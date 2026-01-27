@@ -1,0 +1,17 @@
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+tasks:
+  stub-gen:
+    desc: Generate stub file
+    cmds:
+      - cargo run --bin stub_gen
+
+  test:
+    desc: Run tests
+    cmds:
+      - uv run pyright
+      - uvx ruff check
+      - uv run mypy --show-error-codes -p type_statement_alias
+      - uv run stubtest type_statement_alias --ignore-missing-stub --ignore-disjoint-bases

@@ -2,7 +2,7 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     generate::Import,
-    stub_type::{ImportRef, ModuleRef, TypeRef},
+    stub_type::ImportRef,
     type_info::TypeAliasInfo,
     TypeInfo,
 };
@@ -24,13 +24,9 @@ impl From<&TypeAliasInfo> for TypeAliasDef {
 
 impl Import for TypeAliasDef {
     fn import(&self) -> HashSet<ImportRef> {
-        let mut imports = self.type_.import.clone();
-        // Always import TypeAlias from typing
-        imports.insert(ImportRef::Type(TypeRef {
-            module: ModuleRef::Named("typing".to_string()),
-            name: "TypeAlias".to_string(),
-        }));
-        imports
+        // Only return imports from the type itself
+        // TypeAlias will be handled conditionally by Module
+        self.type_.import.clone()
     }
 }
 
@@ -41,9 +37,64 @@ impl fmt::Display for TypeAliasDef {
 }
 
 impl TypeAliasDef {
-    /// Format type alias with module-qualified type names
-    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+    /// Format type alias with module-qualified names and syntax based on configuration
+    pub fn fmt_with_config(
+        &self,
+        target_module: &str,
+        f: &mut fmt::Formatter,
+        use_type_statement: bool,
+    ) -> fmt::Result {
         let qualified_type = self.type_.qualified_for_module(target_module);
-        write!(f, "{}: TypeAlias = {}", self.name, qualified_type)
+
+        if use_type_statement {
+            // Python 3.12+ syntax
+            write!(f, "type {} = {}", self.name, qualified_type)
+        } else {
+            // Pre-3.12 syntax (default)
+            write!(f, "{}: TypeAlias = {}", self.name, qualified_type)
+        }
+    }
+
+    /// Existing method for backward compatibility (uses pre-3.12 syntax)
+    pub fn fmt_for_module(&self, target_module: &str, f: &mut fmt::Formatter) -> fmt::Result {
+        self.fmt_with_config(target_module, f, false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fmt::Write;
+
+    #[test]
+    fn test_pre_312_syntax() {
+        let alias = TypeAliasDef {
+            name: "MyAlias",
+            type_: TypeInfo::builtin("int"),
+        };
+        let mut output = String::new();
+        write!(&mut output, "{}", FormatterWrapper(&alias, "test_module", false)).unwrap();
+        assert!(output.contains("MyAlias: TypeAlias = builtins.int"));
+    }
+
+    #[test]
+    fn test_312_syntax() {
+        let alias = TypeAliasDef {
+            name: "MyAlias",
+            type_: TypeInfo::builtin("int"),
+        };
+        let mut output = String::new();
+        write!(&mut output, "{}", FormatterWrapper(&alias, "test_module", true)).unwrap();
+        assert!(output.contains("type MyAlias = builtins.int"));
+        assert!(!output.contains("TypeAlias"));
+    }
+
+    // Helper struct to test formatting
+    struct FormatterWrapper<'a>(&'a TypeAliasDef, &'a str, bool);
+
+    impl<'a> fmt::Display for FormatterWrapper<'a> {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            self.0.fmt_with_config(self.1, f, self.2)
+        }
     }
 }

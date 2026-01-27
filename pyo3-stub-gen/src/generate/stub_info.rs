@@ -3,7 +3,6 @@ use anyhow::{Context, Result};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
-    io::Write,
     path::*,
 };
 
@@ -13,6 +12,8 @@ pub struct StubInfo {
     pub python_root: PathBuf,
     /// Whether this is a mixed Python/Rust layout (has `python-source` in pyproject.toml)
     pub is_mixed_layout: bool,
+    /// Whether to use Python 3.12+ `type` statement syntax for type aliases
+    pub use_type_statement: bool,
 }
 
 impl StubInfo {
@@ -20,7 +21,8 @@ impl StubInfo {
     /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        StubInfoBuilder::from_pyproject_toml(pyproject).build()
+        let use_type_statement = pyproject.use_type_statement();
+        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement).build()
     }
 
     /// Initialize [StubInfo] with a specific module name and project root.
@@ -30,9 +32,15 @@ impl StubInfo {
         default_module_name: String,
         project_root: PathBuf,
         is_mixed_layout: bool,
+        use_type_statement: bool,
     ) -> Result<Self> {
-        StubInfoBuilder::from_project_root(default_module_name, project_root, is_mixed_layout)
-            .build()
+        StubInfoBuilder::from_project_root(
+            default_module_name,
+            project_root,
+            is_mixed_layout,
+            use_type_statement,
+        )
+        .build()
     }
 
     pub fn generate(&self) -> Result<()> {
@@ -76,8 +84,8 @@ impl StubInfo {
                 fs::create_dir_all(dir)?;
             }
 
-            let mut f = fs::File::create(&dest)?;
-            write!(f, "{module}")?;
+            let content = module.format_with_config(self.use_type_statement);
+            fs::write(&dest, content)?;
             log::info!(
                 "Generate stub file of a module `{name}` at {dest}",
                 dest = dest.display()
@@ -92,10 +100,11 @@ struct StubInfoBuilder {
     default_module_name: String,
     python_root: PathBuf,
     is_mixed_layout: bool,
+    use_type_statement: bool,
 }
 
 impl StubInfoBuilder {
-    fn from_pyproject_toml(pyproject: PyProject) -> Self {
+    fn from_pyproject_toml(pyproject: PyProject, use_type_statement: bool) -> Self {
         let is_mixed_layout = pyproject.python_source().is_some();
         let python_root = pyproject
             .python_source()
@@ -106,6 +115,7 @@ impl StubInfoBuilder {
             default_module_name: pyproject.module_name().to_string(),
             python_root,
             is_mixed_layout,
+            use_type_statement,
         }
     }
 
@@ -113,12 +123,14 @@ impl StubInfoBuilder {
         default_module_name: String,
         project_root: PathBuf,
         is_mixed_layout: bool,
+        use_type_statement: bool,
     ) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
             is_mixed_layout,
+            use_type_statement,
         }
     }
 
@@ -480,6 +492,7 @@ impl StubInfoBuilder {
             modules: self.modules,
             python_root: self.python_root,
             is_mixed_layout: self.is_mixed_layout,
+            use_type_statement: self.use_type_statement,
         })
     }
 }
@@ -491,7 +504,7 @@ mod tests {
     #[test]
     fn test_register_submodules_creates_empty_parent_modules() {
         let mut builder =
-            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into(), false);
+            StubInfoBuilder::from_project_root("test_module".to_string(), "/tmp".into(), false, false);
 
         // Simulate a module with only submodules
         builder.modules.insert(
@@ -518,7 +531,7 @@ mod tests {
     #[test]
     fn test_register_submodules_with_multiple_levels() {
         let mut builder =
-            StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into(), false);
+            StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into(), false, false);
 
         // Simulate deeply nested modules
         builder.modules.insert(
@@ -572,6 +585,7 @@ mod tests {
             },
             python_root: PathBuf::from("/tmp"),
             is_mixed_layout: false,
+            use_type_statement: false,
         };
 
         let result = stub_info.generate();

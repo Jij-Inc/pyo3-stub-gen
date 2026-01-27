@@ -8,6 +8,7 @@ members = [
   "examples/pure",
   "examples/simple_name_collision",
   "examples/test-dash-package",
+  "examples/type-statement-alias",
   "examples/underscore_items",
   "pyo3-stub-gen",
   "pyo3-stub-gen-derive"

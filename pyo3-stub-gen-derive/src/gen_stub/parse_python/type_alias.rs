@@ -102,6 +102,18 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                     }
                 }
             }
+            ast::Stmt::TypeAlias(type_alias_stmt) => {
+                // Python 3.12+ type statement: type Name = Type
+                if let ast::Expr::Name(name_expr) = &*type_alias_stmt.name {
+                    let alias_name = name_expr.id.to_string();
+                    let type_str = expr_to_type_string(&type_alias_stmt.value)?;
+                    type_aliases.push(PythonTypeAliasStub {
+                        name: alias_name,
+                        type_expr: type_str,
+                        imports: imports.clone(),
+                    });
+                }
+            }
             _ => {
                 // Ignore other statements
             }
