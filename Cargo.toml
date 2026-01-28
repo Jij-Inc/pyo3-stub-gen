@@ -15,7 +15,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.18.0"
+version = "0.19.0"
 edition = "2021"
 description = "Stub file (*.pyi) generator for PyO3"
 readme = "README.md"
