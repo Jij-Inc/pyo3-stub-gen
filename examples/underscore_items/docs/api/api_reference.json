@@ -1,0 +1,70 @@
+{
+  "name": "underscore_items",
+  "modules": {
+    "underscore_items": {
+      "name": "underscore_items",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Function",
+          "name": "_private_function",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "public_function",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "PublicClass",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "_PrivateClass",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "underscore_items.PublicClass": "underscore_items",
+    "underscore_items._PrivateClass": "underscore_items",
+    "underscore_items._private_function": "underscore_items",
+    "underscore_items.public_function": "underscore_items"
+  }
+}

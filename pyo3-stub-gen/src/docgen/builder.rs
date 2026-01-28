@@ -12,6 +12,11 @@ use crate::generate::StubInfo;
 use crate::Result;
 use std::collections::{BTreeMap, HashMap};
 
+/// Check if module is hidden (any path component starts with '_')
+fn is_hidden_module(module_name: &str) -> bool {
+    module_name.split('.').any(|part| part.starts_with('_'))
+}
+
 /// Builder for converting StubInfo to DocPackage
 pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
@@ -45,6 +50,11 @@ impl<'a> DocPackageBuilder<'a> {
         let mut modules = BTreeMap::new();
 
         for (module_name, module) in &self.stub_info.modules {
+            // Skip modules with any component starting with '_'
+            if is_hidden_module(module_name) {
+                continue;
+            }
+
             let doc_module = self.build_module(module_name, module)?;
             modules.insert(module_name.clone(), doc_module);
         }
@@ -103,7 +113,12 @@ impl<'a> DocPackageBuilder<'a> {
             name: name.to_string(),
             doc: module.doc.clone(),
             items,
-            submodules: module.submodules.iter().cloned().collect(),
+            submodules: module
+                .submodules
+                .iter()
+                .filter(|s| !s.starts_with('_'))
+                .cloned()
+                .collect(),
         })
     }
 
