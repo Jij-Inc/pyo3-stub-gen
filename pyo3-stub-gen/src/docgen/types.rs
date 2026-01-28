@@ -74,7 +74,11 @@ impl<'a> TypeRenderer<'a> {
             ModuleRef::Named(module_path) => {
                 // Type from named module - extract the bare type name
                 // name might be like "main_mod.A" but we want just "A"
-                let bare_name = type_info.name.split('.').last().unwrap_or(&type_info.name);
+                let bare_name = type_info
+                    .name
+                    .split('.')
+                    .next_back()
+                    .unwrap_or(&type_info.name);
                 format!("{}.{}", module_path, bare_name)
             }
         };
@@ -111,7 +115,9 @@ impl<'a> TypeRenderer<'a> {
 
         while i < chars.len() {
             // Check if we're at the start of a qualified name
-            if i == 0 || !chars[i - 1].is_alphanumeric() && chars[i - 1] != '_' && chars[i - 1] != '.' {
+            if i == 0
+                || !chars[i - 1].is_alphanumeric() && chars[i - 1] != '_' && chars[i - 1] != '.'
+            {
                 let remaining: String = chars[i..].iter().collect();
                 let mut matched = false;
 
@@ -136,7 +142,9 @@ impl<'a> TypeRenderer<'a> {
 
                 // Try to match local package prefixes
                 // Extract qualified identifier (e.g., "main_mod.A" or "pure.DataContainer")
-                let ident_match = remaining.split(|c: char| !c.is_alphanumeric() && c != '_' && c != '.').next();
+                let ident_match = remaining
+                    .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '.')
+                    .next();
                 if let Some(ident) = ident_match {
                     if ident.contains('.') {
                         // This is a qualified name, check if it's from our package
@@ -148,8 +156,16 @@ impl<'a> TypeRenderer<'a> {
                             let last_part = parts[parts.len() - 1];
 
                             // If it looks like a package.Type pattern, extract just the Type
-                            if first_part.chars().next().map(|c| c.is_lowercase()).unwrap_or(false)
-                                && last_part.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
+                            if first_part
+                                .chars()
+                                .next()
+                                .map(|c| c.is_lowercase())
+                                .unwrap_or(false)
+                                && last_part
+                                    .chars()
+                                    .next()
+                                    .map(|c| c.is_uppercase())
+                                    .unwrap_or(false)
                             {
                                 // Skip to the last part
                                 let prefix_len = ident.len() - last_part.len();

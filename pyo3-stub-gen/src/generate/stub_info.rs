@@ -25,7 +25,8 @@ impl StubInfo {
         let path = path.as_ref();
         let pyproject = PyProject::parse_toml(path)?;
         let use_type_statement = pyproject.use_type_statement();
-        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement).build_with_pyproject_path(Some(path.to_path_buf()))
+        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement)
+            .build_with_pyproject_path(Some(path.to_path_buf()))
     }
 
     /// Initialize [StubInfo] with a specific module name and project root.
@@ -99,7 +100,7 @@ impl StubInfo {
         // Generate documentation if configured
         if let Some(pyproject_path) = &self.pyproject_path {
             if let Ok(pyproject) = PyProject::parse_toml(pyproject_path) {
-                if let Some(doc_config) = pyproject.doc_gen_config() {
+                if let Some(doc_config) = pyproject.doc_gen_config_resolved() {
                     self.generate_docs(&doc_config)?;
                 }
             }

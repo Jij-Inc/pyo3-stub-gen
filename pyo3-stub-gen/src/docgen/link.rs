@@ -23,11 +23,7 @@ impl<'a> LinkResolver<'a> {
     /// 3. Else (private module only): no link
     ///
     /// Returns (doc_module, item_kind) if linkable, None otherwise
-    pub fn resolve_link(
-        &self,
-        item_fqn: &str,
-        current_module: &str,
-    ) -> Option<(String, ItemKind)> {
+    pub fn resolve_link(&self, item_fqn: &str, current_module: &str) -> Option<(String, ItemKind)> {
         // Check if item is exported from current module
         if let Some(export_module) = self.export_map.get(item_fqn) {
             if export_module == current_module {

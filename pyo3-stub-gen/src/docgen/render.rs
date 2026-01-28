@@ -52,7 +52,9 @@ pub fn generate_index_rst(package: &DocPackage, output_dir: &Path) -> Result<()>
         "=".repeat(package.name.len() + 14)
     ));
 
-    content.push_str("This is the API reference documentation generated from Rust code using pyo3-stub-gen.\n\n");
+    content.push_str(
+        "This is the API reference documentation generated from Rust code using pyo3-stub-gen.\n\n",
+    );
 
     // Create toctree
     content.push_str(".. toctree::\n");

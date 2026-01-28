@@ -3,8 +3,8 @@
 use crate::docgen::{
     export::ExportResolver,
     ir::{
-        DocClass, DocFunction, DocItem, DocModule, DocPackage, DocParameter, DocSignature,
-        DocTypeAlias, DocTypeExpr, DocVariable, DeprecatedInfo,
+        DeprecatedInfo, DocClass, DocFunction, DocItem, DocModule, DocPackage, DocParameter,
+        DocSignature, DocTypeAlias, DocTypeExpr, DocVariable,
     },
     types::TypeRenderer,
 };
@@ -56,11 +56,7 @@ impl<'a> DocPackageBuilder<'a> {
         })
     }
 
-    fn build_module(
-        &self,
-        name: &str,
-        module: &crate::generate::Module,
-    ) -> Result<DocModule> {
+    fn build_module(&self, name: &str, module: &crate::generate::Module) -> Result<DocModule> {
         let exports = self.export_resolver.resolve_exports(module);
         let mut items = Vec::new();
 
@@ -147,8 +143,14 @@ impl<'a> DocPackageBuilder<'a> {
         return_type: &crate::TypeInfo,
     ) -> Result<DocSignature> {
         let type_aliases = HashMap::new();
-        let link_resolver = crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(&link_resolver, module, &type_aliases, &self.default_module_name);
+        let link_resolver =
+            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
+        let type_renderer = TypeRenderer::new(
+            &link_resolver,
+            module,
+            &type_aliases,
+            &self.default_module_name,
+        );
 
         let params: Vec<DocParameter> = parameters
             .positional_only
@@ -198,8 +200,14 @@ impl<'a> DocPackageBuilder<'a> {
     ) -> Result<DocItem> {
         // Requirement #2: Preserve alias definition + docstring
         let type_aliases = HashMap::new();
-        let link_resolver = crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(&link_resolver, module, &type_aliases, &self.default_module_name);
+        let link_resolver =
+            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
+        let type_renderer = TypeRenderer::new(
+            &link_resolver,
+            module,
+            &type_aliases,
+            &self.default_module_name,
+        );
 
         Ok(DocItem::TypeAlias(DocTypeAlias {
             name: alias.name.to_string(),
@@ -208,14 +216,16 @@ impl<'a> DocPackageBuilder<'a> {
         }))
     }
 
-    fn build_class(
-        &self,
-        module: &str,
-        class: &crate::generate::ClassDef,
-    ) -> Result<DocItem> {
+    fn build_class(&self, module: &str, class: &crate::generate::ClassDef) -> Result<DocItem> {
         let type_aliases = HashMap::new();
-        let link_resolver = crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(&link_resolver, module, &type_aliases, &self.default_module_name);
+        let link_resolver =
+            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
+        let type_renderer = TypeRenderer::new(
+            &link_resolver,
+            module,
+            &type_aliases,
+            &self.default_module_name,
+        );
 
         let bases: Vec<DocTypeExpr> = class
             .bases
@@ -244,7 +254,10 @@ impl<'a> DocPackageBuilder<'a> {
                     .map(|m| m.doc.to_string())
                     .unwrap_or_default(),
                 signatures,
-                is_async: method_overloads.first().map(|m| m.is_async).unwrap_or(false),
+                is_async: method_overloads
+                    .first()
+                    .map(|m| m.is_async)
+                    .unwrap_or(false),
                 deprecated,
             });
         }
@@ -279,14 +292,16 @@ impl<'a> DocPackageBuilder<'a> {
         }))
     }
 
-    fn build_variable(
-        &self,
-        module: &str,
-        var: &crate::generate::VariableDef,
-    ) -> Result<DocItem> {
+    fn build_variable(&self, module: &str, var: &crate::generate::VariableDef) -> Result<DocItem> {
         let type_aliases = HashMap::new();
-        let link_resolver = crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(&link_resolver, module, &type_aliases, &self.default_module_name);
+        let link_resolver =
+            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
+        let type_renderer = TypeRenderer::new(
+            &link_resolver,
+            module,
+            &type_aliases,
+            &self.default_module_name,
+        );
 
         Ok(DocItem::Variable(DocVariable {
             name: var.name.to_string(),

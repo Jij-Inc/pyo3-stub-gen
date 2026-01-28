@@ -78,6 +78,22 @@ impl PyProject {
             .and_then(|t| t.pyo3_stub_gen.as_ref())
             .and_then(|config| config.doc_gen.clone())
     }
+
+    /// Return doc-gen configuration with output_dir resolved relative to pyproject.toml directory
+    pub fn doc_gen_config_resolved(&self) -> Option<crate::docgen::DocGenConfig> {
+        if let Some(mut config) = self.doc_gen_config() {
+            // Resolve output_dir relative to pyproject.toml directory
+            // Only resolve if the path is relative (absolute paths stay unchanged)
+            if config.output_dir.is_relative() {
+                if let Some(base) = self.toml_path.parent() {
+                    config.output_dir = base.join(&config.output_dir);
+                }
+            }
+            Some(config)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -158,5 +174,49 @@ mod tests {
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
         assert_eq!(pyproject.use_type_statement(), false);
+    }
+
+    #[test]
+    fn test_doc_gen_config_resolved_relative_path() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen.doc-gen]
+            output-dir = "docs/api"
+        "#;
+        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
+
+        let config = pyproject.doc_gen_config_resolved().unwrap();
+        assert_eq!(config.output_dir, PathBuf::from("/project/root/docs/api"));
+    }
+
+    #[test]
+    fn test_doc_gen_config_resolved_absolute_path() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen.doc-gen]
+            output-dir = "/absolute/path/docs"
+        "#;
+        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
+
+        let config = pyproject.doc_gen_config_resolved().unwrap();
+        assert_eq!(config.output_dir, PathBuf::from("/absolute/path/docs"));
+    }
+
+    #[test]
+    fn test_doc_gen_config_resolved_missing_config() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+        "#;
+        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
+
+        assert!(pyproject.doc_gen_config_resolved().is_none());
     }
 }
