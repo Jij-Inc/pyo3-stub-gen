@@ -628,12 +628,12 @@ API Reference
 
 Or with MyST Markdown (`docs/api.md`):
 
-```markdown
+````markdown
 # API Reference
 
 ```{pyo3-api} your_module_name
 ```
-```
+````
 
 **5. Build documentation:**
 
