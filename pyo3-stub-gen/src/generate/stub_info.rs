@@ -1,4 +1,8 @@
-use crate::{generate::*, pyproject::PyProject, type_info::*};
+use crate::{
+    generate::*,
+    pyproject::{PyProject, StubGenConfig},
+    type_info::*,
+};
 use anyhow::{Context, Result};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -12,8 +16,8 @@ pub struct StubInfo {
     pub python_root: PathBuf,
     /// Whether this is a mixed Python/Rust layout (has `python-source` in pyproject.toml)
     pub is_mixed_layout: bool,
-    /// Whether to use Python 3.12+ `type` statement syntax for type aliases
-    pub use_type_statement: bool,
+    /// Configuration options for stub generation
+    pub config: StubGenConfig,
 }
 
 impl StubInfo {
@@ -21,24 +25,24 @@ impl StubInfo {
     /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let pyproject = PyProject::parse_toml(path)?;
-        let use_type_statement = pyproject.use_type_statement();
-        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement).build()
+        let config = pyproject.stub_gen_config();
+        StubInfoBuilder::from_pyproject_toml(pyproject, config).build()
     }
 
-    /// Initialize [StubInfo] with a specific module name and project root.
+    /// Initialize [StubInfo] with a specific module name, project root, and configuration.
     /// This must be placed in your PyO3 library crate, i.e. the same crate where [inventory::submit]ted,
     /// not in the `gen_stub` executables due to [inventory]'s mechanism.
     pub fn from_project_root(
         default_module_name: String,
         project_root: PathBuf,
         is_mixed_layout: bool,
-        use_type_statement: bool,
+        config: StubGenConfig,
     ) -> Result<Self> {
         StubInfoBuilder::from_project_root(
             default_module_name,
             project_root,
             is_mixed_layout,
-            use_type_statement,
+            config,
         )
         .build()
     }
@@ -84,7 +88,7 @@ impl StubInfo {
                 fs::create_dir_all(dir)?;
             }
 
-            let content = module.format_with_config(self.use_type_statement);
+            let content = module.format_with_config(self.config.use_type_statement);
             fs::write(&dest, content)?;
             log::info!(
                 "Generate stub file of a module `{name}` at {dest}",
@@ -100,11 +104,11 @@ struct StubInfoBuilder {
     default_module_name: String,
     python_root: PathBuf,
     is_mixed_layout: bool,
-    use_type_statement: bool,
+    config: StubGenConfig,
 }
 
 impl StubInfoBuilder {
-    fn from_pyproject_toml(pyproject: PyProject, use_type_statement: bool) -> Self {
+    fn from_pyproject_toml(pyproject: PyProject, config: StubGenConfig) -> Self {
         let is_mixed_layout = pyproject.python_source().is_some();
         let python_root = pyproject
             .python_source()
@@ -115,7 +119,7 @@ impl StubInfoBuilder {
             default_module_name: pyproject.module_name().to_string(),
             python_root,
             is_mixed_layout,
-            use_type_statement,
+            config,
         }
     }
 
@@ -123,14 +127,14 @@ impl StubInfoBuilder {
         default_module_name: String,
         project_root: PathBuf,
         is_mixed_layout: bool,
-        use_type_statement: bool,
+        config: StubGenConfig,
     ) -> Self {
         Self {
             modules: BTreeMap::new(),
             default_module_name,
             python_root: project_root,
             is_mixed_layout,
-            use_type_statement,
+            config,
         }
     }
 
@@ -492,7 +496,7 @@ impl StubInfoBuilder {
             modules: self.modules,
             python_root: self.python_root,
             is_mixed_layout: self.is_mixed_layout,
-            use_type_statement: self.use_type_statement,
+            config: self.config,
         })
     }
 }
@@ -507,7 +511,7 @@ mod tests {
             "test_module".to_string(),
             "/tmp".into(),
             false,
-            false,
+            StubGenConfig::default(),
         );
 
         // Simulate a module with only submodules
@@ -534,8 +538,12 @@ mod tests {
 
     #[test]
     fn test_register_submodules_with_multiple_levels() {
-        let mut builder =
-            StubInfoBuilder::from_project_root("root".to_string(), "/tmp".into(), false, false);
+        let mut builder = StubInfoBuilder::from_project_root(
+            "root".to_string(),
+            "/tmp".into(),
+            false,
+            StubGenConfig::default(),
+        );
 
         // Simulate deeply nested modules
         builder.modules.insert(
@@ -589,7 +597,7 @@ mod tests {
             },
             python_root: PathBuf::from("/tmp"),
             is_mixed_layout: false,
-            use_type_statement: false,
+            config: StubGenConfig::default(),
         };
 
         let result = stub_info.generate();
