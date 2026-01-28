@@ -1,12 +1,24 @@
 # Type aliases are purely for static type checking and don't exist at runtime
 pure.CallbackType
+pure.ContainerList
+pure.ContainerMap
+pure.ContainerTuple
+pure.DocumentedAlias
+pure.DocumentedCallback
+pure.DocumentedMap
+pure.DocumentedUnion
 pure.GenericUnion
 pure.MaybeDecimal
+pure.MultiLineDocCallback
+pure.NestedContainer
 pure.NumberOrStringAlias
 pure.OptionalCallback
+pure.OptionalContainer
 pure.SequenceOfInts
 pure.SimpleAlias
+pure.SimpleContainer
 pure.SingleTypeAlias
 pure.StrIntMap
 pure.StructUnion
 pure.TripleUnion
+pure.UndocumentedCallback
