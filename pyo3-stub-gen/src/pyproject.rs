@@ -70,6 +70,14 @@ impl PyProject {
             .map(|config| config.use_type_statement)
             .unwrap_or(false)
     }
+
+    /// Return doc-gen configuration if present in pyproject.toml
+    pub fn doc_gen_config(&self) -> Option<crate::docgen::DocGenConfig> {
+        self.tool
+            .as_ref()
+            .and_then(|t| t.pyo3_stub_gen.as_ref())
+            .and_then(|config| config.doc_gen.clone())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -96,6 +104,8 @@ pub struct Maturin {
 pub struct Pyo3StubGen {
     #[serde(rename = "use-type-statement", default)]
     pub use_type_statement: bool,
+    #[serde(rename = "doc-gen")]
+    pub doc_gen: Option<crate::docgen::DocGenConfig>,
 }
 
 #[cfg(test)]

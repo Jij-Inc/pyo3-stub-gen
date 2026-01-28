@@ -14,15 +14,18 @@ pub struct StubInfo {
     pub is_mixed_layout: bool,
     /// Whether to use Python 3.12+ `type` statement syntax for type aliases
     pub use_type_statement: bool,
+    /// Path to pyproject.toml (if available)
+    pyproject_path: Option<PathBuf>,
 }
 
 impl StubInfo {
     /// Initialize [StubInfo] from a `pyproject.toml` file in `CARGO_MANIFEST_DIR`.
     /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
+        let path = path.as_ref();
         let pyproject = PyProject::parse_toml(path)?;
         let use_type_statement = pyproject.use_type_statement();
-        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement).build()
+        StubInfoBuilder::from_pyproject_toml(pyproject, use_type_statement).build_with_pyproject_path(Some(path.to_path_buf()))
     }
 
     /// Initialize [StubInfo] with a specific module name and project root.
@@ -56,6 +59,7 @@ impl StubInfo {
             );
         }
 
+        // Generate stub files
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
@@ -91,6 +95,43 @@ impl StubInfo {
                 dest = dest.display()
             );
         }
+
+        // Generate documentation if configured
+        if let Some(pyproject_path) = &self.pyproject_path {
+            if let Ok(pyproject) = PyProject::parse_toml(pyproject_path) {
+                if let Some(doc_config) = pyproject.doc_gen_config() {
+                    self.generate_docs(&doc_config)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn generate_docs(&self, config: &crate::docgen::DocGenConfig) -> Result<()> {
+        log::info!("Generating API documentation...");
+
+        // 1. Build DocPackage IR
+        let doc_package = crate::docgen::builder::DocPackageBuilder::new(self).build()?;
+
+        // 2. Render to JSON
+        let json_output = crate::docgen::render::render_to_json(&doc_package)?;
+
+        // 3. Write files
+        fs::create_dir_all(&config.output_dir)?;
+        fs::write(config.output_dir.join(&config.json_output), json_output)?;
+
+        // 4. Copy Sphinx extension
+        crate::docgen::render::copy_sphinx_extension(&config.output_dir)?;
+
+        // 5. Generate RST files
+        if config.separate_pages {
+            crate::docgen::render::generate_module_pages(&doc_package, &config.output_dir)?;
+            crate::docgen::render::generate_index_rst(&doc_package, &config.output_dir)?;
+            log::info!("Generated separate .rst pages for each module");
+        }
+
+        log::info!("Generated API docs at {:?}", config.output_dir);
         Ok(())
     }
 }
@@ -445,7 +486,11 @@ impl StubInfoBuilder {
         unreachable!("Missing struct_id/enum_id = {:?}", struct_id);
     }
 
-    fn build(mut self) -> Result<StubInfo> {
+    fn build(self) -> Result<StubInfo> {
+        self.build_with_pyproject_path(None)
+    }
+
+    fn build_with_pyproject_path(mut self, pyproject_path: Option<PathBuf>) -> Result<StubInfo> {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
@@ -493,6 +538,7 @@ impl StubInfoBuilder {
             python_root: self.python_root,
             is_mixed_layout: self.is_mixed_layout,
             use_type_statement: self.use_type_statement,
+            pyproject_path,
         })
     }
 }
@@ -567,6 +613,7 @@ mod tests {
     fn test_pure_layout_rejects_multiple_modules() {
         // Pure Rust layout should reject multiple modules (whether submodules or top-level)
         let stub_info = StubInfo {
+            pyproject_path: None,
             modules: {
                 let mut map = BTreeMap::new();
                 map.insert(

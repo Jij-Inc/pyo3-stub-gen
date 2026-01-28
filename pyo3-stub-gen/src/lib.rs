@@ -180,6 +180,7 @@
 pub use inventory;
 pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 
+pub mod docgen;
 pub mod exception;
 pub mod generate;
 pub mod pyproject;

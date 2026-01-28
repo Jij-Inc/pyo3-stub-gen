@@ -779,6 +779,7 @@ dependencies = [
  "pyo3-stub-gen-derive",
  "rust_decimal",
  "serde",
+ "serde_json",
  "test-case",
  "toml",
 ]

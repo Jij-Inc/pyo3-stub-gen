@@ -18,3 +18,20 @@ tasks:
       - uv run stubtest pure --ignore-missing-stub --ignore-disjoint-bases --allowlist .stubtest-allowlist
       - uv run pyrefly check ./pure.pyi
       - uv run ty check .
+
+  doc-build:
+    desc: Build Sphinx documentation
+    deps:
+      - stub-gen
+    cmds:
+      - uv run --with sphinx sphinx-build -W -b html docs docs/_build
+
+  doc-test:
+    desc: Test that Sphinx documentation builds and objects.inv exists
+    deps:
+      - doc-build
+    cmds:
+      - bash -c 'test -f docs/_build/index.html || (echo "ERROR index.html not generated" && exit 1)'
+      - bash -c 'test -f docs/_build/objects.inv || (echo "ERROR objects.inv not generated" && exit 1)'
+      - echo "✓ Documentation built successfully"
+      - echo "✓ objects.inv generated for intersphinx"

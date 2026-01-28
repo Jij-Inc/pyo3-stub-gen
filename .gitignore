@@ -19,3 +19,6 @@ dist/
 .task/
 .claude/settings.local.json
 workspace
+
+# Sphinx documentation build output
+_build/

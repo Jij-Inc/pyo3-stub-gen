@@ -1,0 +1,2803 @@
+{
+  "name": "pure",
+  "modules": {
+    "pure": {
+      "name": "pure",
+      "doc": "Document for pure ...",
+      "items": [
+        {
+          "kind": "Function",
+          "name": "add_decimals",
+          "doc": "Add two decimal numbers with high precision",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "Decimal",
+                    "link_target": {
+                      "fqn": "decimal.Decimal",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "b",
+                  "type_": {
+                    "display": "Decimal",
+                    "link_target": {
+                      "fqn": "decimal.Decimal",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Decimal",
+                "link_target": {
+                  "fqn": "decimal.Decimal",
+                  "doc_module": "pure",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "ahash_dict",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "dict[str, int]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "as_tuple",
+          "doc": "Convert sequence to list when tuple_out is False",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[False]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[True]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tuple[int, ...]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "async_num",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": true,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": "2"
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_containers",
+          "doc": "\n    Create a list of DataContainer instances.\n\n    Demonstrates using RustType with generic types containing custom types.\n    ",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "count",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[DataContainer]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_dict",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "n",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "dict[int, list[int]]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "default_value",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "num",
+                  "type_": {
+                    "display": "Number",
+                    "link_target": {
+                      "fqn": "pure.Number",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": "Number.FLOAT"
+                }
+              ],
+              "return_type": {
+                "display": "Number",
+                "link_target": {
+                  "fqn": "pure.Number",
+                  "doc_module": "pure",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "deprecated_function",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": {
+            "since": "1.0.0",
+            "note": "This function is deprecated"
+          }
+        },
+        {
+          "kind": "Function",
+          "name": "echo_path",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "path",
+                  "type_": {
+                    "display": "str | PathLike | Path",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Path",
+                "link_target": {
+                  "fqn": "pathlib.Path",
+                  "doc_module": "pure",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "fn_override_type",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "cb",
+                  "type_": {
+                    "display": "Callable[[str], Any]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Callable[[str], Any]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "fn_with_python_param",
+          "doc": "\n    Example using python parameter in gen_stub_pyfunction attribute.\n    This demonstrates specifying types directly in Python stub syntax.\n    ",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "callback",
+                  "type_": {
+                    "display": "Callable[[str], Any]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Callable[[str], Any]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "fn_with_python_stub",
+          "doc": "\n    Example function using gen_function_from_python! macro.\n    This demonstrates how to define type information using Python stub syntax.\n    ",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "callback",
+                  "type_": {
+                    "display": "Callable[[str], Any]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Callable[[str], Any]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "func_with_kwargs",
+          "doc": "Takes a variable number of keyword arguments and does nothing",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "kwargs",
+                  "type_": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "func_with_star_arg",
+          "doc": "Takes a variable number of arguments and returns their string representation.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "args",
+                  "type_": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "func_with_star_arg_typed",
+          "doc": "Takes a variable number of arguments and returns their string representation.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "args",
+                  "type_": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "manual_overload_as_tuple",
+          "doc": "Convert sequence to list when tuple_out is False",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[False]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[True]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tuple[int, ...]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "manual_overload_example_1",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "manual_overload_example_2",
+          "doc": "Increments integer by 1",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "overload_example_1",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "overload_example_2",
+          "doc": "Increments integer by 1",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "print_c",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "c",
+                  "type_": {
+                    "display": "Optional[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": "None"
+                }
+              ],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "process_container",
+          "doc": "\n    Process a DataContainer by doubling its value.\n\n    This uses the RustType marker to reference the Rust type directly,\n    which will expand to the correct Python stub type using PyStubType trait.\n    ",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "container",
+                  "type_": {
+                    "display": "DataContainer",
+                    "link_target": {
+                      "fqn": "pure.DataContainer",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "DataContainer",
+                "link_target": {
+                  "fqn": "pure.DataContainer",
+                  "doc_module": "pure",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "read_dict",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "dict",
+                  "type_": {
+                    "display": "Mapping[int, Mapping[int, int]]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "str_len",
+          "doc": "Returns the length of the string.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "sum",
+          "doc": "Returns the sum of two numbers as a string.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "v",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "sum_list",
+          "doc": "\n    Sum a list of integers.\n\n    RustType[\"Vec<i32>\"] will expand to the correct input type (typing.Sequence[int])\n    and RustType[\"i32\"] will expand to the correct output type (int).\n    ",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "values",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_all",
+          "doc": "Test function with type: ignore (without equals for catch-all)",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_custom",
+          "doc": "Test function with custom (unknown) rule",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_no_comment_all",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_no_comment_specific",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_pyright",
+          "doc": "Test function with Pyright diagnostic rules",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_type_ignore_specific",
+          "doc": "Test function with type: ignore for specific rules",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "CallbackType",
+          "doc": "",
+          "definition": {
+            "display": "Callable[[str], None]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ContainerList",
+          "doc": "",
+          "definition": {
+            "display": "list[DataContainer]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ContainerMap",
+          "doc": "",
+          "definition": {
+            "display": "dict[str, DataContainer]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ContainerTuple",
+          "doc": "",
+          "definition": {
+            "display": "tuple[DataContainer, DataContainer]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "DocumentedAlias",
+          "doc": "This is a simple type alias with documentation",
+          "definition": {
+            "display": "Optional[int]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "DocumentedCallback",
+          "doc": "A callback function that takes a string and returns nothing",
+          "definition": {
+            "display": "Callable[[str], None]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "DocumentedMap",
+          "doc": "A map type alias with detailed documentation.\n\nThis can have multiple lines of documentation.",
+          "definition": {
+            "display": "dict[str, list[int]]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "DocumentedUnion",
+          "doc": "A union type with documentation",
+          "definition": {
+            "display": "int | str",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "GenericUnion",
+          "doc": "",
+          "definition": {
+            "display": "Optional[int] | list[str]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "MaybeDecimal",
+          "doc": "",
+          "definition": {
+            "display": "Optional[DecimalHolder]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "MultiLineDocCallback",
+          "doc": "\nA callback with multi-line documentation.\n\nThis callback takes a string and an integer, and returns a boolean.\n",
+          "definition": {
+            "display": "Callable[[str, int], bool]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "NestedContainer",
+          "doc": "",
+          "definition": {
+            "display": "list[list[DataContainer]]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "NumberOrStringAlias",
+          "doc": "",
+          "definition": {
+            "display": "int | str",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "OptionalCallback",
+          "doc": "",
+          "definition": {
+            "display": "Callable[[str], None] | None",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "OptionalContainer",
+          "doc": "",
+          "definition": {
+            "display": "DataContainer | None",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "SequenceOfInts",
+          "doc": "",
+          "definition": {
+            "display": "Sequence[int]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "SimpleAlias",
+          "doc": "",
+          "definition": {
+            "display": "Optional[int]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "SimpleContainer",
+          "doc": "",
+          "definition": {
+            "display": "DataContainer",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "SingleTypeAlias",
+          "doc": "",
+          "definition": {
+            "display": "Optional[int]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "StrIntMap",
+          "doc": "",
+          "definition": {
+            "display": "dict[str, int]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "StructUnion",
+          "doc": "",
+          "definition": {
+            "display": "ComparableStruct | HashableStruct",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "TripleUnion",
+          "doc": "",
+          "definition": {
+            "display": "int | str | bool",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "UndocumentedCallback",
+          "doc": "",
+          "definition": {
+            "display": "Callable[[int], bool]",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "Class",
+          "name": "NormalClass",
+          "doc": "Test class without skip_stub_type (normal behavior)",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "NormalClass",
+                    "link_target": {
+                      "fqn": "pure.NormalClass",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "DecimalHolder",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "Decimal",
+                        "link_target": {
+                          "fqn": "decimal.Decimal",
+                          "doc_module": "pure",
+                          "kind": "Class"
+                        },
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "DecimalHolder",
+                    "link_target": {
+                      "fqn": "pure.DecimalHolder",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "HashableStruct",
+          "doc": "Test struct for hash and str methods",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__eq__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__hash__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__str__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "HashableStruct",
+                    "link_target": {
+                      "fqn": "pure.HashableStruct",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "DataContainer",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "DataContainer",
+                    "link_target": {
+                      "fqn": "pure.DataContainer",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Shape1",
+          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "MyDate",
+          "doc": "",
+          "bases": [
+            {
+              "display": "date",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Problem",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Problem",
+                    "link_target": {
+                      "fqn": "pure.Problem",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "evaluate",
+              "doc": "\n        Evaluate with instance data mapping string keys to InstanceValue objects.\n\n        This example demonstrates RustType marker usage within nested generic types\n        such as dict value types. The marker should expand to the correct Python type.\n        ",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "instance_data",
+                      "type_": {
+                        "display": "dict[str, InstanceValue]",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NotIntError",
+          "doc": "A manual custom exception case\n\nBased on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263",
+          "bases": [
+            {
+              "display": "TypeError",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "item",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "NotIntError",
+                    "link_target": {
+                      "fqn": "pure.NotIntError",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__str__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "trivial_number",
+              "doc": "A trivial number",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "item_is_str",
+              "doc": "Checks if the item is a string",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomStubType",
+          "doc": "Test class with manually defined PyStubType",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "CustomStubType",
+                    "link_target": {
+                      "fqn": "pure.CustomStubType",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "increment",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NumberComplex",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Shape2",
+          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Calculator",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Calculator",
+                    "link_target": {
+                      "fqn": "pure.Calculator",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "add",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "multiply",
+              "doc": "\n        Multiply this calculator's result by another calculator's result.\n\n        Using RustType marker for both input and output types.\n        ",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "Calculator",
+                        "link_target": {
+                          "fqn": "pure.Calculator",
+                          "doc_module": "pure",
+                          "kind": "Class"
+                        },
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Calculator",
+                    "link_target": {
+                      "fqn": "pure.Calculator",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "PartialManualSubmit",
+          "doc": "Example demonstrating manual submission mixed with proc-macro generated method info",
+          "bases": [],
+          "methods": [
+            {
+              "name": "echo_overloaded",
+              "doc": "Overloaded version for int input",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "fn_override_type",
+              "doc": "Example method with complex type annotation, skipped from #[gen_stub_pymethods]",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "cb",
+                      "type_": {
+                        "display": "Callable[[str], Any]",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Callable[[str], Any]",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__new__",
+              "doc": "The constructor for PartialManualSubmit",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "PartialManualSubmit",
+                    "link_target": {
+                      "fqn": "pure.PartialManualSubmit",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "echo",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "TypeIgnoreTest",
+          "doc": "Test class for method type: ignore functionality",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "TypeIgnoreTest",
+                    "link_target": {
+                      "fqn": "pure.TypeIgnoreTest",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "test_method_ignore",
+              "doc": "Test method with type: ignore for specific rules",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "test_method_all_ignore",
+              "doc": "Test method with type: ignore (without equals for catch-all)",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "ComparableStruct",
+          "doc": "Test struct for eq and ord comparison methods",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__eq__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__lt__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__le__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__gt__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__ge__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "ComparableStruct",
+                    "link_target": {
+                      "fqn": "pure.ComparableStruct",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "This is a constructor of :class:`A`.",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "classmethod_test1",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "deprecated_classmethod",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This classmethod is deprecated"
+              }
+            },
+            {
+              "name": "classmethod_test2",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "ref_test",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "dict",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "dict",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "async_get_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": true,
+              "deprecated": null
+            },
+            {
+              "name": "deprecated_method",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This method is deprecated"
+              }
+            },
+            {
+              "name": "deprecated_staticmethod",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This staticmethod is deprecated"
+              }
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OverrideType",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "error",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Never",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "MyError",
+          "doc": "",
+          "bases": [
+            {
+              "display": "RuntimeError",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "InstanceValue",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "data",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "InstanceValue",
+                    "link_target": {
+                      "fqn": "pure.InstanceValue",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Placeholder",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Placeholder",
+                    "link_target": {
+                      "fqn": "pure.Placeholder",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "configure",
+              "doc": "\n        Configure placeholder with keyword-only parameters.\n\n        This demonstrates keyword-only parameters (after *) which should be\n        preserved in the generated stub file.\n        ",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "dtype",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "ndim",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "shape",
+                      "type_": {
+                        "display": "Optional[str]",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "jagged",
+                      "type_": {
+                        "display": "bool",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": "False"
+                    },
+                    {
+                      "name": "latex",
+                      "type_": {
+                        "display": "Optional[str]",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": "None"
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Placeholder",
+                    "link_target": {
+                      "fqn": "pure.Placeholder",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "ManualSubmit",
+          "doc": "Demonstrates manual submission of class methods using the `submit!` macro",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "Constructor for ManualSubmit class",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "ManualSubmit",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "increment",
+              "doc": "Add 1.0 to the input float",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "echo",
+              "doc": "If the input is an int, returns int",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [
+            {
+              "display": "A",
+              "link_target": {
+                "fqn": "pure.A",
+                "doc_module": "pure",
+                "kind": "Class"
+              },
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomComplexEnum",
+          "doc": "Test complex enum with skip_stub_type",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomEnum",
+          "doc": "Test enum with skip_stub_type",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Number",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NumberRenameAll",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Variable",
+          "name": "MY_CONSTANT1",
+          "doc": "",
+          "type_": {
+            "display": "int",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
+          "kind": "Variable",
+          "name": "MY_CONSTANT2",
+          "doc": "",
+          "type_": {
+            "display": "int",
+            "link_target": null,
+            "children": []
+          }
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "pure.GenericUnion": "pure",
+    "pure.SingleTypeAlias": "pure",
+    "pure.func_with_star_arg": "pure",
+    "pure.print_c": "pure",
+    "pure.TypeIgnoreTest": "pure",
+    "pure.Problem": "pure",
+    "pure.SimpleContainer": "pure",
+    "pure.CustomStubType": "pure",
+    "pure.Shape1": "pure",
+    "pure.Number": "pure",
+    "pure.test_type_ignore_custom": "pure",
+    "pure.fn_with_python_stub": "pure",
+    "pure.B": "pure",
+    "pure.deprecated_function": "pure",
+    "pure.str_len": "pure",
+    "pure.DecimalHolder": "pure",
+    "pure.DocumentedUnion": "pure",
+    "pure.CustomComplexEnum": "pure",
+    "pure.test_type_ignore_pyright": "pure",
+    "pure.CustomEnum": "pure",
+    "pure.NumberComplex": "pure",
+    "pure.Shape2": "pure",
+    "pure.func_with_star_arg_typed": "pure",
+    "pure.SimpleAlias": "pure",
+    "pure.ContainerTuple": "pure",
+    "pure.MY_CONSTANT2": "pure",
+    "pure.NumberOrStringAlias": "pure",
+    "pure.create_containers": "pure",
+    "pure.Calculator": "pure",
+    "pure.StrIntMap": "pure",
+    "pure.manual_overload_example_2": "pure",
+    "pure.manual_overload_example_1": "pure",
+    "pure.OverrideType": "pure",
+    "pure.create_a": "pure",
+    "pure.ContainerMap": "pure",
+    "pure.MultiLineDocCallback": "pure",
+    "pure.manual_overload_as_tuple": "pure",
+    "pure.NumberRenameAll": "pure",
+    "pure.test_type_ignore_no_comment_all": "pure",
+    "pure.SequenceOfInts": "pure",
+    "pure.NormalClass": "pure",
+    "pure.create_dict": "pure",
+    "pure.TripleUnion": "pure",
+    "pure.func_with_kwargs": "pure",
+    "pure.NestedContainer": "pure",
+    "pure.ComparableStruct": "pure",
+    "pure.ContainerList": "pure",
+    "pure.DocumentedAlias": "pure",
+    "pure.test_type_ignore_no_comment_specific": "pure",
+    "pure.DocumentedMap": "pure",
+    "pure.sum": "pure",
+    "pure.as_tuple": "pure",
+    "pure.CallbackType": "pure",
+    "pure.add_decimals": "pure",
+    "pure.default_value": "pure",
+    "pure.ahash_dict": "pure",
+    "pure.OptionalContainer": "pure",
+    "pure.Placeholder": "pure",
+    "pure.OptionalCallback": "pure",
+    "pure.fn_with_python_param": "pure",
+    "pure.PartialManualSubmit": "pure",
+    "pure.MaybeDecimal": "pure",
+    "pure.DataContainer": "pure",
+    "pure.NotIntError": "pure",
+    "pure.InstanceValue": "pure",
+    "pure.read_dict": "pure",
+    "pure.MyDate": "pure",
+    "pure.DocumentedCallback": "pure",
+    "pure.MY_CONSTANT1": "pure",
+    "pure.process_container": "pure",
+    "pure.sum_list": "pure",
+    "pure.test_type_ignore_all": "pure",
+    "pure.StructUnion": "pure",
+    "pure.test_type_ignore_specific": "pure",
+    "pure.ManualSubmit": "pure",
+    "pure.HashableStruct": "pure",
+    "pure.A": "pure",
+    "pure.UndocumentedCallback": "pure",
+    "pure.async_num": "pure",
+    "pure.echo_path": "pure",
+    "pure.fn_override_type": "pure",
+    "pure.overload_example_2": "pure",
+    "pure.overload_example_1": "pure",
+    "pure.MyError": "pure"
+  }
+}
