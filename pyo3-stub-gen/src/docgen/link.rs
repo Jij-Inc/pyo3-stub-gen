@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 /// Link resolver implementing Haddock-style resolution
 pub struct LinkResolver<'a> {
     export_map: &'a BTreeMap<String, String>,
+    #[allow(dead_code)] // Reserved for future use in link resolution
     package_name: &'a str,
 }
 

@@ -17,6 +17,10 @@ pub struct DocGenConfig {
     /// Generate separate .rst pages for each module (default: true)
     #[serde(rename = "separate-pages", default = "default_separate_pages")]
     pub separate_pages: bool,
+
+    /// Custom intro message for index.rst (default: standard message, empty string to omit)
+    #[serde(rename = "intro-message", default)]
+    pub intro_message: Option<String>,
 }
 
 impl Default for DocGenConfig {
@@ -25,6 +29,7 @@ impl Default for DocGenConfig {
             output_dir: default_output_dir(),
             json_output: default_json_output(),
             separate_pages: default_separate_pages(),
+            intro_message: None,
         }
     }
 }

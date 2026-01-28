@@ -42,7 +42,11 @@ pub fn generate_module_pages(package: &DocPackage, output_dir: &Path) -> Result<
 }
 
 /// Generate index.rst that references all module pages
-pub fn generate_index_rst(package: &DocPackage, output_dir: &Path) -> Result<()> {
+pub fn generate_index_rst(
+    package: &DocPackage,
+    output_dir: &Path,
+    config: &crate::docgen::config::DocGenConfig,
+) -> Result<()> {
     let mut content = String::new();
 
     // Title
@@ -52,9 +56,19 @@ pub fn generate_index_rst(package: &DocPackage, output_dir: &Path) -> Result<()>
         "=".repeat(package.name.len() + 14)
     ));
 
-    content.push_str(
-        "This is the API reference documentation generated from Rust code using pyo3-stub-gen.\n\n",
-    );
+    // Add intro message (configurable or default)
+    if let Some(intro) = &config.intro_message {
+        if !intro.is_empty() {
+            content.push_str(intro);
+            content.push_str("\n\n");
+        }
+        // Empty string -> skip intro entirely
+    } else {
+        // Default message when not configured
+        content.push_str(
+            "This is the API reference documentation generated from Rust code using pyo3-stub-gen.\n\n",
+        );
+    }
 
     // Create toctree
     content.push_str(".. toctree::\n");

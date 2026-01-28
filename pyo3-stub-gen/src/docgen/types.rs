@@ -10,9 +10,10 @@ pub struct TypeAliasDef;
 
 /// Renderer for type expressions
 pub struct TypeRenderer<'a> {
+    #[allow(dead_code)] // Reserved for future Haddock-style link resolution
     link_resolver: &'a LinkResolver<'a>,
     current_module: &'a str,
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Reserved for type alias expansion
     type_aliases: &'a HashMap<String, TypeAliasDef>,
     default_module_name: &'a str,
 }

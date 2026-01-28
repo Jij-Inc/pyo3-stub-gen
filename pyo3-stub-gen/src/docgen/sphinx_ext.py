@@ -6,8 +6,9 @@ from pathlib import Path
 from docutils import nodes
 from sphinx.addnodes import (
     desc, desc_signature, desc_name, desc_parameterlist,
-    desc_parameter, desc_returns, pending_xref, desc_content
+    desc_parameter, desc_returns, pending_xref, desc_content, desc_annotation
 )
+from myst_parser.parsers.docutils_ import Parser as MystParser
 from sphinx.util.docutils import SphinxDirective
 
 # Helper functions for building documentation nodes
@@ -178,10 +179,33 @@ def _build_type_expr(type_expr):
         return _parse_and_link_type(display)
 
 def _parse_myst(markdown_text):
-    """Parse MyST markdown to nodes"""
-    # Simplified - just return as paragraph for now
-    # Full implementation would use MyST parser
-    return nodes.paragraph(text=markdown_text)
+    """Parse MyST markdown to docutils nodes using myst-parser"""
+    from docutils.core import publish_doctree
+    import textwrap
+
+    try:
+        # Dedent the text to avoid markdown treating it as a code block
+        # (indented text in markdown is interpreted as preformatted code)
+        dedented_text = textwrap.dedent(markdown_text).strip()
+
+        # Parse markdown using docutils core API with MyST parser
+        doctree = publish_doctree(
+            dedented_text,
+            parser=MystParser(),
+            settings_overrides={
+                'report_level': 5,  # Suppress warnings
+                'halt_level': 5,
+            }
+        )
+
+        # Extract the content nodes (skip the document wrapper)
+        container = nodes.container()
+        for child in doctree.children:
+            container.append(child)
+        return container
+    except Exception:
+        # Fallback to simple paragraph if parsing fails
+        return nodes.paragraph(text=markdown_text.strip())
 
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
@@ -245,8 +269,10 @@ def _build_type_alias(env, alias, module_name):
     sig_id = fullname
     sig_node['ids'].append(sig_id)
 
+    # Use Python 3.12+ type syntax
+    sig_node += desc_annotation(text='type ')
     sig_node += desc_name(text=alias['name'])
-    sig_node += nodes.Text(': TypeAlias = ')
+    sig_node += nodes.Text(' = ')
     sig_node += _build_type_expr(alias['definition'])
     desc_node += sig_node
 
@@ -340,10 +366,49 @@ class Pyo3APIDirective(SphinxDirective):
 
         doc_module = doc_package['modules'][module_name]
 
-        # Build nodes for all items
         result = []
-        for item in doc_module['items']:
-            result.extend(self._build_item(item, module_name))
+
+        # Render module docstring if present
+        if doc_module.get('doc'):
+            result.append(_parse_myst(doc_module['doc']))
+
+        # Group items by kind
+        functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+        classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+        type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+        variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+
+        # Functions section
+        if functions:
+            func_section = nodes.section(ids=[f'{module_name}-functions'])
+            func_section += nodes.title(text='Functions')
+            for func in functions:
+                func_section.extend(self._build_function(func, module_name))
+            result.append(func_section)
+
+        # Classes section
+        if classes:
+            class_section = nodes.section(ids=[f'{module_name}-classes'])
+            class_section += nodes.title(text='Classes')
+            for cls in classes:
+                class_section.extend(self._build_class(cls, module_name))
+            result.append(class_section)
+
+        # Type Aliases section
+        if type_aliases:
+            alias_section = nodes.section(ids=[f'{module_name}-type-aliases'])
+            alias_section += nodes.title(text='Type Aliases')
+            for alias in type_aliases:
+                alias_section.extend(self._build_type_alias(alias, module_name))
+            result.append(alias_section)
+
+        # Variables section
+        if variables:
+            var_section = nodes.section(ids=[f'{module_name}-variables'])
+            var_section += nodes.title(text='Variables')
+            for var in variables:
+                var_section.extend(self._build_variable(var, module_name))
+            result.append(var_section)
 
         return result
 
@@ -400,9 +465,47 @@ class Pyo3APIPackageDirective(SphinxDirective):
                 title = nodes.title(text=title_text)
                 section += title
 
-                # Build nodes for all items in this module
-                for item in doc_module['items']:
-                    section.extend(self._build_item(item, module_name))
+                # Render module docstring if present
+                if doc_module.get('doc'):
+                    section += _parse_myst(doc_module['doc'])
+
+                # Group items by kind
+                functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+                classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+                type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+                variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+
+                # Functions subsection
+                if functions:
+                    func_section = nodes.section(ids=[f'{module_name}-functions'])
+                    func_section += nodes.title(text='Functions')
+                    for func in functions:
+                        func_section.extend(self._build_function(func, module_name))
+                    section.append(func_section)
+
+                # Classes subsection
+                if classes:
+                    class_section = nodes.section(ids=[f'{module_name}-classes'])
+                    class_section += nodes.title(text='Classes')
+                    for cls in classes:
+                        class_section.extend(self._build_class(cls, module_name))
+                    section.append(class_section)
+
+                # Type Aliases subsection
+                if type_aliases:
+                    alias_section = nodes.section(ids=[f'{module_name}-type-aliases'])
+                    alias_section += nodes.title(text='Type Aliases')
+                    for alias in type_aliases:
+                        alias_section.extend(self._build_type_alias(alias, module_name))
+                    section.append(alias_section)
+
+                # Variables subsection
+                if variables:
+                    var_section = nodes.section(ids=[f'{module_name}-variables'])
+                    var_section += nodes.title(text='Variables')
+                    for var in variables:
+                        var_section.extend(self._build_variable(var, module_name))
+                    section.append(var_section)
 
                 result.append(section)
 
