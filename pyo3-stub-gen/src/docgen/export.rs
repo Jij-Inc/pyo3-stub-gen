@@ -1,7 +1,7 @@
 //! Export resolution for determining which items are publicly accessible
 
 use crate::generate::Module;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Resolver for determining which items are exported from modules
 pub struct ExportResolver<'a> {
@@ -65,8 +65,8 @@ impl<'a> ExportResolver<'a> {
 
     /// Build global map: item_fqn → module_where_exported
     /// For re-exports: map to re-exporting module
-    pub fn build_export_map(&self) -> HashMap<String, String> {
-        let mut export_map = HashMap::new();
+    pub fn build_export_map(&self) -> BTreeMap<String, String> {
+        let mut export_map = BTreeMap::new();
 
         for (module_name, module) in self.modules {
             let exports = self.resolve_exports(module);

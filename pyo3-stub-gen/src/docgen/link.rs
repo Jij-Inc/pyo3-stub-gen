@@ -1,16 +1,16 @@
 //! Haddock-style link resolution for documentation
 
 use crate::docgen::ir::ItemKind;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 /// Link resolver implementing Haddock-style resolution
 pub struct LinkResolver<'a> {
-    export_map: &'a HashMap<String, String>,
+    export_map: &'a BTreeMap<String, String>,
     package_name: &'a str,
 }
 
 impl<'a> LinkResolver<'a> {
-    pub fn new(export_map: &'a HashMap<String, String>, package_name: &'a str) -> Self {
+    pub fn new(export_map: &'a BTreeMap<String, String>, package_name: &'a str) -> Self {
         Self {
             export_map,
             package_name,

@@ -16,7 +16,7 @@ use std::collections::{BTreeMap, HashMap};
 pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
     export_resolver: ExportResolver<'a>,
-    export_map: HashMap<String, String>,
+    export_map: BTreeMap<String, String>,
     default_module_name: String,
 }
 
@@ -74,15 +74,19 @@ impl<'a> DocPackageBuilder<'a> {
             }
         }
 
-        // Process classes
-        for class_def in module.class.values() {
+        // Process classes (sorted by name for deterministic output)
+        let mut classes: Vec<_> = module.class.values().collect();
+        classes.sort_by_key(|c| c.name);
+        for class_def in classes {
             if exports.contains(class_def.name) {
                 items.push(self.build_class(name, class_def)?);
             }
         }
 
-        // Process enums
-        for enum_def in module.enum_.values() {
+        // Process enums (sorted by name for deterministic output)
+        let mut enums: Vec<_> = module.enum_.values().collect();
+        enums.sort_by_key(|e| e.name);
+        for enum_def in enums {
             if exports.contains(enum_def.name) {
                 items.push(self.build_enum_as_class(name, enum_def)?);
             }

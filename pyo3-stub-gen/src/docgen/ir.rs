@@ -1,7 +1,7 @@
 //! Intermediate representation for documentation generation
 
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 /// Root documentation package structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,7 +9,7 @@ pub struct DocPackage {
     pub name: String,
     pub modules: BTreeMap<String, DocModule>,
     /// Maps item FQN to the public module where it's exported
-    pub export_map: HashMap<String, String>,
+    pub export_map: BTreeMap<String, String>,
 }
 
 /// A single module's documentation
