@@ -65,6 +65,25 @@ pub fn gen_stub_pyclass_complex_enum(attr: TokenStream, item: TokenStream) -> To
         .into()
 }
 
+/// Embed metadata for Python stub file generation for `#[derive(FromPyObject)]` macro with an enum
+/// of different types
+///
+/// ```
+/// #[pyo3_stub_gen_derive::gen_stub_type_union_enum]
+/// #[derive(pyo3::FromPyObject)]
+/// pub enum FunctionAgg {
+///     S(String),
+///     I(i32),
+///     F(f32),
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn gen_stub_type_union_enum(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    gen_stub::type_union_enum(item.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}
+
 /// Embed metadata for Python stub file generation for `#[pymethods]` macro
 ///
 /// ```

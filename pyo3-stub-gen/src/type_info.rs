@@ -226,6 +226,21 @@ pub struct PyComplexEnumInfo {
 
 inventory::collect!(PyComplexEnumInfo);
 
+/// Info of a `#[pyclass]` with a rich (structured) Rust enum
+#[derive(Debug)]
+pub struct TypeUnionEnumInfo {
+    // Rust struct type-id
+    pub enum_id: fn() -> TypeId,
+    // The name exposed to Python
+    pub pyclass_name: &'static str,
+    /// Docstring
+    pub doc: &'static str,
+    /// types of union variants
+    pub variants: &'static [fn() -> TypeInfo],
+}
+
+inventory::collect!(TypeUnionEnumInfo);
+
 /// Info of `#[pyclass]` with Rust enum
 #[derive(Debug)]
 pub struct PyEnumInfo {

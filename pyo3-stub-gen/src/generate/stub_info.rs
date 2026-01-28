@@ -176,6 +176,12 @@ impl StubInfoBuilder {
             .insert((info.enum_id)(), class_def);
     }
 
+    fn add_type_union_enum(&mut self, info: &TypeUnionEnumInfo) {
+        self.get_module(None)
+            .type_union
+            .insert((info.enum_id)(), TypeUnionDef::from(info));
+    }
+
     fn add_enum(&mut self, info: &PyEnumInfo) {
         self.get_module(info.module)
             .enum_
@@ -428,6 +434,9 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<PyComplexEnumInfo> {
             self.add_complex_enum(info);
+        }
+        for info in inventory::iter::<TypeUnionEnumInfo> {
+            self.add_type_union_enum(info);
         }
         for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);

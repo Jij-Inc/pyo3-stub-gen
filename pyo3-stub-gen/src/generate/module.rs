@@ -21,6 +21,7 @@ pub struct Module {
     pub doc: String,
     pub class: BTreeMap<TypeId, ClassDef>,
     pub enum_: BTreeMap<TypeId, EnumDef>,
+    pub type_union: BTreeMap<TypeId, TypeUnionDef>,
     pub function: BTreeMap<&'static str, Vec<FunctionDef>>,
     pub variables: BTreeMap<&'static str, VariableDef>,
     pub name: String,
@@ -226,6 +227,9 @@ impl fmt::Display for Module {
         }
         for enum_ in self.enum_.values().sorted_by_key(|class| class.name) {
             enum_.fmt_for_module(&self.name, f)?;
+        }
+        for type_union in self.type_union.values().sorted_by_key(|class| class.name) {
+            write!(f, "{type_union}")?;
         }
         for functions in self.function.values() {
             // Check if we should add @overload to all functions

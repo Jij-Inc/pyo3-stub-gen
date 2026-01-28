@@ -89,6 +89,7 @@ mod pymethods;
 mod renaming;
 mod signature;
 mod stub_type;
+mod type_union_enum;
 mod util;
 mod variant;
 
@@ -103,6 +104,7 @@ use pymethods::*;
 use renaming::*;
 use signature::*;
 use stub_type::*;
+use type_union_enum::*;
 use util::*;
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -178,6 +180,18 @@ pub fn pyclass_complex_enum(attr: TokenStream2, item: TokenStream2) -> Result<To
             }
         })
     }
+}
+
+pub fn type_union_enum(item: TokenStream2) -> Result<TokenStream2> {
+    let inner = TypeUnionEnumInfo::try_from(parse2::<ItemEnum>(item.clone())?)?;
+    let derive_stub_type = StubType::from(&inner);
+    Ok(quote! {
+        #item
+        #derive_stub_type
+        pyo3_stub_gen::inventory::submit! {
+            #inner
+        }
+    })
 }
 
 pub fn pymethods(item: TokenStream2) -> Result<TokenStream2> {
