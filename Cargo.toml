@@ -8,13 +8,14 @@ members = [
   "examples/pure",
   "examples/simple_name_collision",
   "examples/test-dash-package",
+  "examples/type-statement-alias",
   "examples/underscore_items",
   "pyo3-stub-gen",
   "pyo3-stub-gen-derive"
 ]
 
 [workspace.package]
-version = "0.18.0"
+version = "0.19.0"
 edition = "2021"
 description = "Stub file (*.pyi) generator for PyO3"
 readme = "README.md"

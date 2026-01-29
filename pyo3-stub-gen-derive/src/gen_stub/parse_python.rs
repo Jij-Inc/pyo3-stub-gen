@@ -5,12 +5,14 @@
 
 mod pyfunction;
 mod pymethods;
+mod type_alias;
 
 pub use pyfunction::{
     parse_gen_function_from_python_input, parse_python_function_stub, parse_python_overload_stubs,
     GenFunctionFromPythonInput,
 };
 pub use pymethods::parse_python_methods_stub;
+pub use type_alias::{parse_python_type_alias_stub, GenTypeAliasFromPythonInput};
 
 use indexmap::IndexSet;
 use rustpython_parser::ast;
@@ -521,6 +523,16 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> Result<Str
             ast::Constant::Ellipsis => "...".to_string(),
             _ => "Any".to_string(),
         },
+        ast::Expr::BinOp(binop) => {
+            // Handle union types with | operator
+            if matches!(binop.op, ast::Operator::BitOr) {
+                let left = expr_to_type_string_inner(&binop.left, false)?;
+                let right = expr_to_type_string_inner(&binop.right, false)?;
+                format!("{} | {}", left, right)
+            } else {
+                "Any".to_string()
+            }
+        }
         _ => "Any".to_string(),
     })
 }

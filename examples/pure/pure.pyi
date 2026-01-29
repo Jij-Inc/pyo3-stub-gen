@@ -13,35 +13,59 @@ import os
 import pathlib
 import typing
 import typing_extensions
+from typing import TypeAlias
 __all__ = [
     "A",
     "B",
     "Calculator",
+    "CallbackType",
     "ComparableStruct",
+    "ContainerList",
+    "ContainerMap",
+    "ContainerTuple",
     "CustomComplexEnum",
     "CustomEnum",
     "CustomStubType",
     "DataContainer",
     "DecimalHolder",
+    "DocumentedAlias",
+    "DocumentedCallback",
+    "DocumentedMap",
+    "DocumentedUnion",
+    "GenericUnion",
     "HashableStruct",
     "InstanceValue",
     "MY_CONSTANT1",
     "MY_CONSTANT2",
     "ManualSubmit",
+    "MaybeDecimal",
+    "MultiLineDocCallback",
     "MyDate",
     "MyError",
+    "NestedContainer",
     "NormalClass",
     "NotIntError",
     "Number",
     "NumberComplex",
+    "NumberOrStringAlias",
     "NumberRenameAll",
+    "OptionalCallback",
+    "OptionalContainer",
     "OverrideType",
     "PartialManualSubmit",
     "Placeholder",
     "Problem",
+    "SequenceOfInts",
     "Shape1",
     "Shape2",
+    "SimpleAlias",
+    "SimpleContainer",
+    "SingleTypeAlias",
+    "StrIntMap",
+    "StructUnion",
+    "TripleUnion",
     "TypeIgnoreTest",
+    "UndocumentedCallback",
     "add_decimals",
     "ahash_dict",
     "as_tuple",
@@ -77,6 +101,53 @@ __all__ = [
     "test_type_ignore_specific",
 ]
 
+CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+ContainerList: TypeAlias = list[DataContainer]
+ContainerMap: TypeAlias = dict[str, DataContainer]
+ContainerTuple: TypeAlias = tuple[DataContainer, DataContainer]
+DocumentedAlias: TypeAlias = typing.Optional[builtins.int]
+r"""
+This is a simple type alias with documentation
+"""
+
+DocumentedCallback: TypeAlias = collections.abc.Callable[[str], None]
+r"""
+A callback function that takes a string and returns nothing
+"""
+
+DocumentedMap: TypeAlias = builtins.dict[builtins.str, builtins.list[builtins.int]]
+r"""
+A map type alias with detailed documentation.
+
+This can have multiple lines of documentation.
+"""
+
+DocumentedUnion: TypeAlias = builtins.int | builtins.str
+r"""
+A union type with documentation
+"""
+
+GenericUnion: TypeAlias = typing.Optional[builtins.int] | builtins.list[builtins.str]
+MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+MultiLineDocCallback: TypeAlias = collections.abc.Callable[[str, int], bool]
+r"""
+A callback with multi-line documentation.
+
+This callback takes a string and an integer, and returns a boolean.
+"""
+
+NestedContainer: TypeAlias = list[list[DataContainer]]
+NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
+OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
+OptionalContainer: TypeAlias = DataContainer  |  None
+SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
+SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SimpleContainer: TypeAlias = DataContainer
+SingleTypeAlias: TypeAlias = typing.Optional[builtins.int]
+StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
+StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
+TripleUnion: TypeAlias = builtins.int | builtins.str | builtins.bool
+UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
 class A:

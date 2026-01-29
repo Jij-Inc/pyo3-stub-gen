@@ -11,6 +11,7 @@ mod module;
 mod parameters;
 pub(crate) mod qualifier;
 mod stub_info;
+mod type_alias;
 mod variable;
 mod variant_methods;
 
@@ -22,6 +23,7 @@ pub use method::*;
 pub use module::*;
 pub use parameters::*;
 pub use stub_info::*;
+pub use type_alias::*;
 pub use variable::*;
 
 use crate::stub_type::ImportRef;

@@ -217,3 +217,42 @@ pub fn gen_methods_from_python(input: TokenStream) -> TokenStream {
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }
+
+/// Generate TypeAliasInfo from Python type alias syntax
+///
+/// This proc-macro parses Python type alias syntax and generates TypeAliasInfo structures.
+/// It supports multiple type alias definitions in a single invocation.
+///
+/// # Examples
+///
+/// ```ignore
+/// // Single type alias
+/// pyo3_stub_gen::derive::gen_type_alias_from_python!(
+///     "mymodule",
+///     r#"
+///     from typing import TypeAlias
+///     import collections.abc
+///
+///     ComplexAlias: TypeAlias = collections.abc.Sequence[int] | None
+///     "#
+/// );
+///
+/// // Multiple type aliases
+/// pyo3_stub_gen::derive::gen_type_alias_from_python!(
+///     "mymodule",
+///     r#"
+///     from typing import TypeAlias
+///     import collections.abc
+///
+///     StrList: TypeAlias = list[str]
+///     IntDict: TypeAlias = dict[str, int]
+///     Callback: TypeAlias = collections.abc.Callable[[str], None]
+///     "#
+/// );
+/// ```
+#[proc_macro]
+pub fn gen_type_alias_from_python(input: TokenStream) -> TokenStream {
+    gen_stub::gen_type_alias_from_python_impl(input.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
+}

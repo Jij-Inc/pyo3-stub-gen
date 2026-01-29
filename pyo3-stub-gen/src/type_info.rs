@@ -277,6 +277,16 @@ pub struct PyVariableInfo {
 inventory::collect!(PyVariableInfo);
 
 #[derive(Debug)]
+pub struct TypeAliasInfo {
+    pub name: &'static str,
+    pub module: &'static str,
+    pub r#type: fn() -> TypeInfo,
+    pub doc: &'static str,
+}
+
+inventory::collect!(TypeAliasInfo);
+
+#[derive(Debug)]
 pub struct ModuleDocInfo {
     pub module: &'static str,
     pub doc: fn() -> String,
