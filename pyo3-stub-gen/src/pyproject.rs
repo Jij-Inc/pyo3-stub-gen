@@ -61,38 +61,13 @@ impl PyProject {
         None
     }
 
-    /// Return whether to use Python 3.12+ `type` statement syntax for type aliases.
-    /// Default is false (use pre-3.12 `TypeAlias` syntax).
-    pub fn use_type_statement(&self) -> bool {
+    /// Return stub generation configuration from `[tool.pyo3-stub-gen]`.
+    /// Returns default configuration if the section is not present.
+    pub fn stub_gen_config(&self) -> StubGenConfig {
         self.tool
             .as_ref()
-            .and_then(|t| t.pyo3_stub_gen.as_ref())
-            .map(|config| config.use_type_statement)
-            .unwrap_or(false)
-    }
-
-    /// Return doc-gen configuration if present in pyproject.toml
-    pub fn doc_gen_config(&self) -> Option<crate::docgen::DocGenConfig> {
-        self.tool
-            .as_ref()
-            .and_then(|t| t.pyo3_stub_gen.as_ref())
-            .and_then(|config| config.doc_gen.clone())
-    }
-
-    /// Return doc-gen configuration with output_dir resolved relative to pyproject.toml directory
-    pub fn doc_gen_config_resolved(&self) -> Option<crate::docgen::DocGenConfig> {
-        if let Some(mut config) = self.doc_gen_config() {
-            // Resolve output_dir relative to pyproject.toml directory
-            // Only resolve if the path is relative (absolute paths stay unchanged)
-            if config.output_dir.is_relative() {
-                if let Some(base) = self.toml_path.parent() {
-                    config.output_dir = base.join(&config.output_dir);
-                }
-            }
-            Some(config)
-        } else {
-            None
-        }
+            .and_then(|t| t.pyo3_stub_gen.clone())
+            .unwrap_or_default()
     }
 }
 
@@ -105,7 +80,7 @@ pub struct Project {
 pub struct Tool {
     pub maturin: Option<Maturin>,
     #[serde(rename = "pyo3-stub-gen")]
-    pub pyo3_stub_gen: Option<Pyo3StubGen>,
+    pub pyo3_stub_gen: Option<StubGenConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -116,12 +91,17 @@ pub struct Maturin {
     pub module_name: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Pyo3StubGen {
+/// Configuration options for stub generation from `[tool.pyo3-stub-gen]` in pyproject.toml.
+///
+/// This struct is marked as `#[non_exhaustive]` to allow adding new configuration
+/// options in future versions without breaking backward compatibility.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct StubGenConfig {
+    /// Whether to use Python 3.12+ `type` statement syntax for type aliases.
+    /// Default is `false` (use pre-3.12 `TypeAlias` syntax).
     #[serde(rename = "use-type-statement", default)]
     pub use_type_statement: bool,
-    #[serde(rename = "doc-gen")]
-    pub doc_gen: Option<crate::docgen::DocGenConfig>,
 }
 
 #[cfg(test)]
@@ -129,7 +109,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_use_type_statement_true() {
+    fn test_stub_gen_config_true() {
         let toml_str = r#"
             [project]
             name = "test"
@@ -138,11 +118,11 @@ mod tests {
             use-type-statement = true
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        assert_eq!(pyproject.use_type_statement(), true);
+        assert!(pyproject.stub_gen_config().use_type_statement);
     }
 
     #[test]
-    fn test_use_type_statement_false() {
+    fn test_stub_gen_config_false() {
         let toml_str = r#"
             [project]
             name = "test"
@@ -151,21 +131,21 @@ mod tests {
             use-type-statement = false
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        assert_eq!(pyproject.use_type_statement(), false);
+        assert!(!pyproject.stub_gen_config().use_type_statement);
     }
 
     #[test]
-    fn test_use_type_statement_default() {
+    fn test_stub_gen_config_default() {
         let toml_str = r#"
             [project]
             name = "test"
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        assert_eq!(pyproject.use_type_statement(), false);
+        assert!(!pyproject.stub_gen_config().use_type_statement);
     }
 
     #[test]
-    fn test_use_type_statement_empty_config() {
+    fn test_stub_gen_config_empty_section() {
         let toml_str = r#"
             [project]
             name = "test"
@@ -173,50 +153,6 @@ mod tests {
             [tool.pyo3-stub-gen]
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        assert_eq!(pyproject.use_type_statement(), false);
-    }
-
-    #[test]
-    fn test_doc_gen_config_resolved_relative_path() {
-        let toml_str = r#"
-            [project]
-            name = "test"
-
-            [tool.pyo3-stub-gen.doc-gen]
-            output-dir = "docs/api"
-        "#;
-        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
-
-        let config = pyproject.doc_gen_config_resolved().unwrap();
-        assert_eq!(config.output_dir, PathBuf::from("/project/root/docs/api"));
-    }
-
-    #[test]
-    fn test_doc_gen_config_resolved_absolute_path() {
-        let toml_str = r#"
-            [project]
-            name = "test"
-
-            [tool.pyo3-stub-gen.doc-gen]
-            output-dir = "/absolute/path/docs"
-        "#;
-        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
-
-        let config = pyproject.doc_gen_config_resolved().unwrap();
-        assert_eq!(config.output_dir, PathBuf::from("/absolute/path/docs"));
-    }
-
-    #[test]
-    fn test_doc_gen_config_resolved_missing_config() {
-        let toml_str = r#"
-            [project]
-            name = "test"
-        "#;
-        let mut pyproject: PyProject = toml::from_str(toml_str).unwrap();
-        pyproject.toml_path = PathBuf::from("/project/root/pyproject.toml");
-
-        assert!(pyproject.doc_gen_config_resolved().is_none());
+        assert!(!pyproject.stub_gen_config().use_type_statement);
     }
 }

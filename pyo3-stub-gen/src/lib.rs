@@ -190,6 +190,7 @@ pub mod type_info;
 pub mod util;
 
 pub use generate::StubInfo;
+pub use pyproject::StubGenConfig;
 pub use stub_type::{ImportKind, ImportRef, ModuleRef, PyStubType, TypeIdentifierRef, TypeInfo};
 
 pub type Result<T> = anyhow::Result<T>;

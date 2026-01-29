@@ -55,9 +55,3 @@ tasks:
       - task: avoid_name_collision_with_submod:test
       - task: underscore_items:test
       - task: type-statement-alias:test
-
-  doc-test:
-    desc: Test Sphinx documentation generation
-    cmds:
-      - task: pure:doc-test
-      - task: mixed:doc-test
