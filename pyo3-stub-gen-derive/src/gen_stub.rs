@@ -217,6 +217,12 @@ pub fn gen_methods_from_python_impl(input: TokenStream2) -> Result<TokenStream2>
     Ok(quote! { #inner })
 }
 
+pub fn gen_type_alias_from_python_impl(input: TokenStream2) -> Result<TokenStream2> {
+    let parsed: parse_python::GenTypeAliasFromPythonInput = parse2(input)?;
+    let inner = parse_python::parse_python_type_alias_stub(&parsed)?;
+    Ok(quote! { #inner })
+}
+
 pub fn prune_gen_stub(item: TokenStream2) -> Result<TokenStream2> {
     fn prune_attrs<T: syn::parse::Parse + quote::ToTokens>(
         item: &TokenStream2,

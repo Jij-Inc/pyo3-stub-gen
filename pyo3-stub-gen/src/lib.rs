@@ -189,6 +189,7 @@ pub mod type_info;
 pub mod util;
 
 pub use generate::StubInfo;
+pub use pyproject::StubGenConfig;
 pub use stub_type::{ImportKind, ImportRef, ModuleRef, PyStubType, TypeIdentifierRef, TypeInfo};
 
 pub type Result<T> = anyhow::Result<T>;
@@ -270,6 +271,101 @@ macro_rules! module_variable {
                     }
                     _fmt
                 }),
+            }
+        }
+    };
+}
+
+/// Add module-level type alias using TypeInfo
+///
+/// This macro supports both single types and union types.
+///
+/// # Examples
+///
+/// Single type:
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", MyAlias = Option<usize>);
+/// ```
+///
+/// Union type (direct syntax):
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", MyUnion = i32 | String);
+/// ```
+/// ```rust,ignore
+/// pyo3_stub_gen::type_alias!("module.name", StructUnion = Bound<'static, TypeA> | Bound<'static, TypeB>);
+/// ```
+#[macro_export]
+macro_rules! type_alias {
+    // Pattern 1: Union types with docstring - must come first
+    ($module:expr, $name:ident = $($base:ty)|+, $doc:expr) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: $doc,
+                }
+            }
+        };
+    };
+
+    // Pattern 2: Union types without docstring (backward compatible)
+    ($module:expr, $name:ident = $($base:ty)|+) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: "",
+                }
+            }
+        };
+    };
+
+    // Pattern 3: Single types with docstring
+    ($module:expr, $name:ident = $ty:ty, $doc:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: stringify!($name),
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: $doc,
+            }
+        }
+    };
+
+    // Pattern 4: Single types without docstring (backward compatible)
+    ($module:expr, $name:ident = $ty:ty) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: stringify!($name),
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: "",
             }
         }
     };

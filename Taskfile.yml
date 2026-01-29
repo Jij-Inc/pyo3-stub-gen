@@ -27,6 +27,9 @@ includes:
   underscore_items:
     taskfile: examples/underscore_items/Taskfile.yml
     dir: examples/underscore_items
+  type-statement-alias:
+    taskfile: examples/type-statement-alias/Taskfile.yml
+    dir: examples/type-statement-alias
 
 tasks:
   stub-gen:
@@ -39,6 +42,7 @@ tasks:
       - task: simple_name_collision:stub-gen
       - task: avoid_name_collision_with_submod:stub-gen
       - task: underscore_items:stub-gen
+      - task: type-statement-alias:stub-gen
 
   test:
     cmds:
@@ -50,3 +54,4 @@ tasks:
       - task: simple_name_collision:test
       - task: avoid_name_collision_with_submod:test
       - task: underscore_items:test
+      - task: type-statement-alias:test

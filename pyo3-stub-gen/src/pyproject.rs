@@ -60,6 +60,15 @@ impl PyProject {
         }
         None
     }
+
+    /// Return stub generation configuration from `[tool.pyo3-stub-gen]`.
+    /// Returns default configuration if the section is not present.
+    pub fn stub_gen_config(&self) -> StubGenConfig {
+        self.tool
+            .as_ref()
+            .and_then(|t| t.pyo3_stub_gen.clone())
+            .unwrap_or_default()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -70,6 +79,8 @@ pub struct Project {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Tool {
     pub maturin: Option<Maturin>,
+    #[serde(rename = "pyo3-stub-gen")]
+    pub pyo3_stub_gen: Option<StubGenConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -78,4 +89,70 @@ pub struct Maturin {
     pub python_source: Option<String>,
     #[serde(rename = "module-name")]
     pub module_name: Option<String>,
+}
+
+/// Configuration options for stub generation from `[tool.pyo3-stub-gen]` in pyproject.toml.
+///
+/// This struct is marked as `#[non_exhaustive]` to allow adding new configuration
+/// options in future versions without breaking backward compatibility.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct StubGenConfig {
+    /// Whether to use Python 3.12+ `type` statement syntax for type aliases.
+    /// Default is `false` (use pre-3.12 `TypeAlias` syntax).
+    #[serde(rename = "use-type-statement", default)]
+    pub use_type_statement: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stub_gen_config_true() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            use-type-statement = true
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        assert!(pyproject.stub_gen_config().use_type_statement);
+    }
+
+    #[test]
+    fn test_stub_gen_config_false() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            use-type-statement = false
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        assert!(!pyproject.stub_gen_config().use_type_statement);
+    }
+
+    #[test]
+    fn test_stub_gen_config_default() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        assert!(!pyproject.stub_gen_config().use_type_statement);
+    }
+
+    #[test]
+    fn test_stub_gen_config_empty_section() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        assert!(!pyproject.stub_gen_config().use_type_statement);
+    }
 }

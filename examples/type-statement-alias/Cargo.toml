@@ -1,0 +1,19 @@
+[package]
+name = "type_statement_alias"
+version = "0.19.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "type_statement_alias"
+
+[[bin]]
+doc = false
+name = "stub_gen"
+
+[dependencies]
+env_logger = { workspace = true }
+pyo3 = { workspace = true }
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+pyo3-stub-gen-derive = { path = "../../pyo3-stub-gen-derive" }

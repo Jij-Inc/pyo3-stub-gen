@@ -54,6 +54,9 @@ pub fn greet_a() {
     println!("Hello from mod_A!")
 }
 
+// Type alias in mod_a to test wildcard re-export
+pyo3_stub_gen::type_alias!("mixed.main_mod.mod_a", ModAAlias = i32);
+
 #[gen_stub_pyfunction(module = "mixed.main_mod")]
 #[pyfunction(name = "greet_main")]
 pub fn greet_main() {

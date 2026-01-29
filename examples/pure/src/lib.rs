@@ -563,6 +563,102 @@ impl TypeIgnoreTest {
     }
 }
 
+// Test type aliases WITHOUT docstrings (backward compatibility)
+pyo3_stub_gen::type_alias!("pure", SimpleAlias = Option<usize>);
+pyo3_stub_gen::type_alias!("pure", StrIntMap = HashMap<String, i32>);
+
+// Type alias referring to locally defined class
+pyo3_stub_gen::type_alias!(
+    "pure",
+    MaybeDecimal = Option<Bound<'static, DecimalHolder>>
+);
+
+// Direct union type syntax (no impl_stub_type! needed)
+pyo3_stub_gen::type_alias!("pure", NumberOrStringAlias = i32 | String);
+
+// Union of locally defined types using direct syntax
+pyo3_stub_gen::type_alias!("pure", StructUnion = Bound<'static, ComparableStruct> | Bound<'static, HashableStruct>);
+
+// Additional test cases for the new syntax
+pyo3_stub_gen::type_alias!("pure", TripleUnion = i32 | String | bool);
+pyo3_stub_gen::type_alias!("pure", GenericUnion = Option<i32> | Vec<String>);
+pyo3_stub_gen::type_alias!("pure", SingleTypeAlias = Option<usize>); // Backward compatibility test
+
+// Test type aliases WITH docstrings
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedAlias = Option<usize>,
+    "This is a simple type alias with documentation"
+);
+
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedUnion = i32 | String,
+    "A union type with documentation"
+);
+
+pyo3_stub_gen::type_alias!(
+    "pure",
+    DocumentedMap = HashMap<String, Vec<i32>>,
+    "A map type alias with detailed documentation.\n\nThis can have multiple lines of documentation."
+);
+
+// Test type aliases using Python syntax (without docstrings)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+    import collections.abc
+
+    CallbackType: TypeAlias = collections.abc.Callable[[str], None]
+    OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
+    SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
+    "#
+);
+
+// Test type aliases using Python syntax (with docstrings)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+    import collections.abc
+
+    DocumentedCallback: TypeAlias = collections.abc.Callable[[str], None]
+    """A callback function that takes a string and returns nothing"""
+
+    UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
+
+    MultiLineDocCallback: TypeAlias = collections.abc.Callable[[str, int], bool]
+    """
+    A callback with multi-line documentation.
+
+    This callback takes a string and an integer, and returns a boolean.
+    """
+    "#
+);
+
+// Test RustType markers in type aliases (TypeAlias syntax)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    from typing import TypeAlias
+
+    SimpleContainer: TypeAlias = pyo3_stub_gen.RustType["DataContainer"]
+    ContainerList: TypeAlias = list[pyo3_stub_gen.RustType["DataContainer"]]
+    ContainerMap: TypeAlias = dict[str, pyo3_stub_gen.RustType["DataContainer"]]
+    OptionalContainer: TypeAlias = pyo3_stub_gen.RustType["DataContainer"] | None
+    "#
+);
+
+// Test RustType markers in type aliases (Python 3.12+ type statement syntax)
+pyo3_stub_gen::derive::gen_type_alias_from_python!(
+    "pure",
+    r#"
+    type ContainerTuple = tuple[pyo3_stub_gen.RustType["DataContainer"], pyo3_stub_gen.RustType["DataContainer"]]
+    type NestedContainer = list[list[pyo3_stub_gen.RustType["DataContainer"]]]
+    "#
+);
+
 define_stub_info_gatherer!(stub_info);
 
 /// Test of unit test for testing link problem
