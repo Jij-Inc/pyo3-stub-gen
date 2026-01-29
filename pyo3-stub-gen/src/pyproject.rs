@@ -104,7 +104,6 @@ pub struct StubGenConfig {
     pub use_type_statement: bool,
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
