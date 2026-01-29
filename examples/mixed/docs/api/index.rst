@@ -1,7 +1,7 @@
 mixed.main_mod API Reference
 ============================
 
-This is the API reference documentation generated from Rust code using pyo3-stub-gen.
+Custom documentation for the mixed example project demonstrating PyO3 stub generation.
 
 .. toctree::
    :maxdepth: 2
