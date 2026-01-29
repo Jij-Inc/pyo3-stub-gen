@@ -26,7 +26,13 @@ impl StubInfo {
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
         let path = path.as_ref();
         let pyproject = PyProject::parse_toml(path)?;
-        let config = pyproject.stub_gen_config();
+        let mut config = pyproject.stub_gen_config();
+
+        // Resolve doc_gen paths relative to pyproject.toml location
+        if let Some(resolved_doc_gen) = pyproject.doc_gen_config_resolved() {
+            config.doc_gen = Some(resolved_doc_gen);
+        }
+
         StubInfoBuilder::from_pyproject_toml(pyproject, config).build()
     }
 
@@ -99,12 +105,8 @@ impl StubInfo {
         }
 
         // Generate documentation if configured
-        if let Some(pyproject_path) = &self.pyproject_path {
-            if let Ok(pyproject) = PyProject::parse_toml(pyproject_path) {
-                if let Some(doc_config) = pyproject.doc_gen_config_resolved() {
-                    self.generate_docs(&doc_config)?;
-                }
-            }
+        if let Some(doc_config) = &self.config.doc_gen {
+            self.generate_docs(doc_config)?;
         }
 
         Ok(())
@@ -488,11 +490,7 @@ impl StubInfoBuilder {
         unreachable!("Missing struct_id/enum_id = {:?}", struct_id);
     }
 
-    fn build(self) -> Result<StubInfo> {
-        self.build_with_pyproject_path(None)
-    }
-
-    fn build_with_pyproject_path(mut self, pyproject_path: Option<PathBuf>) -> Result<StubInfo> {
+    fn build(mut self) -> Result<StubInfo> {
         for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
@@ -618,7 +616,6 @@ mod tests {
     fn test_pure_layout_rejects_multiple_modules() {
         // Pure Rust layout should reject multiple modules (whether submodules or top-level)
         let stub_info = StubInfo {
-            pyproject_path: None,
             modules: {
                 let mut map = BTreeMap::new();
                 map.insert(

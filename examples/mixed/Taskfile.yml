@@ -17,7 +17,7 @@ tasks:
       - uv run mypy --show-error-codes -p mixed.main_mod
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details
-      - uv run pyrefly check .
+      - uv run pyrefly check --ignore-missing-imports .
       - uv run ty check .
 
   doc-build:

@@ -1231,16 +1231,6 @@ dependencies = [
  "env_logger",
  "pyo3",
  "pyo3-stub-gen",
- "pyo3-stub-gen-derive",
-]
-
-[[package]]
-name = "underscore_items"
-version = "0.19.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
 ]
 
 [[package]]

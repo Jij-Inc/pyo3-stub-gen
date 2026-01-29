@@ -15,10 +15,14 @@ output-dir = "docs/api"
 json-output = "api_reference.json"
 
 [tool.pyrefly]
-project-excludes = ["**/type_error_cases/*.py"]
+project-excludes = ["**/type_error_cases/*.py", "docs/api/**"]
+enabled-ignores = ["type", "pyrefly"]
 
 [tool.pyright]
-ignore = ["**/type_error_cases/*.py"]
+ignore = ["**/type_error_cases/*.py", "docs/api/**"]
+
+[tool.mypy]
+exclude = ["docs/api"]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]

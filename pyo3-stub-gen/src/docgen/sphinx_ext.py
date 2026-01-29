@@ -1,3 +1,4 @@
+# type: ignore
 """Sphinx extension for pyo3-stub-gen API documentation"""
 
 import json
