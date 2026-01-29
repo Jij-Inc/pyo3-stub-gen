@@ -4,6 +4,7 @@ members = [
   "examples/avoid_name_collision_with_submod",
   "examples/empty_super_module",
   "examples/feature_gated",
+  "examples/hidden_module_docgen_test",
   "examples/mixed",
   "examples/pure",
   "examples/simple_name_collision",

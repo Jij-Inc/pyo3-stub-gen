@@ -49,8 +49,9 @@ jobs:
         crate:
           - pure
           - mixed
+          - hidden_module_docgen_test
         python-version:
-          - "3.13"  # Only test on latest Python
+          - "3.13" # Only test on latest Python
     steps:
       - name: Checkout
         uses: actions/checkout@v6

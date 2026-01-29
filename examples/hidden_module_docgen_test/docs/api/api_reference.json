@@ -1,0 +1,165 @@
+{
+  "name": "hidden_module_docgen_test",
+  "modules": {
+    "hidden_module_docgen_test": {
+      "name": "hidden_module_docgen_test",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Function",
+          "name": "create_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "B",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.B",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.A",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_main",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ModAAlias",
+          "doc": "",
+          "definition": {
+            "display": "A",
+            "link_target": {
+              "fqn": "hidden_module_docgen_test.A",
+              "doc_module": "hidden_module_docgen_test",
+              "kind": "Class"
+            },
+            "children": []
+          }
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "hidden_module_docgen_test.A": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.B": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.ModAAlias": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.create_a": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.create_b": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test"
+  }
+}

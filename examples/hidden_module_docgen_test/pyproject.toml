@@ -1,0 +1,21 @@
+[project]
+name = "hidden_module_docgen_test"
+version = "0.1"
+requires-python = ">=3.10"
+
+[dependency-groups]
+dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "hidden_module_docgen_test"
+python-source = "python"
+
+[tool.pyo3-stub-gen.doc-gen]
+output-dir = "docs/api"
+json-output = "api_reference.json"
+intro-message = "Re-export from hidden module should appear in the documentation."

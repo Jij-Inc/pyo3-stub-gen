@@ -195,6 +195,177 @@
           "deprecated": null
         },
         {
+          "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_c",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.A",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "b",
+                  "type_": {
+                    "display": "B",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.B",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "mixed.main_mod.mod_a.C",
+                  "doc_module": "mixed.main_mod.mod_a",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_module_with_python",
+          "doc": "Test function with both module and python parameters",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Generator[int, None, None]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ModAAlias",
+          "doc": "",
+          "definition": {
+            "display": "int",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
           "kind": "Module",
           "name": "int",
           "doc": "",
@@ -270,7 +441,7 @@
                     "display": "A",
                     "link_target": {
                       "fqn": "mixed.main_mod.A",
-                      "doc_module": "mixed.main_mod.mod_a",
+                      "doc_module": "mixed.main_mod",
                       "kind": "Class"
                     },
                     "children": []
@@ -283,7 +454,7 @@
                     "display": "B",
                     "link_target": {
                       "fqn": "mixed.main_mod.B",
-                      "doc_module": "mixed.main_mod.mod_a",
+                      "doc_module": "mixed.main_mod",
                       "kind": "Class"
                     },
                     "children": []

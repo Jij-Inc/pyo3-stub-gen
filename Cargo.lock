@@ -314,6 +314,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "hidden_module_docgen_test"
+version = "0.19.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -17,6 +17,17 @@ fn is_hidden_module(module_name: &str) -> bool {
     module_name.split('.').any(|part| part.starts_with('_'))
 }
 
+/// Helper to check if item already exists in the list
+fn matches_item_name(item: &DocItem, name: &str) -> bool {
+    match item {
+        DocItem::Function(f) => f.name == name,
+        DocItem::Class(c) => c.name == name,
+        DocItem::TypeAlias(t) => t.name == name,
+        DocItem::Variable(v) => v.name == name,
+        DocItem::Module(m) => m.name == name,
+    }
+}
+
 /// Builder for converting StubInfo to DocPackage
 pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
@@ -109,6 +120,27 @@ impl<'a> DocPackageBuilder<'a> {
             }
         }
 
+        // Process module re-exports (from reexport_module_members!)
+        for re_export in &module.module_re_exports {
+            if let Some(source_module) = self.stub_info.modules.get(&re_export.source_module) {
+                for item_name in &re_export.items {
+                    // Skip if already added (prefer directly-defined items)
+                    if items.iter().any(|item| matches_item_name(item, item_name)) {
+                        continue;
+                    }
+
+                    // Build re-exported item (link targets will be corrected later)
+                    if let Some(item) = self.build_reexported_item(
+                        &re_export.source_module,
+                        source_module,
+                        item_name,
+                    )? {
+                        items.push(item);
+                    }
+                }
+            }
+        }
+
         // Process submodules - convert to DocItem::Module entries
         for submod_name in &module.submodules {
             if !submod_name.starts_with('_') && exports.contains(submod_name) {
@@ -133,6 +165,12 @@ impl<'a> DocPackageBuilder<'a> {
                     fqn: submod_fqn,
                 }));
             }
+        }
+
+        // Correct all link targets and display text in all items
+        // This ensures both directly-defined and re-exported items have correct references
+        for item in &mut items {
+            self.correct_link_targets(item, name);
         }
 
         Ok(DocModule {
@@ -353,5 +391,163 @@ impl<'a> DocPackageBuilder<'a> {
             doc: String::new(), // VariableDef doesn't have doc field
             type_: Some(type_renderer.render_type(&var.type_)),
         }))
+    }
+
+    /// Build a re-exported item from a source module
+    fn build_reexported_item(
+        &self,
+        source_module_name: &str,
+        source_module: &crate::generate::Module,
+        item_name: &str,
+    ) -> Result<Option<DocItem>> {
+        // Try functions
+        if let Some(func_defs) = source_module.function.get(item_name) {
+            return Ok(Some(self.build_function(source_module_name, func_defs)?));
+        }
+
+        // Try classes
+        for class_def in source_module.class.values() {
+            if class_def.name == item_name {
+                return Ok(Some(self.build_class(source_module_name, class_def)?));
+            }
+        }
+
+        // Try enums
+        for enum_def in source_module.enum_.values() {
+            if enum_def.name == item_name {
+                return Ok(Some(self.build_enum_as_class(source_module_name, enum_def)?));
+            }
+        }
+
+        // Try type aliases
+        if let Some(alias_def) = source_module.type_aliases.get(item_name) {
+            return Ok(Some(self.build_type_alias(source_module_name, alias_def)?));
+        }
+
+        // Try variables
+        if let Some(var_def) = source_module.variables.get(item_name) {
+            return Ok(Some(self.build_variable(source_module_name, var_def)?));
+        }
+
+        Ok(None)
+    }
+
+    /// Correct link targets in a re-exported item to point to the target module
+    fn correct_link_targets(&self, item: &mut DocItem, _target_module: &str) {
+        match item {
+            DocItem::Function(func) => {
+                for sig in &mut func.signatures {
+                    if let Some(ret) = &mut sig.return_type {
+                        self.correct_type_expr(ret);
+                    }
+                    for param in &mut sig.parameters {
+                        self.correct_type_expr(&mut param.type_);
+                    }
+                }
+            }
+            DocItem::Class(cls) => {
+                for base in &mut cls.bases {
+                    self.correct_type_expr(base);
+                }
+                for method in &mut cls.methods {
+                    for sig in &mut method.signatures {
+                        if let Some(ret) = &mut sig.return_type {
+                            self.correct_type_expr(ret);
+                        }
+                        for param in &mut sig.parameters {
+                            self.correct_type_expr(&mut param.type_);
+                        }
+                    }
+                }
+                for attr in &mut cls.attributes {
+                    if let Some(type_) = &mut attr.type_ {
+                        self.correct_type_expr(type_);
+                    }
+                }
+            }
+            DocItem::TypeAlias(alias) => {
+                self.correct_type_expr(&mut alias.definition);
+            }
+            DocItem::Variable(var) => {
+                if let Some(type_) = &mut var.type_ {
+                    self.correct_type_expr(type_);
+                }
+            }
+            DocItem::Module(_) => {}
+        }
+    }
+
+    /// Correct a type expression to use export_map for link targets
+    fn correct_type_expr(&self, type_expr: &mut DocTypeExpr) {
+        if let Some(link_target) = &mut type_expr.link_target {
+            // Try to find the correct export module and FQN
+            // First try the original FQN
+            let (exported_fqn, exported_module) = if let Some(module) = self.export_map.get(&link_target.fqn) {
+                (link_target.fqn.clone(), module.clone())
+            } else {
+                // If not found, try to extract the type name and look for it under other modules
+                // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
+                if let Some(type_name) = link_target.fqn.split('.').last() {
+                    // Try each module in export_map to find a match
+                    if let Some((fqn, module)) = self.export_map
+                        .iter()
+                        .find(|(fqn, _)| fqn.ends_with(&format!(".{}", type_name)))
+                    {
+                        (fqn.clone(), module.clone())
+                    } else {
+                        (link_target.fqn.clone(), link_target.doc_module.clone())
+                    }
+                } else {
+                    (link_target.fqn.clone(), link_target.doc_module.clone())
+                }
+            };
+
+            link_target.fqn = exported_fqn;
+            link_target.doc_module = exported_module;
+
+            // Update display text to strip internal module prefixes
+            // e.g., "_core.A" -> "A"
+            type_expr.display = self.strip_internal_module_prefix(&type_expr.display);
+        }
+        for child in &mut type_expr.children {
+            self.correct_type_expr(child);
+        }
+    }
+
+    /// Strip internal module prefixes (modules starting with '_') from display text
+    /// e.g., "_core.A" -> "A", "_internal.Foo" -> "Foo"
+    fn strip_internal_module_prefix(&self, display: &str) -> String {
+        let mut result = String::new();
+        let mut i = 0;
+        let chars: Vec<char> = display.chars().collect();
+
+        while i < chars.len() {
+            // Check if we're at the start of a potential module prefix
+            if i == 0 || !chars[i - 1].is_alphanumeric() && chars[i - 1] != '_' {
+                // Try to match a pattern like "_module." or "_module.submodule."
+                let remaining: String = chars[i..].iter().collect();
+
+                // Look for pattern: _identifier followed by .
+                if remaining.starts_with('_') {
+                    // Find the next non-identifier character
+                    let mut j = i + 1;
+                    while j < chars.len() && (chars[j].is_alphanumeric() || chars[j] == '_') {
+                        j += 1;
+                    }
+
+                    // If followed by a dot, this is a module prefix to strip
+                    if j < chars.len() && chars[j] == '.' {
+                        // Skip the module name and the dot
+                        i = j + 1;
+                        continue;
+                    }
+                }
+            }
+
+            result.push(chars[i]);
+            i += 1;
+        }
+
+        result
     }
 }

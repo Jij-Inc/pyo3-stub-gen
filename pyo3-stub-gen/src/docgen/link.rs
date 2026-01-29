@@ -18,6 +18,11 @@ impl<'a> LinkResolver<'a> {
         }
     }
 
+    /// Get the export map for resolving type links
+    pub fn export_map(&self) -> &BTreeMap<String, String> {
+        self.export_map
+    }
+
     /// Resolve a link using Haddock rules:
     /// 1. If exported from current_module (incl. re-exports): link to current
     /// 2. Else if exported from public module: link there
