@@ -191,6 +191,67 @@ impl fmt::Display for Parameters {
     }
 }
 
+impl Parameters {
+    /// Format parameters with module-qualified type names
+    ///
+    /// This method uses the target module context to qualify type identifiers
+    /// within compound type expressions based on their source modules.
+    pub fn fmt_for_module(&self, target_module: &str) -> String {
+        let mut parts = Vec::new();
+
+        // Positional-only parameters
+        for param in &self.positional_only {
+            parts.push(Self::format_param(param, target_module));
+        }
+
+        // Insert `/` delimiter if there are positional-only parameters
+        if !self.positional_only.is_empty() {
+            parts.push("/".to_string());
+        }
+
+        // Positional or keyword parameters
+        for param in &self.positional_or_keyword {
+            parts.push(Self::format_param(param, target_module));
+        }
+
+        // Variable positional parameter or bare `*` for keyword-only
+        if let Some(varargs) = &self.varargs {
+            parts.push(Self::format_param(varargs, target_module));
+        } else if !self.keyword_only.is_empty() {
+            // Need bare `*` to indicate keyword-only parameters follow
+            parts.push("*".to_string());
+        }
+
+        // Keyword-only parameters
+        for param in &self.keyword_only {
+            parts.push(Self::format_param(param, target_module));
+        }
+
+        // Variable keyword parameter
+        if let Some(varkw) = &self.varkw {
+            parts.push(Self::format_param(varkw, target_module));
+        }
+
+        parts.join(", ")
+    }
+
+    /// Format a single parameter with qualified type names
+    fn format_param(param: &Parameter, target_module: &str) -> String {
+        let qualified_type = param.type_info.qualified_for_module(target_module);
+        match param.kind {
+            ParameterKind::VarPositional => format!("*{}: {}", param.name, qualified_type),
+            ParameterKind::VarKeyword => format!("**{}: {}", param.name, qualified_type),
+            _ => {
+                let base = format!("{}: {}", param.name, qualified_type);
+                match &param.default {
+                    ParameterDefault::None => base,
+                    ParameterDefault::Expr(expr) => format!("{} = {}", base, expr),
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

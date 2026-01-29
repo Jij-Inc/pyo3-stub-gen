@@ -1,48 +1,50 @@
 [workspace]
-members = [
-  "pyo3-stub-gen",
-  "pyo3-stub-gen-derive",
-  "examples/pure",
-  "examples/mixed",
-  "examples/empty_super_module",
-  "examples/test-dash-package",
-  "examples/feature_gated",
-]
 resolver = "2"
+members = [
+  "examples/avoid_name_collision_with_submod",
+  "examples/empty_super_module",
+  "examples/feature_gated",
+  "examples/mixed",
+  "examples/pure",
+  "examples/simple_name_collision",
+  "examples/test-dash-package",
+  "examples/underscore_items",
+  "pyo3-stub-gen",
+  "pyo3-stub-gen-derive"
+]
 
 [workspace.package]
 version = "0.18.0"
 edition = "2021"
-
 description = "Stub file (*.pyi) generator for PyO3"
-repository = "https://github.com/Jij-Inc/pyo3-stub-gen"
-keywords = ["pyo3"]
-license = "MIT OR Apache-2.0"
 readme = "README.md"
+repository = "https://github.com/Jij-Inc/pyo3-stub-gen"
+license = "MIT OR Apache-2.0"
+keywords = ["pyo3"]
 
 [workspace.dependencies]
 ahash = "0.8.11"
 anyhow = "1.0.99"
-chrono = "0.4.42"
+chrono = "0.4.43"
 either = "1.15.0"
 env_logger = "0.11.8"
 heck = "0.5"
 indexmap = ">= 2.7.0"
-insta = "1.44.3"
+insta = "1.46.1"
 inventory = "0.3.21"
 itertools = "0.14.0"
-log = "0.4.28"
+log = "0.4.29"
 maplit = "1.0.2"
 num-complex = "0.4.6"
 numpy = ">= 0.26.0"
 ordered-float = { version = "5.1", default-features = false }
 prettyplease = "0.2.37"
-proc-macro2 = "1.0.103"
+proc-macro2 = "1.0.105"
 pyo3 = ">= 0.26.0"
-rust_decimal = { version = "1.39", default-features = false }
-quote = "1.0.42"
+quote = "1.0.43"
+rust_decimal = { version = "1.40", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
-syn = "2.0.111"
+syn = "2.0.114"
 test-case = "3.3.1"
-toml = "0.9.8"
+toml = "0.9.11"
 trybuild = "1.0.114"

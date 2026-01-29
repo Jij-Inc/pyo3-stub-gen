@@ -7,26 +7,30 @@ pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "overload_example_2", parameters
     : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "ob", kind :
     ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
-    ::std::collections::HashSet::from([]) }, default :
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, source_module : None, import :
+    ::std::collections::HashSet::from([]), type_refs :
+    ::std::collections::HashMap::new(), }, default :
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : ||
-    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, import :
-    ::std::collections::HashSet::from([]) }, doc : "Increments integer by 1", module :
-    None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
-    file : file!(), line : line!(), column : column!(), index : 0usize, }
+    ::pyo3_stub_gen::TypeInfo { name : "int".to_string(), quote : false, source_module : None, import :
+    ::std::collections::HashSet::from([]), type_refs : ::std::collections::HashMap::new()
+    }, doc : "Increments integer by 1", module : None, is_async : false, deprecated :
+    None, type_ignored : None, is_overload : true, file : file!(), line : line!(), column
+    : column!(), index : 0usize, }
 }
 #[automatically_derived]
 pyo3_stub_gen::inventory::submit! {
     ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "overload_example_2", parameters
     : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "ob", kind :
     ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : ||
-    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, import :
-    ::std::collections::HashSet::from([]) }, default :
+    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, source_module : None, import
+    : ::std::collections::HashSet::from([]), type_refs :
+    ::std::collections::HashMap::new(), }, default :
     ::pyo3_stub_gen::type_info::ParameterDefault::None, }], r#return : ||
-    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, import :
-    ::std::collections::HashSet::from([]) }, doc : "Increments float by 1", module :
-    None, is_async : false, deprecated : None, type_ignored : None, is_overload : true,
-    file : file!(), line : line!(), column : column!(), index : 1usize, }
+    ::pyo3_stub_gen::TypeInfo { name : "float".to_string(), quote : false, source_module : None, import
+    : ::std::collections::HashSet::from([]), type_refs :
+    ::std::collections::HashMap::new() }, doc : "Increments float by 1", module : None,
+    is_async : false, deprecated : None, type_ignored : None, is_overload : true, file :
+    file!(), line : line!(), column : column!(), index : 1usize, }
 }
 #[pyfunction]
 pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {

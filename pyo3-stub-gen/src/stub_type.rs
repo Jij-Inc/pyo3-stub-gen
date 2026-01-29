@@ -13,7 +13,10 @@ mod rust_decimal;
 
 use maplit::hashset;
 use std::cmp::Ordering;
-use std::{collections::HashSet, fmt, ops};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt, ops,
+};
 
 /// Indicates what to import.
 /// Module: The purpose is to import the entire module(eg import builtins).
@@ -96,6 +99,30 @@ impl TypeRef {
     }
 }
 
+/// Represents how a type identifier should be qualified in stub files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ImportKind {
+    /// Type is imported by name (from module import Type).
+    /// It can be used unqualified in the target module.
+    ByName,
+    /// Type is from a module import (from package import module).
+    /// It must be qualified as module.Type.
+    Module,
+    /// Type is defined in the same module as the usage site.
+    /// It can be used unqualified.
+    SameModule,
+}
+
+/// Represents a reference to a type identifier within a compound type expression.
+/// Tracks which module the type comes from and how it should be qualified.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TypeIdentifierRef {
+    /// The module where this type is defined.
+    pub module: ModuleRef,
+    /// How this type should be qualified in stub files.
+    pub import_kind: ImportKind,
+}
+
 /// Type information for creating Python stub files annotated by [PyStubType] trait.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypeInfo {
@@ -105,11 +132,28 @@ pub struct TypeInfo {
     /// Whether its usage as an annotation requires quotes.
     pub quote: bool,
 
+    /// The module this type belongs to.
+    ///
+    /// - `None`: Type has no source module (e.g., `typing.Any`, primitives, generic container types)
+    /// - `Some(ModuleRef::Default)`: Type from current package's default module
+    /// - `Some(ModuleRef::Named(path))`: Type from specific module (e.g., `"package.sub_mod"`)
+    pub source_module: Option<ModuleRef>,
+
     /// Python modules must be imported in the stub file.
     ///
     /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
     /// This makes it possible to use user-defined types in the stub file.
     pub import: HashSet<ImportRef>,
+
+    /// Track all type identifiers referenced in the name expression.
+    ///
+    /// This enables context-aware qualification of identifiers within compound type expressions.
+    /// For example, in `typing.Optional[ClassA]`, we need to track that `ClassA` is from a specific module
+    /// and qualify it appropriately based on the target module context.
+    ///
+    /// - Key: bare identifier (e.g., "ClassA")
+    /// - Value: TypeIdentifierRef containing module and import kind
+    pub type_refs: HashMap<String, TypeIdentifierRef>,
 }
 
 impl TypeInfo {
@@ -137,7 +181,9 @@ impl TypeInfo {
         Self {
             name: "None".to_string(),
             quote: false,
+            source_module: None,
             import: HashSet::new(),
+            type_refs: HashMap::new(),
         }
     }
 
@@ -146,58 +192,128 @@ impl TypeInfo {
         Self {
             name: "typing.Any".to_string(),
             quote: false,
+            source_module: None,
             import: hashset! { "typing".into() },
+            type_refs: HashMap::new(),
         }
     }
 
     /// A `list[Type]` type annotation.
     pub fn list_of<T: PyStubType>() -> Self {
-        let TypeInfo {
-            name,
-            quote,
-            mut import,
-        } = T::type_output();
+        let inner = T::type_output();
+        let mut import = inner.import.clone();
         import.insert("builtins".into());
+
+        // Build type_refs from inner type
+        let mut type_refs = HashMap::new();
+        if let Some(ref source_module) = inner.source_module {
+            if let Some(_module_name) = source_module.get() {
+                // Extract bare type identifier from the (potentially qualified) name
+                let bare_name = inner
+                    .name
+                    .split('[')
+                    .next()
+                    .unwrap_or(&inner.name)
+                    .split('.')
+                    .next_back()
+                    .unwrap_or(&inner.name);
+                type_refs.insert(
+                    bare_name.to_string(),
+                    TypeIdentifierRef {
+                        module: source_module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+            }
+        }
+        type_refs.extend(inner.type_refs);
+
         TypeInfo {
-            name: format!("builtins.list[{name}]"),
-            quote,
+            name: format!("builtins.list[{}]", inner.name),
+            quote: inner.quote,
+            source_module: None,
             import,
+            type_refs,
         }
     }
 
     /// A `set[Type]` type annotation.
     pub fn set_of<T: PyStubType>() -> Self {
-        let TypeInfo {
-            name,
-            quote,
-            mut import,
-        } = T::type_output();
+        let inner = T::type_output();
+        let mut import = inner.import.clone();
         import.insert("builtins".into());
+
+        // Build type_refs from inner type
+        let mut type_refs = HashMap::new();
+        if let Some(ref source_module) = inner.source_module {
+            if let Some(_module_name) = source_module.get() {
+                let bare_name = inner
+                    .name
+                    .split('[')
+                    .next()
+                    .unwrap_or(&inner.name)
+                    .split('.')
+                    .next_back()
+                    .unwrap_or(&inner.name);
+                type_refs.insert(
+                    bare_name.to_string(),
+                    TypeIdentifierRef {
+                        module: source_module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+            }
+        }
+        type_refs.extend(inner.type_refs);
+
         TypeInfo {
-            name: format!("builtins.set[{name}]"),
-            quote,
+            name: format!("builtins.set[{}]", inner.name),
+            quote: inner.quote,
+            source_module: None,
             import,
+            type_refs,
         }
     }
 
     /// A `dict[Type]` type annotation.
     pub fn dict_of<K: PyStubType, V: PyStubType>() -> Self {
-        let TypeInfo {
-            name: name_k,
-            quote: quote_k,
-            mut import,
-        } = K::type_output();
-        let TypeInfo {
-            name: name_v,
-            quote: quote_v,
-            import: import_v,
-        } = V::type_output();
-        import.extend(import_v);
+        let inner_k = K::type_output();
+        let inner_v = V::type_output();
+        let mut import = inner_k.import.clone();
+        import.extend(inner_v.import.clone());
         import.insert("builtins".into());
+
+        // Build type_refs from both inner types
+        let mut type_refs = HashMap::new();
+        for inner in [&inner_k, &inner_v] {
+            if let Some(ref source_module) = inner.source_module {
+                if let Some(_module_name) = source_module.get() {
+                    let bare_name = inner
+                        .name
+                        .split('[')
+                        .next()
+                        .unwrap_or(&inner.name)
+                        .split('.')
+                        .next_back()
+                        .unwrap_or(&inner.name);
+                    type_refs.insert(
+                        bare_name.to_string(),
+                        TypeIdentifierRef {
+                            module: source_module.clone(),
+                            import_kind: ImportKind::Module,
+                        },
+                    );
+                }
+            }
+            type_refs.extend(inner.type_refs.clone());
+        }
+
         TypeInfo {
-            name: format!("builtins.dict[{name_k}, {name_v}]"),
-            quote: quote_k || quote_v,
+            name: format!("builtins.dict[{}, {}]", inner_k.name, inner_v.name),
+            quote: inner_k.quote || inner_v.quote,
+            source_module: None,
             import,
+            type_refs,
         }
     }
 
@@ -206,7 +322,9 @@ impl TypeInfo {
         Self {
             name: format!("builtins.{name}"),
             quote: false,
+            source_module: None,
             import: hashset! { "builtins".into() },
+            type_refs: HashMap::new(),
         }
     }
 
@@ -215,7 +333,9 @@ impl TypeInfo {
         Self {
             name: name.to_string(),
             quote: false,
+            source_module: None,
             import: hashset! {},
+            type_refs: HashMap::new(),
         }
     }
 
@@ -226,33 +346,192 @@ impl TypeInfo {
     /// ```
     pub fn with_module(name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
-        import.insert(ImportRef::Module(module));
+        import.insert(ImportRef::Module(module.clone()));
         Self {
             name: name.to_string(),
             quote: false,
+            source_module: Some(module),
             import,
+            type_refs: HashMap::new(),
         }
     }
 
     /// A type defined in the PyO3 module.
     ///
-    /// - Types defined in the same module can be referenced without import.
-    ///   But when it is used in another submodule, it must be imported.
-    /// - For example, if `A` is defined in `submod1`, it can be used as `A` in `submod1`.
-    ///   In `submod2`, it must be imported as `from submod1 import A`.
+    /// - Types are referenced using fully qualified names to avoid symbol collision when used across modules.
+    /// - For example, if `A` is defined in `package.submod1`, it will be referenced as `submod1.A` when used in other modules.
+    /// - The module will be imported as `from package import submod1`.
+    /// - When used in the same module where it's defined, it will be automatically de-qualified during stub generation.
+    /// - The `source_module` field tracks which module the type belongs to for future use.
     ///
     /// ```
-    /// pyo3_stub_gen::TypeInfo::locally_defined("A", "submod1".into());
+    /// pyo3_stub_gen::TypeInfo::locally_defined("A", "package.submod1".into());
     /// ```
     pub fn locally_defined(type_name: &str, module: ModuleRef) -> Self {
         let mut import = HashSet::new();
-        let type_ref = TypeRef::new(module, type_name.to_string());
-        import.insert(ImportRef::Type(type_ref));
+        let mut type_refs = HashMap::new();
+
+        // Determine qualified name and import based on module
+        // We qualify all named modules; de-qualification for same-module usage happens during stub generation
+        let qualified_name = match module.get() {
+            Some(module_name) if !module_name.is_empty() => {
+                // Extract the last component of the module path for qualification
+                // e.g., "package.module.submodule" -> "submodule"
+                let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
+                // Use Module import for cross-module references
+                import.insert(ImportRef::Module(module.clone()));
+
+                // Populate type_refs with the bare identifier for context-aware qualification
+                type_refs.insert(
+                    type_name.to_string(),
+                    TypeIdentifierRef {
+                        module: module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+
+                format!("{}.{}", module_component, type_name)
+            }
+            _ => {
+                // Default/empty module - treat like named modules but keep name unqualified
+                // Will be resolved to actual module name at runtime
+                import.insert(ImportRef::Module(module.clone()));
+                type_refs.insert(
+                    type_name.to_string(),
+                    TypeIdentifierRef {
+                        module: module.clone(),
+                        import_kind: ImportKind::Module,
+                    },
+                );
+                type_name.to_string()
+            }
+        };
 
         Self {
-            name: type_name.to_string(),
+            name: qualified_name,
             quote: true,
+            source_module: Some(module),
             import,
+            type_refs,
+        }
+    }
+
+    /// Get the qualified name for use in a specific target module.
+    ///
+    /// - If the type has no source module, returns the name as-is
+    /// - If the type is from the same module as the target, returns unqualified name
+    /// - If the type is from a different module, returns qualified name with module component
+    ///
+    /// # Examples
+    ///
+    /// - Type A from "package.sub_mod" used in "package.sub_mod" -> "A"
+    /// - Type A from "package.sub_mod" used in "package.main_mod" -> "sub_mod.A"
+    pub fn qualified_name(&self, target_module: &str) -> String {
+        match &self.source_module {
+            None => self.name.clone(),
+            Some(module_ref) => {
+                let source = module_ref.get().unwrap_or(target_module);
+                if source == target_module {
+                    // Same module: unqualified
+                    // Strip module prefix if present (handles pre-qualified names from macros)
+                    let module_component = source.rsplit('.').next().unwrap_or(source);
+                    let prefix = format!("{}.", module_component);
+                    if let Some(stripped) = self.name.strip_prefix(&prefix) {
+                        stripped.to_string()
+                    } else {
+                        self.name.clone()
+                    }
+                } else {
+                    // Different module: qualify with last module component
+                    let module_component = source.rsplit('.').next().unwrap_or(source);
+                    // Strip existing module prefix if present (handles pre-qualified names from macros)
+                    let prefix = format!("{}.", module_component);
+                    let base_name = if let Some(stripped) = self.name.strip_prefix(&prefix) {
+                        stripped
+                    } else {
+                        &self.name
+                    };
+                    format!("{}.{}", module_component, base_name)
+                }
+            }
+        }
+    }
+
+    /// Check if this type is from the same module as the target module.
+    pub fn is_same_module(&self, target_module: &str) -> bool {
+        self.source_module.as_ref().and_then(|m| m.get()) == Some(target_module)
+    }
+
+    /// Check if this type is internal to the package (starts with package root).
+    pub fn is_internal_to_package(&self, package_root: &str) -> bool {
+        match &self.source_module {
+            Some(ModuleRef::Named(path)) => path.starts_with(package_root),
+            Some(ModuleRef::Default) => true,
+            None => false,
+        }
+    }
+
+    /// Get the qualified name for use in a specific target module with context-aware rewriting.
+    ///
+    /// This method handles compound type expressions by rewriting nested identifiers
+    /// based on the type_refs tracking information. For example:
+    /// - `typing.Optional[ClassA]` becomes `typing.Optional[sub_mod.ClassA]` when ClassA
+    ///   is from a different module.
+    ///
+    /// # Arguments
+    /// * `target_module` - The module where this type will be used
+    ///
+    /// # Returns
+    /// The qualified type name string with identifiers properly qualified
+    pub fn qualified_for_module(&self, target_module: &str) -> String {
+        // If no type_refs, use the simpler qualified_name method
+        if self.type_refs.is_empty() {
+            return self.qualified_name(target_module);
+        }
+
+        // Rewrite the expression with context-aware qualification
+        use crate::generate::qualifier::TypeExpressionQualifier;
+        TypeExpressionQualifier::qualify_expression(&self.name, &self.type_refs, target_module)
+    }
+
+    /// Resolve ModuleRef::Default to the actual module name.
+    /// Called at runtime when default module name is known.
+    pub fn resolve_default_module(&mut self, default_module_name: &str) {
+        // Resolve source_module
+        if let Some(ModuleRef::Default) = &self.source_module {
+            self.source_module = Some(ModuleRef::Named(default_module_name.to_string()));
+
+            // Update qualified name if needed
+            let module_component = default_module_name
+                .rsplit('.')
+                .next()
+                .unwrap_or(default_module_name);
+            if !self.name.contains('.') {
+                self.name = format!("{}.{}", module_component, self.name);
+            }
+        }
+
+        // Resolve import refs
+        let mut new_import = std::collections::HashSet::new();
+        for import_ref in &self.import {
+            match import_ref {
+                ImportRef::Module(ModuleRef::Default) => {
+                    new_import.insert(ImportRef::Module(ModuleRef::Named(
+                        default_module_name.to_string(),
+                    )));
+                }
+                other => {
+                    new_import.insert(other.clone());
+                }
+            }
+        }
+        self.import = new_import;
+
+        // Resolve type_refs
+        for type_ref in self.type_refs.values_mut() {
+            if let ModuleRef::Default = &type_ref.module {
+                type_ref.module = ModuleRef::Named(default_module_name.to_string());
+            }
         }
     }
 }
@@ -262,10 +541,15 @@ impl ops::BitOr for TypeInfo {
 
     fn bitor(mut self, rhs: Self) -> Self {
         self.import.extend(rhs.import);
+        // Merge type_refs from both sides
+        let mut merged_type_refs = self.type_refs.clone();
+        merged_type_refs.extend(rhs.type_refs);
         Self {
             name: format!("{} | {}", self.name, rhs.name),
             quote: self.quote || rhs.quote,
+            source_module: None, // Union types are synthetic, have no source module
             import: self.import,
+            type_refs: merged_type_refs,
         }
     }
 }

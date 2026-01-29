@@ -189,7 +189,7 @@ pub mod type_info;
 pub mod util;
 
 pub use generate::StubInfo;
-pub use stub_type::{PyStubType, TypeInfo};
+pub use stub_type::{ImportKind, ImportRef, ModuleRef, PyStubType, TypeIdentifierRef, TypeInfo};
 
 pub type Result<T> = anyhow::Result<T>;
 
@@ -270,6 +270,77 @@ macro_rules! module_variable {
                     }
                     _fmt
                 }),
+            }
+        }
+    };
+}
+
+/// Re-export items from another module into __all__
+///
+/// # Wildcard re-export
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module");
+/// ```
+///
+/// # Specific items re-export
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module", "item1", "item2");
+/// ```
+#[macro_export]
+macro_rules! reexport_module_members {
+    // Wildcard: reexport_module_members!("target", "source")
+    ($target:expr, $source:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: None,
+            }
+        }
+    };
+    // Specific items: reexport_module_members!("target", "source", "item1", "item2")
+    ($target:expr, $source:expr, $($item:expr),+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: Some(&[$($item),+]),
+            }
+        }
+    };
+}
+
+/// Add verbatim entry to __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::export_verbatim!("my.module", "my_name");
+/// ```
+#[macro_export]
+macro_rules! export_verbatim {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ExportVerbatim {
+                target_module: $module,
+                name: $name,
+            }
+        }
+    };
+}
+
+/// Exclude specific items from __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::exclude_from_all!("my.module", "internal_function");
+/// ```
+#[macro_export]
+macro_rules! exclude_from_all {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ExcludeFromAll {
+                target_module: $module,
+                name: $name,
             }
         }
     };
