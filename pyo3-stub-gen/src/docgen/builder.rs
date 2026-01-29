@@ -4,7 +4,7 @@ use crate::docgen::{
     export::ExportResolver,
     ir::{
         DeprecatedInfo, DocClass, DocFunction, DocItem, DocModule, DocPackage, DocParameter,
-        DocSignature, DocTypeAlias, DocTypeExpr, DocVariable,
+        DocSignature, DocSubmodule, DocTypeAlias, DocTypeExpr, DocVariable,
     },
     types::TypeRenderer,
 };
@@ -106,6 +106,32 @@ impl<'a> DocPackageBuilder<'a> {
         for (var_name, var_def) in &module.variables {
             if exports.contains(*var_name) {
                 items.push(self.build_variable(name, var_def)?);
+            }
+        }
+
+        // Process submodules - convert to DocItem::Module entries
+        for submod_name in &module.submodules {
+            if !submod_name.starts_with('_') && exports.contains(submod_name) {
+                // Construct FQN for the submodule
+                let submod_fqn = if name.is_empty() {
+                    submod_name.clone()
+                } else {
+                    format!("{}.{}", name, submod_name)
+                };
+
+                // Retrieve the submodule's doc from stub_info.modules
+                let submod_doc = self
+                    .stub_info
+                    .modules
+                    .get(&submod_fqn)
+                    .map(|m| m.doc.clone())
+                    .unwrap_or_default();
+
+                items.push(DocItem::Module(DocSubmodule {
+                    name: submod_name.clone(),
+                    doc: submod_doc,
+                    fqn: submod_fqn,
+                }));
             }
         }
 

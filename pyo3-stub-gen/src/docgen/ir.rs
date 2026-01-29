@@ -21,6 +21,14 @@ pub struct DocModule {
     pub submodules: Vec<String>,
 }
 
+/// A reference to a submodule
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DocSubmodule {
+    pub name: String,
+    pub doc: String,
+    pub fqn: String,
+}
+
 /// A documented item (function, class, type alias, etc.)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind")]
@@ -29,6 +37,7 @@ pub enum DocItem {
     Class(DocClass),
     TypeAlias(DocTypeAlias),
     Variable(DocVariable),
+    Module(DocSubmodule),
 }
 
 /// A function with all its overload signatures

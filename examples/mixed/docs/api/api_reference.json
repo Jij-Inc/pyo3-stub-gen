@@ -14,6 +14,18 @@
             "link_target": null,
             "children": []
           }
+        },
+        {
+          "kind": "Module",
+          "name": "main_mod",
+          "doc": "",
+          "fqn": "mixed.main_mod"
+        },
+        {
+          "kind": "Module",
+          "name": "test",
+          "doc": "",
+          "fqn": "mixed.test"
         }
       ],
       "submodules": [
@@ -181,6 +193,24 @@
           "methods": [],
           "attributes": [],
           "deprecated": null
+        },
+        {
+          "kind": "Module",
+          "name": "int",
+          "doc": "",
+          "fqn": "mixed.main_mod.int"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_a",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_a"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_b",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_b"
         }
       ],
       "submodules": [
@@ -469,7 +499,20 @@
     "mixed.test": {
       "name": "mixed.test",
       "doc": "",
-      "items": [],
+      "items": [
+        {
+          "kind": "Module",
+          "name": "from_inline",
+          "doc": "",
+          "fqn": "mixed.test.from_inline"
+        },
+        {
+          "kind": "Module",
+          "name": "from_pyo3",
+          "doc": "",
+          "fqn": "mixed.test.from_pyo3"
+        }
+      ],
       "submodules": [
         "from_inline",
         "from_pyo3"

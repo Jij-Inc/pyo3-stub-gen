@@ -164,6 +164,7 @@ def _build_type_expr(type_expr):
             'Function': 'func',
             'TypeAlias': 'data',
             'Variable': 'data',
+            'Module': 'mod',
         }
         xref = pending_xref(
             '',
@@ -343,6 +344,36 @@ def _build_variable(env, var, module_name):
 
     return [desc_node]
 
+def _build_submodule(env, submod, parent_module_name):
+    """Build documentation for a submodule reference"""
+    submod_name = submod['name']
+    submod_fqn = submod['fqn']
+    submod_doc = submod.get('doc', '')
+
+    # Create a list item with a reference
+    list_item = nodes.list_item()
+    para = nodes.paragraph()
+
+    # Add the module annotation as strong text
+    para += nodes.strong(text='module ')
+
+    # Create a reference to the submodule's documentation page
+    # The documentation pages are named after the FQN (e.g., mixed.main_mod.html)
+    ref = nodes.reference('', '')
+    ref['refuri'] = f'{submod_fqn}.html'
+    ref['reftitle'] = f'Link to {submod_fqn} module'
+    ref += nodes.literal(text=submod_name, classes=['xref', 'py', 'py-mod'])
+    para += ref
+
+    list_item += para
+
+    # Add docstring if present
+    if submod_doc:
+        list_item += _parse_myst(submod_doc)
+
+    # Return just the list item (caller will add to bullet list)
+    return [list_item]
+
 class Pyo3APIDirective(SphinxDirective):
     """Render API from pyo3-stub-gen JSON IR"""
 
@@ -361,7 +392,7 @@ class Pyo3APIDirective(SphinxDirective):
 
         # Find module
         if module_name not in doc_package['modules']:
-            return [nodes.error(None, nodes.paragraph(
+            return [nodes.error('', nodes.paragraph(
                 text=f"Module not found: {module_name}"))]
 
         doc_module = doc_package['modules'][module_name]
@@ -377,6 +408,18 @@ class Pyo3APIDirective(SphinxDirective):
         classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
         type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
         variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+        modules = [item for item in doc_module['items'] if item['kind'] == 'Module']
+
+        # Submodules section (add FIRST for prominence)
+        if modules:
+            mod_section = nodes.section(ids=[f'{module_name}-submodules'])
+            mod_section += nodes.title(text='Submodules')
+            # Create a single bullet list for all submodules
+            bullet_list = nodes.bullet_list()
+            for submod in modules:
+                bullet_list.extend(self._build_submodule(submod, module_name))
+            mod_section += bullet_list
+            result.append(mod_section)
 
         # Functions section
         if functions:
@@ -436,6 +479,9 @@ class Pyo3APIDirective(SphinxDirective):
     def _build_variable(self, var, module_name):
         return _build_variable(self.env, var, module_name)
 
+    def _build_submodule(self, submod, module_name):
+        return _build_submodule(self.env, submod, module_name)
+
 class Pyo3APIPackageDirective(SphinxDirective):
     """Render API for all modules in a package from pyo3-stub-gen JSON IR"""
 
@@ -474,6 +520,18 @@ class Pyo3APIPackageDirective(SphinxDirective):
                 classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
                 type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
                 variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+                modules = [item for item in doc_module['items'] if item['kind'] == 'Module']
+
+                # Submodules subsection (add FIRST for prominence)
+                if modules:
+                    mod_section = nodes.section(ids=[f'{module_name}-submodules'])
+                    mod_section += nodes.title(text='Submodules')
+                    # Create a single bullet list for all submodules
+                    bullet_list = nodes.bullet_list()
+                    for submod in modules:
+                        bullet_list.extend(self._build_submodule(submod, module_name))
+                    mod_section += bullet_list
+                    section.append(mod_section)
 
                 # Functions subsection
                 if functions:
@@ -534,6 +592,9 @@ class Pyo3APIPackageDirective(SphinxDirective):
 
     def _build_variable(self, var, module_name):
         return _build_variable(self.env, var, module_name)
+
+    def _build_submodule(self, submod, module_name):
+        return _build_submodule(self.env, submod, module_name)
 
 def setup(app):
     app.add_directive('pyo3-api', Pyo3APIDirective)
