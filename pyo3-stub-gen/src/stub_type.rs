@@ -129,15 +129,15 @@ pub struct TypeInfo {
     /// The Python type name.
     pub name: String,
 
-    /// Whether its usage as an annotation requires quotes.
-    pub quote: bool,
-
     /// The module this type belongs to.
     ///
     /// - `None`: Type has no source module (e.g., `typing.Any`, primitives, generic container types)
     /// - `Some(ModuleRef::Default)`: Type from current package's default module
     /// - `Some(ModuleRef::Named(path))`: Type from specific module (e.g., `"package.sub_mod"`)
     pub source_module: Option<ModuleRef>,
+
+    /// Whether its usage as an annotation requires quotes.
+    pub quote: bool,
 
     /// Python modules must be imported in the stub file.
     ///
@@ -180,8 +180,8 @@ impl TypeInfo {
         // but there is no corresponding definitions prior to 3.10.
         Self {
             name: "None".to_string(),
-            quote: false,
             source_module: None,
+            quote: false,
             import: HashSet::new(),
             type_refs: HashMap::new(),
         }
@@ -191,8 +191,8 @@ impl TypeInfo {
     pub fn any() -> Self {
         Self {
             name: "typing.Any".to_string(),
-            quote: false,
             source_module: None,
+            quote: false,
             import: hashset! { "typing".into() },
             type_refs: HashMap::new(),
         }
@@ -230,8 +230,8 @@ impl TypeInfo {
 
         TypeInfo {
             name: format!("builtins.list[{}]", inner.name),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -268,8 +268,8 @@ impl TypeInfo {
 
         TypeInfo {
             name: format!("builtins.set[{}]", inner.name),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -310,8 +310,8 @@ impl TypeInfo {
 
         TypeInfo {
             name: format!("builtins.dict[{}, {}]", inner_k.name, inner_v.name),
-            quote: inner_k.quote || inner_v.quote,
             source_module: None,
+            quote: inner_k.quote || inner_v.quote,
             import,
             type_refs,
         }
@@ -321,8 +321,8 @@ impl TypeInfo {
     pub fn builtin(name: &str) -> Self {
         Self {
             name: format!("builtins.{name}"),
-            quote: false,
             source_module: None,
+            quote: false,
             import: hashset! { "builtins".into() },
             type_refs: HashMap::new(),
         }
@@ -332,8 +332,8 @@ impl TypeInfo {
     pub fn unqualified(name: &str) -> Self {
         Self {
             name: name.to_string(),
-            quote: false,
             source_module: None,
+            quote: false,
             import: hashset! {},
             type_refs: HashMap::new(),
         }
@@ -349,8 +349,8 @@ impl TypeInfo {
         import.insert(ImportRef::Module(module.clone()));
         Self {
             name: name.to_string(),
-            quote: false,
             source_module: Some(module),
+            quote: false,
             import,
             type_refs: HashMap::new(),
         }
@@ -409,8 +409,8 @@ impl TypeInfo {
 
         Self {
             name: qualified_name,
-            quote: true,
             source_module: Some(module),
+            quote: true,
             import,
             type_refs,
         }
@@ -546,8 +546,8 @@ impl ops::BitOr for TypeInfo {
         merged_type_refs.extend(rhs.type_refs);
         Self {
             name: format!("{} | {}", self.name, rhs.name),
-            quote: self.quote || rhs.quote,
             source_module: None, // Union types are synthetic, have no source module
+            quote: self.quote || rhs.quote,
             import: self.import,
             type_refs: merged_type_refs,
         }

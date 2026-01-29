@@ -104,6 +104,7 @@ impl PyStubType for ClassACallback {
         TypeInfo {
             name: "typing.Callable[[ClassA], ClassA]".to_string(),
             source_module: None,
+            quote: true,
             import: [].into(),
             type_refs: [(
                 "ClassA".to_string(),

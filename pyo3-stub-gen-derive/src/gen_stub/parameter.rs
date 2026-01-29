@@ -206,8 +206,8 @@ impl ToTokens for ParameterWithKind {
                         kind: #kind,
                         type_info: || ::pyo3_stub_gen::TypeInfo {
                             name: #type_name_code,
-			    quote: false,
                             source_module: None,
+                            quote: false,
                             import: ::std::collections::HashSet::from([#(#imports.into(),)*]),
                             type_refs: #type_refs_code,
                         },

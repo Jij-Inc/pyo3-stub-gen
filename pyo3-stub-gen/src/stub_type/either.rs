@@ -53,8 +53,8 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
 
         TypeInfo {
             name: format!("typing.Union[{}, {}]", info_l.name, info_r.name),
-            quote: info_l.quote || info_r.quote,
             source_module: None,
+            quote: info_l.quote || info_r.quote,
             import,
             type_refs,
         }
@@ -76,8 +76,8 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
 
         TypeInfo {
             name: format!("typing.Union[{}, {}]", info_l.name, info_r.name),
-            quote: info_l.quote || info_r.quote,
             source_module: None,
+            quote: info_l.quote || info_r.quote,
             import,
             type_refs,
         }

@@ -58,8 +58,8 @@ impl<T: PyStubType> PyStubType for Option<T> {
 
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -74,8 +74,8 @@ impl<T: PyStubType> PyStubType for Option<T> {
 
         TypeInfo {
             name: format!("typing.Optional[{name}]"),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -111,8 +111,8 @@ impl<T: PyStubType> PyStubType for Vec<T> {
 
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -133,8 +133,8 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
 
         TypeInfo {
             name: format!("typing.Sequence[{name}]"),
-            quote: inner.quote,
             source_module: None,
+            quote: inner.quote,
             import,
             type_refs,
         }
@@ -177,8 +177,8 @@ macro_rules! impl_map_inner {
 
             TypeInfo {
                 name: format!("typing.Mapping[{}, {}]", key_info.name, value_info.name),
-                quote: key_info.quote || value_info.quote,
                 source_module: None,
+                quote: key_info.quote || value_info.quote,
                 import,
                 type_refs,
             }
@@ -196,8 +196,8 @@ macro_rules! impl_map_inner {
 
             TypeInfo {
                 name: format!("builtins.dict[{}, {}]", key_info.name, value_info.name),
-                quote: key_info.quote || value_info.quote,
                 source_module: None,
+                quote: key_info.quote || value_info.quote,
                 import,
                 type_refs,
             }
@@ -236,8 +236,8 @@ macro_rules! impl_tuple {
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
-                    quote: quote_any,
                     source_module: None,
+                    quote: quote_any,
                     import: merged,
                     type_refs,
                 }
@@ -256,8 +256,8 @@ macro_rules! impl_tuple {
                 )*
                 TypeInfo {
                     name: format!("tuple[{}]", names.join(", ")),
-                    quote: quote_any,
                     source_module: None,
+                    quote: quote_any,
                     import: merged,
                     type_refs,
                 }
