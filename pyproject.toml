@@ -29,4 +29,5 @@ members = [
   "examples/simple_name_collision",
   "examples/avoid_name_collision_with_submod",
   "examples/underscore_items",
+  "examples/type-statement-alias",
 ]
