@@ -211,6 +211,7 @@ def _parse_myst(markdown_text):
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
     desc_node = desc(domain='py', objtype='function', noindex=False)
+    desc_node['classes'].extend(['py', 'function'])
 
     fullname = f"{module_name}.{func['name']}"
     sig_id = fullname
@@ -225,6 +226,7 @@ def _build_function(env, func, module_name):
         sig_node['ids'].append(sig_id)
         sig_node['first'] = (idx == 0)
 
+        # Function name
         sig_node += desc_name(text=func['name'])
 
         # Parameters
@@ -292,6 +294,7 @@ def _build_type_alias(env, alias, module_name):
 def _build_class(env, cls, module_name):
     """Build class documentation"""
     desc_node = desc(domain='py', objtype='class', noindex=False)
+    desc_node['classes'].extend(['py', 'class'])
 
     fullname = f"{module_name}.{cls['name']}"
     sig_node = desc_signature(module=module_name, fullname=fullname)
@@ -300,7 +303,21 @@ def _build_class(env, cls, module_name):
     sig_id = fullname
     sig_node['ids'].append(sig_id)
 
+    # Add "class" prefix annotation with syntax highlighting
+    annotation = desc_annotation()
+    # Keyword span (class keyword)
+    keyword_span = nodes.inline(classes=['k'])
+    keyword_span += nodes.Text('class')
+    annotation += keyword_span
+    # Whitespace span
+    ws_span = nodes.inline(classes=['w'])
+    ws_span += nodes.Text(' ')
+    annotation += ws_span
+    sig_node += annotation
+
+    # Add class name
     sig_node += desc_name(text=cls['name'])
+
     desc_node += sig_node
 
     if cls.get('doc'):
@@ -312,6 +329,87 @@ def _build_class(env, cls, module_name):
     if hasattr(env, 'domaindata'):
         py_domain = env.get_domain('py')
         py_domain.note_object(fullname, 'class', sig_id, location=env.docname)
+
+    # Render class methods
+    methods = cls.get('methods', [])
+    for method in methods:
+        method_fullname = f"{fullname}.{method['name']}"
+        method_desc = desc(domain='py', objtype='method', noindex=False)
+        method_desc['classes'].extend(['py', 'method'])
+
+        # Add signature for each overload
+        for idx, sig in enumerate(method['signatures']):
+            sig_node = desc_signature(module=module_name, fullname=method_fullname)
+            sig_node['module'] = module_name
+            sig_node['fullname'] = method_fullname
+            sig_node['ids'].append(method_fullname)
+            sig_node['first'] = (idx == 0)
+
+            # Method name
+            sig_node += desc_name(text=method['name'])
+
+            # Parameters
+            param_list = desc_parameterlist()
+            for param in sig['parameters']:
+                param_node = desc_parameter()
+                param_node += nodes.Text(param['name'] + ': ')
+                param_node += _build_type_expr(param['type_'])
+                if param.get('default'):
+                    param_node += nodes.Text(' = ' + param['default'])
+                param_list += param_node
+            sig_node += param_list
+
+            # Return type
+            if sig['return_type']:
+                returns = desc_returns()
+                returns += _build_type_expr(sig['return_type'])
+                sig_node += returns
+
+            method_desc += sig_node
+
+        # Method docstring
+        if method.get('doc'):
+            method_content = desc_content()
+            method_content += _parse_myst(method['doc'])
+            method_desc += method_content
+
+        # Register method
+        if hasattr(env, 'domaindata'):
+            py_domain = env.get_domain('py')
+            py_domain.note_object(method_fullname, 'method', method_fullname, location=env.docname)
+
+        desc_node += method_desc
+
+    # Render class attributes
+    attributes = cls.get('attributes', [])
+    for attr in attributes:
+        attr_fullname = f"{fullname}.{attr['name']}"
+        attr_desc = desc(domain='py', objtype='attribute', noindex=False)
+
+        sig_node = desc_signature(module=module_name, fullname=attr_fullname)
+        sig_node['module'] = module_name
+        sig_node['fullname'] = attr_fullname
+        sig_node['ids'].append(attr_fullname)
+
+        sig_node += desc_name(text=attr['name'])
+        if attr.get('type_'):
+            sig_node += nodes.Text(': ')
+            sig_node += _build_type_expr(attr['type_'])
+
+        attr_desc += sig_node
+
+        # Attribute docstring
+        if attr.get('doc'):
+            attr_content = desc_content()
+            attr_content += _parse_myst(attr['doc'])
+            attr_desc += attr_content
+
+        # Register attribute
+        if hasattr(env, 'domaindata'):
+            py_domain = env.get_domain('py')
+            py_domain.note_object(attr_fullname, 'attribute', attr_fullname, location=env.docname)
+
+        desc_node += attr_desc
 
     return [desc_node]
 
