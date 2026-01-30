@@ -32,7 +32,8 @@ def greet_main() -> None:
     ```python
     >>> 42
     42
-    
     ```
+    
+    Another math test \(\int_{-\infty}^\infty e^{-x^2} \mathrm{d}x\).
     """
 
