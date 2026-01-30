@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+use crate::docgen::config::DocGenConfig;
+
 /// Root documentation package structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DocPackage {
@@ -10,6 +12,8 @@ pub struct DocPackage {
     pub modules: BTreeMap<String, DocModule>,
     /// Maps item FQN to the public module where it's exported
     pub export_map: BTreeMap<String, String>,
+    /// Documentation generation configuration
+    pub config: DocGenConfig,
 }
 
 /// A single module's documentation

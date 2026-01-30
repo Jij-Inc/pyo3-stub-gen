@@ -404,6 +404,157 @@ def _parse_myst(markdown_text, env=None):
         # Fallback to simple paragraph if parsing fails
         return [nodes.paragraph(text=markdown_text.strip())]
 
+def _extract_first_line_doc(doc_string, max_length=100):
+    """Extract first line from docstring for summary
+
+    Returns plain text (strips basic markdown), truncated if needed.
+    """
+    if not doc_string:
+        return ""
+
+    # Split by newlines, take first non-empty line
+    lines = doc_string.strip().split('\n')
+    first_line = next((line.strip() for line in lines if line.strip()), "")
+
+    # Strip basic markdown: **bold**, *italic*, `code`
+    first_line = re.sub(r'\*\*([^*]+)\*\*', r'\1', first_line)
+    first_line = re.sub(r'\*([^*]+)\*', r'\1', first_line)
+    first_line = re.sub(r'`([^`]+)`', r'\1', first_line)
+
+    # Truncate if too long
+    if len(first_line) > max_length:
+        first_line = first_line[:max_length].rstrip() + "..."
+
+    return first_line
+
+def _get_reftype_for_item(item):
+    """Get Sphinx reftype for cross-references"""
+    kind = item['kind']
+    if kind == 'Function':
+        return 'func'
+    elif kind == 'Class':
+        return 'class'
+    elif kind == 'TypeAlias':
+        return 'data'
+    elif kind == 'Variable':
+        return 'data'
+    return 'obj'
+
+def _build_contents_table(env, category_title, items, module_name):
+    """Build a single category table in module contents
+
+    Returns list of nodes (rubric + table).
+    """
+    from sphinx.addnodes import pending_xref
+
+    # Use rubric for category heading
+    rubric = nodes.rubric(text=category_title)
+
+    # Create table structure
+    table = nodes.table()
+    tgroup = nodes.tgroup(cols=2)
+    table += tgroup
+
+    # Column specifications
+    tgroup += nodes.colspec(colwidth=30)
+    tgroup += nodes.colspec(colwidth=70)
+
+    # Table head
+    thead = nodes.thead()
+    tgroup += thead
+    row = nodes.row()
+    thead += row
+
+    # Header cells
+    entry = nodes.entry()
+    entry += nodes.paragraph(text='Name')
+    row += entry
+
+    entry = nodes.entry()
+    entry += nodes.paragraph(text='Description')
+    row += entry
+
+    # Table body
+    tbody = nodes.tbody()
+    tgroup += tbody
+
+    for item in items:
+        item_name = item['name']
+        item_doc = item.get('doc', '')
+        item_fqn = f"{module_name}.{item_name}"
+
+        # Extract first line description
+        description = _extract_first_line_doc(item_doc)
+
+        # Create table row
+        row = nodes.row()
+        tbody += row
+
+        # Name cell with cross-reference
+        entry = nodes.entry()
+        para = nodes.paragraph()
+        xref = pending_xref(
+            '',
+            refdomain='py',
+            reftype=_get_reftype_for_item(item),
+            reftarget=item_fqn,
+            refexplicit=False,
+        )
+        xref += nodes.literal(text=item_name, classes=['xref', 'py'])
+        para += xref
+        entry += para
+        row += entry
+
+        # Description cell
+        entry = nodes.entry()
+        if description:
+            entry += nodes.paragraph(text=description)
+        row += entry
+
+    return [rubric, table]
+
+def _build_module_contents_table(env, doc_module, module_name):
+    """Build module contents table with categorized items
+
+    Returns list of nodes (section with rubrics and tables).
+    """
+    # Group items by kind
+    functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+    classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+    type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+    variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+
+    # Skip if module has no items to show
+    if not any([functions, classes, type_aliases, variables]):
+        return []
+
+    # Create section
+    section = nodes.section(ids=[f'{module_name}-contents'])
+    section += nodes.title(text='Module Contents')
+
+    # Build each category (in this specific order)
+    if classes:
+        section.extend(_build_contents_table(
+            env, 'Classes', classes, module_name
+        ))
+
+    if functions:
+        section.extend(_build_contents_table(
+            env, 'Functions', functions, module_name
+        ))
+
+    if type_aliases:
+        section.extend(_build_contents_table(
+            env, 'Type Aliases', type_aliases, module_name
+        ))
+
+    if variables:
+        section.extend(_build_contents_table(
+            env, 'Variables', variables, module_name
+        ))
+
+    return [section]
+
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
     desc_node = desc(domain='py', objtype='function', noindex=False)
@@ -711,6 +862,10 @@ class Pyo3APIDirective(SphinxDirective):
         if doc_module.get('doc'):
             result.extend(_parse_myst(doc_module['doc'], self.env))
 
+        # Add module contents table if enabled in config
+        if doc_package.get('config', {}).get('contents-table', False):
+            result.extend(_build_module_contents_table(self.env, doc_module, module_name))
+
         # Group items by kind
         functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
         classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
@@ -822,6 +977,11 @@ class Pyo3APIPackageDirective(SphinxDirective):
                 # Render module docstring if present
                 if doc_module.get('doc'):
                     for node in _parse_myst(doc_module['doc'], self.env):
+                        section.append(node)
+
+                # Add module contents table if enabled in config
+                if doc_package.get('config', {}).get('contents-table', False):
+                    for node in _build_module_contents_table(self.env, doc_module, module_name):
                         section.append(node)
 
                 # Group items by kind

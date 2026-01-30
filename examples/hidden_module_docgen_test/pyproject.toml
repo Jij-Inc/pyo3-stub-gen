@@ -26,3 +26,4 @@ python-source = "python"
 output-dir = "docs/api"
 json-output = "api_reference.json"
 intro-message = "Re-export from hidden module should appear in the documentation."
+contents-table = true

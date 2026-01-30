@@ -25,6 +25,10 @@ pub struct DocGenConfig {
     /// Custom title for index.rst (default: "{package_name} API Reference", empty string to use "API Reference")
     #[serde(rename = "index-title", default)]
     pub index_title: Option<String>,
+
+    /// Generate module contents tables (default: false)
+    #[serde(rename = "contents-table", default)]
+    pub contents_table: bool,
 }
 
 impl Default for DocGenConfig {
@@ -35,6 +39,7 @@ impl Default for DocGenConfig {
             separate_pages: default_separate_pages(),
             intro_message: None,
             index_title: None,
+            contents_table: false,
         }
     }
 }

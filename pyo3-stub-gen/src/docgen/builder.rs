@@ -71,9 +71,10 @@ impl<'a> DocPackageBuilder<'a> {
         }
 
         Ok(DocPackage {
-            name: self.default_module_name,
+            name: self.default_module_name.clone(),
             modules,
             export_map: self.export_map,
+            config: self.stub_info.config.doc_gen.clone().unwrap_or_default(),
         })
     }
 
