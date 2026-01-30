@@ -204,7 +204,10 @@
                     "link_target": null,
                     "children": []
                   },
-                  "default": "2"
+                  "default": {
+                    "kind": "Simple",
+                    "value": "2"
+                  }
                 }
               ],
               "return_type": {
@@ -212,7 +215,8 @@
                 "link_target": {
                   "fqn": "pure.A",
                   "doc_module": "pure",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -247,7 +251,8 @@
                     "link_target": {
                       "fqn": "pure.DataContainer",
                       "doc_module": "pure",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   }
@@ -316,11 +321,27 @@
                     "link_target": {
                       "fqn": "pure.Number",
                       "doc_module": "pure",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
-                  "default": "Number.FLOAT"
+                  "default": {
+                    "kind": "Expression",
+                    "display": "Number.FLOAT",
+                    "type_refs": [
+                      {
+                        "text": "Number.FLOAT",
+                        "offset": 0,
+                        "link_target": {
+                          "fqn": "pure.Number.FLOAT",
+                          "doc_module": "pure",
+                          "kind": "Class",
+                          "attribute": "FLOAT"
+                        }
+                      }
+                    ]
+                  }
                 }
               ],
               "return_type": {
@@ -328,7 +349,8 @@
                 "link_target": {
                   "fqn": "pure.Number",
                   "doc_module": "pure",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -667,8 +689,53 @@
         {
           "kind": "Function",
           "name": "manual_overload_as_tuple",
-          "doc": "Convert sequence to tuple when tuple_out is True",
+          "doc": "Convert sequence to list when tuple_out is False",
           "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[False]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "False",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
+            },
             {
               "parameters": [
                 {
@@ -718,51 +785,6 @@
                   }
                 ]
               }
-            },
-            {
-              "parameters": [
-                {
-                  "name": "xs",
-                  "type_": {
-                    "display": "Sequence[int]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                },
-                {
-                  "name": "tuple_out",
-                  "type_": {
-                    "display": "Literal[False]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "False",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "list[int]",
-                "link_target": null,
-                "children": [
-                  {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                ]
-              }
             }
           ],
           "is_async": false,
@@ -778,24 +800,6 @@
                 {
                   "name": "x",
                   "type_": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "int",
-                "link_target": null,
-                "children": []
-              }
-            },
-            {
-              "parameters": [
-                {
-                  "name": "x",
-                  "type_": {
                     "display": "float",
                     "link_target": null,
                     "children": []
@@ -805,6 +809,24 @@
               ],
               "return_type": {
                 "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
                 "link_target": null,
                 "children": []
               }
@@ -816,26 +838,8 @@
         {
           "kind": "Function",
           "name": "manual_overload_example_2",
-          "doc": "Increments float by 1",
+          "doc": "Increments integer by 1",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "ob",
-                  "type_": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "float",
-                "link_target": null,
-                "children": []
-              }
-            },
             {
               "parameters": [
                 {
@@ -850,6 +854,24 @@
               ],
               "return_type": {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
                 "link_target": null,
                 "children": []
               }
@@ -968,7 +990,10 @@
                       }
                     ]
                   },
-                  "default": "None"
+                  "default": {
+                    "kind": "Simple",
+                    "value": "None"
+                  }
                 }
               ],
               "return_type": {
@@ -995,7 +1020,8 @@
                     "link_target": {
                       "fqn": "pure.DataContainer",
                       "doc_module": "pure",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
@@ -1007,7 +1033,8 @@
                 "link_target": {
                   "fqn": "pure.DataContainer",
                   "doc_module": "pure",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -1965,7 +1992,8 @@
               "link_target": {
                 "fqn": "pure.A",
                 "doc_module": "pure",
-                "kind": "Class"
+                "kind": "Class",
+                "attribute": null
               },
               "children": []
             }
@@ -3011,7 +3039,10 @@
                         "link_target": null,
                         "children": []
                       },
-                      "default": "False"
+                      "default": {
+                        "kind": "Simple",
+                        "value": "False"
+                      }
                     },
                     {
                       "name": "latex",
@@ -3026,7 +3057,10 @@
                           }
                         ]
                       },
-                      "default": "None"
+                      "default": {
+                        "kind": "Simple",
+                        "value": "None"
+                      }
                     }
                   ],
                   "return_type": {
@@ -3198,7 +3232,18 @@
           "doc": "Test enum with skip_stub_type",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "OPTION_A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "OPTION_B",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         },
         {
@@ -3207,7 +3252,18 @@
           "doc": "",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "FLOAT",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "INTEGER",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         },
         {
@@ -3216,7 +3272,18 @@
           "doc": "",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "FLOAT",
+              "doc": "Float variant",
+              "type_": null
+            },
+            {
+              "name": "INTEGER",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         },
         {

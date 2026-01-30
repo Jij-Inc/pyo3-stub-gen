@@ -519,11 +519,13 @@ def _build_class(env, cls, module_name):
 
     desc_node += sig_node
 
+    # Always create desc_content to hold docstring + methods + attributes
+    content = desc_content()
+
+    # Add docstring if present
     if cls.get('doc'):
-        content = desc_content()
         for node in _parse_myst(cls['doc'], env):
             content.append(node)
-        desc_node += content
 
     # Register with Python domain
     if hasattr(env, 'domaindata'):
@@ -580,7 +582,7 @@ def _build_class(env, cls, module_name):
             py_domain = env.get_domain('py')
             py_domain.note_object(method_fullname, 'method', method_fullname, location=env.docname)
 
-        desc_node += method_desc
+        content += method_desc
 
     # Render class attributes
     attributes = cls.get('attributes', [])
@@ -612,7 +614,10 @@ def _build_class(env, cls, module_name):
             py_domain = env.get_domain('py')
             py_domain.note_object(attr_fullname, 'attribute', attr_fullname, location=env.docname)
 
-        desc_node += attr_desc
+        content += attr_desc
+
+    # Add the complete content block to desc_node
+    desc_node += content
 
     return [desc_node]
 

@@ -59,7 +59,8 @@
                 "link_target": {
                   "fqn": "mixed.main_mod.A",
                   "doc_module": "mixed.main_mod",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -90,7 +91,8 @@
                 "link_target": {
                   "fqn": "mixed.main_mod.B",
                   "doc_module": "mixed.main_mod",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -196,6 +198,49 @@
         },
         {
           "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "C",
           "doc": "",
           "bases": [],
@@ -234,7 +279,8 @@
                     "link_target": {
                       "fqn": "mixed.main_mod.A",
                       "doc_module": "mixed.main_mod",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
@@ -247,7 +293,8 @@
                     "link_target": {
                       "fqn": "mixed.main_mod.B",
                       "doc_module": "mixed.main_mod",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
@@ -259,7 +306,8 @@
                 "link_target": {
                   "fqn": "mixed.main_mod.mod_a.C",
                   "doc_module": "mixed.main_mod.mod_a",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -339,49 +387,6 @@
           }
         },
         {
-          "kind": "Class",
-          "name": "D",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
-          "name": "greet_b",
-          "doc": "",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "None",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
           "kind": "Module",
           "name": "int",
           "doc": "",
@@ -458,7 +463,8 @@
                     "link_target": {
                       "fqn": "mixed.main_mod.A",
                       "doc_module": "mixed.main_mod",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
@@ -471,7 +477,8 @@
                     "link_target": {
                       "fqn": "mixed.main_mod.B",
                       "doc_module": "mixed.main_mod",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
@@ -483,7 +490,8 @@
                 "link_target": {
                   "fqn": "mixed.main_mod.mod_a.C",
                   "doc_module": "mixed.main_mod.mod_a",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -617,7 +625,8 @@
                 "link_target": {
                   "fqn": "mixed.main_mod.mod_b.D",
                   "doc_module": "mixed.main_mod.mod_b",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -772,7 +781,18 @@
           "doc": "Test 2: Inline overrides pyo3",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         },
         {
@@ -781,7 +801,18 @@
           "doc": "Test 3: Only inline (no pyo3)",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         }
       ],
@@ -806,7 +837,18 @@
           "doc": "Test 1: Only pyo3 module",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
           "deprecated": null
         }
       ],
