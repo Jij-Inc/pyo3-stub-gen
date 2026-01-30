@@ -1,6 +1,6 @@
 //! Haddock-style link resolution for documentation
 
-use crate::docgen::ir::ItemKind;
+use crate::docgen::ir::{ItemKind, LinkTarget};
 use std::collections::BTreeMap;
 
 /// Link resolver implementing Haddock-style resolution
@@ -50,5 +50,33 @@ impl<'a> LinkResolver<'a> {
     /// Check if a module is private (has underscore segments)
     fn is_private_module(&self, module_name: &str) -> bool {
         module_name.split('.').any(|part| part.starts_with('_'))
+    }
+
+    /// Resolve a link to a class attribute (e.g., "C.C1" → link to C1 variant of class C)
+    ///
+    /// This is used for linking to enum variants or class attributes in default values.
+    pub fn resolve_attribute_link(
+        &self,
+        class_name: &str,
+        attribute_name: &str,
+        current_module: &str,
+    ) -> Option<LinkTarget> {
+        // 1. Resolve the class itself
+        let (doc_module, kind) = self.resolve_link(class_name, current_module)?;
+
+        // 2. Verify it's a class
+        if kind != ItemKind::Class {
+            return None;
+        }
+
+        // 3. Build FQN with attribute: "module.Class.attribute"
+        let fqn = format!("{}.{}", class_name, attribute_name);
+
+        Some(LinkTarget {
+            fqn,
+            doc_module,
+            kind: ItemKind::Class,
+            attribute: Some(attribute_name.to_string()),
+        })
     }
 }

@@ -3,8 +3,8 @@
 use crate::docgen::{
     export::ExportResolver,
     ir::{
-        DeprecatedInfo, DocClass, DocFunction, DocItem, DocModule, DocPackage, DocParameter,
-        DocSignature, DocSubmodule, DocTypeAlias, DocTypeExpr, DocVariable,
+        DeprecatedInfo, DocAttribute, DocClass, DocFunction, DocItem, DocModule, DocPackage,
+        DocParameter, DocSignature, DocSubmodule, DocTypeAlias, DocTypeExpr, DocVariable,
     },
     types::TypeRenderer,
 };
@@ -234,6 +234,8 @@ impl<'a> DocPackageBuilder<'a> {
             &type_aliases,
             &self.default_module_name,
         );
+        let default_parser =
+            crate::docgen::default_parser::DefaultValueParser::new(&link_resolver, module);
 
         let params: Vec<DocParameter> = parameters
             .positional_only
@@ -247,7 +249,10 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: type_renderer.render_type(&param.type_info),
                 default: match &param.default {
                     crate::generate::ParameterDefault::None => None,
-                    crate::generate::ParameterDefault::Expr(s) => Some(s.clone()),
+                    crate::generate::ParameterDefault::Expr(s) => {
+                        // Parse default value and identify type references
+                        Some(default_parser.parse(s, &param.type_info))
+                    }
                 },
             })
             .collect();
@@ -365,12 +370,23 @@ impl<'a> DocPackageBuilder<'a> {
         // Convert enum to class-like representation
         // EnumDef doesn't have bases field
 
+        // Convert enum variants to DocAttributes
+        let attributes: Vec<DocAttribute> = enum_def
+            .variants
+            .iter()
+            .map(|(variant_name, variant_doc)| DocAttribute {
+                name: (*variant_name).to_string(),
+                doc: (*variant_doc).to_string(),
+                type_: None, // Enum variants don't have explicit type annotations
+            })
+            .collect();
+
         Ok(DocItem::Class(DocClass {
             name: enum_def.name.to_string(),
             doc: enum_def.doc.to_string(),
             bases: Vec::new(), // Enums don't have bases in our structure
             methods: Vec::new(),
-            attributes: Vec::new(),
+            attributes,
             deprecated: None,
         }))
     }

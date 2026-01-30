@@ -339,6 +339,7 @@ impl<'a> TypeRenderer<'a> {
             fqn,
             doc_module,
             kind: ItemKind::Class, // Assume class for now
+            attribute: None,
         })
     }
 

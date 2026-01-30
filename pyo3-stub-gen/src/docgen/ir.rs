@@ -64,7 +64,7 @@ pub struct DocSignature {
 pub struct DocParameter {
     pub name: String,
     pub type_: DocTypeExpr,
-    pub default: Option<String>,
+    pub default: Option<DocDefaultValue>,
 }
 
 /// A type alias definition
@@ -113,15 +113,47 @@ pub struct DocTypeExpr {
     pub children: Vec<DocTypeExpr>,
 }
 
+/// Default value that may contain type references
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "kind")]
+pub enum DocDefaultValue {
+    /// Simple literal (no type references): "42", "None", etc.
+    Simple { value: String },
+    /// Expression containing type references: "C.C1", "SomeClass()"
+    Expression(DocDefaultExpression),
+}
+
+/// Default value expression with embedded type references
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DocDefaultExpression {
+    /// Full expression text: "C.C1"
+    pub display: String,
+    /// Identified type references within expression
+    pub type_refs: Vec<DocTypeRef>,
+}
+
+/// Type reference within a default value expression
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DocTypeRef {
+    /// Full reference text: "C.C1"
+    pub text: String,
+    /// Character offset in display string
+    pub offset: usize,
+    /// Can link to class or class attribute
+    pub link_target: Option<LinkTarget>,
+}
+
 /// Link target information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LinkTarget {
-    /// Fully qualified name
+    /// Fully qualified name (can be "module.Class" or "module.Class.attribute")
     pub fqn: String,
     /// Module where the item is documented (after Haddock resolution)
     pub doc_module: String,
     /// Item kind
     pub kind: ItemKind,
+    /// Attribute name for attribute-level links (e.g., "C1" for enum variant)
+    pub attribute: Option<String>,
 }
 
 /// Kind of documented item

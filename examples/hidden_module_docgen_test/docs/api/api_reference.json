@@ -27,7 +27,8 @@
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.B",
                   "doc_module": "hidden_module_docgen_test",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -94,7 +95,23 @@
           "doc": "This is the docstring for enum C.",
           "bases": [],
           "methods": [],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "C0",
+              "doc": "This is 0th variant",
+              "type_": null
+            },
+            {
+              "name": "C1",
+              "doc": "This is 1st variant",
+              "type_": null
+            },
+            {
+              "name": "C2",
+              "doc": "This is 2nd variant",
+              "type_": null
+            }
+          ],
           "deprecated": null
         },
         {
@@ -119,7 +136,8 @@
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.A",
                   "doc_module": "hidden_module_docgen_test",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -142,11 +160,27 @@
                     "link_target": {
                       "fqn": "hidden_module_docgen_test.C",
                       "doc_module": "hidden_module_docgen_test",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   },
-                  "default": "_core.C.C1"
+                  "default": {
+                    "kind": "Expression",
+                    "display": "C.C1",
+                    "type_refs": [
+                      {
+                        "text": "C.C1",
+                        "offset": 0,
+                        "link_target": {
+                          "fqn": "hidden_module_docgen_test.C.C1",
+                          "doc_module": "hidden_module_docgen_test",
+                          "kind": "Class",
+                          "attribute": "C1"
+                        }
+                      }
+                    ]
+                  }
                 }
               ],
               "return_type": {
@@ -154,7 +188,8 @@
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.C",
                   "doc_module": "hidden_module_docgen_test",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -198,7 +233,8 @@
                         "link_target": {
                           "fqn": "hidden_module_docgen_test.A",
                           "doc_module": "hidden_module_docgen_test",
-                          "kind": "Class"
+                          "kind": "Class",
+                          "attribute": null
                         },
                         "children": []
                       }
@@ -216,7 +252,8 @@
                     "link_target": {
                       "fqn": "hidden_module_docgen_test.A",
                       "doc_module": "hidden_module_docgen_test",
-                      "kind": "Class"
+                      "kind": "Class",
+                      "attribute": null
                     },
                     "children": []
                   }
@@ -240,7 +277,8 @@
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.A",
                   "doc_module": "hidden_module_docgen_test",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               },
@@ -249,7 +287,8 @@
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.B",
                   "doc_module": "hidden_module_docgen_test",
-                  "kind": "Class"
+                  "kind": "Class",
+                  "attribute": null
                 },
                 "children": []
               }
@@ -265,7 +304,8 @@
             "link_target": {
               "fqn": "hidden_module_docgen_test.A",
               "doc_module": "hidden_module_docgen_test",
-              "kind": "Class"
+              "kind": "Class",
+              "attribute": null
             },
             "children": []
           }

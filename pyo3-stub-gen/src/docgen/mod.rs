@@ -5,6 +5,7 @@
 
 pub mod builder;
 pub mod config;
+pub mod default_parser;
 pub mod export;
 pub mod ir;
 pub mod link;
