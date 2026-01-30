@@ -174,7 +174,7 @@ def _build_type_expr(type_expr):
             reftarget=link_target['fqn'],
             refexplicit=True,
         )
-        xref += nodes.literal(text=display)
+        xref += nodes.Text(display)
         return xref
     else:
         # Parse the type expression and create intersphinx links for external types
