@@ -415,7 +415,9 @@ impl<'a> DocPackageBuilder<'a> {
         // Try enums
         for enum_def in source_module.enum_.values() {
             if enum_def.name == item_name {
-                return Ok(Some(self.build_enum_as_class(source_module_name, enum_def)?));
+                return Ok(Some(
+                    self.build_enum_as_class(source_module_name, enum_def)?,
+                ));
             }
         }
 
@@ -482,25 +484,27 @@ impl<'a> DocPackageBuilder<'a> {
         if let Some(link_target) = &mut type_expr.link_target {
             // Try to find the correct export module and FQN
             // First try the original FQN
-            let (exported_fqn, exported_module) = if let Some(module) = self.export_map.get(&link_target.fqn) {
-                (link_target.fqn.clone(), module.clone())
-            } else {
-                // If not found, try to extract the type name and look for it under other modules
-                // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
-                if let Some(type_name) = link_target.fqn.split('.').last() {
-                    // Try each module in export_map to find a match
-                    if let Some((fqn, module)) = self.export_map
-                        .iter()
-                        .find(|(fqn, _)| fqn.ends_with(&format!(".{}", type_name)))
-                    {
-                        (fqn.clone(), module.clone())
+            let (exported_fqn, exported_module) =
+                if let Some(module) = self.export_map.get(&link_target.fqn) {
+                    (link_target.fqn.clone(), module.clone())
+                } else {
+                    // If not found, try to extract the type name and look for it under other modules
+                    // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
+                    if let Some(type_name) = link_target.fqn.split('.').next_back() {
+                        // Try each module in export_map to find a match
+                        if let Some((fqn, module)) = self
+                            .export_map
+                            .iter()
+                            .find(|(fqn, _)| fqn.ends_with(&format!(".{}", type_name)))
+                        {
+                            (fqn.clone(), module.clone())
+                        } else {
+                            (link_target.fqn.clone(), link_target.doc_module.clone())
+                        }
                     } else {
                         (link_target.fqn.clone(), link_target.doc_module.clone())
                     }
-                } else {
-                    (link_target.fqn.clone(), link_target.doc_module.clone())
-                }
-            };
+                };
 
             link_target.fqn = exported_fqn;
             link_target.doc_module = exported_module;

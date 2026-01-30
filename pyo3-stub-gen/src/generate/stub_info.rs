@@ -1,5 +1,5 @@
 use crate::{
-    generate::*,
+    generate::{docstring::normalize_docstring, *},
     pyproject::{PyProject, StubGenConfig},
     type_info::*,
 };
@@ -281,7 +281,8 @@ impl StubInfoBuilder {
     }
 
     fn add_module_doc(&mut self, info: &ModuleDocInfo) {
-        self.get_module(Some(info.module)).doc = (info.doc)();
+        let raw_doc = (info.doc)();
+        self.get_module(Some(info.module)).doc = normalize_docstring(&raw_doc);
     }
 
     fn add_module_export(&mut self, info: &ReexportModuleMembers) {

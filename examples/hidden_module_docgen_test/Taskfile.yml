@@ -11,13 +11,14 @@ tasks:
   test:
     desc: Run tests
     cmds:
+      - uv sync --dev
       - uv run pyright
       - uvx ruff check
       - uv run mypy --show-error-codes -p hidden_module_docgen_test
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details
-      - uv run pyrefly check .
-      - uv run ty check .
+      - uv run pyrefly check python
+      - uv run ty check python
 
   doc-build:
     desc: Build Sphinx documentation

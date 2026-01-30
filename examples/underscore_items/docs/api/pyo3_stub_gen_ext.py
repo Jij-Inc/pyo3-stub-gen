@@ -1,3 +1,4 @@
+# type: ignore
 """Sphinx extension for pyo3-stub-gen API documentation"""
 
 import json
@@ -6,8 +7,9 @@ from pathlib import Path
 from docutils import nodes
 from sphinx.addnodes import (
     desc, desc_signature, desc_name, desc_parameterlist,
-    desc_parameter, desc_returns, pending_xref, desc_content
+    desc_parameter, desc_returns, pending_xref, desc_content, desc_annotation
 )
+from myst_parser.parsers.docutils_ import Parser as MystParser
 from sphinx.util.docutils import SphinxDirective
 
 # Helper functions for building documentation nodes
@@ -163,6 +165,7 @@ def _build_type_expr(type_expr):
             'Function': 'func',
             'TypeAlias': 'data',
             'Variable': 'data',
+            'Module': 'mod',
         }
         xref = pending_xref(
             '',
@@ -178,14 +181,38 @@ def _build_type_expr(type_expr):
         return _parse_and_link_type(display)
 
 def _parse_myst(markdown_text):
-    """Parse MyST markdown to nodes"""
-    # Simplified - just return as paragraph for now
-    # Full implementation would use MyST parser
-    return nodes.paragraph(text=markdown_text)
+    """Parse MyST markdown to docutils nodes using myst-parser"""
+    from docutils.core import publish_doctree
+    import textwrap
+
+    try:
+        # Dedent the text to avoid markdown treating it as a code block
+        # (indented text in markdown is interpreted as preformatted code)
+        dedented_text = textwrap.dedent(markdown_text).strip()
+
+        # Parse markdown using docutils core API with MyST parser
+        doctree = publish_doctree(
+            dedented_text,
+            parser=MystParser(),
+            settings_overrides={
+                'report_level': 5,  # Suppress warnings
+                'halt_level': 5,
+            }
+        )
+
+        # Extract the content nodes (skip the document wrapper)
+        container = nodes.container()
+        for child in doctree.children:
+            container.append(child)
+        return container
+    except Exception:
+        # Fallback to simple paragraph if parsing fails
+        return nodes.paragraph(text=markdown_text.strip())
 
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
     desc_node = desc(domain='py', objtype='function', noindex=False)
+    desc_node['classes'].extend(['py', 'function'])
 
     fullname = f"{module_name}.{func['name']}"
     sig_id = fullname
@@ -200,6 +227,7 @@ def _build_function(env, func, module_name):
         sig_node['ids'].append(sig_id)
         sig_node['first'] = (idx == 0)
 
+        # Function name
         sig_node += desc_name(text=func['name'])
 
         # Parameters
@@ -245,8 +273,10 @@ def _build_type_alias(env, alias, module_name):
     sig_id = fullname
     sig_node['ids'].append(sig_id)
 
+    # Use Python 3.12+ type syntax
+    sig_node += desc_annotation(text='type ')
     sig_node += desc_name(text=alias['name'])
-    sig_node += nodes.Text(': TypeAlias = ')
+    sig_node += nodes.Text(' = ')
     sig_node += _build_type_expr(alias['definition'])
     desc_node += sig_node
 
@@ -265,6 +295,7 @@ def _build_type_alias(env, alias, module_name):
 def _build_class(env, cls, module_name):
     """Build class documentation"""
     desc_node = desc(domain='py', objtype='class', noindex=False)
+    desc_node['classes'].extend(['py', 'class'])
 
     fullname = f"{module_name}.{cls['name']}"
     sig_node = desc_signature(module=module_name, fullname=fullname)
@@ -273,7 +304,21 @@ def _build_class(env, cls, module_name):
     sig_id = fullname
     sig_node['ids'].append(sig_id)
 
+    # Add "class" prefix annotation with syntax highlighting
+    annotation = desc_annotation()
+    # Keyword span (class keyword)
+    keyword_span = nodes.inline(classes=['k'])
+    keyword_span += nodes.Text('class')
+    annotation += keyword_span
+    # Whitespace span
+    ws_span = nodes.inline(classes=['w'])
+    ws_span += nodes.Text(' ')
+    annotation += ws_span
+    sig_node += annotation
+
+    # Add class name
     sig_node += desc_name(text=cls['name'])
+
     desc_node += sig_node
 
     if cls.get('doc'):
@@ -285,6 +330,87 @@ def _build_class(env, cls, module_name):
     if hasattr(env, 'domaindata'):
         py_domain = env.get_domain('py')
         py_domain.note_object(fullname, 'class', sig_id, location=env.docname)
+
+    # Render class methods
+    methods = cls.get('methods', [])
+    for method in methods:
+        method_fullname = f"{fullname}.{method['name']}"
+        method_desc = desc(domain='py', objtype='method', noindex=False)
+        method_desc['classes'].extend(['py', 'method'])
+
+        # Add signature for each overload
+        for idx, sig in enumerate(method['signatures']):
+            sig_node = desc_signature(module=module_name, fullname=method_fullname)
+            sig_node['module'] = module_name
+            sig_node['fullname'] = method_fullname
+            sig_node['ids'].append(method_fullname)
+            sig_node['first'] = (idx == 0)
+
+            # Method name
+            sig_node += desc_name(text=method['name'])
+
+            # Parameters
+            param_list = desc_parameterlist()
+            for param in sig['parameters']:
+                param_node = desc_parameter()
+                param_node += nodes.Text(param['name'] + ': ')
+                param_node += _build_type_expr(param['type_'])
+                if param.get('default'):
+                    param_node += nodes.Text(' = ' + param['default'])
+                param_list += param_node
+            sig_node += param_list
+
+            # Return type
+            if sig['return_type']:
+                returns = desc_returns()
+                returns += _build_type_expr(sig['return_type'])
+                sig_node += returns
+
+            method_desc += sig_node
+
+        # Method docstring
+        if method.get('doc'):
+            method_content = desc_content()
+            method_content += _parse_myst(method['doc'])
+            method_desc += method_content
+
+        # Register method
+        if hasattr(env, 'domaindata'):
+            py_domain = env.get_domain('py')
+            py_domain.note_object(method_fullname, 'method', method_fullname, location=env.docname)
+
+        desc_node += method_desc
+
+    # Render class attributes
+    attributes = cls.get('attributes', [])
+    for attr in attributes:
+        attr_fullname = f"{fullname}.{attr['name']}"
+        attr_desc = desc(domain='py', objtype='attribute', noindex=False)
+
+        sig_node = desc_signature(module=module_name, fullname=attr_fullname)
+        sig_node['module'] = module_name
+        sig_node['fullname'] = attr_fullname
+        sig_node['ids'].append(attr_fullname)
+
+        sig_node += desc_name(text=attr['name'])
+        if attr.get('type_'):
+            sig_node += nodes.Text(': ')
+            sig_node += _build_type_expr(attr['type_'])
+
+        attr_desc += sig_node
+
+        # Attribute docstring
+        if attr.get('doc'):
+            attr_content = desc_content()
+            attr_content += _parse_myst(attr['doc'])
+            attr_desc += attr_content
+
+        # Register attribute
+        if hasattr(env, 'domaindata'):
+            py_domain = env.get_domain('py')
+            py_domain.note_object(attr_fullname, 'attribute', attr_fullname, location=env.docname)
+
+        desc_node += attr_desc
 
     return [desc_node]
 
@@ -317,6 +443,36 @@ def _build_variable(env, var, module_name):
 
     return [desc_node]
 
+def _build_submodule(env, submod, parent_module_name):
+    """Build documentation for a submodule reference"""
+    submod_name = submod['name']
+    submod_fqn = submod['fqn']
+    submod_doc = submod.get('doc', '')
+
+    # Create a list item with a reference
+    list_item = nodes.list_item()
+    para = nodes.paragraph()
+
+    # Add the module annotation as strong text
+    para += nodes.strong(text='module ')
+
+    # Create a reference to the submodule's documentation page
+    # The documentation pages are named after the FQN (e.g., mixed.main_mod.html)
+    ref = nodes.reference('', '')
+    ref['refuri'] = f'{submod_fqn}.html'
+    ref['reftitle'] = f'Link to {submod_fqn} module'
+    ref += nodes.literal(text=submod_name, classes=['xref', 'py', 'py-mod'])
+    para += ref
+
+    list_item += para
+
+    # Add docstring if present
+    if submod_doc:
+        list_item += _parse_myst(submod_doc)
+
+    # Return just the list item (caller will add to bullet list)
+    return [list_item]
+
 class Pyo3APIDirective(SphinxDirective):
     """Render API from pyo3-stub-gen JSON IR"""
 
@@ -335,15 +491,66 @@ class Pyo3APIDirective(SphinxDirective):
 
         # Find module
         if module_name not in doc_package['modules']:
-            return [nodes.error(None, nodes.paragraph(
+            return [nodes.error('', nodes.paragraph(
                 text=f"Module not found: {module_name}"))]
 
         doc_module = doc_package['modules'][module_name]
 
-        # Build nodes for all items
         result = []
-        for item in doc_module['items']:
-            result.extend(self._build_item(item, module_name))
+
+        # Render module docstring if present
+        if doc_module.get('doc'):
+            result.append(_parse_myst(doc_module['doc']))
+
+        # Group items by kind
+        functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+        classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+        type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+        variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+        modules = [item for item in doc_module['items'] if item['kind'] == 'Module']
+
+        # Submodules section (add FIRST for prominence)
+        if modules:
+            mod_section = nodes.section(ids=[f'{module_name}-submodules'])
+            mod_section += nodes.title(text='Submodules')
+            # Create a single bullet list for all submodules
+            bullet_list = nodes.bullet_list()
+            for submod in modules:
+                bullet_list.extend(self._build_submodule(submod, module_name))
+            mod_section += bullet_list
+            result.append(mod_section)
+
+        # Functions section
+        if functions:
+            func_section = nodes.section(ids=[f'{module_name}-functions'])
+            func_section += nodes.title(text='Functions')
+            for func in functions:
+                func_section.extend(self._build_function(func, module_name))
+            result.append(func_section)
+
+        # Classes section
+        if classes:
+            class_section = nodes.section(ids=[f'{module_name}-classes'])
+            class_section += nodes.title(text='Classes')
+            for cls in classes:
+                class_section.extend(self._build_class(cls, module_name))
+            result.append(class_section)
+
+        # Type Aliases section
+        if type_aliases:
+            alias_section = nodes.section(ids=[f'{module_name}-type-aliases'])
+            alias_section += nodes.title(text='Type Aliases')
+            for alias in type_aliases:
+                alias_section.extend(self._build_type_alias(alias, module_name))
+            result.append(alias_section)
+
+        # Variables section
+        if variables:
+            var_section = nodes.section(ids=[f'{module_name}-variables'])
+            var_section += nodes.title(text='Variables')
+            for var in variables:
+                var_section.extend(self._build_variable(var, module_name))
+            result.append(var_section)
 
         return result
 
@@ -370,6 +577,9 @@ class Pyo3APIDirective(SphinxDirective):
 
     def _build_variable(self, var, module_name):
         return _build_variable(self.env, var, module_name)
+
+    def _build_submodule(self, submod, module_name):
+        return _build_submodule(self.env, submod, module_name)
 
 class Pyo3APIPackageDirective(SphinxDirective):
     """Render API for all modules in a package from pyo3-stub-gen JSON IR"""
@@ -400,9 +610,59 @@ class Pyo3APIPackageDirective(SphinxDirective):
                 title = nodes.title(text=title_text)
                 section += title
 
-                # Build nodes for all items in this module
-                for item in doc_module['items']:
-                    section.extend(self._build_item(item, module_name))
+                # Render module docstring if present
+                if doc_module.get('doc'):
+                    section += _parse_myst(doc_module['doc'])
+
+                # Group items by kind
+                functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+                classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+                type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+                variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+                modules = [item for item in doc_module['items'] if item['kind'] == 'Module']
+
+                # Submodules subsection (add FIRST for prominence)
+                if modules:
+                    mod_section = nodes.section(ids=[f'{module_name}-submodules'])
+                    mod_section += nodes.title(text='Submodules')
+                    # Create a single bullet list for all submodules
+                    bullet_list = nodes.bullet_list()
+                    for submod in modules:
+                        bullet_list.extend(self._build_submodule(submod, module_name))
+                    mod_section += bullet_list
+                    section.append(mod_section)
+
+                # Functions subsection
+                if functions:
+                    func_section = nodes.section(ids=[f'{module_name}-functions'])
+                    func_section += nodes.title(text='Functions')
+                    for func in functions:
+                        func_section.extend(self._build_function(func, module_name))
+                    section.append(func_section)
+
+                # Classes subsection
+                if classes:
+                    class_section = nodes.section(ids=[f'{module_name}-classes'])
+                    class_section += nodes.title(text='Classes')
+                    for cls in classes:
+                        class_section.extend(self._build_class(cls, module_name))
+                    section.append(class_section)
+
+                # Type Aliases subsection
+                if type_aliases:
+                    alias_section = nodes.section(ids=[f'{module_name}-type-aliases'])
+                    alias_section += nodes.title(text='Type Aliases')
+                    for alias in type_aliases:
+                        alias_section.extend(self._build_type_alias(alias, module_name))
+                    section.append(alias_section)
+
+                # Variables subsection
+                if variables:
+                    var_section = nodes.section(ids=[f'{module_name}-variables'])
+                    var_section += nodes.title(text='Variables')
+                    for var in variables:
+                        var_section.extend(self._build_variable(var, module_name))
+                    section.append(var_section)
 
                 result.append(section)
 
@@ -431,6 +691,9 @@ class Pyo3APIPackageDirective(SphinxDirective):
 
     def _build_variable(self, var, module_name):
         return _build_variable(self.env, var, module_name)
+
+    def _build_submodule(self, submod, module_name):
+        return _build_submodule(self.env, submod, module_name)
 
 def setup(app):
     app.add_directive('pyo3-api', Pyo3APIDirective)

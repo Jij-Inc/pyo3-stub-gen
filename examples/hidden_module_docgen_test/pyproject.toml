@@ -4,7 +4,13 @@ version = "0.1"
 requires-python = ">=3.10"
 
 [dependency-groups]
-dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+dev = [
+  "mypy>=1.19.1",
+  "myst-parser",
+  "pyrefly>=0.50.1",
+  "sphinx",
+  "sphinx-rtd-theme",
+]
 
 [build-system]
 requires = ["maturin>=1.1,<2.0"]

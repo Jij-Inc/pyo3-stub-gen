@@ -3,7 +3,7 @@
   "modules": {
     "hidden_module_docgen_test": {
       "name": "hidden_module_docgen_test",
-      "doc": "",
+      "doc": "This is the main module docstring for hidden_module_docgen_test.\nThese lines are trimmed appropriately.\n\n    This must be indented by four spaces.",
       "items": [
         {
           "kind": "Function",

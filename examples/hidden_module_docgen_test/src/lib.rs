@@ -88,4 +88,14 @@ pyo3_stub_gen::reexport_module_members!(
     "hidden_module_docgen_test._core"
 );
 
+pyo3_stub_gen::module_doc!(
+    "hidden_module_docgen_test",
+    r#"
+    This is the main module docstring for hidden_module_docgen_test.
+    These lines are trimmed appropriately.
+
+        This must be indented by four spaces.
+    "#
+);
+
 define_stub_info_gatherer!(stub_info);

@@ -89,7 +89,9 @@ impl<'a> TypeRenderer<'a> {
         let kind = ItemKind::Class;
 
         // Use export_map to find the correct module where this type is exported
-        let doc_module = self.link_resolver.export_map()
+        let doc_module = self
+            .link_resolver
+            .export_map()
             .get(&fqn)
             .cloned()
             .unwrap_or_else(|| self.current_module.to_string());
