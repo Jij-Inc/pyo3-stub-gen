@@ -38,7 +38,7 @@
         },
         {
           "kind": "Class",
-          "name": "B",
+          "name": "A",
           "doc": "",
           "bases": [],
           "methods": [
@@ -64,7 +64,7 @@
         },
         {
           "kind": "Class",
-          "name": "A",
+          "name": "B",
           "doc": "",
           "bases": [],
           "methods": [
@@ -148,7 +148,17 @@
                   "type_": {
                     "display": "Optional[_core.A]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "A",
+                        "link_target": {
+                          "fqn": "hidden_module_docgen_test.A",
+                          "doc_module": "hidden_module_docgen_test",
+                          "kind": "Class"
+                        },
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -156,7 +166,17 @@
               "return_type": {
                 "display": "Optional[_core.A]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "hidden_module_docgen_test.A",
+                      "doc_module": "hidden_module_docgen_test",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -170,7 +190,26 @@
           "definition": {
             "display": "_core.A | _core.B",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "A",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.A",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class"
+                },
+                "children": []
+              },
+              {
+                "display": "B",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.B",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            ]
           }
         },
         {

@@ -154,11 +154,39 @@ def _parse_and_link_type(type_str):
     return container
 
 def _build_type_expr(type_expr):
-    """Build type expression with intersphinx linking for external types"""
+    """Build type expression with intersphinx linking for external types
+
+    Recursively handles nested types from the children field.
+    """
     display = type_expr['display']
     link_target = type_expr.get('link_target')
+    children = type_expr.get('children', [])
 
-    if link_target:
+    # Case 1: Type with link target and children (e.g., Generic[T] where Generic has a link)
+    if link_target and children:
+        # Build the base type with link
+        kind_to_reftype = {
+            'Class': 'class',
+            'Function': 'func',
+            'TypeAlias': 'data',
+            'Variable': 'data',
+            'Module': 'mod',
+        }
+        base_name = display.split('[')[0] if '[' in display else display
+        xref = pending_xref(
+            '',
+            refdomain='py',
+            reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+            reftarget=link_target['fqn'],
+            refexplicit=True,
+        )
+        xref += nodes.Text(base_name)
+
+        # Build the generic part with children
+        return _build_generic_with_children(xref, children)
+
+    # Case 2: Type with link target but no children (simple type)
+    elif link_target:
         # Create pending_xref for our own types
         kind_to_reftype = {
             'Class': 'class',
@@ -176,9 +204,55 @@ def _build_type_expr(type_expr):
         )
         xref += nodes.Text(display)
         return xref
+
+    # Case 3: Union type (has children but no link_target)
+    elif children:
+        # Check if this is a union type by looking for '|' in display
+        if '|' in display:
+            return _build_union_type(children)
+        # Otherwise it's a generic type with no base link (e.g., typing.Optional)
+        else:
+            # Extract base name
+            base_name = display.split('[')[0] if '[' in display else display
+            # Parse base to potentially link it via intersphinx
+            base_node = _parse_and_link_type(base_name)
+            return _build_generic_with_children(base_node, children)
+
+    # Case 4: External type or simple builtin (no link, no children)
     else:
         # Parse the type expression and create intersphinx links for external types
         return _parse_and_link_type(display)
+
+
+def _build_generic_with_children(base_node, children):
+    """Build a generic type expression like Base[T1, T2] with linked children"""
+    container = nodes.inline()
+    container += base_node
+    container += nodes.Text('[')
+
+    for i, child in enumerate(children):
+        if i > 0:
+            container += nodes.Text(', ')
+        # Recursively render child
+        child_node = _build_type_expr(child)
+        container += child_node
+
+    container += nodes.Text(']')
+    return container
+
+
+def _build_union_type(children):
+    """Build a union type expression like A | B | C with linked children"""
+    container = nodes.inline()
+
+    for i, child in enumerate(children):
+        if i > 0:
+            container += nodes.Text(' | ')
+        # Recursively render child
+        child_node = _build_type_expr(child)
+        container += child_node
+
+    return container
 
 def _parse_myst(markdown_text, env=None):
     """Parse MyST markdown to docutils nodes using myst-parser
