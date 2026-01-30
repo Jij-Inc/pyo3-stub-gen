@@ -37,6 +37,20 @@ struct B {
     x: usize,
 }
 
+// Class without explicit module specification
+#[gen_stub_pyclass_enum]
+#[pyclass(module = "hidden_module_docgen_test._core", frozen, eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// This is the docstring for enum C.
+enum C {
+    /// This is 0th variant
+    C0,
+    /// This is 1st variant
+    C1,
+    /// This is 2nd variant
+    C2,
+}
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl B {
@@ -59,6 +73,13 @@ impl B {
 /// This must be rendered: $x + x$
 fn create_b(x: usize) -> B {
     B { x }
+}
+
+/// A function with a default argument
+#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[pyfunction(signature = (c = C::C1))]
+fn default_c(c: C) -> C {
+    c
 }
 
 // Type alias in mod_a to test wildcard re-export
@@ -93,6 +114,8 @@ fn hidden_module_docgen_test(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(create_b, m)?)?;
     m.add_function(wrap_pyfunction!(greet_main, m)?)?;
+    m.add_function(wrap_pyfunction!(wrap_opt_a, m)?)?;
+    m.add_function(wrap_pyfunction!(default_c, m)?)?;
 
     // Add submodules
     core(m)?;
@@ -104,9 +127,12 @@ fn core(parent: &Bound<PyModule>) -> PyResult<()> {
     let sub = PyModule::new(py, "_core")?;
     sub.add_class::<A>()?;
     sub.add_class::<B>()?;
+    sub.add_class::<C>()?;
     sub.add_function(wrap_pyfunction!(create_a, &sub)?)?;
     sub.add_function(wrap_pyfunction!(create_b, &sub)?)?;
     sub.add_function(wrap_pyfunction!(greet_main, &sub)?)?;
+    sub.add_function(wrap_pyfunction!(wrap_opt_a, &sub)?)?;
+    sub.add_function(wrap_pyfunction!(default_c, &sub)?)?;
     parent.add_submodule(&sub)?;
     Ok(())
 }

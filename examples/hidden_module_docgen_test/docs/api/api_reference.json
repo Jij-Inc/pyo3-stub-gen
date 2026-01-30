@@ -38,6 +38,32 @@
         },
         {
           "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "A",
           "doc": "",
           "bases": [],
@@ -64,27 +90,10 @@
         },
         {
           "kind": "Class",
-          "name": "B",
-          "doc": "",
+          "name": "C",
+          "doc": "This is the docstring for enum C.",
           "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
+          "methods": [],
           "attributes": [],
           "deprecated": null
         },
@@ -109,6 +118,41 @@
                 "display": "A",
                 "link_target": {
                   "fqn": "hidden_module_docgen_test.A",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class"
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "default_c",
+          "doc": "A function with a default argument",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "c",
+                  "type_": {
+                    "display": "C",
+                    "link_target": {
+                      "fqn": "hidden_module_docgen_test.C",
+                      "doc_module": "hidden_module_docgen_test",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  },
+                  "default": "_core.C.C1"
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.C",
                   "doc_module": "hidden_module_docgen_test",
                   "kind": "Class"
                 },
@@ -234,9 +278,11 @@
     "hidden_module_docgen_test.A": "hidden_module_docgen_test",
     "hidden_module_docgen_test.AorB": "hidden_module_docgen_test",
     "hidden_module_docgen_test.B": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.C": "hidden_module_docgen_test",
     "hidden_module_docgen_test.ModAAlias": "hidden_module_docgen_test",
     "hidden_module_docgen_test.create_a": "hidden_module_docgen_test",
     "hidden_module_docgen_test.create_b": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.default_c": "hidden_module_docgen_test",
     "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test",
     "hidden_module_docgen_test.wrap_opt_a": "hidden_module_docgen_test"
   }

@@ -14,9 +14,11 @@ __all__ = [
     "A",
     "AorB",
     "B",
+    "C",
     "ModAAlias",
     "create_a",
     "create_b",
+    "default_c",
     "greet_main",
     "wrap_opt_a",
 ]

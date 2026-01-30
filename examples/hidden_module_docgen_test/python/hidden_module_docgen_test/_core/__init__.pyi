@@ -2,14 +2,17 @@
 # ruff: noqa: E501, F401, F403, F405
 
 import builtins
+import enum
 import typing
 from typing import TypeAlias
 __all__ = [
     "A",
     "AorB",
     "B",
+    "C",
     "ModAAlias",
     "create_a",
+    "default_c",
     "greet_main",
     "wrap_opt_a",
 ]
@@ -24,7 +27,30 @@ class A:
 class B:
     def show_x(self) -> None: ...
 
+@typing.final
+class C(enum.Enum):
+    r"""
+    This is the docstring for enum C.
+    """
+    C0 = ...
+    r"""
+    This is 0th variant
+    """
+    C1 = ...
+    r"""
+    This is 1st variant
+    """
+    C2 = ...
+    r"""
+    This is 2nd variant
+    """
+
 def create_a(x: builtins.int) -> A: ...
+
+def default_c(c: C = _core.C.C1) -> C:
+    r"""
+    A function with a default argument
+    """
 
 def greet_main() -> None:
     r"""
