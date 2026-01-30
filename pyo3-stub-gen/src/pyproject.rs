@@ -69,6 +69,22 @@ impl PyProject {
             .and_then(|t| t.pyo3_stub_gen.clone())
             .unwrap_or_default()
     }
+
+    /// Return doc-gen configuration with output_dir resolved relative to pyproject.toml directory
+    pub fn doc_gen_config_resolved(&self) -> Option<crate::docgen::DocGenConfig> {
+        if let Some(mut config) = self.stub_gen_config().doc_gen {
+            // Resolve output_dir relative to pyproject.toml directory
+            // Only resolve if the path is relative (absolute paths stay unchanged)
+            if config.output_dir.is_relative() {
+                if let Some(base) = self.toml_path.parent() {
+                    config.output_dir = base.join(&config.output_dir);
+                }
+            }
+            Some(config)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -102,6 +118,9 @@ pub struct StubGenConfig {
     /// Default is `false` (use pre-3.12 `TypeAlias` syntax).
     #[serde(rename = "use-type-statement", default)]
     pub use_type_statement: bool,
+    /// Documentation generation configuration
+    #[serde(rename = "doc-gen")]
+    pub doc_gen: Option<crate::docgen::DocGenConfig>,
 }
 
 #[cfg(test)]

@@ -1,5 +1,6 @@
 use indexmap::IndexMap;
 
+use crate::generate::docstring::normalize_docstring;
 use crate::generate::variant_methods::get_variant_methods;
 use crate::{
     generate::{
@@ -70,10 +71,16 @@ impl From<&PyComplexEnumInfo> for ClassDef {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
 
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
         let enum_info = Self {
             name: info.pyclass_name,
             module: info.module,
-            doc: info.doc,
+            doc,
             getter_setters: IndexMap::new(),
             methods: IndexMap::new(),
             classes: info
@@ -95,10 +102,16 @@ impl ClassDef {
     fn from_variant(enum_info: &PyComplexEnumInfo, info: &VariantInfo) -> Self {
         let methods = get_variant_methods(enum_info, info);
 
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
         Self {
             name: info.pyclass_name,
             module: enum_info.module,
-            doc: info.doc,
+            doc,
             getter_setters: info
                 .fields
                 .iter()
@@ -118,16 +131,28 @@ impl From<&PyClassInfo> for ClassDef {
     fn from(info: &PyClassInfo) -> Self {
         // Since there are multiple `#[pymethods]` for a single class, we need to merge them.
         // This is only an initializer. See `StubInfo::gather` for the actual merging.
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
         let mut getter_setters: IndexMap<String, (Option<MemberDef>, Option<MemberDef>)> = info
             .getters
             .iter()
             .map(|info| (info.name.to_string(), (Some(MemberDef::from(info)), None)))
             .collect();
         for setter in info.setters {
+            let setter_doc = if setter.doc.is_empty() {
+                ""
+            } else {
+                Box::leak(normalize_docstring(setter.doc).into_boxed_str())
+            };
+
             getter_setters.entry(setter.name.to_string()).or_default().1 = Some(MemberDef {
                 name: setter.name,
                 r#type: (setter.r#type)(),
-                doc: setter.doc,
+                doc: setter_doc,
                 default: setter.default.map(|f| f()),
                 deprecated: setter.deprecated.clone(),
             });
@@ -135,7 +160,7 @@ impl From<&PyClassInfo> for ClassDef {
         let mut new = Self {
             name: info.pyclass_name,
             module: info.module,
-            doc: info.doc,
+            doc,
             attrs: Vec::new(),
             getter_setters,
             methods: Default::default(),

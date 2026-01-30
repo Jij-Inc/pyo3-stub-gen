@@ -40,3 +40,26 @@ jobs:
         run: git diff --exit-code
       - name: Test
         run: task ${{ matrix.crate }}:test
+
+  doc-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - pure
+          - mixed
+          - hidden_module_docgen_test
+        python-version:
+          - "3.13" # Only test on latest Python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Environment
+        uses: ./.github/actions/setup-test-environment
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test documentation generation
+        run: task ${{ matrix.crate }}:doc-test
+      - name: Check if generated API docs are up to date
+        run: git diff --exit-code

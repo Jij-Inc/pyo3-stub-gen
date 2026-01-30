@@ -1,13 +1,32 @@
-[build-system]
-requires = ["maturin>=1.1,<2.0"]
-build-backend = "maturin"
-
 [project]
 name = "mixed"
 version = "0.1"
 requires-python = ">=3.10"
 
+[dependency-groups]
+dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
 [tool.maturin]
-python-source = "python"
-module-name = "mixed.main_mod"
 features = ["pyo3/extension-module"]
+module-name = "mixed.main_mod"
+python-source = "python"
+
+[tool.pyo3-stub-gen.doc-gen]
+output-dir = "docs/api"
+json-output = "api_reference.json"
+intro-message = "Custom documentation for the mixed example project demonstrating PyO3 stub generation."
+index-title = "Mixed Example API Documentation"
+
+[tool.pyright]
+ignore = ["docs/api/**"]
+
+[tool.mypy]
+exclude = ["docs/api"]
+
+[tool.pyrefly]
+project-excludes = ["docs/api/**"]
+enabled-ignores = ["type", "pyrefly"]

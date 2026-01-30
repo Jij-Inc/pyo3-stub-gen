@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 /// Token types in Python type expressions
 #[derive(Debug, Clone, PartialEq)]
-enum Token {
+pub(crate) enum Token {
     /// Bare identifier (e.g., "ClassA", "int")
     Identifier(String),
     /// Dotted path (e.g., "typing.Optional", "collections.abc.Callable")
@@ -39,7 +39,7 @@ enum Token {
 /// - Special characters: `,`, `|`, `...`
 /// - String literals: `"ForwardRef"`
 /// - Whitespace preservation
-fn tokenize(expr: &str) -> Vec<Token> {
+pub(crate) fn tokenize(expr: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut chars = expr.chars().peekable();
 
