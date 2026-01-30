@@ -5,7 +5,7 @@ use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 #[gen_stub_pyclass]
 #[pyclass(module = "hidden_module_docgen_test._core")]
 #[derive(Debug, Clone)]
-struct A {
+pub struct A {
     x: usize,
 }
 
