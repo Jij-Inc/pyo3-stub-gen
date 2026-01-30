@@ -1,3 +1,4 @@
+use crate::generate::docstring::normalize_docstring;
 use crate::{generate::*, type_info::*};
 use std::fmt;
 
@@ -16,11 +17,33 @@ pub struct EnumDef {
 
 impl From<&PyEnumInfo> for EnumDef {
     fn from(info: &PyEnumInfo) -> Self {
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
+        // Normalize variant docstrings
+        let variants_vec: Vec<(&'static str, &'static str)> = info
+            .variants
+            .iter()
+            .map(|(name, variant_doc)| {
+                let normalized_variant_doc = if variant_doc.is_empty() {
+                    ""
+                } else {
+                    Box::leak(normalize_docstring(variant_doc).into_boxed_str())
+                };
+                (*name, normalized_variant_doc)
+            })
+            .collect();
+        let variants: &'static [(&'static str, &'static str)] =
+            Box::leak(variants_vec.into_boxed_slice());
+
         Self {
             name: info.pyclass_name,
             module: info.module,
-            doc: info.doc,
-            variants: info.variants,
+            doc,
+            variants,
             methods: Vec::new(),
             attrs: Vec::new(),
             getters: Vec::new(),

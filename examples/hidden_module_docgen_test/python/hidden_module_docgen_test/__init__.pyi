@@ -19,5 +19,16 @@ __all__ = [
     "greet_main",
 ]
 
-def create_b(x: builtins.int) -> _core.B: ...
+def create_b(x: builtins.int) -> _core.B:
+    r"""
+    This is the docstring fo {py:func}`great_main` function.
+    
+    These lines must be rendered as separate paragraphs.
+    
+    ```python
+    >>> 42
+    42
+    
+    ```
+    """
 

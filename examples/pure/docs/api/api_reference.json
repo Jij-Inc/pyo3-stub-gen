@@ -184,7 +184,7 @@
         {
           "kind": "Function",
           "name": "create_containers",
-          "doc": "\n    Create a list of DataContainer instances.\n\n    Demonstrates using RustType with generic types containing custom types.\n    ",
+          "doc": "Create a list of DataContainer instances.\n\nDemonstrates using RustType with generic types containing custom types.",
           "signatures": [
             {
               "parameters": [
@@ -351,7 +351,7 @@
         {
           "kind": "Function",
           "name": "fn_with_python_param",
-          "doc": "\n    Example using python parameter in gen_stub_pyfunction attribute.\n    This demonstrates specifying types directly in Python stub syntax.\n    ",
+          "doc": "Example using python parameter in gen_stub_pyfunction attribute.\nThis demonstrates specifying types directly in Python stub syntax.",
           "signatures": [
             {
               "parameters": [
@@ -378,7 +378,7 @@
         {
           "kind": "Function",
           "name": "fn_with_python_stub",
-          "doc": "\n    Example function using gen_function_from_python! macro.\n    This demonstrates how to define type information using Python stub syntax.\n    ",
+          "doc": "Example function using gen_function_from_python! macro.\nThis demonstrates how to define type information using Python stub syntax.",
           "signatures": [
             {
               "parameters": [
@@ -756,7 +756,7 @@
         {
           "kind": "Function",
           "name": "process_container",
-          "doc": "\n    Process a DataContainer by doubling its value.\n\n    This uses the RustType marker to reference the Rust type directly,\n    which will expand to the correct Python stub type using PyStubType trait.\n    ",
+          "doc": "Process a DataContainer by doubling its value.\n\nThis uses the RustType marker to reference the Rust type directly,\nwhich will expand to the correct Python stub type using PyStubType trait.",
           "signatures": [
             {
               "parameters": [
@@ -872,7 +872,7 @@
         {
           "kind": "Function",
           "name": "sum_list",
-          "doc": "\n    Sum a list of integers.\n\n    RustType[\"Vec<i32>\"] will expand to the correct input type (typing.Sequence[int])\n    and RustType[\"i32\"] will expand to the correct output type (int).\n    ",
+          "doc": "Sum a list of integers.\n\nRustType[\"Vec<i32>\"] will expand to the correct input type (typing.Sequence[int])\nand RustType[\"i32\"] will expand to the correct output type (int).",
           "signatures": [
             {
               "parameters": [
@@ -1488,7 +1488,7 @@
             },
             {
               "name": "multiply",
-              "doc": "\n        Multiply this calculator's result by another calculator's result.\n\n        Using RustType marker for both input and output types.\n        ",
+              "doc": "Multiply this calculator's result by another calculator's result.\n\nUsing RustType marker for both input and output types.",
               "signatures": [
                 {
                   "parameters": [
@@ -2440,7 +2440,7 @@
             },
             {
               "name": "configure",
-              "doc": "\n        Configure placeholder with keyword-only parameters.\n\n        This demonstrates keyword-only parameters (after *) which should be\n        preserved in the generated stub file.\n        ",
+              "doc": "Configure placeholder with keyword-only parameters.\n\nThis demonstrates keyword-only parameters (after *) which should be\npreserved in the generated stub file.",
               "signatures": [
                 {
                   "parameters": [
@@ -2545,7 +2545,7 @@
             },
             {
               "name": "evaluate",
-              "doc": "\n        Evaluate with instance data mapping string keys to InstanceValue objects.\n\n        This example demonstrates RustType marker usage within nested generic types\n        such as dict value types. The marker should expand to the correct Python type.\n        ",
+              "doc": "Evaluate with instance data mapping string keys to InstanceValue objects.\n\nThis example demonstrates RustType marker usage within nested generic types\nsuch as dict value types. The marker should expand to the correct Python type.",
               "signatures": [
                 {
                   "parameters": [

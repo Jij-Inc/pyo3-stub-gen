@@ -180,8 +180,16 @@ def _build_type_expr(type_expr):
         # Parse the type expression and create intersphinx links for external types
         return _parse_and_link_type(display)
 
-def _parse_myst(markdown_text):
-    """Parse MyST markdown to docutils nodes using myst-parser"""
+def _parse_myst(markdown_text, env=None):
+    """Parse MyST markdown to docutils nodes using myst-parser
+
+    Returns a list of docutils nodes (not a container) so they can be added directly
+    to parent nodes.
+
+    Args:
+        markdown_text: The MyST markdown text to parse
+        env: Optional Sphinx environment (required for some MyST features to work correctly)
+    """
     from docutils.core import publish_doctree
     import textwrap
 
@@ -191,23 +199,27 @@ def _parse_myst(markdown_text):
         dedented_text = textwrap.dedent(markdown_text).strip()
 
         # Parse markdown using docutils core API with MyST parser
+        settings_overrides = {
+            'report_level': 5,  # Suppress warnings
+            'halt_level': 5,
+        }
+
+        # Add env to settings if provided
+        if env is not None:
+            settings_overrides['env'] = env
+
         doctree = publish_doctree(
             dedented_text,
             parser=MystParser(),
-            settings_overrides={
-                'report_level': 5,  # Suppress warnings
-                'halt_level': 5,
-            }
+            settings_overrides=settings_overrides
         )
 
-        # Extract the content nodes (skip the document wrapper)
-        container = nodes.container()
-        for child in doctree.children:
-            container.append(child)
-        return container
+        # Return the list of child nodes directly (not wrapped in a container)
+        # This allows the caller to add them to any parent node
+        return list(doctree.children)
     except Exception:
         # Fallback to simple paragraph if parsing fails
-        return nodes.paragraph(text=markdown_text.strip())
+        return [nodes.paragraph(text=markdown_text.strip())]
 
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
@@ -252,7 +264,8 @@ def _build_function(env, func, module_name):
     # Docstring (MyST-formatted)
     if func.get('doc'):
         content = desc_content()
-        content += _parse_myst(func['doc'])
+        for node in _parse_myst(func['doc'], env):
+            content.append(node)
         desc_node += content
 
     # Register with Python domain for intersphinx
@@ -282,7 +295,8 @@ def _build_type_alias(env, alias, module_name):
 
     if alias.get('doc'):
         content = desc_content()
-        content += _parse_myst(alias['doc'])
+        for node in _parse_myst(alias['doc'], env):
+            content.append(node)
         desc_node += content
 
     # Register with Python domain
@@ -323,7 +337,8 @@ def _build_class(env, cls, module_name):
 
     if cls.get('doc'):
         content = desc_content()
-        content += _parse_myst(cls['doc'])
+        for node in _parse_myst(cls['doc'], env):
+            content.append(node)
         desc_node += content
 
     # Register with Python domain
@@ -371,7 +386,8 @@ def _build_class(env, cls, module_name):
         # Method docstring
         if method.get('doc'):
             method_content = desc_content()
-            method_content += _parse_myst(method['doc'])
+            for node in _parse_myst(method['doc'], env):
+                method_content.append(node)
             method_desc += method_content
 
         # Register method
@@ -402,7 +418,8 @@ def _build_class(env, cls, module_name):
         # Attribute docstring
         if attr.get('doc'):
             attr_content = desc_content()
-            attr_content += _parse_myst(attr['doc'])
+            for node in _parse_myst(attr['doc'], env):
+                attr_content.append(node)
             attr_desc += attr_content
 
         # Register attribute
@@ -433,7 +450,8 @@ def _build_variable(env, var, module_name):
 
     if var.get('doc'):
         content = desc_content()
-        content += _parse_myst(var['doc'])
+        for node in _parse_myst(var['doc'], env):
+            content.append(node)
         desc_node += content
 
     # Register with Python domain
@@ -468,7 +486,8 @@ def _build_submodule(env, submod, parent_module_name):
 
     # Add docstring if present
     if submod_doc:
-        list_item += _parse_myst(submod_doc)
+        for node in _parse_myst(submod_doc, env):
+            list_item.append(node)
 
     # Return just the list item (caller will add to bullet list)
     return [list_item]
@@ -500,7 +519,7 @@ class Pyo3APIDirective(SphinxDirective):
 
         # Render module docstring if present
         if doc_module.get('doc'):
-            result.append(_parse_myst(doc_module['doc']))
+            result.extend(_parse_myst(doc_module['doc'], self.env))
 
         # Group items by kind
         functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
@@ -612,7 +631,8 @@ class Pyo3APIPackageDirective(SphinxDirective):
 
                 # Render module docstring if present
                 if doc_module.get('doc'):
-                    section += _parse_myst(doc_module['doc'])
+                    for node in _parse_myst(doc_module['doc'], self.env):
+                        section.append(node)
 
                 # Group items by kind
                 functions = [item for item in doc_module['items'] if item['kind'] == 'Function']

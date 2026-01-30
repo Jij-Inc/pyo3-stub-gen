@@ -217,7 +217,7 @@ class Calculator:
         r"""
         Multiply this calculator's result by another calculator's result.
         
-                Using RustType marker for both input and output types.
+        Using RustType marker for both input and output types.
         """
 
 @typing.final
@@ -431,8 +431,8 @@ class Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
         
-                This demonstrates keyword-only parameters (after *) which should be
-                preserved in the generated stub file.
+        This demonstrates keyword-only parameters (after *) which should be
+        preserved in the generated stub file.
         """
 
 @typing.final
@@ -442,8 +442,8 @@ class Problem:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
         
-                This example demonstrates RustType marker usage within nested generic types
-                such as dict value types. The marker should expand to the correct Python type.
+        This example demonstrates RustType marker usage within nested generic types
+        such as dict value types. The marker should expand to the correct Python type.
         """
 
 class Shape1:
@@ -596,7 +596,7 @@ def create_containers(count: builtins.int) -> builtins.list[DataContainer]:
     r"""
     Create a list of DataContainer instances.
     
-        Demonstrates using RustType with generic types containing custom types.
+    Demonstrates using RustType with generic types containing custom types.
     """
 
 def create_dict(n: builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
@@ -613,13 +613,13 @@ def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collect
 def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example using python parameter in gen_stub_pyfunction attribute.
-        This demonstrates specifying types directly in Python stub syntax.
+    This demonstrates specifying types directly in Python stub syntax.
     """
 
 def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example function using gen_function_from_python! macro.
-        This demonstrates how to define type information using Python stub syntax.
+    This demonstrates how to define type information using Python stub syntax.
     """
 
 def func_with_kwargs(**kwargs: typing.Any) -> builtins.bool:
@@ -691,8 +691,8 @@ def process_container(container: DataContainer) -> DataContainer:
     r"""
     Process a DataContainer by doubling its value.
     
-        This uses the RustType marker to reference the Rust type directly,
-        which will expand to the correct Python stub type using PyStubType trait.
+    This uses the RustType marker to reference the Rust type directly,
+    which will expand to the correct Python stub type using PyStubType trait.
     """
 
 def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
@@ -711,8 +711,8 @@ def sum_list(values: typing.Sequence[builtins.int]) -> builtins.int:
     r"""
     Sum a list of integers.
     
-        RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
-        and RustType["i32"] will expand to the correct output type (int).
+    RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
+    and RustType["i32"] will expand to the correct output type (int).
     """
 
 def test_type_ignore_all() -> builtins.int:  # type: ignore

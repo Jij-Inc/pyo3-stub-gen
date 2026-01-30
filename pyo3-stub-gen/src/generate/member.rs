@@ -1,3 +1,4 @@
+use crate::generate::docstring::normalize_docstring;
 use crate::{generate::*, type_info::*, TypeInfo};
 use std::{
     borrow::Cow,
@@ -28,10 +29,16 @@ impl Import for MemberDef {
 
 impl From<&MemberInfo> for MemberDef {
     fn from(info: &MemberInfo) -> Self {
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
         Self {
             name: info.name,
             r#type: (info.r#type)(),
-            doc: info.doc,
+            doc,
             default: info.default.map(|f| f()),
             deprecated: info.deprecated.clone(),
         }

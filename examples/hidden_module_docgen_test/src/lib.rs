@@ -41,6 +41,15 @@ impl B {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
+/// This is the docstring fo {py:func}`great_main` function.
+///
+/// These lines must be rendered as separate paragraphs.
+///
+/// ```python
+/// >>> 42
+/// 42
+///
+/// ```
 fn create_b(x: usize) -> B {
     B { x }
 }
@@ -50,6 +59,17 @@ pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", ModAAlias = A);
 
 #[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
 #[pyfunction(name = "greet_main")]
+#[doc = r#"
+    This is the docstring fo {py:func}`great_main` function.
+
+    These lines must be rendered as separate paragraphs.
+
+    ```python
+    >>> 42
+    42
+
+    ```
+"#]
 pub fn greet_main() {
     println!("Hello from main_mod!")
 }

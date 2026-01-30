@@ -23,5 +23,16 @@ class B:
 
 def create_a(x: builtins.int) -> A: ...
 
-def greet_main() -> None: ...
+def greet_main() -> None:
+    r"""
+    This is the docstring fo {py:func}`great_main` function.
+    
+    These lines must be rendered as separate paragraphs.
+    
+    ```python
+    >>> 42
+    42
+    
+    ```
+    """
 
