@@ -16,11 +16,7 @@
                   "name": "a",
                   "type_": {
                     "display": "Decimal",
-                    "link_target": {
-                      "fqn": "decimal.Decimal",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   },
                   "default": null
@@ -29,11 +25,7 @@
                   "name": "b",
                   "type_": {
                     "display": "Decimal",
-                    "link_target": {
-                      "fqn": "decimal.Decimal",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   },
                   "default": null
@@ -41,11 +33,7 @@
               ],
               "return_type": {
                 "display": "Decimal",
-                "link_target": {
-                  "fqn": "decimal.Decimal",
-                  "doc_module": "pure",
-                  "kind": "Class"
-                },
+                "link_target": null,
                 "children": []
               }
             }
@@ -63,7 +51,18 @@
               "return_type": {
                 "display": "dict[str, int]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -82,7 +81,13 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 },
@@ -91,7 +96,13 @@
                   "type_": {
                     "display": "Literal[False]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "False",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -99,7 +110,13 @@
               "return_type": {
                 "display": "list[int]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             },
             {
@@ -109,7 +126,13 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 },
@@ -118,7 +141,13 @@
                   "type_": {
                     "display": "Literal[True]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "True",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -126,7 +155,18 @@
               "return_type": {
                 "display": "tuple[int, ...]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "...",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -201,7 +241,17 @@
               "return_type": {
                 "display": "list[DataContainer]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "DataContainer",
+                    "link_target": {
+                      "fqn": "pure.DataContainer",
+                      "doc_module": "pure",
+                      "kind": "Class"
+                    },
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -228,7 +278,24 @@
               "return_type": {
                 "display": "dict[int, list[int]]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "list[int]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
               }
             }
           ],
@@ -302,18 +369,30 @@
                   "type_": {
                     "display": "str | PathLike | Path",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "PathLike",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "Path",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
               ],
               "return_type": {
                 "display": "Path",
-                "link_target": {
-                  "fqn": "pathlib.Path",
-                  "doc_module": "pure",
-                  "kind": "Class"
-                },
+                "link_target": null,
                 "children": []
               }
             }
@@ -333,7 +412,24 @@
                   "type_": {
                     "display": "Callable[[str], Any]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -341,7 +437,24 @@
               "return_type": {
                 "display": "Callable[[str], Any]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "[str]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -360,7 +473,24 @@
                   "type_": {
                     "display": "Callable[[str], Any]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -368,7 +498,24 @@
               "return_type": {
                 "display": "Callable[[str], Any]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "[str]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -387,7 +534,24 @@
                   "type_": {
                     "display": "Callable[[str], Any]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -395,7 +559,24 @@
               "return_type": {
                 "display": "Callable[[str], Any]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "[str]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -486,7 +667,7 @@
         {
           "kind": "Function",
           "name": "manual_overload_as_tuple",
-          "doc": "Convert sequence to list when tuple_out is False",
+          "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
             {
               "parameters": [
@@ -495,24 +676,47 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 },
                 {
                   "name": "tuple_out",
                   "type_": {
-                    "display": "Literal[False]",
+                    "display": "Literal[True]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "True",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
               ],
               "return_type": {
-                "display": "list[int]",
+                "display": "tuple[int, ...]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "...",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             },
             {
@@ -522,24 +726,42 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 },
                 {
                   "name": "tuple_out",
                   "type_": {
-                    "display": "Literal[True]",
+                    "display": "Literal[False]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "False",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
               ],
               "return_type": {
-                "display": "tuple[int, ...]",
+                "display": "list[int]",
                 "link_target": null,
-                "children": []
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -556,24 +778,6 @@
                 {
                   "name": "x",
                   "type_": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "float",
-                "link_target": null,
-                "children": []
-              }
-            },
-            {
-              "parameters": [
-                {
-                  "name": "x",
-                  "type_": {
                     "display": "int",
                     "link_target": null,
                     "children": []
@@ -583,6 +787,24 @@
               ],
               "return_type": {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
                 "link_target": null,
                 "children": []
               }
@@ -594,26 +816,8 @@
         {
           "kind": "Function",
           "name": "manual_overload_example_2",
-          "doc": "Increments integer by 1",
+          "doc": "Increments float by 1",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "ob",
-                  "type_": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "int",
-                "link_target": null,
-                "children": []
-              }
-            },
             {
               "parameters": [
                 {
@@ -628,6 +832,24 @@
               ],
               "return_type": {
                 "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
                 "link_target": null,
                 "children": []
               }
@@ -684,26 +906,8 @@
         {
           "kind": "Function",
           "name": "overload_example_2",
-          "doc": "Increments integer by 1",
+          "doc": "Increments float by 1",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "ob",
-                  "type_": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "int",
-                "link_target": null,
-                "children": []
-              }
-            },
             {
               "parameters": [
                 {
@@ -718,6 +922,24 @@
               ],
               "return_type": {
                 "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
                 "link_target": null,
                 "children": []
               }
@@ -738,7 +960,13 @@
                   "type_": {
                     "display": "Optional[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": "None"
                 }
@@ -800,7 +1028,29 @@
                   "type_": {
                     "display": "Mapping[int, Mapping[int, int]]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "Mapping[int, int]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "int",
+                            "link_target": null,
+                            "children": []
+                          },
+                          {
+                            "display": "int",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -854,7 +1104,13 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -881,7 +1137,13 @@
                   "type_": {
                     "display": "Sequence[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -1005,7 +1267,24 @@
           "definition": {
             "display": "Callable[[str], None]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "[str]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1015,7 +1294,13 @@
           "definition": {
             "display": "list[DataContainer]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "DataContainer",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1025,7 +1310,18 @@
           "definition": {
             "display": "dict[str, DataContainer]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "DataContainer",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1035,7 +1331,18 @@
           "definition": {
             "display": "tuple[DataContainer, DataContainer]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "DataContainer",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "DataContainer",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1045,7 +1352,13 @@
           "definition": {
             "display": "Optional[int]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1055,7 +1368,24 @@
           "definition": {
             "display": "Callable[[str], None]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "[str]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1065,7 +1395,24 @@
           "definition": {
             "display": "dict[str, list[int]]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "list[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
           }
         },
         {
@@ -1075,7 +1422,18 @@
           "definition": {
             "display": "int | str",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1085,7 +1443,30 @@
           "definition": {
             "display": "Optional[int] | list[str]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "Optional[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "list[str]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
           }
         },
         {
@@ -1095,7 +1476,13 @@
           "definition": {
             "display": "Optional[DecimalHolder]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "DecimalHolder",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1105,7 +1492,29 @@
           "definition": {
             "display": "Callable[[str, int], bool]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "[str, int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1115,7 +1524,19 @@
           "definition": {
             "display": "list[list[DataContainer]]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "list[DataContainer]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "DataContainer",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
           }
         },
         {
@@ -1125,7 +1546,18 @@
           "definition": {
             "display": "int | str",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1135,7 +1567,35 @@
           "definition": {
             "display": "Callable[[str], None] | None",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "Callable[[str], None]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "[str]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1145,7 +1605,18 @@
           "definition": {
             "display": "DataContainer | None",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "DataContainer",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1155,7 +1626,13 @@
           "definition": {
             "display": "Sequence[int]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1165,7 +1642,13 @@
           "definition": {
             "display": "Optional[int]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1185,7 +1668,13 @@
           "definition": {
             "display": "Optional[int]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1195,7 +1684,18 @@
           "definition": {
             "display": "dict[str, int]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1205,7 +1705,18 @@
           "definition": {
             "display": "ComparableStruct | HashableStruct",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "ComparableStruct",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "HashableStruct",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1215,7 +1726,23 @@
           "definition": {
             "display": "int | str | bool",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1225,7 +1752,24 @@
           "definition": {
             "display": "Callable[[int], bool]",
             "link_target": null,
-            "children": []
+            "children": [
+              {
+                "display": "[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            ]
           }
         },
         {
@@ -1252,11 +1796,7 @@
                   ],
                   "return_type": {
                     "display": "A",
-                    "link_target": {
-                      "fqn": "pure.A",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1448,11 +1988,7 @@
                   "parameters": [],
                   "return_type": {
                     "display": "Calculator",
-                    "link_target": {
-                      "fqn": "pure.Calculator",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1496,11 +2032,7 @@
                       "name": "other",
                       "type_": {
                         "display": "Calculator",
-                        "link_target": {
-                          "fqn": "pure.Calculator",
-                          "doc_module": "pure",
-                          "kind": "Class"
-                        },
+                        "link_target": null,
                         "children": []
                       },
                       "default": null
@@ -1508,11 +2040,7 @@
                   ],
                   "return_type": {
                     "display": "Calculator",
-                    "link_target": {
-                      "fqn": "pure.Calculator",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1678,11 +2206,7 @@
                   ],
                   "return_type": {
                     "display": "ComparableStruct",
-                    "link_target": {
-                      "fqn": "pure.ComparableStruct",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1727,11 +2251,7 @@
                   ],
                   "return_type": {
                     "display": "CustomStubType",
-                    "link_target": {
-                      "fqn": "pure.CustomStubType",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1783,11 +2303,7 @@
                   ],
                   "return_type": {
                     "display": "DataContainer",
-                    "link_target": {
-                      "fqn": "pure.DataContainer",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1815,11 +2331,7 @@
                       "name": "value",
                       "type_": {
                         "display": "Decimal",
-                        "link_target": {
-                          "fqn": "decimal.Decimal",
-                          "doc_module": "pure",
-                          "kind": "Class"
-                        },
+                        "link_target": null,
                         "children": []
                       },
                       "default": null
@@ -1827,11 +2339,7 @@
                   ],
                   "return_type": {
                     "display": "DecimalHolder",
-                    "link_target": {
-                      "fqn": "pure.DecimalHolder",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1925,11 +2433,7 @@
                   ],
                   "return_type": {
                     "display": "HashableStruct",
-                    "link_target": {
-                      "fqn": "pure.HashableStruct",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -1965,11 +2469,7 @@
                   ],
                   "return_type": {
                     "display": "InstanceValue",
-                    "link_target": {
-                      "fqn": "pure.InstanceValue",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2131,11 +2631,7 @@
                   ],
                   "return_type": {
                     "display": "NormalClass",
-                    "link_target": {
-                      "fqn": "pure.NormalClass",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2177,11 +2673,7 @@
                   ],
                   "return_type": {
                     "display": "NotIntError",
-                    "link_target": {
-                      "fqn": "pure.NotIntError",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2337,7 +2829,24 @@
                       "type_": {
                         "display": "Callable[[str], Any]",
                         "link_target": null,
-                        "children": []
+                        "children": [
+                          {
+                            "display": "[str]",
+                            "link_target": null,
+                            "children": [
+                              {
+                                "display": "str",
+                                "link_target": null,
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "display": "Any",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
                       },
                       "default": null
                     }
@@ -2345,7 +2854,24 @@
                   "return_type": {
                     "display": "Callable[[str], Any]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   }
                 }
               ],
@@ -2360,11 +2886,7 @@
                   "parameters": [],
                   "return_type": {
                     "display": "PartialManualSubmit",
-                    "link_target": {
-                      "fqn": "pure.PartialManualSubmit",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2426,11 +2948,7 @@
                   ],
                   "return_type": {
                     "display": "Placeholder",
-                    "link_target": {
-                      "fqn": "pure.Placeholder",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2476,7 +2994,13 @@
                       "type_": {
                         "display": "Optional[str]",
                         "link_target": null,
-                        "children": []
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
                       },
                       "default": null
                     },
@@ -2494,18 +3018,20 @@
                       "type_": {
                         "display": "Optional[str]",
                         "link_target": null,
-                        "children": []
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
                       },
                       "default": "None"
                     }
                   ],
                   "return_type": {
                     "display": "Placeholder",
-                    "link_target": {
-                      "fqn": "pure.Placeholder",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2531,11 +3057,7 @@
                   "parameters": [],
                   "return_type": {
                     "display": "Problem",
-                    "link_target": {
-                      "fqn": "pure.Problem",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }
@@ -2554,7 +3076,18 @@
                       "type_": {
                         "display": "dict[str, InstanceValue]",
                         "link_target": null,
-                        "children": []
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          },
+                          {
+                            "display": "InstanceValue",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
                       },
                       "default": null
                     }
@@ -2605,11 +3138,7 @@
                   "parameters": [],
                   "return_type": {
                     "display": "TypeIgnoreTest",
-                    "link_target": {
-                      "fqn": "pure.TypeIgnoreTest",
-                      "doc_module": "pure",
-                      "kind": "Class"
-                    },
+                    "link_target": null,
                     "children": []
                   }
                 }

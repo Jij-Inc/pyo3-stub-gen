@@ -154,11 +154,39 @@ def _parse_and_link_type(type_str):
     return container
 
 def _build_type_expr(type_expr):
-    """Build type expression with intersphinx linking for external types"""
+    """Build type expression with intersphinx linking for external types
+
+    Recursively handles nested types from the children field.
+    """
     display = type_expr['display']
     link_target = type_expr.get('link_target')
+    children = type_expr.get('children', [])
 
-    if link_target:
+    # Case 1: Type with link target and children (e.g., Generic[T] where Generic has a link)
+    if link_target and children:
+        # Build the base type with link
+        kind_to_reftype = {
+            'Class': 'class',
+            'Function': 'func',
+            'TypeAlias': 'data',
+            'Variable': 'data',
+            'Module': 'mod',
+        }
+        base_name = display.split('[')[0] if '[' in display else display
+        xref = pending_xref(
+            '',
+            refdomain='py',
+            reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+            reftarget=link_target['fqn'],
+            refexplicit=True,
+        )
+        xref += nodes.Text(base_name)
+
+        # Build the generic part with children
+        return _build_generic_with_children(xref, children)
+
+    # Case 2: Type with link target but no children (simple type)
+    elif link_target:
         # Create pending_xref for our own types
         kind_to_reftype = {
             'Class': 'class',
@@ -174,11 +202,57 @@ def _build_type_expr(type_expr):
             reftarget=link_target['fqn'],
             refexplicit=True,
         )
-        xref += nodes.literal(text=display)
+        xref += nodes.Text(display)
         return xref
+
+    # Case 3: Union type (has children but no link_target)
+    elif children:
+        # Check if this is a union type by looking for '|' in display
+        if '|' in display:
+            return _build_union_type(children)
+        # Otherwise it's a generic type with no base link (e.g., typing.Optional)
+        else:
+            # Extract base name
+            base_name = display.split('[')[0] if '[' in display else display
+            # Parse base to potentially link it via intersphinx
+            base_node = _parse_and_link_type(base_name)
+            return _build_generic_with_children(base_node, children)
+
+    # Case 4: External type or simple builtin (no link, no children)
     else:
         # Parse the type expression and create intersphinx links for external types
         return _parse_and_link_type(display)
+
+
+def _build_generic_with_children(base_node, children):
+    """Build a generic type expression like Base[T1, T2] with linked children"""
+    container = nodes.inline()
+    container += base_node
+    container += nodes.Text('[')
+
+    for i, child in enumerate(children):
+        if i > 0:
+            container += nodes.Text(', ')
+        # Recursively render child
+        child_node = _build_type_expr(child)
+        container += child_node
+
+    container += nodes.Text(']')
+    return container
+
+
+def _build_union_type(children):
+    """Build a union type expression like A | B | C with linked children"""
+    container = nodes.inline()
+
+    for i, child in enumerate(children):
+        if i > 0:
+            container += nodes.Text(' | ')
+        # Recursively render child
+        child_node = _build_type_expr(child)
+        container += child_node
+
+    return container
 
 def _parse_myst(markdown_text, env=None):
     """Parse MyST markdown to docutils nodes using myst-parser
@@ -188,7 +262,7 @@ def _parse_myst(markdown_text, env=None):
 
     Args:
         markdown_text: The MyST markdown text to parse
-        env: Optional Sphinx environment (required for some MyST features to work correctly)
+        env: Optional Sphinx environment (required for MyST features to work correctly)
     """
     from docutils.core import publish_doctree
     import textwrap
@@ -198,7 +272,7 @@ def _parse_myst(markdown_text, env=None):
         # (indented text in markdown is interpreted as preformatted code)
         dedented_text = textwrap.dedent(markdown_text).strip()
 
-        # Parse markdown using docutils core API with MyST parser
+        # Base settings
         settings_overrides = {
             'report_level': 5,  # Suppress warnings
             'halt_level': 5,
@@ -208,6 +282,39 @@ def _parse_myst(markdown_text, env=None):
         if env is not None:
             settings_overrides['env'] = env
 
+            # Extract MyST configuration from Sphinx app config
+            # This enables all MyST extensions configured in conf.py
+            if hasattr(env, 'app') and hasattr(env.app, 'config'):
+                config = env.app.config
+
+                # Dynamically get valid MyST settings from the parser
+                # This avoids hard-coding a setting list that will become stale
+                parser_instance = MystParser()
+                valid_myst_settings = set()
+
+                # Extract setting names from parser's settings_spec
+                # settings_spec is a tuple: (title, description, option_spec_tuple)
+                if hasattr(parser_instance, 'settings_spec') and parser_instance.settings_spec:
+                    # settings_spec[2] contains the tuple of setting definitions
+                    for setting_def in parser_instance.settings_spec[2]:
+                        # Each setting_def is (description, options, kwargs)
+                        # kwargs contains 'dest' which is the setting name
+                        if len(setting_def) >= 3 and isinstance(setting_def[2], dict):
+                            dest = setting_def[2].get('dest')
+                            if dest:
+                                valid_myst_settings.add(dest)
+
+                # Copy only valid MyST settings from Sphinx config to parser settings
+                for setting_name in valid_myst_settings:
+                    if hasattr(config, setting_name):
+                        value = getattr(config, setting_name)
+                        # Only set non-default values
+                        # Note: MyST uses UNSET as a sentinel, but we check for None here
+                        # as that's what Sphinx config will have for unset values
+                        if value is not None:
+                            settings_overrides[setting_name] = value
+
+        # Parse markdown using docutils core API with MyST parser
         doctree = publish_doctree(
             dedented_text,
             parser=MystParser(),

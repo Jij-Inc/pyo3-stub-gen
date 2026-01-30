@@ -196,49 +196,6 @@
         },
         {
           "kind": "Class",
-          "name": "D",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
-          "name": "greet_b",
-          "doc": "",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "None",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
           "name": "C",
           "doc": "",
           "bases": [],
@@ -340,7 +297,23 @@
                   "type_": {
                     "display": "Generator[int, None, None]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -364,6 +337,49 @@
             "link_target": null,
             "children": []
           }
+        },
+        {
+          "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
         },
         {
           "kind": "Module",
@@ -505,7 +521,23 @@
                   "type_": {
                     "display": "Generator[int, None, None]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
@@ -623,7 +655,13 @@
                   "type_": {
                     "display": "List[int]",
                     "link_target": null,
-                    "children": []
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
                   },
                   "default": null
                 }
