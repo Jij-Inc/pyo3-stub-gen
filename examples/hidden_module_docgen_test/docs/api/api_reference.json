@@ -8,7 +8,7 @@
         {
           "kind": "Function",
           "name": "create_b",
-          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n\n```",
+          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nThis must be rendered: $x + x$",
           "signatures": [
             {
               "parameters": [

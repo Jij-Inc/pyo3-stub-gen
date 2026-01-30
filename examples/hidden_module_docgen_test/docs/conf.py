@@ -13,8 +13,14 @@ author = "pyo3-stub-gen"
 
 # Extensions
 extensions = [
+    "myst_parser",
     "pyo3_stub_gen_ext",  # Our generated extension
     "sphinx.ext.intersphinx",  # For cross-references
+    "sphinxcontrib.katex",
+]
+
+myst_enable_extensions = [
+    "dollarmath",
 ]
 
 # Intersphinx mapping - enables cross-references to external projects

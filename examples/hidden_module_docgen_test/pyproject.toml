@@ -10,6 +10,7 @@ dev = [
   "pyrefly>=0.50.1",
   "sphinx",
   "sphinx-rtd-theme",
+  "sphinxcontrib-katex>=0.9.11",
 ]
 
 [build-system]

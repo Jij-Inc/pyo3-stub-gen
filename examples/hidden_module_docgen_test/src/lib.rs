@@ -48,8 +48,9 @@ impl B {
 /// ```python
 /// >>> 42
 /// 42
-///
 /// ```
+///
+/// This must be rendered: $x + x$
 fn create_b(x: usize) -> B {
     B { x }
 }

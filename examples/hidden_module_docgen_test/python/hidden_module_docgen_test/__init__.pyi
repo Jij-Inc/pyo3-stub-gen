@@ -28,7 +28,8 @@ def create_b(x: builtins.int) -> _core.B:
     ```python
     >>> 42
     42
-    
     ```
+    
+    This must be rendered: $x + x$
     """
 
