@@ -1,5 +1,5 @@
-pure API Reference
-==================
+API Reference
+=============
 
 This is the API reference documentation generated from Rust code using pyo3-stub-gen.
 

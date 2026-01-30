@@ -49,12 +49,18 @@ pub fn generate_index_rst(
 ) -> Result<()> {
     let mut content = String::new();
 
-    // Title
-    content.push_str(&format!(
-        "{} API Reference\n{}\n\n",
-        package.name,
-        "=".repeat(package.name.len() + 14)
-    ));
+    // Title - use configured title or default to "{package_name} API Reference"
+    let title = if let Some(custom_title) = &config.index_title {
+        if custom_title.is_empty() {
+            "API Reference".to_string()
+        } else {
+            custom_title.clone()
+        }
+    } else {
+        format!("{} API Reference", package.name)
+    };
+
+    content.push_str(&format!("{}\n{}\n\n", title, "=".repeat(title.len())));
 
     // Add intro message (configurable or default)
     if let Some(intro) = &config.intro_message {

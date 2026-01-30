@@ -254,6 +254,82 @@ def _build_union_type(children):
 
     return container
 
+def _build_link_from_target(text, link_target):
+    """Build cross-reference node from link target"""
+    kind_to_reftype = {
+        'Class': 'class',
+        'Function': 'func',
+        'TypeAlias': 'data',
+        'Variable': 'data',
+        'Module': 'mod',
+    }
+
+    # Handle attribute-level links (e.g., enum variants)
+    if link_target.get('attribute'):
+        # Link to class attribute (e.g., C.C1 variant)
+        # Use py:attribute reftype with full FQN
+        xref = pending_xref(
+            '',
+            refdomain='py',
+            reftype='attribute',
+            reftarget=link_target['fqn'],
+            refexplicit=True,
+        )
+        xref += nodes.Text(text)
+        return xref
+
+    # Regular class/function/etc link
+    xref = pending_xref(
+        '',
+        refdomain='py',
+        reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+        reftarget=link_target['fqn'],
+        refexplicit=True,
+    )
+    xref += nodes.Text(text)
+    return xref
+
+def _build_default_value(default_value):
+    """Build nodes for default value with type links"""
+    if default_value.get('kind') == 'Simple':
+        return nodes.Text(default_value['value'])
+
+    elif default_value.get('kind') == 'Expression':
+        # Build expression with embedded type links
+        expr = default_value['display']
+        type_refs = default_value.get('type_refs', [])
+
+        # Sort by offset descending to insert links from right to left
+        nodes_list = []
+        last_pos = len(expr)
+
+        for ref in sorted(type_refs, key=lambda r: r['offset'], reverse=True):
+            # Add text after this reference
+            if ref['offset'] + len(ref['text']) < last_pos:
+                nodes_list.insert(0, nodes.Text(expr[ref['offset'] + len(ref['text']):last_pos]))
+
+            # Add linked reference (entire C.C1, not just C)
+            if ref.get('link_target'):
+                xref = _build_link_from_target(ref['text'], ref['link_target'])
+                nodes_list.insert(0, xref)
+            else:
+                nodes_list.insert(0, nodes.Text(ref['text']))
+
+            last_pos = ref['offset']
+
+        # Add remaining text before first reference
+        if last_pos > 0:
+            nodes_list.insert(0, nodes.Text(expr[:last_pos]))
+
+        # Return a container with all nodes
+        container = nodes.inline(classes=['default_value'])
+        for node in nodes_list:
+            container += node
+        return container
+
+    # Fallback for unknown kinds
+    return nodes.Text(str(default_value))
+
 def _parse_myst(markdown_text, env=None):
     """Parse MyST markdown to docutils nodes using myst-parser
 
@@ -356,7 +432,8 @@ def _build_function(env, func, module_name):
             param_node += nodes.Text(param['name'] + ': ')
             param_node += _build_type_expr(param['type_'])
             if param.get('default'):
-                param_node += nodes.Text(' = ' + param['default'])
+                param_node += nodes.Text(' = ')
+                param_node += _build_default_value(param['default'])
             param_list += param_node
         sig_node += param_list
 
@@ -442,11 +519,13 @@ def _build_class(env, cls, module_name):
 
     desc_node += sig_node
 
+    # Always create desc_content to hold docstring + methods + attributes
+    content = desc_content()
+
+    # Add docstring if present
     if cls.get('doc'):
-        content = desc_content()
         for node in _parse_myst(cls['doc'], env):
             content.append(node)
-        desc_node += content
 
     # Register with Python domain
     if hasattr(env, 'domaindata'):
@@ -478,7 +557,8 @@ def _build_class(env, cls, module_name):
                 param_node += nodes.Text(param['name'] + ': ')
                 param_node += _build_type_expr(param['type_'])
                 if param.get('default'):
-                    param_node += nodes.Text(' = ' + param['default'])
+                    param_node += nodes.Text(' = ')
+                    param_node += _build_default_value(param['default'])
                 param_list += param_node
             sig_node += param_list
 
@@ -502,7 +582,7 @@ def _build_class(env, cls, module_name):
             py_domain = env.get_domain('py')
             py_domain.note_object(method_fullname, 'method', method_fullname, location=env.docname)
 
-        desc_node += method_desc
+        content += method_desc
 
     # Render class attributes
     attributes = cls.get('attributes', [])
@@ -534,7 +614,10 @@ def _build_class(env, cls, module_name):
             py_domain = env.get_domain('py')
             py_domain.note_object(attr_fullname, 'attribute', attr_fullname, location=env.docname)
 
-        desc_node += attr_desc
+        content += attr_desc
+
+    # Add the complete content block to desc_node
+    desc_node += content
 
     return [desc_node]
 

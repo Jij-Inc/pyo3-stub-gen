@@ -21,6 +21,10 @@ pub struct DocGenConfig {
     /// Custom intro message for index.rst (default: standard message, empty string to omit)
     #[serde(rename = "intro-message", default)]
     pub intro_message: Option<String>,
+
+    /// Custom title for index.rst (default: "{package_name} API Reference", empty string to use "API Reference")
+    #[serde(rename = "index-title", default)]
+    pub index_title: Option<String>,
 }
 
 impl Default for DocGenConfig {
@@ -30,6 +34,7 @@ impl Default for DocGenConfig {
             json_output: default_json_output(),
             separate_pages: default_separate_pages(),
             intro_message: None,
+            index_title: None,
         }
     }
 }

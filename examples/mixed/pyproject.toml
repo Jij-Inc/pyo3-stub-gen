@@ -19,6 +19,7 @@ python-source = "python"
 output-dir = "docs/api"
 json-output = "api_reference.json"
 intro-message = "Custom documentation for the mixed example project demonstrating PyO3 stub generation."
+index-title = "Mixed Example API Documentation"
 
 [tool.pyright]
 ignore = ["docs/api/**"]

@@ -1,5 +1,5 @@
-mixed.main_mod API Reference
-============================
+Mixed Example API Documentation
+===============================
 
 Custom documentation for the mixed example project demonstrating PyO3 stub generation.
 

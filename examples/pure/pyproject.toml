@@ -13,6 +13,7 @@ features = ["pyo3/extension-module"]
 [tool.pyo3-stub-gen.doc-gen]
 output-dir = "docs/api"
 json-output = "api_reference.json"
+index-title = "API Reference"
 
 [tool.pyrefly]
 project-excludes = ["**/type_error_cases/*.py", "docs/api/**"]
