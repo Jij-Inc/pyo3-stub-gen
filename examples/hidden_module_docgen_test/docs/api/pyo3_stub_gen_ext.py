@@ -188,7 +188,7 @@ def _parse_myst(markdown_text, env=None):
 
     Args:
         markdown_text: The MyST markdown text to parse
-        env: Optional Sphinx environment (required for some MyST features to work correctly)
+        env: Optional Sphinx environment (required for MyST features to work correctly)
     """
     from docutils.core import publish_doctree
     import textwrap
@@ -198,7 +198,7 @@ def _parse_myst(markdown_text, env=None):
         # (indented text in markdown is interpreted as preformatted code)
         dedented_text = textwrap.dedent(markdown_text).strip()
 
-        # Parse markdown using docutils core API with MyST parser
+        # Base settings
         settings_overrides = {
             'report_level': 5,  # Suppress warnings
             'halt_level': 5,
@@ -208,6 +208,39 @@ def _parse_myst(markdown_text, env=None):
         if env is not None:
             settings_overrides['env'] = env
 
+            # Extract MyST configuration from Sphinx app config
+            # This enables all MyST extensions configured in conf.py
+            if hasattr(env, 'app') and hasattr(env.app, 'config'):
+                config = env.app.config
+
+                # Dynamically get valid MyST settings from the parser
+                # This avoids hard-coding a setting list that will become stale
+                parser_instance = MystParser()
+                valid_myst_settings = set()
+
+                # Extract setting names from parser's settings_spec
+                # settings_spec is a tuple: (title, description, option_spec_tuple)
+                if hasattr(parser_instance, 'settings_spec') and parser_instance.settings_spec:
+                    # settings_spec[2] contains the tuple of setting definitions
+                    for setting_def in parser_instance.settings_spec[2]:
+                        # Each setting_def is (description, options, kwargs)
+                        # kwargs contains 'dest' which is the setting name
+                        if len(setting_def) >= 3 and isinstance(setting_def[2], dict):
+                            dest = setting_def[2].get('dest')
+                            if dest:
+                                valid_myst_settings.add(dest)
+
+                # Copy only valid MyST settings from Sphinx config to parser settings
+                for setting_name in valid_myst_settings:
+                    if hasattr(config, setting_name):
+                        value = getattr(config, setting_name)
+                        # Only set non-default values
+                        # Note: MyST uses UNSET as a sentinel, but we check for None here
+                        # as that's what Sphinx config will have for unset values
+                        if value is not None:
+                            settings_overrides[setting_name] = value
+
+        # Parse markdown using docutils core API with MyST parser
         doctree = publish_doctree(
             dedented_text,
             parser=MystParser(),

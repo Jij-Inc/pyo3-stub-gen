@@ -22,4 +22,4 @@ workspace
 
 # Sphinx documentation build output
 _build/
-.playright-mcp
+.playwright-mcp

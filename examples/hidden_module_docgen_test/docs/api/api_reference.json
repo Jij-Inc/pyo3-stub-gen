@@ -122,7 +122,7 @@
         {
           "kind": "Function",
           "name": "greet_main",
-          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nAnother math test \\(\\int_{-\\infty}^\\infty e^{-x^2} \\mathrm{d}x\\).",
+          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nAnother math test $\\int_{-\\infty}^\\infty e^{-x^2} \\mathrm{d}x$.",
           "signatures": [
             {
               "parameters": [],

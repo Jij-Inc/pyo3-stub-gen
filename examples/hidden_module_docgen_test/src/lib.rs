@@ -70,7 +70,7 @@ pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", ModAAlias = A);
     42
     ```
 
-    Another math test \(\int_{-\infty}^\infty e^{-x^2} \mathrm{d}x\).
+    Another math test $\int_{-\infty}^\infty e^{-x^2} \mathrm{d}x$.
 "#]
 pub fn greet_main() {
     println!("Hello from main_mod!")
