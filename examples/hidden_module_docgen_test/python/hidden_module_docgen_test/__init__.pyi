@@ -12,11 +12,13 @@ from hidden_module_docgen_test._core import *
 from . import _core
 __all__ = [
     "A",
+    "AorB",
     "B",
     "ModAAlias",
     "create_a",
     "create_b",
     "greet_main",
+    "wrap_opt_a",
 ]
 
 def create_b(x: builtins.int) -> _core.B:

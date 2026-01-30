@@ -6,12 +6,15 @@ import typing
 from typing import TypeAlias
 __all__ = [
     "A",
+    "AorB",
     "B",
     "ModAAlias",
     "create_a",
     "greet_main",
+    "wrap_opt_a",
 ]
 
+AorB: TypeAlias = A  |  B
 ModAAlias: TypeAlias = A
 @typing.final
 class A:
@@ -36,4 +39,6 @@ def greet_main() -> None:
     
     Another math test $\int_{-\infty}^\infty e^{-x^2} \mathrm{d}x$.
     """
+
+def wrap_opt_a(x: typing.Optional[A]) -> typing.Optional[A]: ...
 

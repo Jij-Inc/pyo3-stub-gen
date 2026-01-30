@@ -137,6 +137,43 @@
           "deprecated": null
         },
         {
+          "kind": "Function",
+          "name": "wrap_opt_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Optional[_core.A]",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Optional[_core.A]",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "AorB",
+          "doc": "",
+          "definition": {
+            "display": "_core.A | _core.B",
+            "link_target": null,
+            "children": []
+          }
+        },
+        {
           "kind": "TypeAlias",
           "name": "ModAAlias",
           "doc": "",
@@ -156,10 +193,12 @@
   },
   "export_map": {
     "hidden_module_docgen_test.A": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.AorB": "hidden_module_docgen_test",
     "hidden_module_docgen_test.B": "hidden_module_docgen_test",
     "hidden_module_docgen_test.ModAAlias": "hidden_module_docgen_test",
     "hidden_module_docgen_test.create_a": "hidden_module_docgen_test",
     "hidden_module_docgen_test.create_b": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test"
+    "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.wrap_opt_a": "hidden_module_docgen_test"
   }
 }

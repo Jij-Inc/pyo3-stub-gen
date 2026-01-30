@@ -23,6 +23,12 @@ fn create_a(x: usize) -> A {
     A { x }
 }
 
+#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[pyfunction]
+pub fn wrap_opt_a(x: Option<A>) -> Option<A> {
+    x
+}
+
 // Class without explicit module specification
 #[gen_stub_pyclass]
 #[pyclass(module = "hidden_module_docgen_test._core")]
@@ -57,6 +63,9 @@ fn create_b(x: usize) -> B {
 
 // Type alias in mod_a to test wildcard re-export
 pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", ModAAlias = A);
+
+// Type alias in mod_a to test wildcard re-export
+pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", AorB = A | B);
 
 #[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
 #[pyfunction(name = "greet_main")]
