@@ -72,7 +72,7 @@ pub fn generate_index_rst(
     } else {
         // Default message when not configured
         content.push_str(
-            "This is the API reference documentation generated from Rust code using pyo3-stub-gen.\n\n",
+            "This is the API reference documentation generated from Rust code using `pyo3-stub-gen <https://github.com/Jij-Inc/pyo3-stub-gen>`_.\n\n",
         );
     }
 
