@@ -327,7 +327,7 @@
     "hidden_module_docgen_test.wrap_opt_a": "hidden_module_docgen_test"
   },
   "config": {
-    "output-dir": "/Users/hiromi/Documents/jobs/pyo3-stub-gen/examples/hidden_module_docgen_test/docs/api",
+    "output-dir": "docs/api",
     "json-output": "api_reference.json",
     "separate-pages": true,
     "intro-message": "Re-export from hidden module should appear in the documentation.",

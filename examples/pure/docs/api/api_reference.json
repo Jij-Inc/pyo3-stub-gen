@@ -3397,7 +3397,7 @@
     "pure.test_type_ignore_specific": "pure"
   },
   "config": {
-    "output-dir": "/Users/hiromi/Documents/jobs/pyo3-stub-gen/examples/pure/docs/api",
+    "output-dir": "docs/api",
     "json-output": "api_reference.json",
     "separate-pages": true,
     "intro-message": null,

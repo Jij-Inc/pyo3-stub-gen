@@ -11,6 +11,7 @@ use crate::docgen::{
 use crate::generate::StubInfo;
 use crate::Result;
 use std::collections::{BTreeMap, HashMap};
+use std::path::PathBuf;
 
 /// Check if module is hidden (any path component starts with '_')
 fn is_hidden_module(module_name: &str) -> bool {
@@ -70,11 +71,20 @@ impl<'a> DocPackageBuilder<'a> {
             modules.insert(module_name.clone(), doc_module);
         }
 
+        let export_map = self.export_map;
+
+        // Convert config to use relative POSIX path for JSON serialization
+        let mut json_config = self.stub_info.config.doc_gen.clone().unwrap_or_default();
+        if let Some(pyproject_dir) = &self.stub_info.pyproject_dir {
+            let relative_posix = json_config.to_relative_posix_path(pyproject_dir);
+            json_config.output_dir = PathBuf::from(relative_posix);
+        }
+
         Ok(DocPackage {
             name: self.default_module_name.clone(),
             modules,
-            export_map: self.export_map,
-            config: self.stub_info.config.doc_gen.clone().unwrap_or_default(),
+            export_map,
+            config: json_config,
         })
     }
 

@@ -897,7 +897,7 @@
     "mixed.test.from_pyo3.OnlyPyo3Module": "mixed.test.from_pyo3"
   },
   "config": {
-    "output-dir": "/Users/hiromi/Documents/jobs/pyo3-stub-gen/examples/mixed/docs/api",
+    "output-dir": "docs/api",
     "json-output": "api_reference.json",
     "separate-pages": true,
     "intro-message": "Custom documentation for the mixed example project demonstrating PyO3 stub generation.",

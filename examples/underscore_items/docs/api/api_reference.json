@@ -68,7 +68,7 @@
     "underscore_items.public_function": "underscore_items"
   },
   "config": {
-    "output-dir": "/Users/hiromi/Documents/jobs/pyo3-stub-gen/examples/underscore_items/docs/api",
+    "output-dir": "docs/api",
     "json-output": "api_reference.json",
     "separate-pages": true,
     "intro-message": null,

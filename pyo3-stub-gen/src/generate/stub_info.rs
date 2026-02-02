@@ -18,6 +18,8 @@ pub struct StubInfo {
     pub is_mixed_layout: bool,
     /// Configuration options for stub generation
     pub config: StubGenConfig,
+    /// Directory containing pyproject.toml (for relative path calculations)
+    pub pyproject_dir: Option<PathBuf>,
 }
 
 impl StubInfo {
@@ -33,7 +35,11 @@ impl StubInfo {
             config.doc_gen = Some(resolved_doc_gen);
         }
 
-        StubInfoBuilder::from_pyproject_toml(pyproject, config).build()
+        let pyproject_dir = path.parent().map(|p| p.to_path_buf());
+
+        let mut stub_info = StubInfoBuilder::from_pyproject_toml(pyproject, config).build()?;
+        stub_info.pyproject_dir = pyproject_dir;
+        Ok(stub_info)
     }
 
     /// Initialize [StubInfo] with a specific module name, project root, and configuration.
@@ -539,6 +545,7 @@ impl StubInfoBuilder {
             python_root: self.python_root,
             is_mixed_layout: self.is_mixed_layout,
             config: self.config,
+            pyproject_dir: None, // Will be set by from_pyproject_toml()
         })
     }
 }
@@ -640,6 +647,7 @@ mod tests {
             python_root: PathBuf::from("/tmp"),
             is_mixed_layout: false,
             config: StubGenConfig::default(),
+            pyproject_dir: None,
         };
 
         let result = stub_info.generate();
