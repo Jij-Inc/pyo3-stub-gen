@@ -202,19 +202,23 @@ impl<'a> DocPackageBuilder<'a> {
         module: &str,
         func_defs: &[crate::generate::FunctionDef],
     ) -> Result<DocItem> {
+        // Sort overloads by source location for deterministic ordering (same as stub generation)
+        let mut sorted_defs = func_defs.to_vec();
+        sorted_defs.sort_by_key(|func| (func.file, func.line, func.column, func.index));
+
         // Requirement #1: Include ALL overload signatures
-        let signatures: Vec<DocSignature> = func_defs
+        let signatures: Vec<DocSignature> = sorted_defs
             .iter()
             .map(|def| self.build_signature(module, def))
             .collect::<Result<_>>()?;
 
         // Use first def's doc (they should all have same doc)
-        let doc = func_defs
+        let doc = sorted_defs
             .first()
             .map(|d| d.doc.to_string())
             .unwrap_or_default();
 
-        let deprecated = func_defs.first().and_then(|d| {
+        let deprecated = sorted_defs.first().and_then(|d| {
             d.deprecated.as_ref().map(|dep| DeprecatedInfo {
                 since: dep.since.map(|s| s.to_string()),
                 note: dep.note.map(|s| s.to_string()),
@@ -222,10 +226,10 @@ impl<'a> DocPackageBuilder<'a> {
         });
 
         Ok(DocItem::Function(DocFunction {
-            name: func_defs[0].name.to_string(),
+            name: sorted_defs[0].name.to_string(),
             doc,
             signatures,
-            is_async: func_defs[0].is_async,
+            is_async: sorted_defs[0].is_async,
             deprecated,
         }))
     }

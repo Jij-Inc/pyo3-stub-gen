@@ -1559,53 +1559,8 @@
         {
           "kind": "Function",
           "name": "as_tuple",
-          "doc": "Convert sequence to list when tuple_out is False",
+          "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "xs",
-                  "type_": {
-                    "display": "Sequence[int]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                },
-                {
-                  "name": "tuple_out",
-                  "type_": {
-                    "display": "Literal[False]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "False",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "list[int]",
-                "link_target": null,
-                "children": [
-                  {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                ]
-              }
-            },
             {
               "parameters": [
                 {
@@ -1650,6 +1605,51 @@
                   },
                   {
                     "display": "...",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[False]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "False",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
                     "link_target": null,
                     "children": []
                   }
@@ -2176,53 +2176,8 @@
         {
           "kind": "Function",
           "name": "manual_overload_as_tuple",
-          "doc": "Convert sequence to list when tuple_out is False",
+          "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "xs",
-                  "type_": {
-                    "display": "Sequence[int]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                },
-                {
-                  "name": "tuple_out",
-                  "type_": {
-                    "display": "Literal[False]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "False",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "list[int]",
-                "link_target": null,
-                "children": [
-                  {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                ]
-              }
-            },
             {
               "parameters": [
                 {
@@ -2272,6 +2227,51 @@
                   }
                 ]
               }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "xs",
+                  "type_": {
+                    "display": "Sequence[int]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                },
+                {
+                  "name": "tuple_out",
+                  "type_": {
+                    "display": "Literal[False]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "False",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              }
             }
           ],
           "is_async": false,
@@ -2287,24 +2287,6 @@
                 {
                   "name": "x",
                   "type_": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "float",
-                "link_target": null,
-                "children": []
-              }
-            },
-            {
-              "parameters": [
-                {
-                  "name": "x",
-                  "type_": {
                     "display": "int",
                     "link_target": null,
                     "children": []
@@ -2314,6 +2296,24 @@
               ],
               "return_type": {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
                 "link_target": null,
                 "children": []
               }
@@ -2415,26 +2415,8 @@
         {
           "kind": "Function",
           "name": "overload_example_2",
-          "doc": "Increments float by 1",
+          "doc": "Increments integer by 1",
           "signatures": [
-            {
-              "parameters": [
-                {
-                  "name": "ob",
-                  "type_": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  },
-                  "default": null
-                }
-              ],
-              "return_type": {
-                "display": "float",
-                "link_target": null,
-                "children": []
-              }
-            },
             {
               "parameters": [
                 {
@@ -2449,6 +2431,24 @@
               ],
               "return_type": {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "parameters": [
+                {
+                  "name": "ob",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "float",
                 "link_target": null,
                 "children": []
               }
