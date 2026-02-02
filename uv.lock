@@ -407,6 +407,22 @@ name = "pure"
 version = "0.1"
 source = { editable = "examples/pure" }
 
+[package.dev-dependencies]
+dev = [
+    { name = "myst-parser" },
+    { name = "sphinx" },
+    { name = "sphinx-rtd-theme" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "myst-parser" },
+    { name = "sphinx" },
+    { name = "sphinx-rtd-theme" },
+]
+
 [[package]]
 name = "pydantic"
 version = "2.12.4"

@@ -3,6 +3,9 @@ name = "pure"
 version = "0.1"
 requires-python = ">=3.10"
 
+[dependency-groups]
+dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+
 [build-system]
 requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
@@ -21,9 +24,6 @@ enabled-ignores = ["type", "pyrefly"]
 
 [tool.pyright]
 ignore = ["**/type_error_cases/*.py", "docs/api/**"]
-
-[tool.mypy]
-exclude = ["docs/api"]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
