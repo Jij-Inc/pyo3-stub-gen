@@ -9,7 +9,7 @@ use std::fmt;
 ///
 /// # Examples
 /// ```
-/// # use pyo3_stub_gen::generate::docstring::normalize_docstring;
+/// # use pyo3_stub_gen::generate::normalize_docstring;
 /// let doc = r#"
 ///     First line
 ///     Second line
