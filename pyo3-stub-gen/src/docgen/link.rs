@@ -6,16 +6,11 @@ use std::collections::BTreeMap;
 /// Link resolver implementing Haddock-style resolution
 pub struct LinkResolver<'a> {
     export_map: &'a BTreeMap<String, String>,
-    #[allow(dead_code)] // Reserved for future use in link resolution
-    package_name: &'a str,
 }
 
 impl<'a> LinkResolver<'a> {
-    pub fn new(export_map: &'a BTreeMap<String, String>, package_name: &'a str) -> Self {
-        Self {
-            export_map,
-            package_name,
-        }
+    pub fn new(export_map: &'a BTreeMap<String, String>) -> Self {
+        Self { export_map }
     }
 
     /// Get the export map for resolving type links

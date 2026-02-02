@@ -2,6 +2,7 @@
 
 use crate::docgen::ir::{DocDefaultExpression, DocDefaultValue, DocTypeRef};
 use crate::docgen::link::LinkResolver;
+use crate::docgen::util::prefix_stripper;
 use crate::TypeInfo;
 
 /// Parser for default values that identifies and links type references
@@ -39,9 +40,7 @@ impl<'a> DefaultValueParser<'a> {
 
     /// Strip module prefixes like "_core.", "typing.", "builtins." from the display text
     fn strip_module_prefixes(&self, text: &str) -> String {
-        text.replace("_core.", "")
-            .replace("typing.", "")
-            .replace("builtins.", "")
+        prefix_stripper::strip_default_value_prefixes(text)
     }
 
     /// Try to parse an attribute reference like "C.C1"

@@ -7,16 +7,12 @@ use crate::docgen::{
         DocParameter, DocSignature, DocSubmodule, DocTypeAlias, DocTypeExpr, DocVariable,
     },
     types::TypeRenderer,
+    util::{is_hidden_module, prefix_stripper},
 };
 use crate::generate::StubInfo;
 use crate::Result;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::path::PathBuf;
-
-/// Check if module is hidden (any path component starts with '_')
-fn is_hidden_module(module_name: &str) -> bool {
-    module_name.split('.').any(|part| part.starts_with('_'))
-}
 
 /// Helper to check if item already exists in the list
 fn matches_item_name(item: &DocItem, name: &str) -> bool {
@@ -26,6 +22,24 @@ fn matches_item_name(item: &DocItem, name: &str) -> bool {
         DocItem::TypeAlias(t) => t.name == name,
         DocItem::Variable(v) => v.name == name,
         DocItem::Module(m) => m.name == name,
+    }
+}
+
+/// Context for building documentation items, containing shared rendering components
+struct DocBuildContext<'a> {
+    link_resolver: crate::docgen::link::LinkResolver<'a>,
+    module: &'a str,
+}
+
+impl<'a> DocBuildContext<'a> {
+    /// Get a type renderer for this context
+    fn type_renderer(&self) -> TypeRenderer<'_> {
+        TypeRenderer::new(&self.link_resolver, self.module)
+    }
+
+    /// Get a default value parser for this context
+    fn default_parser(&self) -> crate::docgen::default_parser::DefaultValueParser<'_> {
+        crate::docgen::default_parser::DefaultValueParser::new(&self.link_resolver, self.module)
     }
 }
 
@@ -55,6 +69,15 @@ impl<'a> DocPackageBuilder<'a> {
             export_resolver,
             export_map,
             default_module_name,
+        }
+    }
+
+    /// Create a build context for a specific module
+    fn create_context<'b>(&'b self, module: &'b str) -> DocBuildContext<'b> {
+        let link_resolver = crate::docgen::link::LinkResolver::new(&self.export_map);
+        DocBuildContext {
+            link_resolver,
+            module,
         }
     }
 
@@ -240,17 +263,9 @@ impl<'a> DocPackageBuilder<'a> {
         parameters: &crate::generate::Parameters,
         return_type: &crate::TypeInfo,
     ) -> Result<DocSignature> {
-        let type_aliases = HashMap::new();
-        let link_resolver =
-            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(
-            &link_resolver,
-            module,
-            &type_aliases,
-            &self.default_module_name,
-        );
-        let default_parser =
-            crate::docgen::default_parser::DefaultValueParser::new(&link_resolver, module);
+        let ctx = self.create_context(module);
+        let type_renderer = ctx.type_renderer();
+        let default_parser = ctx.default_parser();
 
         let params: Vec<DocParameter> = parameters
             .positional_only
@@ -302,15 +317,8 @@ impl<'a> DocPackageBuilder<'a> {
         alias: &crate::generate::TypeAliasDef,
     ) -> Result<DocItem> {
         // Requirement #2: Preserve alias definition + docstring
-        let type_aliases = HashMap::new();
-        let link_resolver =
-            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(
-            &link_resolver,
-            module,
-            &type_aliases,
-            &self.default_module_name,
-        );
+        let ctx = self.create_context(module);
+        let type_renderer = ctx.type_renderer();
 
         Ok(DocItem::TypeAlias(DocTypeAlias {
             name: alias.name.to_string(),
@@ -320,15 +328,8 @@ impl<'a> DocPackageBuilder<'a> {
     }
 
     fn build_class(&self, module: &str, class: &crate::generate::ClassDef) -> Result<DocItem> {
-        let type_aliases = HashMap::new();
-        let link_resolver =
-            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(
-            &link_resolver,
-            module,
-            &type_aliases,
-            &self.default_module_name,
-        );
+        let ctx = self.create_context(module);
+        let type_renderer = ctx.type_renderer();
 
         let bases: Vec<DocTypeExpr> = class
             .bases
@@ -407,15 +408,8 @@ impl<'a> DocPackageBuilder<'a> {
     }
 
     fn build_variable(&self, module: &str, var: &crate::generate::VariableDef) -> Result<DocItem> {
-        let type_aliases = HashMap::new();
-        let link_resolver =
-            crate::docgen::link::LinkResolver::new(&self.export_map, &self.default_module_name);
-        let type_renderer = TypeRenderer::new(
-            &link_resolver,
-            module,
-            &type_aliases,
-            &self.default_module_name,
-        );
+        let ctx = self.create_context(module);
+        let type_renderer = ctx.type_renderer();
 
         Ok(DocItem::Variable(DocVariable {
             name: var.name.to_string(),
@@ -552,37 +546,6 @@ impl<'a> DocPackageBuilder<'a> {
     /// Strip internal module prefixes (modules starting with '_') from display text
     /// e.g., "_core.A" -> "A", "_internal.Foo" -> "Foo"
     fn strip_internal_module_prefix(&self, display: &str) -> String {
-        let mut result = String::new();
-        let mut i = 0;
-        let chars: Vec<char> = display.chars().collect();
-
-        while i < chars.len() {
-            // Check if we're at the start of a potential module prefix
-            if i == 0 || !chars[i - 1].is_alphanumeric() && chars[i - 1] != '_' {
-                // Try to match a pattern like "_module." or "_module.submodule."
-                let remaining: String = chars[i..].iter().collect();
-
-                // Look for pattern: _identifier followed by .
-                if remaining.starts_with('_') {
-                    // Find the next non-identifier character
-                    let mut j = i + 1;
-                    while j < chars.len() && (chars[j].is_alphanumeric() || chars[j] == '_') {
-                        j += 1;
-                    }
-
-                    // If followed by a dot, this is a module prefix to strip
-                    if j < chars.len() && chars[j] == '.' {
-                        // Skip the module name and the dot
-                        i = j + 1;
-                        continue;
-                    }
-                }
-            }
-
-            result.push(chars[i]);
-            i += 1;
-        }
-
-        result
+        prefix_stripper::strip_internal_prefixes(display)
     }
 }

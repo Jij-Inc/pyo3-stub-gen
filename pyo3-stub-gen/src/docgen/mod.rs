@@ -11,6 +11,7 @@ pub mod ir;
 pub mod link;
 pub mod render;
 pub mod types;
+pub mod util;
 
 pub use config::DocGenConfig;
 pub use ir::DocPackage;

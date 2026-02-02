@@ -2,11 +2,12 @@
 
 use crate::docgen::ir::{DocTypeExpr, ItemKind, LinkTarget};
 use crate::docgen::link::LinkResolver;
+use crate::docgen::util::prefix_stripper;
 use crate::generate::qualifier::{tokenize, Token};
 use crate::TypeInfo;
-use std::collections::HashMap;
 
 /// Type alias definition placeholder
+/// TODO: This will be used for type alias expansion in future versions
 pub struct TypeAliasDef;
 
 /// Parsed structure of a type expression
@@ -211,27 +212,15 @@ impl TypeStructure {
 
 /// Renderer for type expressions
 pub struct TypeRenderer<'a> {
-    #[allow(dead_code)] // Reserved for future Haddock-style link resolution
     link_resolver: &'a LinkResolver<'a>,
     current_module: &'a str,
-    #[allow(dead_code)] // Reserved for type alias expansion
-    type_aliases: &'a HashMap<String, TypeAliasDef>,
-    #[allow(dead_code)] // Previously used for simple type linking, now using type_refs
-    default_module_name: &'a str,
 }
 
 impl<'a> TypeRenderer<'a> {
-    pub fn new(
-        link_resolver: &'a LinkResolver<'a>,
-        current_module: &'a str,
-        type_aliases: &'a HashMap<String, TypeAliasDef>,
-        default_module_name: &'a str,
-    ) -> Self {
+    pub fn new(link_resolver: &'a LinkResolver<'a>, current_module: &'a str) -> Self {
         Self {
             link_resolver,
             current_module,
-            type_aliases,
-            default_module_name,
         }
     }
 
@@ -347,89 +336,6 @@ impl<'a> TypeRenderer<'a> {
     /// Remove "typing.", "builtins.", "package.submod."
     /// Keep only bare names: "Optional[ClassA]" not "typing.Optional[sub_mod.ClassA]"
     fn strip_module_prefix(&self, type_name: &str) -> String {
-        // Known external prefixes to strip
-        let external_prefixes = &[
-            "typing.",
-            "builtins.",
-            "collections.abc.",
-            "typing_extensions.",
-            "decimal.",
-            "datetime.",
-            "pathlib.",
-        ];
-
-        let mut result = String::new();
-        let mut i = 0;
-        let chars: Vec<char> = type_name.chars().collect();
-
-        while i < chars.len() {
-            // Check if we're at the start of a qualified name
-            if i == 0
-                || !chars[i - 1].is_alphanumeric() && chars[i - 1] != '_' && chars[i - 1] != '.'
-            {
-                let remaining: String = chars[i..].iter().collect();
-                let mut matched = false;
-
-                // Try to match external prefixes first
-                for prefix in external_prefixes {
-                    if remaining.starts_with(prefix) {
-                        let after_prefix_idx = prefix.len();
-                        if after_prefix_idx < remaining.len() {
-                            let next_char = remaining.chars().nth(after_prefix_idx).unwrap();
-                            if next_char.is_alphabetic() || next_char == '_' {
-                                i += prefix.len();
-                                matched = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if matched {
-                    continue;
-                }
-
-                // Try to match local package prefixes
-                // Extract qualified identifier (e.g., "main_mod.A" or "pure.DataContainer")
-                let ident_match = remaining
-                    .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '.')
-                    .next();
-                if let Some(ident) = ident_match {
-                    if ident.contains('.') {
-                        // This is a qualified name, check if it's from our package
-                        let parts: Vec<&str> = ident.split('.').collect();
-                        if parts.len() >= 2 {
-                            // Check if the first part might be a module in our package
-                            // by seeing if it starts with lowercase (modules are usually lowercase)
-                            let first_part = parts[0];
-                            let last_part = parts[parts.len() - 1];
-
-                            // If it looks like a package.Type pattern, extract just the Type
-                            if first_part
-                                .chars()
-                                .next()
-                                .map(|c| c.is_lowercase())
-                                .unwrap_or(false)
-                                && last_part
-                                    .chars()
-                                    .next()
-                                    .map(|c| c.is_uppercase())
-                                    .unwrap_or(false)
-                            {
-                                // Skip to the last part
-                                let prefix_len = ident.len() - last_part.len();
-                                i += prefix_len;
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
-
-            result.push(chars[i]);
-            i += 1;
-        }
-
-        result
+        prefix_stripper::strip_type_prefixes(type_name, self.current_module)
     }
 }

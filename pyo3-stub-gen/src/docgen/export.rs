@@ -1,12 +1,8 @@
 //! Export resolution for determining which items are publicly accessible
 
+use crate::docgen::util::is_hidden_module;
 use crate::generate::Module;
 use std::collections::{BTreeMap, BTreeSet};
-
-/// Check if module is hidden (any path component starts with '_')
-fn is_hidden_module(module_name: &str) -> bool {
-    module_name.split('.').any(|part| part.starts_with('_'))
-}
 
 /// Resolver for determining which items are exported from modules
 pub struct ExportResolver<'a> {
