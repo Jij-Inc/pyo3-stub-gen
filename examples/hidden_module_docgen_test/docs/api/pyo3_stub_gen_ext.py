@@ -7,7 +7,8 @@ from pathlib import Path
 from docutils import nodes
 from sphinx.addnodes import (
     desc, desc_signature, desc_name, desc_parameterlist,
-    desc_parameter, desc_returns, pending_xref, desc_content, desc_annotation
+    desc_parameter, desc_returns, pending_xref, desc_content, desc_annotation,
+    index
 )
 from myst_parser.parsers.docutils_ import Parser as MystParser
 from sphinx.util.docutils import SphinxDirective
@@ -427,6 +428,56 @@ def _extract_first_line_doc(doc_string, max_length=100):
 
     return first_line
 
+def _create_index_node(fullname, objtype, display_name=None):
+    """Create an index node for Sphinx's IndexBuilder
+
+    Args:
+        fullname: Fully qualified name (e.g., "pure.MyClass")
+        objtype: Object type ('function', 'class', 'data', 'method', 'attribute', 'module')
+        display_name: Optional display name for the index entry
+
+    Returns:
+        sphinx.addnodes.index node with appropriate entries
+    """
+    if display_name is None:
+        display_name = fullname
+
+    # Create index node with entries list
+    # Format: ('entrytype', 'entryname', 'target', 'main', 'key')
+    idx = index()
+    entries = []
+
+    if objtype == 'module':
+        # Module entries: "module; modulename"
+        entries.append(('single', f'{fullname} (module)', fullname, '', None))
+    elif objtype in ('class', 'function', 'data'):
+        # Top-level items: add both bare name and module-scoped entry
+        entries.append(('single', f'{display_name}', fullname, '', None))
+        if '.' in fullname:
+            module_name = fullname.rsplit('.', 1)[0]
+            # Match Python domain convention: "func() (in module mod)"
+            if objtype == 'function':
+                entries.append(('single', f'{display_name}() (in module {module_name})', fullname, '', None))
+            else:
+                entries.append(('single', f'{display_name} (in module {module_name})', fullname, '', None))
+    elif objtype in ('method', 'attribute'):
+        # Nested items: add class-scoped entry
+        parts = fullname.rsplit('.', 2)
+        if len(parts) >= 3:
+            class_name = parts[-2]
+            member_name = parts[-1]
+            # "method() (ClassName method)"
+            if objtype == 'method':
+                entries.append(('single', f'{member_name}() ({class_name} method)', fullname, '', None))
+            else:
+                entries.append(('single', f'{member_name} ({class_name} attribute)', fullname, '', None))
+        else:
+            entries.append(('single', f'{display_name}', fullname, '', None))
+
+    idx['entries'] = entries
+    idx['inline'] = False
+    return idx
+
 def _get_reftype_for_item(item):
     """Get Sphinx reftype for cross-references"""
     kind = item['kind']
@@ -557,11 +608,14 @@ def _build_module_contents_table(env, doc_module, module_name):
 
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
-    desc_node = desc(domain='py', objtype='function', noindex=False)
-    desc_node['classes'].extend(['py', 'function'])
-
     fullname = f"{module_name}.{func['name']}"
     sig_id = fullname
+
+    # CREATE INDEX NODE - targets the first signature
+    index_node = _create_index_node(fullname, 'function', func['name'])
+
+    desc_node = desc(domain='py', objtype='function', noindex=False)
+    desc_node['classes'].extend(['py', 'function'])
 
     # Add signature for each overload
     for idx, sig in enumerate(func['signatures']):
@@ -569,8 +623,9 @@ def _build_function(env, func, module_name):
         sig_node['module'] = module_name
         sig_node['fullname'] = fullname
 
-        # Add IDs for cross-referencing
-        sig_node['ids'].append(sig_id)
+        # FIX: Only add ID to the FIRST signature to avoid duplicates
+        if idx == 0:
+            sig_node['ids'].append(sig_id)
         sig_node['first'] = (idx == 0)
 
         # Function name
@@ -608,17 +663,21 @@ def _build_function(env, func, module_name):
         py_domain = env.get_domain('py')
         py_domain.note_object(fullname, 'function', sig_id, location=env.docname)
 
-    return [desc_node]
+    return [index_node, desc_node]
 
 def _build_type_alias(env, alias, module_name):
     """Build type alias documentation"""
+    fullname = f"{module_name}.{alias['name']}"
+    sig_id = fullname
+
+    # CREATE INDEX NODE
+    index_node = _create_index_node(fullname, 'data', alias['name'])
+
     desc_node = desc(domain='py', objtype='data', noindex=False)
 
-    fullname = f"{module_name}.{alias['name']}"
     sig_node = desc_signature(module=module_name, fullname=fullname)
     sig_node['module'] = module_name
     sig_node['fullname'] = fullname
-    sig_id = fullname
     sig_node['ids'].append(sig_id)
 
     # Use Python 3.12+ type syntax
@@ -639,18 +698,22 @@ def _build_type_alias(env, alias, module_name):
         py_domain = env.get_domain('py')
         py_domain.note_object(fullname, 'data', sig_id, location=env.docname)
 
-    return [desc_node]
+    return [index_node, desc_node]
 
 def _build_class(env, cls, module_name):
     """Build class documentation"""
+    fullname = f"{module_name}.{cls['name']}"
+    sig_id = fullname
+
+    # CREATE INDEX NODE for the class
+    index_node = _create_index_node(fullname, 'class', cls['name'])
+
     desc_node = desc(domain='py', objtype='class', noindex=False)
     desc_node['classes'].extend(['py', 'class'])
 
-    fullname = f"{module_name}.{cls['name']}"
     sig_node = desc_signature(module=module_name, fullname=fullname)
     sig_node['module'] = module_name
     sig_node['fullname'] = fullname
-    sig_id = fullname
     sig_node['ids'].append(sig_id)
 
     # Add "class" prefix annotation with syntax highlighting
@@ -687,6 +750,11 @@ def _build_class(env, cls, module_name):
     methods = cls.get('methods', [])
     for method in methods:
         method_fullname = f"{fullname}.{method['name']}"
+
+        # ADD INDEX NODE for method
+        method_index = _create_index_node(method_fullname, 'method', method['name'])
+        content += method_index
+
         method_desc = desc(domain='py', objtype='method', noindex=False)
         method_desc['classes'].extend(['py', 'method'])
 
@@ -695,7 +763,9 @@ def _build_class(env, cls, module_name):
             sig_node = desc_signature(module=module_name, fullname=method_fullname)
             sig_node['module'] = module_name
             sig_node['fullname'] = method_fullname
-            sig_node['ids'].append(method_fullname)
+            # FIX: Only first overload gets the ID
+            if idx == 0:
+                sig_node['ids'].append(method_fullname)
             sig_node['first'] = (idx == 0)
 
             # Method name
@@ -739,6 +809,11 @@ def _build_class(env, cls, module_name):
     attributes = cls.get('attributes', [])
     for attr in attributes:
         attr_fullname = f"{fullname}.{attr['name']}"
+
+        # ADD INDEX NODE for attribute
+        attr_index = _create_index_node(attr_fullname, 'attribute', attr['name'])
+        content += attr_index
+
         attr_desc = desc(domain='py', objtype='attribute', noindex=False)
 
         sig_node = desc_signature(module=module_name, fullname=attr_fullname)
@@ -770,17 +845,21 @@ def _build_class(env, cls, module_name):
     # Add the complete content block to desc_node
     desc_node += content
 
-    return [desc_node]
+    return [index_node, desc_node]
 
 def _build_variable(env, var, module_name):
     """Build variable documentation"""
+    fullname = f"{module_name}.{var['name']}"
+    sig_id = fullname
+
+    # CREATE INDEX NODE
+    index_node = _create_index_node(fullname, 'data', var['name'])
+
     desc_node = desc(domain='py', objtype='data', noindex=False)
 
-    fullname = f"{module_name}.{var['name']}"
     sig_node = desc_signature(module=module_name, fullname=fullname)
     sig_node['module'] = module_name
     sig_node['fullname'] = fullname
-    sig_id = fullname
     sig_node['ids'].append(sig_id)
 
     sig_node += desc_name(text=var['name'])
@@ -800,7 +879,7 @@ def _build_variable(env, var, module_name):
         py_domain = env.get_domain('py')
         py_domain.note_object(fullname, 'data', sig_id, location=env.docname)
 
-    return [desc_node]
+    return [index_node, desc_node]
 
 def _build_submodule(env, submod, parent_module_name):
     """Build documentation for a submodule reference"""
@@ -857,6 +936,23 @@ class Pyo3APIDirective(SphinxDirective):
         doc_module = doc_package['modules'][module_name]
 
         result = []
+
+        # REGISTER MODULE with Python domain for py-modindex
+        if hasattr(self.env, 'domaindata'):
+            py_domain = self.env.get_domain('py')
+            synopsis = _extract_first_line_doc(doc_module.get('doc', ''))
+            # Sphinx 9.x signature: note_module(name, node_id, synopsis, platform, deprecated)
+            py_domain.note_module(
+                module_name,
+                self.env.docname,
+                synopsis,
+                '',
+                False
+            )
+
+        # OPTIONALLY: Add module index entry to genindex
+        module_index = _create_index_node(module_name, 'module')
+        result.append(module_index)
 
         # Render module docstring if present
         if doc_module.get('doc'):
@@ -968,11 +1064,28 @@ class Pyo3APIPackageDirective(SphinxDirective):
             if module_name == package_name or module_name.startswith(package_name + '.'):
                 doc_module = doc_package['modules'][module_name]
 
+                # REGISTER EACH MODULE
+                if hasattr(self.env, 'domaindata'):
+                    py_domain = self.env.get_domain('py')
+                    synopsis = _extract_first_line_doc(doc_module.get('doc', ''))
+                    # Sphinx 9.x signature: note_module(name, node_id, synopsis, platform, deprecated)
+                    py_domain.note_module(
+                        module_name,
+                        self.env.docname,
+                        synopsis,
+                        '',
+                        False
+                    )
+
                 # Add section header for each module
                 section = nodes.section(ids=[f'module-{module_name}'])
                 title_text = f"{module_name} Module" if module_name != package_name else f"{module_name} Package"
                 title = nodes.title(text=title_text)
                 section += title
+
+                # OPTIONALLY: Add module index entry
+                module_index = _create_index_node(module_name, 'module')
+                section += module_index
 
                 # Render module docstring if present
                 if doc_module.get('doc'):
