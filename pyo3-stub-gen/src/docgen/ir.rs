@@ -176,3 +176,100 @@ pub struct DeprecatedInfo {
     pub since: Option<String>,
     pub note: Option<String>,
 }
+
+impl DocPackage {
+    /// Normalize all Vec fields for deterministic JSON output
+    pub fn normalize(&mut self) {
+        for module in self.modules.values_mut() {
+            module.normalize();
+        }
+    }
+}
+
+impl DocModule {
+    fn normalize(&mut self) {
+        // Sort items by type priority and then by name for deterministic output
+        self.items.sort_by(|a, b| {
+            use DocItem::*;
+            match (a, b) {
+                (Function(f1), Function(f2)) => f1.name.cmp(&f2.name),
+                (Class(c1), Class(c2)) => c1.name.cmp(&c2.name),
+                (TypeAlias(t1), TypeAlias(t2)) => t1.name.cmp(&t2.name),
+                (Variable(v1), Variable(v2)) => v1.name.cmp(&v2.name),
+                (Module(m1), Module(m2)) => m1.name.cmp(&m2.name),
+                // Sort by type priority if types differ, then by name
+                _ => Self::item_type_priority(a)
+                    .cmp(&Self::item_type_priority(b))
+                    .then_with(|| Self::item_name(a).cmp(Self::item_name(b))),
+            }
+        });
+
+        // Sort submodules alphabetically
+        self.submodules.sort();
+
+        // Normalize nested items
+        for item in &mut self.items {
+            match item {
+                DocItem::Class(c) => c.normalize(),
+                DocItem::Function(f) => f.normalize(),
+                _ => {}
+            }
+        }
+    }
+
+    fn item_type_priority(item: &DocItem) -> u8 {
+        match item {
+            DocItem::Module(_) => 0,
+            DocItem::Class(_) => 1,
+            DocItem::Function(_) => 2,
+            DocItem::TypeAlias(_) => 3,
+            DocItem::Variable(_) => 4,
+        }
+    }
+
+    fn item_name(item: &DocItem) -> &str {
+        match item {
+            DocItem::Function(f) => &f.name,
+            DocItem::Class(c) => &c.name,
+            DocItem::TypeAlias(t) => &t.name,
+            DocItem::Variable(v) => &v.name,
+            DocItem::Module(m) => &m.name,
+        }
+    }
+}
+
+impl DocClass {
+    fn normalize(&mut self) {
+        // Sort methods by name
+        self.methods.sort_by(|a, b| a.name.cmp(&b.name));
+
+        // Sort attributes by name
+        self.attributes.sort_by(|a, b| a.name.cmp(&b.name));
+
+        // Sort bases by display name
+        self.bases.sort_by(|a, b| a.display.cmp(&b.display));
+
+        // Normalize methods
+        for method in &mut self.methods {
+            method.normalize();
+        }
+    }
+}
+
+impl DocFunction {
+    fn normalize(&mut self) {
+        // Sort signatures by parameter count, then by parameter names for consistent overload ordering
+        self.signatures.sort_by(|a, b| {
+            a.parameters.len().cmp(&b.parameters.len()).then_with(|| {
+                // Compare parameter names lexicographically
+                for (p1, p2) in a.parameters.iter().zip(b.parameters.iter()) {
+                    match p1.name.cmp(&p2.name) {
+                        std::cmp::Ordering::Equal => continue,
+                        other => return other,
+                    }
+                }
+                std::cmp::Ordering::Equal
+            })
+        });
+    }
+}

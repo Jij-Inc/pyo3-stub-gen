@@ -6,16 +6,6 @@
       "doc": "",
       "items": [
         {
-          "kind": "Variable",
-          "name": "custom_export_name",
-          "doc": "",
-          "type_": {
-            "display": "str",
-            "link_target": null,
-            "children": []
-          }
-        },
-        {
           "kind": "Module",
           "name": "main_mod",
           "doc": "",
@@ -26,6 +16,16 @@
           "name": "test",
           "doc": "",
           "fqn": "mixed.test"
+        },
+        {
+          "kind": "Variable",
+          "name": "custom_export_name",
+          "doc": "",
+          "type_": {
+            "display": "str",
+            "link_target": null,
+            "children": []
+          }
         }
       ],
       "submodules": [
@@ -37,6 +37,137 @@
       "name": "mixed.main_mod",
       "doc": "",
       "items": [
+        {
+          "kind": "Module",
+          "name": "int",
+          "doc": "",
+          "fqn": "mixed.main_mod.int"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_a",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_a"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_b",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_b"
+        },
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NoModuleAttr",
+          "doc": "Test 1: No module attribute → uses default",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
         {
           "kind": "Function",
           "name": "create_a",
@@ -103,170 +234,6 @@
         },
         {
           "kind": "Function",
-          "name": "greet_main",
-          "doc": "",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "None",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
-          "name": "no_module_fn",
-          "doc": "Test 1: No module → uses default",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "int",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "A",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "B",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "NoModuleAttr",
-          "doc": "Test 1: No module attribute → uses default",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "D",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
-          "name": "greet_b",
-          "doc": "",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "None",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "C",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
           "name": "create_c",
           "doc": "",
           "signatures": [
@@ -335,6 +302,57 @@
         },
         {
           "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_main",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "no_module_fn",
+          "doc": "Test 1: No module → uses default",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "test_module_with_python",
           "doc": "Test function with both module and python parameters",
           "signatures": [
@@ -385,24 +403,6 @@
             "link_target": null,
             "children": []
           }
-        },
-        {
-          "kind": "Module",
-          "name": "int",
-          "doc": "",
-          "fqn": "mixed.main_mod.int"
-        },
-        {
-          "kind": "Module",
-          "name": "mod_a",
-          "doc": "",
-          "fqn": "mixed.main_mod.mod_a"
-        },
-        {
-          "kind": "Module",
-          "name": "mod_b",
-          "doc": "",
-          "fqn": "mixed.main_mod.mod_b"
         }
       ],
       "submodules": [
@@ -450,6 +450,32 @@
       "doc": "",
       "items": [
         {
+          "kind": "Class",
+          "name": "C",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
           "kind": "Function",
           "name": "create_c",
           "doc": "",
@@ -569,10 +595,17 @@
             "link_target": null,
             "children": []
           }
-        },
+        }
+      ],
+      "submodules": []
+    },
+    "mixed.main_mod.mod_b": {
+      "name": "mixed.main_mod.mod_b",
+      "doc": "",
+      "items": [
         {
           "kind": "Class",
-          "name": "C",
+          "name": "D",
           "doc": "",
           "bases": [],
           "methods": [
@@ -595,14 +628,7 @@
           ],
           "attributes": [],
           "deprecated": null
-        }
-      ],
-      "submodules": []
-    },
-    "mixed.main_mod.mod_b": {
-      "name": "mixed.main_mod.mod_b",
-      "doc": "",
-      "items": [
+        },
         {
           "kind": "Function",
           "name": "create_d",
@@ -684,32 +710,6 @@
           ],
           "is_async": false,
           "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "D",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
         }
       ],
       "submodules": []
@@ -741,35 +741,9 @@
       "doc": "",
       "items": [
         {
-          "kind": "Function",
-          "name": "only_inline_fn",
-          "doc": "Test 2: Only inline module",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "int",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
-        },
-        {
           "kind": "Class",
           "name": "InlineOverridesPyo3Class",
           "doc": "Test 3: Inline parameter overrides pyo3",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "OnlyInlineClass",
-          "doc": "Test 4: Only inline (no pyo3)",
           "bases": [],
           "methods": [],
           "attributes": [],
@@ -797,6 +771,15 @@
         },
         {
           "kind": "Class",
+          "name": "OnlyInlineClass",
+          "doc": "Test 4: Only inline (no pyo3)",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "OnlyInlineEnum",
           "doc": "Test 3: Only inline (no pyo3)",
           "bases": [],
@@ -814,6 +797,23 @@
             }
           ],
           "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "only_inline_fn",
+          "doc": "Test 2: Only inline module",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
         }
       ],
       "submodules": []
@@ -822,15 +822,6 @@
       "name": "mixed.test.from_pyo3",
       "doc": "",
       "items": [
-        {
-          "kind": "Class",
-          "name": "OnlyPyo3Module",
-          "doc": "Test 2: Only pyo3 module → uses pyo3 module",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
         {
           "kind": "Class",
           "name": "OnlyPyo3Enum",
@@ -849,6 +840,15 @@
               "type_": null
             }
           ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OnlyPyo3Module",
+          "doc": "Test 2: Only pyo3 module → uses pyo3 module",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
           "deprecated": null
         }
       ],

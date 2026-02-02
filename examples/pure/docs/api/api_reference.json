@@ -6,6 +6,1493 @@
       "doc": "Document for pure ...",
       "items": [
         {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "This is a constructor of :class:`A`.",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "A",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "async_get_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": true,
+              "deprecated": null
+            },
+            {
+              "name": "classmethod_test1",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "classmethod_test2",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "deprecated_classmethod",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This classmethod is deprecated"
+              }
+            },
+            {
+              "name": "deprecated_method",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This method is deprecated"
+              }
+            },
+            {
+              "name": "deprecated_staticmethod",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This staticmethod is deprecated"
+              }
+            },
+            {
+              "name": "ref_test",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "dict",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "dict",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [
+            {
+              "display": "A",
+              "link_target": {
+                "fqn": "pure.A",
+                "doc_module": "pure",
+                "kind": "Class",
+                "attribute": null
+              },
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Calculator",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Calculator",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "add",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "multiply",
+              "doc": "Multiply this calculator's result by another calculator's result.\n\nUsing RustType marker for both input and output types.",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "Calculator",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Calculator",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "ComparableStruct",
+          "doc": "Test struct for eq and ord comparison methods",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__eq__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__ge__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__gt__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__le__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__lt__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "ComparableStruct",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomComplexEnum",
+          "doc": "Test complex enum with skip_stub_type",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomEnum",
+          "doc": "Test enum with skip_stub_type",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "OPTION_A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "OPTION_B",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "CustomStubType",
+          "doc": "Test class with manually defined PyStubType",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "CustomStubType",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "increment",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "DataContainer",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "DataContainer",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "DecimalHolder",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "Decimal",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "DecimalHolder",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "HashableStruct",
+          "doc": "Test struct for hash and str methods",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__eq__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "other",
+                      "type_": {
+                        "display": "object",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__hash__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "HashableStruct",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__str__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "InstanceValue",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "data",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "InstanceValue",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "ManualSubmit",
+          "doc": "Demonstrates manual submission of class methods using the `submit!` macro",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "Constructor for ManualSubmit class",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "ManualSubmit",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "echo",
+              "doc": "If the input is an int, returns int",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "increment",
+              "doc": "Add 1.0 to the input float",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "x",
+                      "type_": {
+                        "display": "float",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "MyDate",
+          "doc": "",
+          "bases": [
+            {
+              "display": "date",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "MyError",
+          "doc": "",
+          "bases": [
+            {
+              "display": "RuntimeError",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NormalClass",
+          "doc": "Test class without skip_stub_type (normal behavior)",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "NormalClass",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NotIntError",
+          "doc": "A manual custom exception case\n\nBased on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263",
+          "bases": [
+            {
+              "display": "TypeError",
+              "link_target": null,
+              "children": []
+            }
+          ],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "item",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "NotIntError",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "__str__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "item_is_str",
+              "doc": "Checks if the item is a string",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "bool",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "trivial_number",
+              "doc": "A trivial number",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Number",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "FLOAT",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "INTEGER",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NumberComplex",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NumberRenameAll",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "FLOAT",
+              "doc": "Float variant",
+              "type_": null
+            },
+            {
+              "name": "INTEGER",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OverrideType",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "error",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Never",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "PartialManualSubmit",
+          "doc": "Example demonstrating manual submission mixed with proc-macro generated method info",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "The constructor for PartialManualSubmit",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "PartialManualSubmit",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "echo",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "echo_overloaded",
+              "doc": "Overloaded version for int input",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                },
+                {
+                  "parameters": [
+                    {
+                      "name": "obj",
+                      "type_": {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Any",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "fn_override_type",
+              "doc": "Example method with complex type annotation, skipped from #[gen_stub_pymethods]",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "cb",
+                      "type_": {
+                        "display": "Callable[[str], Any]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "[str]",
+                            "link_target": null,
+                            "children": [
+                              {
+                                "display": "str",
+                                "link_target": null,
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "display": "Any",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Callable[[str], Any]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "display": "Any",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Placeholder",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Placeholder",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "configure",
+              "doc": "Configure placeholder with keyword-only parameters.\n\nThis demonstrates keyword-only parameters (after *) which should be\npreserved in the generated stub file.",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "name",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "dtype",
+                      "type_": {
+                        "display": "str",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "ndim",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "shape",
+                      "type_": {
+                        "display": "Optional[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      "default": null
+                    },
+                    {
+                      "name": "jagged",
+                      "type_": {
+                        "display": "bool",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": {
+                        "kind": "Simple",
+                        "value": "False"
+                      }
+                    },
+                    {
+                      "name": "latex",
+                      "type_": {
+                        "display": "Optional[str]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      "default": {
+                        "kind": "Simple",
+                        "value": "None"
+                      }
+                    }
+                  ],
+                  "return_type": {
+                    "display": "Placeholder",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Problem",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "Problem",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "evaluate",
+              "doc": "Evaluate with instance data mapping string keys to InstanceValue objects.\n\nThis example demonstrates RustType marker usage within nested generic types\nsuch as dict value types. The marker should expand to the correct Python type.",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "instance_data",
+                      "type_": {
+                        "display": "dict[str, InstanceValue]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "str",
+                            "link_target": null,
+                            "children": []
+                          },
+                          {
+                            "display": "InstanceValue",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Shape1",
+          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "Shape2",
+          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "TypeIgnoreTest",
+          "doc": "Test class for method type: ignore functionality",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "TypeIgnoreTest",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "test_method_all_ignore",
+              "doc": "Test method with type: ignore (without equals for catch-all)",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "test_method_ignore",
+              "doc": "Test method with type: ignore for specific rules",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
           "kind": "Function",
           "name": "add_decimals",
           "doc": "Add two decimal numbers with high precision",
@@ -1798,1493 +3285,6 @@
               }
             ]
           }
-        },
-        {
-          "kind": "Class",
-          "name": "A",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "This is a constructor of :class:`A`.",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "x",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "A",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "classmethod_test1",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "deprecated_classmethod",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": {
-                "since": "1.0.0",
-                "note": "This classmethod is deprecated"
-              }
-            },
-            {
-              "name": "classmethod_test2",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "ref_test",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "x",
-                      "type_": {
-                        "display": "dict",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "dict",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "async_get_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": true,
-              "deprecated": null
-            },
-            {
-              "name": "deprecated_method",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": {
-                "since": "1.0.0",
-                "note": "This method is deprecated"
-              }
-            },
-            {
-              "name": "deprecated_staticmethod",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": {
-                "since": "1.0.0",
-                "note": "This staticmethod is deprecated"
-              }
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "B",
-          "doc": "",
-          "bases": [
-            {
-              "display": "A",
-              "link_target": {
-                "fqn": "pure.A",
-                "doc_module": "pure",
-                "kind": "Class",
-                "attribute": null
-              },
-              "children": []
-            }
-          ],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Calculator",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "Calculator",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "add",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "float",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "multiply",
-              "doc": "Multiply this calculator's result by another calculator's result.\n\nUsing RustType marker for both input and output types.",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "Calculator",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Calculator",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "ComparableStruct",
-          "doc": "Test struct for eq and ord comparison methods",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__eq__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__lt__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__le__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__gt__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__ge__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "ComparableStruct",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "CustomComplexEnum",
-          "doc": "Test complex enum with skip_stub_type",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "CustomStubType",
-          "doc": "Test class with manually defined PyStubType",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "CustomStubType",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "increment",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "DataContainer",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "DataContainer",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "DecimalHolder",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "Decimal",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "DecimalHolder",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "HashableStruct",
-          "doc": "Test struct for hash and str methods",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__eq__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "other",
-                      "type_": {
-                        "display": "object",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__hash__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__str__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "str",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "name",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "HashableStruct",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "InstanceValue",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "data",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "InstanceValue",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "ManualSubmit",
-          "doc": "Demonstrates manual submission of class methods using the `submit!` macro",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "Constructor for ManualSubmit class",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "ManualSubmit",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "increment",
-              "doc": "Add 1.0 to the input float",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "x",
-                      "type_": {
-                        "display": "float",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "echo",
-              "doc": "If the input is an int, returns int",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "obj",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "obj",
-                      "type_": {
-                        "display": "float",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "float",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "MyDate",
-          "doc": "",
-          "bases": [
-            {
-              "display": "date",
-              "link_target": null,
-              "children": []
-            }
-          ],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "MyError",
-          "doc": "",
-          "bases": [
-            {
-              "display": "RuntimeError",
-              "link_target": null,
-              "children": []
-            }
-          ],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "NormalClass",
-          "doc": "Test class without skip_stub_type (normal behavior)",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "NormalClass",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "NotIntError",
-          "doc": "A manual custom exception case\n\nBased on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263",
-          "bases": [
-            {
-              "display": "TypeError",
-              "link_target": null,
-              "children": []
-            }
-          ],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "item",
-                      "type_": {
-                        "display": "Any",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "NotIntError",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__str__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "str",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "trivial_number",
-              "doc": "A trivial number",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "item_is_str",
-              "doc": "Checks if the item is a string",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "bool",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "NumberComplex",
-          "doc": "",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "OverrideType",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "error",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "Never",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "PartialManualSubmit",
-          "doc": "Example demonstrating manual submission mixed with proc-macro generated method info",
-          "bases": [],
-          "methods": [
-            {
-              "name": "echo_overloaded",
-              "doc": "Overloaded version for int input",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "obj",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                },
-                {
-                  "parameters": [
-                    {
-                      "name": "obj",
-                      "type_": {
-                        "display": "Any",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Any",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "fn_override_type",
-              "doc": "Example method with complex type annotation, skipped from #[gen_stub_pymethods]",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "cb",
-                      "type_": {
-                        "display": "Callable[[str], Any]",
-                        "link_target": null,
-                        "children": [
-                          {
-                            "display": "[str]",
-                            "link_target": null,
-                            "children": [
-                              {
-                                "display": "str",
-                                "link_target": null,
-                                "children": []
-                              }
-                            ]
-                          },
-                          {
-                            "display": "Any",
-                            "link_target": null,
-                            "children": []
-                          }
-                        ]
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Callable[[str], Any]",
-                    "link_target": null,
-                    "children": [
-                      {
-                        "display": "[str]",
-                        "link_target": null,
-                        "children": [
-                          {
-                            "display": "str",
-                            "link_target": null,
-                            "children": []
-                          }
-                        ]
-                      },
-                      {
-                        "display": "Any",
-                        "link_target": null,
-                        "children": []
-                      }
-                    ]
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "__new__",
-              "doc": "The constructor for PartialManualSubmit",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "PartialManualSubmit",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "echo",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "obj",
-                      "type_": {
-                        "display": "Any",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Any",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Placeholder",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "name",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Placeholder",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "configure",
-              "doc": "Configure placeholder with keyword-only parameters.\n\nThis demonstrates keyword-only parameters (after *) which should be\npreserved in the generated stub file.",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "name",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    },
-                    {
-                      "name": "dtype",
-                      "type_": {
-                        "display": "str",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    },
-                    {
-                      "name": "ndim",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    },
-                    {
-                      "name": "shape",
-                      "type_": {
-                        "display": "Optional[str]",
-                        "link_target": null,
-                        "children": [
-                          {
-                            "display": "str",
-                            "link_target": null,
-                            "children": []
-                          }
-                        ]
-                      },
-                      "default": null
-                    },
-                    {
-                      "name": "jagged",
-                      "type_": {
-                        "display": "bool",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": {
-                        "kind": "Simple",
-                        "value": "False"
-                      }
-                    },
-                    {
-                      "name": "latex",
-                      "type_": {
-                        "display": "Optional[str]",
-                        "link_target": null,
-                        "children": [
-                          {
-                            "display": "str",
-                            "link_target": null,
-                            "children": []
-                          }
-                        ]
-                      },
-                      "default": {
-                        "kind": "Simple",
-                        "value": "None"
-                      }
-                    }
-                  ],
-                  "return_type": {
-                    "display": "Placeholder",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Problem",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "Problem",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "evaluate",
-              "doc": "Evaluate with instance data mapping string keys to InstanceValue objects.\n\nThis example demonstrates RustType marker usage within nested generic types\nsuch as dict value types. The marker should expand to the correct Python type.",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "instance_data",
-                      "type_": {
-                        "display": "dict[str, InstanceValue]",
-                        "link_target": null,
-                        "children": [
-                          {
-                            "display": "str",
-                            "link_target": null,
-                            "children": []
-                          },
-                          {
-                            "display": "InstanceValue",
-                            "link_target": null,
-                            "children": []
-                          }
-                        ]
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "str",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Shape1",
-          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Shape2",
-          "doc": "Example from PyO3 documentation for complex enum\nhttps://pyo3.rs/v0.25.1/class.html#complex-enums",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "TypeIgnoreTest",
-          "doc": "Test class for method type: ignore functionality",
-          "bases": [],
-          "methods": [
-            {
-              "name": "__new__",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "TypeIgnoreTest",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "test_method_ignore",
-              "doc": "Test method with type: ignore for specific rules",
-              "signatures": [
-                {
-                  "parameters": [
-                    {
-                      "name": "value",
-                      "type_": {
-                        "display": "int",
-                        "link_target": null,
-                        "children": []
-                      },
-                      "default": null
-                    }
-                  ],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            },
-            {
-              "name": "test_method_all_ignore",
-              "doc": "Test method with type: ignore (without equals for catch-all)",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "CustomEnum",
-          "doc": "Test enum with skip_stub_type",
-          "bases": [],
-          "methods": [],
-          "attributes": [
-            {
-              "name": "OPTION_A",
-              "doc": "",
-              "type_": null
-            },
-            {
-              "name": "OPTION_B",
-              "doc": "",
-              "type_": null
-            }
-          ],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "Number",
-          "doc": "",
-          "bases": [],
-          "methods": [],
-          "attributes": [
-            {
-              "name": "FLOAT",
-              "doc": "",
-              "type_": null
-            },
-            {
-              "name": "INTEGER",
-              "doc": "",
-              "type_": null
-            }
-          ],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "NumberRenameAll",
-          "doc": "",
-          "bases": [],
-          "methods": [],
-          "attributes": [
-            {
-              "name": "FLOAT",
-              "doc": "Float variant",
-              "type_": null
-            },
-            {
-              "name": "INTEGER",
-              "doc": "",
-              "type_": null
-            }
-          ],
-          "deprecated": null
         },
         {
           "kind": "Variable",

@@ -6,7 +6,10 @@ use std::path::Path;
 
 /// Render DocPackage to JSON string
 pub fn render_to_json(package: &DocPackage) -> Result<String> {
-    Ok(serde_json::to_string_pretty(package)?)
+    // Normalize for deterministic output
+    let mut normalized = package.clone();
+    normalized.normalize();
+    Ok(serde_json::to_string_pretty(&normalized)?)
 }
 
 /// Copy the embedded Sphinx extension to the output directory

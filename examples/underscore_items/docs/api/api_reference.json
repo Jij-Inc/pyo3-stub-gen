@@ -6,6 +6,24 @@
       "doc": "",
       "items": [
         {
+          "kind": "Class",
+          "name": "PublicClass",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "_PrivateClass",
+          "doc": "",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
           "kind": "Function",
           "name": "_private_function",
           "doc": "",
@@ -37,24 +55,6 @@
             }
           ],
           "is_async": false,
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "PublicClass",
-          "doc": "",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Class",
-          "name": "_PrivateClass",
-          "doc": "",
-          "bases": [],
-          "methods": [],
-          "attributes": [],
           "deprecated": null
         }
       ],
