@@ -61,7 +61,7 @@ impl B {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-/// This is the docstring fo {py:func}`great_main` function.
+/// This is the docstring for {py:func}`great_main` function.
 ///
 /// These lines must be rendered as separate paragraphs.
 ///
@@ -139,7 +139,7 @@ fn core(parent: &Bound<PyModule>) -> PyResult<()> {
 
 // Test cases for __all__ generation escape hatches
 
-// Test 1: Wildcard re-export fromthe submodule
+// Test 1: Wildcard re-export from the submodule
 pyo3_stub_gen::reexport_module_members!(
     "hidden_module_docgen_test",
     "hidden_module_docgen_test._core"
