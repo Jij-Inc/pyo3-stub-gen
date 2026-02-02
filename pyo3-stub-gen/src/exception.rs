@@ -36,6 +36,9 @@ macro_rules! create_exception {
                 has_hash: false,
                 has_str: false,
                 subclass: true,
+                file: file!(),
+                line: line!(),
+                column: column!(),
             }
         }
     };

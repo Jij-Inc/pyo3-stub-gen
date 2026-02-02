@@ -239,6 +239,9 @@ pub fn parse_python_type_alias_stub(input: &GenTypeAliasFromPythonInput) -> Resu
                             type_refs: #type_refs_code,
                         },
                         doc: #doc,
+                        file: file!(),
+                        line: line!(),
+                        column: column!(),
                     }
                 }
             }

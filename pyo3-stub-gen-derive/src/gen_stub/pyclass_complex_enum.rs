@@ -126,6 +126,9 @@ impl ToTokens for PyComplexEnumInfo {
                 variants: &[ #( #variants ),* ],
                 module: #module,
                 doc: #doc,
+                file: file!(),
+                line: line!(),
+                column: column!(),
             }
         })
     }
