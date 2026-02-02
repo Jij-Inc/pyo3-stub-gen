@@ -25,7 +25,7 @@ __all__ = [
 
 def create_b(x: builtins.int) -> _core.B:
     r"""
-    This is the docstring fo {py:func}`great_main` function.
+    This is the docstring for {py:func}`great_main` function.
     
     These lines must be rendered as separate paragraphs.
     
