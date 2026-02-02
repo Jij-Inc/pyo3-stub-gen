@@ -3,6 +3,7 @@
 
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from docutils import nodes
 from sphinx.addnodes import (
@@ -166,18 +167,11 @@ def _build_type_expr(type_expr):
     # Case 1: Type with link target and children (e.g., Generic[T] where Generic has a link)
     if link_target and children:
         # Build the base type with link
-        kind_to_reftype = {
-            'Class': 'class',
-            'Function': 'func',
-            'TypeAlias': 'data',
-            'Variable': 'data',
-            'Module': 'mod',
-        }
         base_name = display.split('[')[0] if '[' in display else display
         xref = pending_xref(
             '',
             refdomain='py',
-            reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+            reftype=_kind_to_reftype(link_target['kind']),
             reftarget=link_target['fqn'],
             refexplicit=True,
         )
@@ -189,17 +183,10 @@ def _build_type_expr(type_expr):
     # Case 2: Type with link target but no children (simple type)
     elif link_target:
         # Create pending_xref for our own types
-        kind_to_reftype = {
-            'Class': 'class',
-            'Function': 'func',
-            'TypeAlias': 'data',
-            'Variable': 'data',
-            'Module': 'mod',
-        }
         xref = pending_xref(
             '',
             refdomain='py',
-            reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+            reftype=_kind_to_reftype(link_target['kind']),
             reftarget=link_target['fqn'],
             refexplicit=True,
         )
@@ -257,14 +244,6 @@ def _build_union_type(children):
 
 def _build_link_from_target(text, link_target):
     """Build cross-reference node from link target"""
-    kind_to_reftype = {
-        'Class': 'class',
-        'Function': 'func',
-        'TypeAlias': 'data',
-        'Variable': 'data',
-        'Module': 'mod',
-    }
-
     # Handle attribute-level links (e.g., enum variants)
     if link_target.get('attribute'):
         # Link to class attribute (e.g., C.C1 variant)
@@ -283,7 +262,7 @@ def _build_link_from_target(text, link_target):
     xref = pending_xref(
         '',
         refdomain='py',
-        reftype=kind_to_reftype.get(link_target['kind'], 'obj'),
+        reftype=_kind_to_reftype(link_target['kind']),
         reftarget=link_target['fqn'],
         refexplicit=True,
     )
@@ -478,6 +457,153 @@ def _create_index_node(fullname, objtype, display_name=None):
     idx['inline'] = False
     return idx
 
+# Additional helper functions for refactoring
+
+def _append_myst_doc(parent_node, doc, env):
+    """Helper: Parse MyST markdown and append to parent node
+
+    Replaces repeated pattern:
+        if doc:
+            for node in _parse_myst(doc, env):
+                parent.append(node)
+
+    Usage: _append_myst_doc(content, func.get('doc'), env)
+    """
+    if doc:
+        for node in _parse_myst(doc, env):
+            parent_node.append(node)
+
+def _register_py_object(env, fullname, objtype, node_id):
+    """Helper: Register object with Python domain for cross-references
+
+    Replaces repeated pattern:
+        if hasattr(env, 'domaindata'):
+            py_domain = env.get_domain('py')
+            py_domain.note_object(fullname, objtype, node_id, location=env.docname)
+
+    Usage: _register_py_object(env, fullname, 'function', sig_id)
+    """
+    if hasattr(env, 'domaindata'):
+        py_domain = env.get_domain('py')
+        py_domain.note_object(fullname, objtype, node_id, location=env.docname)
+
+def _kind_to_reftype(kind):
+    """Helper: Map ItemKind to Sphinx reftype
+
+    Eliminates repeated dict literal:
+        kind_to_reftype = {
+            'Class': 'class',
+            'Function': 'func',
+            ...
+        }
+
+    Usage: reftype = _kind_to_reftype(link_target['kind'])
+    """
+    return {
+        'Class': 'class',
+        'Function': 'func',
+        'TypeAlias': 'data',
+        'Variable': 'data',
+        'Module': 'mod',
+    }.get(kind, 'obj')
+
+def _build_callable_signatures(signatures, name, module_name, fullname, env):
+    """Build signature nodes for functions/methods with all overloads
+
+    Handles:
+    - Multiple overload signatures
+    - ID only on first signature (avoids duplicates)
+    - Parameter rendering with types and defaults
+    - Return type annotation
+
+    Returns: list of desc_signature nodes
+    """
+    sig_nodes = []
+
+    for idx, sig in enumerate(signatures):
+        sig_node = desc_signature(module=module_name, fullname=fullname)
+        sig_node['module'] = module_name
+        sig_node['fullname'] = fullname
+
+        # Only first signature gets the ID
+        if idx == 0:
+            sig_node['ids'].append(fullname)
+        sig_node['first'] = (idx == 0)
+
+        # Function/method name
+        sig_node += desc_name(text=name)
+
+        # Parameters
+        param_list = desc_parameterlist()
+        for param in sig['parameters']:
+            param_node = desc_parameter()
+            param_node += nodes.Text(param['name'] + ': ')
+            param_node += _build_type_expr(param['type_'])
+
+            if param.get('default'):
+                param_node += nodes.Text(' = ')
+                param_node += _build_default_value(param['default'])
+
+            param_list += param_node
+        sig_node += param_list
+
+        # Return type
+        if sig.get('return_type'):
+            returns = desc_returns()
+            returns += _build_type_expr(sig['return_type'])
+            sig_node += returns
+
+        sig_nodes.append(sig_node)
+
+    return sig_nodes
+
+@lru_cache(maxsize=512)
+def _parse_and_link_type_cached(type_str):
+    """Cached version of _parse_and_link_type
+
+    Many types repeat across signatures (int, str, Optional[...])
+    Cache avoids re-parsing regex and building node trees.
+
+    Note: Returns a node object which is mutable, but since we don't
+    modify these after creation, caching is safe.
+    """
+    return _parse_and_link_type(type_str)
+
+@lru_cache(maxsize=256)
+def _extract_first_line_doc_cached(doc_string, max_length=100):
+    """Cached version of _extract_first_line_doc
+
+    Module contents tables extract first line for every item.
+    Cache avoids redundant markdown stripping.
+    """
+    return _extract_first_line_doc(doc_string, max_length)
+
+def _group_items_by_kind(items):
+    """Group module items by kind for contents table
+
+    Returns: dict with keys 'functions', 'classes', 'type_aliases', 'variables'
+    Each value is a list of items of that kind.
+    """
+    groups = {
+        'functions': [],
+        'classes': [],
+        'type_aliases': [],
+        'variables': []
+    }
+
+    for item in items:
+        kind = item['kind']
+        if kind == 'Function':
+            groups['functions'].append(item)
+        elif kind == 'Class':
+            groups['classes'].append(item)
+        elif kind == 'TypeAlias':
+            groups['type_aliases'].append(item)
+        elif kind == 'Variable':
+            groups['variables'].append(item)
+
+    return groups
+
 def _get_reftype_for_item(item):
     """Get Sphinx reftype for cross-references"""
     kind = item['kind']
@@ -534,8 +660,8 @@ def _build_contents_table(env, category_title, items, module_name):
         item_doc = item.get('doc', '')
         item_fqn = f"{module_name}.{item_name}"
 
-        # Extract first line description
-        description = _extract_first_line_doc(item_doc)
+        # Extract first line description (using cached version)
+        description = _extract_first_line_doc_cached(item_doc)
 
         # Create table row
         row = nodes.row()
@@ -569,14 +695,11 @@ def _build_module_contents_table(env, doc_module, module_name):
 
     Returns list of nodes (section with rubrics and tables).
     """
-    # Group items by kind
-    functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
-    classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
-    type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
-    variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+    # Group items by kind (using helper)
+    groups = _group_items_by_kind(doc_module['items'])
 
     # Skip if module has no items to show
-    if not any([functions, classes, type_aliases, variables]):
+    if not any(groups.values()):
         return []
 
     # Create section
@@ -584,24 +707,24 @@ def _build_module_contents_table(env, doc_module, module_name):
     section += nodes.title(text='Module Contents')
 
     # Build each category (in this specific order)
-    if classes:
+    if groups['classes']:
         section.extend(_build_contents_table(
-            env, 'Classes', classes, module_name
+            env, 'Classes', groups['classes'], module_name
         ))
 
-    if functions:
+    if groups['functions']:
         section.extend(_build_contents_table(
-            env, 'Functions', functions, module_name
+            env, 'Functions', groups['functions'], module_name
         ))
 
-    if type_aliases:
+    if groups['type_aliases']:
         section.extend(_build_contents_table(
-            env, 'Type Aliases', type_aliases, module_name
+            env, 'Type Aliases', groups['type_aliases'], module_name
         ))
 
-    if variables:
+    if groups['variables']:
         section.extend(_build_contents_table(
-            env, 'Variables', variables, module_name
+            env, 'Variables', groups['variables'], module_name
         ))
 
     return [section]
@@ -609,7 +732,6 @@ def _build_module_contents_table(env, doc_module, module_name):
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
     fullname = f"{module_name}.{func['name']}"
-    sig_id = fullname
 
     # CREATE INDEX NODE - targets the first signature
     index_node = _create_index_node(fullname, 'function', func['name'])
@@ -617,58 +739,26 @@ def _build_function(env, func, module_name):
     desc_node = desc(domain='py', objtype='function', noindex=False)
     desc_node['classes'].extend(['py', 'function'])
 
-    # Add signature for each overload
-    for idx, sig in enumerate(func['signatures']):
-        sig_node = desc_signature(module=module_name, fullname=fullname)
-        sig_node['module'] = module_name
-        sig_node['fullname'] = fullname
-
-        # FIX: Only add ID to the FIRST signature to avoid duplicates
-        if idx == 0:
-            sig_node['ids'].append(sig_id)
-        sig_node['first'] = (idx == 0)
-
-        # Function name
-        sig_node += desc_name(text=func['name'])
-
-        # Parameters
-        param_list = desc_parameterlist()
-        for param in sig['parameters']:
-            param_node = desc_parameter()
-            param_node += nodes.Text(param['name'] + ': ')
-            param_node += _build_type_expr(param['type_'])
-            if param.get('default'):
-                param_node += nodes.Text(' = ')
-                param_node += _build_default_value(param['default'])
-            param_list += param_node
-        sig_node += param_list
-
-        # Return type
-        if sig['return_type']:
-            returns = desc_returns()
-            returns += _build_type_expr(sig['return_type'])
-            sig_node += returns
-
+    # Add signature for each overload (using consolidated helper)
+    for sig_node in _build_callable_signatures(
+        func['signatures'], func['name'], module_name, fullname, env
+    ):
         desc_node += sig_node
 
-    # Docstring (MyST-formatted)
+    # Docstring (using helper)
     if func.get('doc'):
         content = desc_content()
-        for node in _parse_myst(func['doc'], env):
-            content.append(node)
+        _append_myst_doc(content, func['doc'], env)
         desc_node += content
 
-    # Register with Python domain for intersphinx
-    if hasattr(env, 'domaindata'):
-        py_domain = env.get_domain('py')
-        py_domain.note_object(fullname, 'function', sig_id, location=env.docname)
+    # Register (using helper)
+    _register_py_object(env, fullname, 'function', fullname)
 
     return [index_node, desc_node]
 
 def _build_type_alias(env, alias, module_name):
     """Build type alias documentation"""
     fullname = f"{module_name}.{alias['name']}"
-    sig_id = fullname
 
     # CREATE INDEX NODE
     index_node = _create_index_node(fullname, 'data', alias['name'])
@@ -678,7 +768,7 @@ def _build_type_alias(env, alias, module_name):
     sig_node = desc_signature(module=module_name, fullname=fullname)
     sig_node['module'] = module_name
     sig_node['fullname'] = fullname
-    sig_node['ids'].append(sig_id)
+    sig_node['ids'].append(fullname)
 
     # Use Python 3.12+ type syntax
     sig_node += desc_annotation(text='type ')
@@ -687,16 +777,14 @@ def _build_type_alias(env, alias, module_name):
     sig_node += _build_type_expr(alias['definition'])
     desc_node += sig_node
 
+    # Docstring (using helper)
     if alias.get('doc'):
         content = desc_content()
-        for node in _parse_myst(alias['doc'], env):
-            content.append(node)
+        _append_myst_doc(content, alias['doc'], env)
         desc_node += content
 
-    # Register with Python domain
-    if hasattr(env, 'domaindata'):
-        py_domain = env.get_domain('py')
-        py_domain.note_object(fullname, 'data', sig_id, location=env.docname)
+    # Register (using helper)
+    _register_py_object(env, fullname, 'data', fullname)
 
     return [index_node, desc_node]
 
@@ -736,15 +824,11 @@ def _build_class(env, cls, module_name):
     # Always create desc_content to hold docstring + methods + attributes
     content = desc_content()
 
-    # Add docstring if present
-    if cls.get('doc'):
-        for node in _parse_myst(cls['doc'], env):
-            content.append(node)
+    # Add docstring if present (using helper)
+    _append_myst_doc(content, cls.get('doc'), env)
 
-    # Register with Python domain
-    if hasattr(env, 'domaindata'):
-        py_domain = env.get_domain('py')
-        py_domain.note_object(fullname, 'class', sig_id, location=env.docname)
+    # Register with Python domain (using helper)
+    _register_py_object(env, fullname, 'class', sig_id)
 
     # Render class methods
     methods = cls.get('methods', [])
@@ -758,50 +842,20 @@ def _build_class(env, cls, module_name):
         method_desc = desc(domain='py', objtype='method', noindex=False)
         method_desc['classes'].extend(['py', 'method'])
 
-        # Add signature for each overload
-        for idx, sig in enumerate(method['signatures']):
-            sig_node = desc_signature(module=module_name, fullname=method_fullname)
-            sig_node['module'] = module_name
-            sig_node['fullname'] = method_fullname
-            # FIX: Only first overload gets the ID
-            if idx == 0:
-                sig_node['ids'].append(method_fullname)
-            sig_node['first'] = (idx == 0)
-
-            # Method name
-            sig_node += desc_name(text=method['name'])
-
-            # Parameters
-            param_list = desc_parameterlist()
-            for param in sig['parameters']:
-                param_node = desc_parameter()
-                param_node += nodes.Text(param['name'] + ': ')
-                param_node += _build_type_expr(param['type_'])
-                if param.get('default'):
-                    param_node += nodes.Text(' = ')
-                    param_node += _build_default_value(param['default'])
-                param_list += param_node
-            sig_node += param_list
-
-            # Return type
-            if sig['return_type']:
-                returns = desc_returns()
-                returns += _build_type_expr(sig['return_type'])
-                sig_node += returns
-
+        # Add signature for each overload (using consolidated helper)
+        for sig_node in _build_callable_signatures(
+            method['signatures'], method['name'], module_name, method_fullname, env
+        ):
             method_desc += sig_node
 
-        # Method docstring
+        # Method docstring (using helper)
         if method.get('doc'):
             method_content = desc_content()
-            for node in _parse_myst(method['doc'], env):
-                method_content.append(node)
+            _append_myst_doc(method_content, method['doc'], env)
             method_desc += method_content
 
-        # Register method
-        if hasattr(env, 'domaindata'):
-            py_domain = env.get_domain('py')
-            py_domain.note_object(method_fullname, 'method', method_fullname, location=env.docname)
+        # Register method (using helper)
+        _register_py_object(env, method_fullname, 'method', method_fullname)
 
         content += method_desc
 
@@ -828,17 +882,14 @@ def _build_class(env, cls, module_name):
 
         attr_desc += sig_node
 
-        # Attribute docstring
+        # Attribute docstring (using helper)
         if attr.get('doc'):
             attr_content = desc_content()
-            for node in _parse_myst(attr['doc'], env):
-                attr_content.append(node)
+            _append_myst_doc(attr_content, attr['doc'], env)
             attr_desc += attr_content
 
-        # Register attribute
-        if hasattr(env, 'domaindata'):
-            py_domain = env.get_domain('py')
-            py_domain.note_object(attr_fullname, 'attribute', attr_fullname, location=env.docname)
+        # Register attribute (using helper)
+        _register_py_object(env, attr_fullname, 'attribute', attr_fullname)
 
         content += attr_desc
 
@@ -850,7 +901,6 @@ def _build_class(env, cls, module_name):
 def _build_variable(env, var, module_name):
     """Build variable documentation"""
     fullname = f"{module_name}.{var['name']}"
-    sig_id = fullname
 
     # CREATE INDEX NODE
     index_node = _create_index_node(fullname, 'data', var['name'])
@@ -860,7 +910,7 @@ def _build_variable(env, var, module_name):
     sig_node = desc_signature(module=module_name, fullname=fullname)
     sig_node['module'] = module_name
     sig_node['fullname'] = fullname
-    sig_node['ids'].append(sig_id)
+    sig_node['ids'].append(fullname)
 
     sig_node += desc_name(text=var['name'])
     if var.get('type_'):
@@ -868,16 +918,14 @@ def _build_variable(env, var, module_name):
         sig_node += _build_type_expr(var['type_'])
     desc_node += sig_node
 
+    # Docstring (using helper)
     if var.get('doc'):
         content = desc_content()
-        for node in _parse_myst(var['doc'], env):
-            content.append(node)
+        _append_myst_doc(content, var['doc'], env)
         desc_node += content
 
-    # Register with Python domain
-    if hasattr(env, 'domaindata'):
-        py_domain = env.get_domain('py')
-        py_domain.note_object(fullname, 'data', sig_id, location=env.docname)
+    # Register (using helper)
+    _register_py_object(env, fullname, 'data', fullname)
 
     return [index_node, desc_node]
 
