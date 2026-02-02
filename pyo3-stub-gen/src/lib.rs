@@ -317,9 +317,6 @@ macro_rules! type_alias {
                     module: $module,
                     r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
                     doc: $doc,
-                    file: file!(),
-                    line: line!(),
-                    column: column!(),
                 }
             }
         };
@@ -345,9 +342,6 @@ macro_rules! type_alias {
                     module: $module,
                     r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
                     doc: "",
-                    file: file!(),
-                    line: line!(),
-                    column: column!(),
                 }
             }
         };
@@ -361,9 +355,6 @@ macro_rules! type_alias {
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
                 doc: $doc,
-                file: file!(),
-                line: line!(),
-                column: column!(),
             }
         }
     };
@@ -376,9 +367,6 @@ macro_rules! type_alias {
                 module: $module,
                 r#type: <$ty as $crate::PyStubType>::type_output,
                 doc: "",
-                file: file!(),
-                line: line!(),
-                column: column!(),
             }
         }
     };

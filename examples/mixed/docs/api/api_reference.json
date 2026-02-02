@@ -198,6 +198,49 @@
         },
         {
           "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "C",
           "doc": "",
           "bases": [],
@@ -342,49 +385,6 @@
             "link_target": null,
             "children": []
           }
-        },
-        {
-          "kind": "Class",
-          "name": "D",
-          "doc": "",
-          "bases": [],
-          "methods": [
-            {
-              "name": "show_x",
-              "doc": "",
-              "signatures": [
-                {
-                  "parameters": [],
-                  "return_type": {
-                    "display": "None",
-                    "link_target": null,
-                    "children": []
-                  }
-                }
-              ],
-              "is_async": false,
-              "deprecated": null
-            }
-          ],
-          "attributes": [],
-          "deprecated": null
-        },
-        {
-          "kind": "Function",
-          "name": "greet_b",
-          "doc": "",
-          "signatures": [
-            {
-              "parameters": [],
-              "return_type": {
-                "display": "None",
-                "link_target": null,
-                "children": []
-              }
-            }
-          ],
-          "is_async": false,
-          "deprecated": null
         },
         {
           "kind": "Module",

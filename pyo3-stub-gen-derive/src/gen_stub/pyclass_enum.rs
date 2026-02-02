@@ -137,9 +137,6 @@ impl ToTokens for PyEnumInfo {
                 variants: &[ #(#variants),* ],
                 module: #module,
                 doc: #doc,
-                file: file!(),
-                line: line!(),
-                column: column!(),
             }
         })
     }

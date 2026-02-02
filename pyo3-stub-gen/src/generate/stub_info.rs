@@ -498,46 +498,25 @@ impl StubInfoBuilder {
     }
 
     fn build(mut self) -> Result<StubInfo> {
-        // Sort PyClassInfo by source location for deterministic ordering
-        let mut class_infos: Vec<_> = inventory::iter::<PyClassInfo>().collect();
-        class_infos.sort_by_key(|info| (info.file, info.line, info.column));
-        for info in class_infos {
+        for info in inventory::iter::<PyClassInfo> {
             self.add_class(info);
         }
-        // Sort PyComplexEnumInfo by source location for deterministic ordering
-        let mut complex_enum_infos: Vec<_> = inventory::iter::<PyComplexEnumInfo>().collect();
-        complex_enum_infos.sort_by_key(|info| (info.file, info.line, info.column));
-        for info in complex_enum_infos {
+        for info in inventory::iter::<PyComplexEnumInfo> {
             self.add_complex_enum(info);
         }
-        // Sort PyEnumInfo by source location for deterministic ordering
-        let mut enum_infos: Vec<_> = inventory::iter::<PyEnumInfo>().collect();
-        enum_infos.sort_by_key(|info| (info.file, info.line, info.column));
-        for info in enum_infos {
+        for info in inventory::iter::<PyEnumInfo> {
             self.add_enum(info);
         }
-        // Sort PyFunctionInfo by source location for deterministic ordering
-        let mut function_infos: Vec<_> = inventory::iter::<PyFunctionInfo>().collect();
-        function_infos.sort_by_key(|info| (info.file, info.line, info.column, info.index));
-        for info in function_infos {
+        for info in inventory::iter::<PyFunctionInfo> {
             self.add_function(info)?;
         }
-        // Sort PyVariableInfo by (module, name) for deterministic ordering
-        let mut var_infos: Vec<_> = inventory::iter::<PyVariableInfo>().collect();
-        var_infos.sort_by_key(|info| (info.module, info.name));
-        for info in var_infos {
+        for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
         }
-        // Sort TypeAliasInfo by source location for deterministic ordering
-        let mut type_alias_infos: Vec<_> = inventory::iter::<TypeAliasInfo>().collect();
-        type_alias_infos.sort_by_key(|info| (info.file, info.line, info.column));
-        for info in type_alias_infos {
+        for info in inventory::iter::<TypeAliasInfo> {
             self.add_type_alias(info);
         }
-        // Sort ModuleDocInfo by module name for deterministic ordering
-        let mut module_doc_infos: Vec<_> = inventory::iter::<ModuleDocInfo>().collect();
-        module_doc_infos.sort_by_key(|info| info.module);
-        for info in module_doc_infos {
+        for info in inventory::iter::<ModuleDocInfo> {
             self.add_module_doc(info);
         }
         // Sort PyMethodsInfo by source location for deterministic IndexMap insertion order
@@ -546,22 +525,14 @@ impl StubInfoBuilder {
         for info in methods_infos {
             self.add_methods(info)?;
         }
-        // Sort ReexportModuleMembers by (target_module, source_module) for deterministic ordering
-        let mut reexport_infos: Vec<_> = inventory::iter::<ReexportModuleMembers>().collect();
-        reexport_infos.sort_by_key(|info| (info.target_module, info.source_module));
-        for info in reexport_infos {
+        // Collect __all__ export directives
+        for info in inventory::iter::<ReexportModuleMembers> {
             self.add_module_export(info);
         }
-        // Sort ExportVerbatim by (target_module, name) for deterministic ordering
-        let mut export_verbatim_infos: Vec<_> = inventory::iter::<ExportVerbatim>().collect();
-        export_verbatim_infos.sort_by_key(|info| (info.target_module, info.name));
-        for info in export_verbatim_infos {
+        for info in inventory::iter::<ExportVerbatim> {
             self.add_verbatim_export(info);
         }
-        // Sort ExcludeFromAll by (target_module, name) for deterministic ordering
-        let mut exclude_infos: Vec<_> = inventory::iter::<ExcludeFromAll>().collect();
-        exclude_infos.sort_by_key(|info| (info.target_module, info.name));
-        for info in exclude_infos {
+        for info in inventory::iter::<ExcludeFromAll> {
             self.add_exclude(info);
         }
         self.register_submodules();

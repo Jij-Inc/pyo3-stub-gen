@@ -187,10 +187,6 @@ pub struct PyClassInfo {
     pub has_str: bool,
     /// Whether the class has subclass attribute `#[pyclass(subclass)]`
     pub subclass: bool,
-    /// Source file location for deterministic ordering
-    pub file: &'static str,
-    pub line: u32,
-    pub column: u32,
 }
 
 inventory::collect!(PyClassInfo);
@@ -226,10 +222,6 @@ pub struct PyComplexEnumInfo {
     pub doc: &'static str,
     /// static members by `#[pyo3(get, set)]`
     pub variants: &'static [VariantInfo],
-    /// Source file location for deterministic ordering
-    pub file: &'static str,
-    pub line: u32,
-    pub column: u32,
 }
 
 inventory::collect!(PyComplexEnumInfo);
@@ -247,10 +239,6 @@ pub struct PyEnumInfo {
     pub doc: &'static str,
     /// Variants of enum (name, doc)
     pub variants: &'static [(&'static str, &'static str)],
-    /// Source file location for deterministic ordering
-    pub file: &'static str,
-    pub line: u32,
-    pub column: u32,
 }
 
 inventory::collect!(PyEnumInfo);
@@ -294,10 +282,6 @@ pub struct TypeAliasInfo {
     pub module: &'static str,
     pub r#type: fn() -> TypeInfo,
     pub doc: &'static str,
-    /// Source file location for deterministic ordering
-    pub file: &'static str,
-    pub line: u32,
-    pub column: u32,
 }
 
 inventory::collect!(TypeAliasInfo);

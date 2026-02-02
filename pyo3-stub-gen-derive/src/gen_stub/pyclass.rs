@@ -172,9 +172,6 @@ impl ToTokens for PyClassInfo {
                 has_hash: #has_hash,
                 has_str: #has_str,
                 subclass: #subclass,
-                file: file!(),
-                line: line!(),
-                column: column!(),
             }
         })
     }
