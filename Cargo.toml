@@ -11,7 +11,7 @@ members = [
   "examples/type-statement-alias",
   "examples/underscore_items",
   "pyo3-stub-gen",
-  "pyo3-stub-gen-derive"
+  "pyo3-stub-gen-derive",
 ]
 
 [workspace.package]
@@ -47,5 +47,6 @@ rust_decimal = { version = "1.40", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
 syn = "2.0.114"
 test-case = "3.3.1"
+time = "0.3.47"
 toml = "0.9.11"
 trybuild = "1.0.114"
