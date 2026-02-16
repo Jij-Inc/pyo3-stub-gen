@@ -33,7 +33,7 @@ toml.workspace = true
 
 [dependencies.pyo3-stub-gen-derive]
 path = "../pyo3-stub-gen-derive"
-version = "0.19.0"
+version = "0.19.1"
 
 [dev-dependencies]
 test-case.workspace = true
