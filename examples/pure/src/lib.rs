@@ -7,6 +7,7 @@ mod overloading;
 mod overriding;
 mod rust_type_marker;
 mod skip_stub_type_test;
+mod time_types;
 
 use custom_exceptions::*;
 use manual_overloading::*;
@@ -15,6 +16,7 @@ use overloading::*;
 use overriding::*;
 use rust_type_marker::*;
 use skip_stub_type_test::*;
+use time_types::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
@@ -484,6 +486,16 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
 
     // Test class for type: ignore functionality
     m.add_class::<TypeIgnoreTest>()?;
+
+    // Test cases for time crate types
+    m.add_function(wrap_pyfunction!(get_date, m)?)?;
+    m.add_function(wrap_pyfunction!(get_time, m)?)?;
+    m.add_function(wrap_pyfunction!(get_duration, m)?)?;
+    m.add_function(wrap_pyfunction!(get_primitive_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_offset_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(add_duration_to_date, m)?)?;
+    m.add_function(wrap_pyfunction!(time_difference, m)?)?;
     Ok(())
 }
 

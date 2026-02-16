@@ -717,6 +717,7 @@ dependencies = [
  "pyo3",
  "pyo3-stub-gen",
  "rust_decimal",
+ "time",
 ]
 
 [[package]]
@@ -734,6 +735,7 @@ dependencies = [
  "pyo3-ffi",
  "pyo3-macros",
  "rust_decimal",
+ "time",
  "unindent",
 ]
 

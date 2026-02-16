@@ -67,6 +67,7 @@ __all__ = [
     "TypeIgnoreTest",
     "UndocumentedCallback",
     "add_decimals",
+    "add_duration_to_date",
     "ahash_dict",
     "as_tuple",
     "async_num",
@@ -82,6 +83,12 @@ __all__ = [
     "func_with_kwargs",
     "func_with_star_arg",
     "func_with_star_arg_typed",
+    "get_date",
+    "get_duration",
+    "get_offset_datetime",
+    "get_primitive_datetime",
+    "get_time",
+    "get_utc_offset",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
@@ -99,6 +106,7 @@ __all__ = [
     "test_type_ignore_no_comment_specific",
     "test_type_ignore_pyright",
     "test_type_ignore_specific",
+    "time_difference",
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
@@ -574,6 +582,11 @@ def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
     Add two decimal numbers with high precision
     """
 
+def add_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+    r"""
+    Add duration to a date
+    """
+
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
 
 @typing.overload
@@ -635,6 +648,36 @@ def func_with_star_arg(*args: typing.Any) -> builtins.str:
 def func_with_star_arg_typed(*args: str) -> builtins.str:
     r"""
     Takes a variable number of arguments and returns their string representation.
+    """
+
+def get_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+    r"""
+    Returns the current date as a time::Date
+    """
+
+def get_duration(seconds: builtins.int) -> datetime.timedelta:
+    r"""
+    Returns a time::Duration from seconds
+    """
+
+def get_offset_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::OffsetDateTime from components with UTC offset
+    """
+
+def get_primitive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::PrimitiveDateTime from date and time components
+    """
+
+def get_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+    r"""
+    Returns a time::Time from hour, minute, second
+    """
+
+def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
+    r"""
+    Returns a time::UtcOffset from hours
     """
 
 @typing.overload
@@ -737,5 +780,10 @@ def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTyp
 def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return-value]
     r"""
     Test function with type: ignore for specific rules
+    """
+
+def time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
+    r"""
+    Calculate the difference between two times as duration
     """
 
