@@ -1494,6 +1494,42 @@
         },
         {
           "kind": "Function",
+          "name": "add_chrono_duration_to_date",
+          "doc": "Add duration to a NaiveDate",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "date",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "duration",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "add_decimals",
           "doc": "Add two decimal numbers with high precision",
           "signatures": [
@@ -1520,6 +1556,42 @@
               ],
               "return_type": {
                 "display": "Decimal",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "add_duration_to_date",
+          "doc": "Add duration to a date",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "date",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "duration",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
                 "link_target": null,
                 "children": []
               }
@@ -2175,6 +2247,761 @@
         },
         {
           "kind": "Function",
+          "name": "get_chrono_duration",
+          "doc": "Returns a chrono::Duration from seconds",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "seconds",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_date",
+          "doc": "Returns a time::Date from year, month, day",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_datetime_fixed_offset",
+          "doc": "Returns a chrono::DateTime<FixedOffset> from components with offset",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "offset_hours",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_datetime_utc",
+          "doc": "Returns a chrono::DateTime<Utc> from components",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_duration",
+          "doc": "Returns a time::Duration from seconds",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "seconds",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_fixed_offset",
+          "doc": "Returns a chrono::FixedOffset from hours",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "hours",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_naive_date",
+          "doc": "Returns a chrono::NaiveDate from year, month, day",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_naive_datetime",
+          "doc": "Returns a chrono::NaiveDateTime from date and time components",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_naive_time",
+          "doc": "Returns a chrono::NaiveTime from hour, minute, second",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "time",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_offset_datetime",
+          "doc": "Returns a time::OffsetDateTime from components with UTC offset",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "offset_hours",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_primitive_datetime",
+          "doc": "Returns a time::PrimitiveDateTime from date and time components",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_time",
+          "doc": "Returns a time::Time from hour, minute, second",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "time",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_utc",
+          "doc": "Returns chrono::Utc timezone",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_utc_datetime",
+          "doc": "Returns a time::UtcDateTime from components",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "year",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "month",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "day",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "hour",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "minute",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "second",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "get_utc_offset",
+          "doc": "Returns a time::UtcOffset from hours",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "hours",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "manual_overload_as_tuple",
           "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
@@ -2359,6 +3186,42 @@
               ],
               "return_type": {
                 "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "naive_time_difference",
+          "doc": "Calculate the difference between two NaiveTimes as duration",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "time1",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "time2",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
                 "link_target": null,
                 "children": []
               }
@@ -2766,6 +3629,42 @@
               "parameters": [],
               "return_type": {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "time_difference",
+          "doc": "Calculate the difference between two times as duration",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "time1",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "time2",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
                 "link_target": null,
                 "children": []
               }
@@ -3362,7 +4261,9 @@
     "pure.TripleUnion": "pure",
     "pure.TypeIgnoreTest": "pure",
     "pure.UndocumentedCallback": "pure",
+    "pure.add_chrono_duration_to_date": "pure",
     "pure.add_decimals": "pure",
+    "pure.add_duration_to_date": "pure",
     "pure.ahash_dict": "pure",
     "pure.as_tuple": "pure",
     "pure.async_num": "pure",
@@ -3378,9 +4279,25 @@
     "pure.func_with_kwargs": "pure",
     "pure.func_with_star_arg": "pure",
     "pure.func_with_star_arg_typed": "pure",
+    "pure.get_chrono_duration": "pure",
+    "pure.get_date": "pure",
+    "pure.get_datetime_fixed_offset": "pure",
+    "pure.get_datetime_utc": "pure",
+    "pure.get_duration": "pure",
+    "pure.get_fixed_offset": "pure",
+    "pure.get_naive_date": "pure",
+    "pure.get_naive_datetime": "pure",
+    "pure.get_naive_time": "pure",
+    "pure.get_offset_datetime": "pure",
+    "pure.get_primitive_datetime": "pure",
+    "pure.get_time": "pure",
+    "pure.get_utc": "pure",
+    "pure.get_utc_datetime": "pure",
+    "pure.get_utc_offset": "pure",
     "pure.manual_overload_as_tuple": "pure",
     "pure.manual_overload_example_1": "pure",
     "pure.manual_overload_example_2": "pure",
+    "pure.naive_time_difference": "pure",
     "pure.overload_example_1": "pure",
     "pure.overload_example_2": "pure",
     "pure.print_c": "pure",
@@ -3394,7 +4311,8 @@
     "pure.test_type_ignore_no_comment_all": "pure",
     "pure.test_type_ignore_no_comment_specific": "pure",
     "pure.test_type_ignore_pyright": "pure",
-    "pure.test_type_ignore_specific": "pure"
+    "pure.test_type_ignore_specific": "pure",
+    "pure.time_difference": "pure"
   },
   "config": {
     "output-dir": "docs/api",
