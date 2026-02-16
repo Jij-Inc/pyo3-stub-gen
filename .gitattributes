@@ -1,6 +1,10 @@
 Cargo.lock linguist-generated=true
 uv.lock linguist-generated=true
 
+# Generated stub files
+examples/**/*.pyi linguist-generated=true
+
+# Generated docgen files
 examples/*/docs/api/pyo3_stub_gen_ext.py linguist-generated=true
 examples/*/docs/api/api_reference.json linguist-generated=true
 examples/*/docs/api/*.rst linguist-generated=true
