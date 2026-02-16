@@ -8,21 +8,18 @@ use time::{Date, Duration, OffsetDateTime, PrimitiveDateTime, Time, UtcOffset};
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_date(year: i32, month: u8, day: u8) -> PyResult<Date> {
-    let month = time::Month::try_from(month).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid month: {}", e))
-    })?;
-    Date::from_calendar_date(year, month, day).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid date: {}", e))
-    })
+    let month = time::Month::try_from(month)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid month: {}", e)))?;
+    Date::from_calendar_date(year, month, day)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid date: {}", e)))
 }
 
 /// Returns a time::Time from hour, minute, second
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_time(hour: u8, minute: u8, second: u8) -> PyResult<Time> {
-    Time::from_hms(hour, minute, second).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid time: {}", e))
-    })
+    Time::from_hms(hour, minute, second)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid time: {}", e)))
 }
 
 /// Returns a time::Duration from seconds
@@ -61,9 +58,8 @@ pub fn get_offset_datetime(
     offset_hours: i8,
 ) -> PyResult<OffsetDateTime> {
     let primitive = get_primitive_datetime(year, month, day, hour, minute, second)?;
-    let offset = UtcOffset::from_hms(offset_hours, 0, 0).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid offset: {}", e))
-    })?;
+    let offset = UtcOffset::from_hms(offset_hours, 0, 0)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid offset: {}", e)))?;
     Ok(primitive.assume_offset(offset))
 }
 
@@ -71,9 +67,8 @@ pub fn get_offset_datetime(
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_utc_offset(hours: i8) -> PyResult<UtcOffset> {
-    UtcOffset::from_hms(hours, 0, 0).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Invalid offset: {}", e))
-    })
+    UtcOffset::from_hms(hours, 0, 0)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid offset: {}", e)))
 }
 
 /// Add duration to a date

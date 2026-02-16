@@ -8,18 +8,16 @@ use pyo3_stub_gen::derive::*;
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_naive_date(year: i32, month: u32, day: u32) -> PyResult<NaiveDate> {
-    NaiveDate::from_ymd_opt(year, month, day).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("Invalid date")
-    })
+    NaiveDate::from_ymd_opt(year, month, day)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid date"))
 }
 
 /// Returns a chrono::NaiveTime from hour, minute, second
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_naive_time(hour: u32, minute: u32, second: u32) -> PyResult<NaiveTime> {
-    NaiveTime::from_hms_opt(hour, minute, second).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("Invalid time")
-    })
+    NaiveTime::from_hms_opt(hour, minute, second)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid time"))
 }
 
 /// Returns a chrono::NaiveDateTime from date and time components
@@ -68,9 +66,8 @@ pub fn get_datetime_fixed_offset(
     offset_hours: i32,
 ) -> PyResult<DateTime<FixedOffset>> {
     use chrono::TimeZone;
-    let offset = FixedOffset::east_opt(offset_hours * 3600).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("Invalid offset")
-    })?;
+    let offset = FixedOffset::east_opt(offset_hours * 3600)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid offset"))?;
     offset
         .with_ymd_and_hms(year, month, day, hour, minute, second)
         .single()
@@ -81,18 +78,16 @@ pub fn get_datetime_fixed_offset(
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_chrono_duration(seconds: i64) -> PyResult<Duration> {
-    Duration::try_seconds(seconds).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("Invalid duration")
-    })
+    Duration::try_seconds(seconds)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid duration"))
 }
 
 /// Returns a chrono::FixedOffset from hours
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_fixed_offset(hours: i32) -> PyResult<FixedOffset> {
-    FixedOffset::east_opt(hours * 3600).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("Invalid offset")
-    })
+    FixedOffset::east_opt(hours * 3600)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid offset"))
 }
 
 /// Returns chrono::Utc timezone
