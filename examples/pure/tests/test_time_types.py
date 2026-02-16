@@ -12,6 +12,7 @@ from pure import (
     get_primitive_datetime,
     get_offset_datetime,
     get_utc_offset,
+    get_utc_datetime,
     add_duration_to_date,
     time_difference,
 )
@@ -66,6 +67,18 @@ def test_get_utc_offset() -> None:
     """Test time::UtcOffset to datetime.tzinfo conversion"""
     offset: datetime.tzinfo = get_utc_offset(9)  # UTC+9
     assert offset is not None
+
+
+def test_get_utc_datetime() -> None:
+    """Test time::UtcDateTime to datetime.datetime conversion"""
+    dt: datetime.datetime = get_utc_datetime(2024, 6, 15, 10, 30, 0)
+    assert dt.year == 2024
+    assert dt.month == 6
+    assert dt.day == 15
+    assert dt.hour == 10
+    assert dt.minute == 30
+    assert dt.second == 0
+    assert dt.tzinfo is not None
 
 
 def test_add_duration_to_date() -> None:

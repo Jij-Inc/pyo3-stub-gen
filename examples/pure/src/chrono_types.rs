@@ -1,6 +1,6 @@
 //! Test cases for `chrono` crate type support in pyo3-stub-gen
 
-use chrono::{DateTime, Duration, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, Duration, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
@@ -47,7 +47,6 @@ pub fn get_datetime_utc(
     minute: u32,
     second: u32,
 ) -> PyResult<DateTime<Utc>> {
-    use chrono::TimeZone;
     Utc.with_ymd_and_hms(year, month, day, hour, minute, second)
         .single()
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid datetime"))
@@ -65,7 +64,6 @@ pub fn get_datetime_fixed_offset(
     second: u32,
     offset_hours: i32,
 ) -> PyResult<DateTime<FixedOffset>> {
-    use chrono::TimeZone;
     let offset = FixedOffset::east_opt(offset_hours * 3600)
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("Invalid offset"))?;
     offset

@@ -2,9 +2,9 @@
 
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
-use time::{Date, Duration, OffsetDateTime, PrimitiveDateTime, Time, UtcOffset};
+use time::{Date, Duration, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, UtcOffset};
 
-/// Returns the current date as a time::Date
+/// Returns a time::Date from year, month, day
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_date(year: i32, month: u8, day: u8) -> PyResult<Date> {
@@ -69,6 +69,22 @@ pub fn get_offset_datetime(
 pub fn get_utc_offset(hours: i8) -> PyResult<UtcOffset> {
     UtcOffset::from_hms(hours, 0, 0)
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid offset: {}", e)))
+}
+
+/// Returns a time::UtcDateTime from components
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn get_utc_datetime(
+    year: i32,
+    month: u8,
+    day: u8,
+    hour: u8,
+    minute: u8,
+    second: u8,
+) -> PyResult<UtcDateTime> {
+    let date = get_date(year, month, day)?;
+    let time = get_time(hour, minute, second)?;
+    Ok(UtcDateTime::new(date, time))
 }
 
 /// Add duration to a date

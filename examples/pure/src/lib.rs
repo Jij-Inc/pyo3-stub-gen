@@ -496,6 +496,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_primitive_datetime, m)?)?;
     m.add_function(wrap_pyfunction!(get_offset_datetime, m)?)?;
     m.add_function(wrap_pyfunction!(get_utc_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc_datetime, m)?)?;
     m.add_function(wrap_pyfunction!(add_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(time_difference, m)?)?;
 

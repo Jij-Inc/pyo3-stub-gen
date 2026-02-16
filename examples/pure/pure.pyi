@@ -97,6 +97,7 @@ __all__ = [
     "get_primitive_datetime",
     "get_time",
     "get_utc",
+    "get_utc_datetime",
     "get_utc_offset",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
@@ -672,7 +673,7 @@ def get_chrono_duration(seconds: builtins.int) -> datetime.timedelta:
 
 def get_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
     r"""
-    Returns the current date as a time::Date
+    Returns a time::Date from year, month, day
     """
 
 def get_datetime_fixed_offset(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
@@ -728,6 +729,11 @@ def get_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> 
 def get_utc() -> datetime.tzinfo:
     r"""
     Returns chrono::Utc timezone
+    """
+
+def get_utc_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::UtcDateTime from components
     """
 
 def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
