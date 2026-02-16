@@ -1,3 +1,4 @@
+use crate::generate::docstring::normalize_docstring;
 use crate::stub_type::ImportRef;
 use crate::{generate::*, rule_name::RuleName, type_info::*, TypeInfo};
 use itertools::Itertools;
@@ -36,11 +37,17 @@ impl Import for FunctionDef {
 
 impl From<&PyFunctionInfo> for FunctionDef {
     fn from(info: &PyFunctionInfo) -> Self {
+        let doc = if info.doc.is_empty() {
+            ""
+        } else {
+            Box::leak(normalize_docstring(info.doc).into_boxed_str())
+        };
+
         Self {
             name: info.name,
             parameters: Parameters::from_infos(info.parameters),
             r#return: (info.r#return)(),
-            doc: info.doc,
+            doc,
             is_async: info.is_async,
             deprecated: info.deprecated.clone(),
             type_ignored: info.type_ignored,

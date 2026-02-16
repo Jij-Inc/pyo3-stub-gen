@@ -10,3 +10,7 @@ build-backend = "maturin"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
+
+[tool.pyo3-stub-gen.doc-gen]
+output-dir = "docs/api"
+json-output = "api_reference.json"

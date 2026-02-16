@@ -1,0 +1,907 @@
+{
+  "name": "mixed.main_mod",
+  "modules": {
+    "mixed": {
+      "name": "mixed",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "main_mod",
+          "doc": "",
+          "fqn": "mixed.main_mod"
+        },
+        {
+          "kind": "Module",
+          "name": "test",
+          "doc": "",
+          "fqn": "mixed.test"
+        },
+        {
+          "kind": "Variable",
+          "name": "custom_export_name",
+          "doc": "",
+          "type_": {
+            "display": "str",
+            "link_target": null,
+            "children": []
+          }
+        }
+      ],
+      "submodules": [
+        "main_mod",
+        "test"
+      ]
+    },
+    "mixed.main_mod": {
+      "name": "mixed.main_mod",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "int",
+          "doc": "",
+          "fqn": "mixed.main_mod.int"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_a",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_a"
+        },
+        {
+          "kind": "Module",
+          "name": "mod_b",
+          "doc": "",
+          "fqn": "mixed.main_mod.mod_b"
+        },
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "NoModuleAttr",
+          "doc": "Test 1: No module attribute → uses default",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "mixed.main_mod.A",
+                  "doc_module": "mixed.main_mod",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "B",
+                "link_target": {
+                  "fqn": "mixed.main_mod.B",
+                  "doc_module": "mixed.main_mod",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_c",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.A",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "b",
+                  "type_": {
+                    "display": "B",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.B",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "mixed.main_mod.mod_a.C",
+                  "doc_module": "mixed.main_mod.mod_a",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_main",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "no_module_fn",
+          "doc": "Test 1: No module → uses default",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_module_with_python",
+          "doc": "Test function with both module and python parameters",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Generator[int, None, None]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ModAAlias",
+          "doc": "",
+          "definition": {
+            "display": "int",
+            "link_target": null,
+            "children": []
+          }
+        }
+      ],
+      "submodules": [
+        "int",
+        "mod_a",
+        "mod_b"
+      ]
+    },
+    "mixed.main_mod.int": {
+      "name": "mixed.main_mod.int",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Function",
+          "name": "dummy_int_fun",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        }
+      ],
+      "submodules": []
+    },
+    "mixed.main_mod.mod_a": {
+      "name": "mixed.main_mod.mod_a",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_c",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.A",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                },
+                {
+                  "name": "b",
+                  "type_": {
+                    "display": "B",
+                    "link_target": {
+                      "fqn": "mixed.main_mod.B",
+                      "doc_module": "mixed.main_mod",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "mixed.main_mod.mod_a.C",
+                  "doc_module": "mixed.main_mod.mod_a",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_module_with_python",
+          "doc": "Test function with both module and python parameters",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Generator[int, None, None]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ModAAlias",
+          "doc": "",
+          "definition": {
+            "display": "int",
+            "link_target": null,
+            "children": []
+          }
+        }
+      ],
+      "submodules": []
+    },
+    "mixed.main_mod.mod_b": {
+      "name": "mixed.main_mod.mod_b",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "D",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_d",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "D",
+                "link_target": {
+                  "fqn": "mixed.main_mod.mod_b.D",
+                  "doc_module": "mixed.main_mod.mod_b",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_b",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "test_submit_with_module",
+          "doc": "Test function defined with gen_function_from_python! and module parameter",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "values",
+                  "type_": {
+                    "display": "List[int]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        }
+      ],
+      "submodules": []
+    },
+    "mixed.test": {
+      "name": "mixed.test",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "from_inline",
+          "doc": "",
+          "fqn": "mixed.test.from_inline"
+        },
+        {
+          "kind": "Module",
+          "name": "from_pyo3",
+          "doc": "",
+          "fqn": "mixed.test.from_pyo3"
+        }
+      ],
+      "submodules": [
+        "from_inline",
+        "from_pyo3"
+      ]
+    },
+    "mixed.test.from_inline": {
+      "name": "mixed.test.from_inline",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "InlineOverridesPyo3Class",
+          "doc": "Test 3: Inline parameter overrides pyo3",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "InlineOverridesPyo3Enum",
+          "doc": "Test 2: Inline overrides pyo3",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OnlyInlineClass",
+          "doc": "Test 4: Only inline (no pyo3)",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OnlyInlineEnum",
+          "doc": "Test 3: Only inline (no pyo3)",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "only_inline_fn",
+          "doc": "Test 2: Only inline module",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        }
+      ],
+      "submodules": []
+    },
+    "mixed.test.from_pyo3": {
+      "name": "mixed.test.from_pyo3",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "OnlyPyo3Enum",
+          "doc": "Test 1: Only pyo3 module",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "A",
+              "doc": "",
+              "type_": null
+            },
+            {
+              "name": "B",
+              "doc": "",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "OnlyPyo3Module",
+          "doc": "Test 2: Only pyo3 module → uses pyo3 module",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "mixed.custom_export_name": "mixed",
+    "mixed.main_mod": "mixed",
+    "mixed.main_mod.A": "mixed.main_mod",
+    "mixed.main_mod.B": "mixed.main_mod",
+    "mixed.main_mod.C": "mixed.main_mod",
+    "mixed.main_mod.D": "mixed.main_mod",
+    "mixed.main_mod.ModAAlias": "mixed.main_mod",
+    "mixed.main_mod.NoModuleAttr": "mixed.main_mod",
+    "mixed.main_mod.create_a": "mixed.main_mod",
+    "mixed.main_mod.create_b": "mixed.main_mod",
+    "mixed.main_mod.create_c": "mixed.main_mod",
+    "mixed.main_mod.greet_a": "mixed.main_mod",
+    "mixed.main_mod.greet_b": "mixed.main_mod",
+    "mixed.main_mod.greet_main": "mixed.main_mod",
+    "mixed.main_mod.int": "mixed.main_mod",
+    "mixed.main_mod.int.dummy_int_fun": "mixed.main_mod.int",
+    "mixed.main_mod.mod_a": "mixed.main_mod",
+    "mixed.main_mod.mod_a.C": "mixed.main_mod.mod_a",
+    "mixed.main_mod.mod_a.ModAAlias": "mixed.main_mod.mod_a",
+    "mixed.main_mod.mod_a.create_c": "mixed.main_mod.mod_a",
+    "mixed.main_mod.mod_a.greet_a": "mixed.main_mod.mod_a",
+    "mixed.main_mod.mod_a.test_module_with_python": "mixed.main_mod.mod_a",
+    "mixed.main_mod.mod_b": "mixed.main_mod",
+    "mixed.main_mod.mod_b.D": "mixed.main_mod.mod_b",
+    "mixed.main_mod.mod_b.create_d": "mixed.main_mod.mod_b",
+    "mixed.main_mod.mod_b.greet_b": "mixed.main_mod.mod_b",
+    "mixed.main_mod.mod_b.test_submit_with_module": "mixed.main_mod.mod_b",
+    "mixed.main_mod.no_module_fn": "mixed.main_mod",
+    "mixed.main_mod.test_module_with_python": "mixed.main_mod",
+    "mixed.test": "mixed",
+    "mixed.test.from_inline": "mixed.test",
+    "mixed.test.from_inline.InlineOverridesPyo3Class": "mixed.test.from_inline",
+    "mixed.test.from_inline.InlineOverridesPyo3Enum": "mixed.test.from_inline",
+    "mixed.test.from_inline.OnlyInlineClass": "mixed.test.from_inline",
+    "mixed.test.from_inline.OnlyInlineEnum": "mixed.test.from_inline",
+    "mixed.test.from_inline.only_inline_fn": "mixed.test.from_inline",
+    "mixed.test.from_pyo3": "mixed.test",
+    "mixed.test.from_pyo3.OnlyPyo3Enum": "mixed.test.from_pyo3",
+    "mixed.test.from_pyo3.OnlyPyo3Module": "mixed.test.from_pyo3"
+  },
+  "config": {
+    "output-dir": "docs/api",
+    "json-output": "api_reference.json",
+    "separate-pages": true,
+    "intro-message": "Custom documentation for the mixed example project demonstrating PyO3 stub generation.",
+    "index-title": "Mixed Example API Documentation",
+    "contents-table": false
+  }
+}

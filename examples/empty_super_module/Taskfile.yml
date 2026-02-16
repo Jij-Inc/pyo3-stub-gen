@@ -1,7 +1,16 @@
 version: '3'
 
 tasks:
+  build:
+    cmds:
+      - uv sync
+    sources:
+      - src/**/*.rs
+      - Cargo.toml
+      - pyproject.toml
+
   stub-gen:
+    deps: [build]
     cmds:
       - cargo run --bin stub_gen
     sources:

@@ -1,5 +1,5 @@
 use crate::{
-    generate::*,
+    generate::{docstring::normalize_docstring, *},
     pyproject::{PyProject, StubGenConfig},
     type_info::*,
 };
@@ -18,15 +18,28 @@ pub struct StubInfo {
     pub is_mixed_layout: bool,
     /// Configuration options for stub generation
     pub config: StubGenConfig,
+    /// Directory containing pyproject.toml (for relative path calculations)
+    pub pyproject_dir: Option<PathBuf>,
 }
 
 impl StubInfo {
     /// Initialize [StubInfo] from a `pyproject.toml` file in `CARGO_MANIFEST_DIR`.
     /// This is automatically set up by the [crate::define_stub_info_gatherer] macro.
     pub fn from_pyproject_toml(path: impl AsRef<Path>) -> Result<Self> {
+        let path = path.as_ref();
         let pyproject = PyProject::parse_toml(path)?;
-        let config = pyproject.stub_gen_config();
-        StubInfoBuilder::from_pyproject_toml(pyproject, config).build()
+        let mut config = pyproject.stub_gen_config();
+
+        // Resolve doc_gen paths relative to pyproject.toml location
+        if let Some(resolved_doc_gen) = pyproject.doc_gen_config_resolved() {
+            config.doc_gen = Some(resolved_doc_gen);
+        }
+
+        let pyproject_dir = path.parent().map(|p| p.to_path_buf());
+
+        let mut stub_info = StubInfoBuilder::from_pyproject_toml(pyproject, config).build()?;
+        stub_info.pyproject_dir = pyproject_dir;
+        Ok(stub_info)
     }
 
     /// Initialize [StubInfo] with a specific module name, project root, and configuration.
@@ -60,6 +73,7 @@ impl StubInfo {
             );
         }
 
+        // Generate stub files
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
@@ -95,6 +109,39 @@ impl StubInfo {
                 dest = dest.display()
             );
         }
+
+        // Generate documentation if configured
+        if let Some(doc_config) = &self.config.doc_gen {
+            self.generate_docs(doc_config)?;
+        }
+
+        Ok(())
+    }
+
+    fn generate_docs(&self, config: &crate::docgen::DocGenConfig) -> Result<()> {
+        log::info!("Generating API documentation...");
+
+        // 1. Build DocPackage IR
+        let doc_package = crate::docgen::builder::DocPackageBuilder::new(self).build()?;
+
+        // 2. Render to JSON
+        let json_output = crate::docgen::render::render_to_json(&doc_package)?;
+
+        // 3. Write files
+        fs::create_dir_all(&config.output_dir)?;
+        fs::write(config.output_dir.join(&config.json_output), json_output)?;
+
+        // 4. Copy Sphinx extension
+        crate::docgen::render::copy_sphinx_extension(&config.output_dir)?;
+
+        // 5. Generate RST files
+        if config.separate_pages {
+            crate::docgen::render::generate_module_pages(&doc_package, &config.output_dir)?;
+            crate::docgen::render::generate_index_rst(&doc_package, &config.output_dir, config)?;
+            log::info!("Generated separate .rst pages for each module");
+        }
+
+        log::info!("Generated API docs at {:?}", config.output_dir);
         Ok(())
     }
 }
@@ -240,7 +287,8 @@ impl StubInfoBuilder {
     }
 
     fn add_module_doc(&mut self, info: &ModuleDocInfo) {
-        self.get_module(Some(info.module)).doc = (info.doc)();
+        let raw_doc = (info.doc)();
+        self.get_module(Some(info.module)).doc = normalize_docstring(&raw_doc);
     }
 
     fn add_module_export(&mut self, info: &ReexportModuleMembers) {
@@ -497,6 +545,7 @@ impl StubInfoBuilder {
             python_root: self.python_root,
             is_mixed_layout: self.is_mixed_layout,
             config: self.config,
+            pyproject_dir: None, // Will be set by from_pyproject_toml()
         })
     }
 }
@@ -598,6 +647,7 @@ mod tests {
             python_root: PathBuf::from("/tmp"),
             is_mixed_layout: false,
             config: StubGenConfig::default(),
+            pyproject_dir: None,
         };
 
         let result = stub_info.generate();

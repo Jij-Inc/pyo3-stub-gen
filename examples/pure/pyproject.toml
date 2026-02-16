@@ -3,6 +3,9 @@ name = "pure"
 version = "0.1"
 requires-python = ">=3.10"
 
+[dependency-groups]
+dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+
 [build-system]
 requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
@@ -10,11 +13,17 @@ build-backend = "maturin"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 
+[tool.pyo3-stub-gen.doc-gen]
+output-dir = "docs/api"
+json-output = "api_reference.json"
+index-title = "API Reference"
+
 [tool.pyrefly]
-project-excludes = ["**/type_error_cases/*.py"]
+project-excludes = ["**/type_error_cases/*.py", "docs/api/**"]
+enabled-ignores = ["type", "pyrefly"]
 
 [tool.pyright]
-ignore = ["**/type_error_cases/*.py"]
+ignore = ["**/type_error_cases/*.py", "docs/api/**"]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]

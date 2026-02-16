@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
 pyo3.workspace = true
+env_logger.workspace = true
 
 [[bin]]
 name = "stub_gen"
