@@ -24,4 +24,4 @@ intersphinx_mapping = {
 }
 
 # HTML theme
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"

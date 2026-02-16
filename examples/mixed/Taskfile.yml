@@ -23,6 +23,7 @@ tasks:
   doc-build:
     desc: Build Sphinx documentation
     deps:
+      # stub-gen generates api_reference.json and pyo3_stub_gen_ext.py required by Sphinx
       - stub-gen
     cmds:
       - uv run --with sphinx sphinx-build -W -b html docs docs/_build
