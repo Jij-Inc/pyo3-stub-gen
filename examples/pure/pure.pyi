@@ -66,6 +66,7 @@ __all__ = [
     "TripleUnion",
     "TypeIgnoreTest",
     "UndocumentedCallback",
+    "add_chrono_duration_to_date",
     "add_decimals",
     "add_duration_to_date",
     "ahash_dict",
@@ -83,15 +84,24 @@ __all__ = [
     "func_with_kwargs",
     "func_with_star_arg",
     "func_with_star_arg_typed",
+    "get_chrono_duration",
     "get_date",
+    "get_datetime_fixed_offset",
+    "get_datetime_utc",
     "get_duration",
+    "get_fixed_offset",
+    "get_naive_date",
+    "get_naive_datetime",
+    "get_naive_time",
     "get_offset_datetime",
     "get_primitive_datetime",
     "get_time",
+    "get_utc",
     "get_utc_offset",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
+    "naive_time_difference",
     "overload_example_1",
     "overload_example_2",
     "print_c",
@@ -577,6 +587,11 @@ class NumberRenameAll(enum.Enum):
     """
     INTEGER = ...
 
+def add_chrono_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+    r"""
+    Add duration to a NaiveDate
+    """
+
 def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
     r"""
     Add two decimal numbers with high precision
@@ -650,14 +665,49 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     Takes a variable number of arguments and returns their string representation.
     """
 
+def get_chrono_duration(seconds: builtins.int) -> datetime.timedelta:
+    r"""
+    Returns a chrono::Duration from seconds
+    """
+
 def get_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
     r"""
     Returns the current date as a time::Date
     """
 
+def get_datetime_fixed_offset(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::DateTime<FixedOffset> from components with offset
+    """
+
+def get_datetime_utc(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::DateTime<Utc> from components
+    """
+
 def get_duration(seconds: builtins.int) -> datetime.timedelta:
     r"""
     Returns a time::Duration from seconds
+    """
+
+def get_fixed_offset(hours: builtins.int) -> datetime.tzinfo:
+    r"""
+    Returns a chrono::FixedOffset from hours
+    """
+
+def get_naive_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+    r"""
+    Returns a chrono::NaiveDate from year, month, day
+    """
+
+def get_naive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::NaiveDateTime from date and time components
+    """
+
+def get_naive_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+    r"""
+    Returns a chrono::NaiveTime from hour, minute, second
     """
 
 def get_offset_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
@@ -673,6 +723,11 @@ def get_primitive_datetime(year: builtins.int, month: builtins.int, day: builtin
 def get_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
     r"""
     Returns a time::Time from hour, minute, second
+    """
+
+def get_utc() -> datetime.tzinfo:
+    r"""
+    Returns chrono::Utc timezone
     """
 
 def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
@@ -708,6 +763,11 @@ def manual_overload_example_2(ob: int) -> int:
 def manual_overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
+    """
+
+def naive_time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
+    r"""
+    Calculate the difference between two NaiveTimes as duration
     """
 
 @typing.overload

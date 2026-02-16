@@ -1,5 +1,6 @@
 #![allow(deprecated)]
 
+mod chrono_types;
 mod custom_exceptions;
 mod manual_overloading;
 mod manual_submit;
@@ -9,6 +10,7 @@ mod rust_type_marker;
 mod skip_stub_type_test;
 mod time_types;
 
+use chrono_types::*;
 use custom_exceptions::*;
 use manual_overloading::*;
 use manual_submit::*;
@@ -496,6 +498,18 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_utc_offset, m)?)?;
     m.add_function(wrap_pyfunction!(add_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(time_difference, m)?)?;
+
+    // Test cases for chrono crate types
+    m.add_function(wrap_pyfunction!(get_naive_date, m)?)?;
+    m.add_function(wrap_pyfunction!(get_naive_time, m)?)?;
+    m.add_function(wrap_pyfunction!(get_naive_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_datetime_utc, m)?)?;
+    m.add_function(wrap_pyfunction!(get_datetime_fixed_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_chrono_duration, m)?)?;
+    m.add_function(wrap_pyfunction!(get_fixed_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc, m)?)?;
+    m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
+    m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
     Ok(())
 }
 
