@@ -12,7 +12,7 @@ members = [
   "examples/type-statement-alias",
   "examples/underscore_items",
   "pyo3-stub-gen",
-  "pyo3-stub-gen-derive"
+  "pyo3-stub-gen-derive",
 ]
 
 [workspace.package]
@@ -26,13 +26,13 @@ keywords = ["pyo3"]
 
 [workspace.dependencies]
 ahash = "0.8.11"
-anyhow = "1.0.99"
+anyhow = "1.0.101"
 chrono = "0.4.43"
 either = "1.15.0"
-env_logger = "0.11.8"
+env_logger = "0.11.9"
 heck = "0.5"
 indexmap = ">= 2.7.0"
-insta = "1.46.1"
+insta = "1.46.3"
 inventory = "0.3.21"
 itertools = "0.14.0"
 log = "0.4.29"
@@ -47,7 +47,8 @@ quote = "1.0.44"
 rust_decimal = { version = "1.40", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"
-syn = "2.0.114"
+syn = "2.0.116"
 test-case = "3.3.1"
-toml = "0.9.11"
-trybuild = "1.0.114"
+time = "0.3.47"
+toml = "1.0.1"
+trybuild = "1.0.116"

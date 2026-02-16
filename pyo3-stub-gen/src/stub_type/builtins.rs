@@ -10,8 +10,6 @@ use std::{
     time::SystemTime,
 };
 
-use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Utc};
-
 macro_rules! impl_builtin {
     ($ty:ty, $pytype:expr) => {
         impl PyStubType for $ty {
@@ -85,20 +83,27 @@ impl PyStubType for PathBuf {
     }
 }
 
-impl<Tz: TimeZone> PyStubType for DateTime<Tz> {
+impl<Tz: chrono::TimeZone> PyStubType for chrono::DateTime<Tz> {
     fn type_output() -> TypeInfo {
         TypeInfo::with_module("datetime.datetime", "datetime".into())
     }
 }
 
 impl_with_module!(SystemTime, "datetime.datetime", "datetime");
-impl_with_module!(NaiveDateTime, "datetime.datetime", "datetime");
-impl_with_module!(NaiveDate, "datetime.date", "datetime");
-impl_with_module!(NaiveTime, "datetime.time", "datetime");
-impl_with_module!(FixedOffset, "datetime.tzinfo", "datetime");
-impl_with_module!(Utc, "datetime.tzinfo", "datetime");
+impl_with_module!(chrono::NaiveDateTime, "datetime.datetime", "datetime");
+impl_with_module!(chrono::NaiveDate, "datetime.date", "datetime");
+impl_with_module!(chrono::NaiveTime, "datetime.time", "datetime");
+impl_with_module!(chrono::FixedOffset, "datetime.tzinfo", "datetime");
+impl_with_module!(chrono::Utc, "datetime.tzinfo", "datetime");
 impl_with_module!(std::time::Duration, "datetime.timedelta", "datetime");
 impl_with_module!(chrono::Duration, "datetime.timedelta", "datetime");
+impl_with_module!(time::Duration, "datetime.timedelta", "datetime");
+impl_with_module!(time::Date, "datetime.date", "datetime");
+impl_with_module!(time::OffsetDateTime, "datetime.datetime", "datetime");
+impl_with_module!(time::PrimitiveDateTime, "datetime.datetime", "datetime");
+impl_with_module!(time::UtcDateTime, "datetime.datetime", "datetime");
+impl_with_module!(time::Time, "datetime.time", "datetime");
+impl_with_module!(time::UtcOffset, "datetime.tzinfo", "datetime");
 
 impl<T: PyStubType> PyStubType for &T {
     fn type_input() -> TypeInfo {
