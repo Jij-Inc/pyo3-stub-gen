@@ -1,0 +1,15 @@
+# Type aliases are purely for static type checking and don't exist at runtime
+type_statement_alias.CallbackType
+type_statement_alias.ComplexNested
+type_statement_alias.DocumentedModernAlias
+type_statement_alias.DocumentedTypeStatement
+type_statement_alias.GenericUnion
+type_statement_alias.MultiLineDocTypeStatement
+type_statement_alias.NumberOrString
+type_statement_alias.OptionalCallback
+type_statement_alias.SimpleAlias
+type_statement_alias.StrIntMap
+type_statement_alias.TripleUnion
+type_statement_alias.UndocumentedModernAlias
+type_statement_alias.UndocumentedTypeStatement
+type_statement_alias.__all__

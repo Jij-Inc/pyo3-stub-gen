@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemEnum, Result, Type};
 
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, PyClassAttr, StubType};
 
 pub struct PyEnumInfo {
     pyclass_name: String,
@@ -28,28 +28,57 @@ impl From<&PyEnumInfo> for StubType {
     }
 }
 
-impl TryFrom<ItemEnum> for PyEnumInfo {
-    type Error = Error;
-    fn try_from(
+impl PyEnumInfo {
+    /// Create PyEnumInfo from ItemEnum with PyClassAttr for module override support
+    pub fn from_item_with_attr(
         ItemEnum {
             variants,
             attrs,
             ident,
             ..
         }: ItemEnum,
+        attr: &PyClassAttr,
     ) -> Result<Self> {
         let doc = extract_documents(&attrs).join("\n");
         let mut pyclass_name = None;
-        let mut module = None;
+        let mut pyo3_module = None;
+        let mut gen_stub_standalone_module = None;
         let mut renaming_rule = None;
-        for attr in parse_pyo3_attrs(&attrs)? {
-            match attr {
+        for attr_item in parse_pyo3_attrs(&attrs)? {
+            match attr_item {
                 Attr::Name(name) => pyclass_name = Some(name),
-                Attr::Module(name) => module = Some(name),
+                Attr::Module(name) => pyo3_module = Some(name),
+                Attr::GenStubModule(name) => gen_stub_standalone_module = Some(name),
                 Attr::RenameAll(name) => renaming_rule = Some(name),
                 _ => {}
             }
         }
+
+        // Validate: inline and standalone gen_stub modules must not conflict
+        if let (Some(inline_mod), Some(standalone_mod)) =
+            (&attr.module, &gen_stub_standalone_module)
+        {
+            if inline_mod != standalone_mod {
+                return Err(Error::new(
+                    ident.span(),
+                    format!(
+                        "Conflicting module specifications: #[gen_stub_pyclass_enum(module = \"{}\")] \
+                         and #[gen_stub(module = \"{}\")]. Please use only one.",
+                        inline_mod, standalone_mod
+                    ),
+                ));
+            }
+        }
+
+        // Priority: inline > standalone > pyo3 > default
+        let module = if let Some(inline_mod) = &attr.module {
+            Some(inline_mod.clone()) // Priority 1: #[gen_stub_pyclass_enum(module = "...")]
+        } else if let Some(standalone_mod) = gen_stub_standalone_module {
+            Some(standalone_mod) // Priority 2: #[gen_stub(module = "...")]
+        } else {
+            pyo3_module // Priority 3: #[pyo3(module = "...")]
+        };
+
         let struct_type = parse_quote!(#ident);
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.to_string());
         let variants = variants
@@ -76,6 +105,14 @@ impl TryFrom<ItemEnum> for PyEnumInfo {
             module,
             variants,
         })
+    }
+}
+
+impl TryFrom<ItemEnum> for PyEnumInfo {
+    type Error = Error;
+    fn try_from(item: ItemEnum) -> Result<Self> {
+        // Use the new method with default PyClassAttr
+        Self::from_item_with_attr(item, &PyClassAttr::default())
     }
 }
 

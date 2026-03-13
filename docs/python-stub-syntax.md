@@ -1039,6 +1039,33 @@ Python type annotations in stub syntax are not validated against Rust implementa
 
 Some complex Python type patterns may not be fully supported. Fallback to `typing.Any` or manual override if needed.
 
+## Configuration Options
+
+### Type Alias Syntax
+
+By default, type aliases are generated using pre-Python 3.12 syntax:
+
+```python
+from typing import TypeAlias
+MyAlias: TypeAlias = int | str
+```
+
+For Python 3.12+, you can enable the `type` statement syntax in `pyproject.toml`:
+
+```toml
+[tool.pyo3-stub-gen]
+use-type-statement = true
+```
+
+This generates:
+
+```python
+type MyAlias = int | str
+```
+
+> [!NOTE]
+> This configuration applies to all type aliases defined with the `type_alias!` macro and `gen_type_alias_from_python!`.
+
 ## Related Documentation
 
 - [Architecture](./architecture.md) - Overall system architecture

@@ -1,4 +1,7 @@
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, StubType};
+use super::{
+    extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, PyClassAttr,
+    StubType,
+};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse_quote, Error, ItemStruct, Result, Type};
@@ -34,9 +37,9 @@ impl From<&PyClassInfo> for StubType {
     }
 }
 
-impl TryFrom<ItemStruct> for PyClassInfo {
-    type Error = Error;
-    fn try_from(item: ItemStruct) -> Result<Self> {
+impl PyClassInfo {
+    /// Create PyClassInfo from ItemStruct with PyClassAttr for module override support
+    pub fn from_item_with_attr(item: ItemStruct, attr: &PyClassAttr) -> Result<Self> {
         let ItemStruct {
             ident,
             attrs,
@@ -45,7 +48,8 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         } = item;
         let struct_type: Type = parse_quote!(#ident);
         let mut pyclass_name = None;
-        let mut module = None;
+        let mut pyo3_module = None;
+        let mut gen_stub_standalone_module = None;
         let mut is_get_all = false;
         let mut is_set_all = false;
         let mut bases = Vec::new();
@@ -54,11 +58,14 @@ impl TryFrom<ItemStruct> for PyClassInfo {
         let mut has_hash = false;
         let mut has_str = false;
         let mut subclass = false;
-        for attr in parse_pyo3_attrs(&attrs)? {
-            match attr {
+        for attr_item in parse_pyo3_attrs(&attrs)? {
+            match attr_item {
                 Attr::Name(name) => pyclass_name = Some(name),
                 Attr::Module(name) => {
-                    module = Some(name);
+                    pyo3_module = Some(name);
+                }
+                Attr::GenStubModule(name) => {
+                    gen_stub_standalone_module = Some(name);
                 }
                 Attr::GetAll => is_get_all = true,
                 Attr::SetAll => is_set_all = true,
@@ -71,6 +78,32 @@ impl TryFrom<ItemStruct> for PyClassInfo {
                 _ => {}
             }
         }
+
+        // Validate: inline and standalone gen_stub modules must not conflict
+        if let (Some(inline_mod), Some(standalone_mod)) =
+            (&attr.module, &gen_stub_standalone_module)
+        {
+            if inline_mod != standalone_mod {
+                return Err(Error::new(
+                    ident.span(),
+                    format!(
+                        "Conflicting module specifications: #[gen_stub_pyclass(module = \"{}\")] \
+                         and #[gen_stub(module = \"{}\")]. Please use only one.",
+                        inline_mod, standalone_mod
+                    ),
+                ));
+            }
+        }
+
+        // Priority: inline > standalone > pyo3 > default
+        let module = if let Some(inline_mod) = &attr.module {
+            Some(inline_mod.clone()) // Priority 1: #[gen_stub_pyclass(module = "...")]
+        } else if let Some(standalone_mod) = gen_stub_standalone_module {
+            Some(standalone_mod) // Priority 2: #[gen_stub(module = "...")]
+        } else {
+            pyo3_module // Priority 3: #[pyo3(module = "...")]
+        };
+
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.to_string());
         let mut getters = Vec::new();
         let mut setters = Vec::new();
@@ -97,6 +130,14 @@ impl TryFrom<ItemStruct> for PyClassInfo {
             has_str,
             subclass,
         })
+    }
+}
+
+impl TryFrom<ItemStruct> for PyClassInfo {
+    type Error = Error;
+    fn try_from(item: ItemStruct) -> Result<Self> {
+        // Use the new method with default PyClassAttr
+        Self::from_item_with_attr(item, &PyClassAttr::default())
     }
 }
 

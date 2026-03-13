@@ -16,3 +16,5 @@ tasks:
       - uvx ruff check
       - uv run mypy --show-error-codes -p feature_gated
       - uv run stubtest feature_gated --ignore-missing-stub --ignore-disjoint-bases
+      - uv run pyrefly check .
+      - uv run ty check .

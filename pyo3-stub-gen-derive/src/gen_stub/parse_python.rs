@@ -5,12 +5,14 @@
 
 mod pyfunction;
 mod pymethods;
+mod type_alias;
 
 pub use pyfunction::{
     parse_gen_function_from_python_input, parse_python_function_stub, parse_python_overload_stubs,
     GenFunctionFromPythonInput,
 };
 pub use pymethods::parse_python_methods_stub;
+pub use type_alias::{parse_python_type_alias_stub, GenTypeAliasFromPythonInput};
 
 use indexmap::IndexSet;
 use rustpython_parser::ast;
@@ -137,6 +139,7 @@ pub(super) fn build_parameters_from_ast(
                     r#type: dummy_type.clone(),
                     type_repr: "typing.Any".to_string(),
                     imports: IndexSet::from(["typing".to_string()]),
+                    rust_type_markers: vec![],
                 }
             };
 
@@ -171,6 +174,7 @@ pub(super) fn build_parameters_from_ast(
                 r#type: dummy_type.clone(),
                 type_repr: "typing.Any".to_string(),
                 imports: IndexSet::from(["typing".to_string()]),
+                rust_type_markers: vec![],
             }
         };
 
@@ -240,6 +244,47 @@ fn extract_return_type(
     }
 }
 
+/// Recursively collect all RustType markers from a Python AST expression
+///
+/// Returns a vector of Rust type names found in RustType["TypeName"] markers
+fn collect_rust_type_markers(expr: &ast::Expr) -> Result<Vec<String>> {
+    let mut markers = Vec::new();
+    collect_rust_type_markers_impl(expr, &mut markers)?;
+    Ok(markers)
+}
+
+fn collect_rust_type_markers_impl(expr: &ast::Expr, markers: &mut Vec<String>) -> Result<()> {
+    // Check if this expression itself is a RustType marker
+    if let Some(type_name) = extract_rust_type_marker(expr)? {
+        markers.push(type_name);
+        return Ok(());
+    }
+
+    // Recursively check children
+    match expr {
+        ast::Expr::Subscript(subscript) => {
+            collect_rust_type_markers_impl(&subscript.value, markers)?;
+            collect_rust_type_markers_impl(&subscript.slice, markers)?;
+        }
+        ast::Expr::Tuple(tuple) => {
+            for elt in &tuple.elts {
+                collect_rust_type_markers_impl(elt, markers)?;
+            }
+        }
+        ast::Expr::List(list) => {
+            for elt in &list.elts {
+                collect_rust_type_markers_impl(elt, markers)?;
+            }
+        }
+        ast::Expr::BinOp(binop) => {
+            collect_rust_type_markers_impl(&binop.left, markers)?;
+            collect_rust_type_markers_impl(&binop.right, markers)?;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
 /// Convert Python type annotation to TypeOrOverride
 fn type_annotation_to_type_override(
     expr: &ast::Expr,
@@ -259,6 +304,9 @@ fn type_annotation_to_type_override(
 
     let type_str = expr_to_type_string(expr)?;
 
+    // Collect all RustType markers in compound expressions
+    let rust_type_markers = collect_rust_type_markers(expr)?;
+
     // Convert imports to IndexSet
     let import_set: IndexSet<String> = imports.iter().map(|s| s.to_string()).collect();
 
@@ -266,6 +314,7 @@ fn type_annotation_to_type_override(
         r#type: dummy_type,
         type_repr: type_str,
         imports: import_set,
+        rust_type_markers,
     })
 }
 
@@ -474,6 +523,16 @@ fn expr_to_type_string_inner(expr: &ast::Expr, in_subscript: bool) -> Result<Str
             ast::Constant::Ellipsis => "...".to_string(),
             _ => "Any".to_string(),
         },
+        ast::Expr::BinOp(binop) => {
+            // Handle union types with | operator
+            if matches!(binop.op, ast::Operator::BitOr) {
+                let left = expr_to_type_string_inner(&binop.left, false)?;
+                let right = expr_to_type_string_inner(&binop.right, false)?;
+                format!("{} | {}", left, right)
+            } else {
+                "Any".to_string()
+            }
+        }
         _ => "Any".to_string(),
     })
 }

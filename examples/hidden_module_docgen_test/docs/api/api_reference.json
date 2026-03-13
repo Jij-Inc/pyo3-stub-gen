@@ -1,0 +1,337 @@
+{
+  "name": "hidden_module_docgen_test",
+  "modules": {
+    "hidden_module_docgen_test": {
+      "name": "hidden_module_docgen_test",
+      "doc": "This is the main module docstring for hidden_module_docgen_test.\nThese lines are trimmed appropriately.\n\n    This must be indented by four spaces.",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "This is the docstring for enum C.",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "C0",
+              "doc": "This is 0th variant",
+              "type_": null
+            },
+            {
+              "name": "C1",
+              "doc": "This is 1st variant",
+              "type_": null
+            },
+            {
+              "name": "C2",
+              "doc": "This is 2nd variant",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.A",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_b",
+          "doc": "This is the docstring for {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nThis must be rendered: $x + x$",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "B",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.B",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "default_c",
+          "doc": "A function with a default argument",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "c",
+                  "type_": {
+                    "display": "C",
+                    "link_target": {
+                      "fqn": "hidden_module_docgen_test.C",
+                      "doc_module": "hidden_module_docgen_test",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Expression",
+                    "display": "C.C1",
+                    "type_refs": [
+                      {
+                        "text": "C.C1",
+                        "offset": 0,
+                        "link_target": {
+                          "fqn": "hidden_module_docgen_test.C.C1",
+                          "doc_module": "hidden_module_docgen_test",
+                          "kind": "Class",
+                          "attribute": "C1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.C",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_main",
+          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nAnother math test $\\int_{-\\infty}^\\infty e^{-x^2} \\mathrm{d}x$.",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "wrap_opt_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Optional[_core.A]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "A",
+                        "link_target": {
+                          "fqn": "hidden_module_docgen_test.A",
+                          "doc_module": "hidden_module_docgen_test",
+                          "kind": "Class",
+                          "attribute": null
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Optional[_core.A]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "hidden_module_docgen_test.A",
+                      "doc_module": "hidden_module_docgen_test",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "AorB",
+          "doc": "",
+          "definition": {
+            "display": "_core.A | _core.B",
+            "link_target": null,
+            "children": [
+              {
+                "display": "A",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.A",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              },
+              {
+                "display": "B",
+                "link_target": {
+                  "fqn": "hidden_module_docgen_test.B",
+                  "doc_module": "hidden_module_docgen_test",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "ModAAlias",
+          "doc": "",
+          "definition": {
+            "display": "A",
+            "link_target": {
+              "fqn": "hidden_module_docgen_test.A",
+              "doc_module": "hidden_module_docgen_test",
+              "kind": "Class",
+              "attribute": null
+            },
+            "children": []
+          }
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "hidden_module_docgen_test.A": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.AorB": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.B": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.C": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.ModAAlias": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.create_a": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.create_b": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.default_c": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test",
+    "hidden_module_docgen_test.wrap_opt_a": "hidden_module_docgen_test"
+  },
+  "config": {
+    "output-dir": "docs/api",
+    "json-output": "api_reference.json",
+    "separate-pages": true,
+    "intro-message": "Re-export from hidden module should appear in the documentation.",
+    "index-title": null,
+    "contents-table": true
+  }
+}

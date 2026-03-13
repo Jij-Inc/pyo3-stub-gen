@@ -1,4 +1,4 @@
-use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, StubType};
+use super::{extract_documents, parse_pyo3_attrs, util::quote_option, Attr, PyClassAttr, StubType};
 use crate::gen_stub::variant::VariantInfo;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
@@ -28,10 +28,9 @@ impl From<&PyComplexEnumInfo> for StubType {
     }
 }
 
-impl TryFrom<ItemEnum> for PyComplexEnumInfo {
-    type Error = Error;
-
-    fn try_from(item: ItemEnum) -> Result<Self> {
+impl PyComplexEnumInfo {
+    /// Create PyComplexEnumInfo from ItemEnum with PyClassAttr for module override support
+    pub fn from_item_with_attr(item: ItemEnum, attr: &PyClassAttr) -> Result<Self> {
         let ItemEnum {
             variants,
             attrs,
@@ -41,18 +40,45 @@ impl TryFrom<ItemEnum> for PyComplexEnumInfo {
 
         let doc = extract_documents(&attrs).join("\n");
         let mut pyclass_name = None;
-        let mut module = None;
+        let mut pyo3_module = None;
+        let mut gen_stub_standalone_module = None;
         let mut renaming_rule = None;
         let mut bases = Vec::new();
-        for attr in parse_pyo3_attrs(&attrs)? {
-            match attr {
+        for attr_item in parse_pyo3_attrs(&attrs)? {
+            match attr_item {
                 Attr::Name(name) => pyclass_name = Some(name),
-                Attr::Module(name) => module = Some(name),
+                Attr::Module(name) => pyo3_module = Some(name),
+                Attr::GenStubModule(name) => gen_stub_standalone_module = Some(name),
                 Attr::RenameAll(name) => renaming_rule = Some(name),
                 Attr::Extends(typ) => bases.push(typ),
                 _ => {}
             }
         }
+
+        // Validate: inline and standalone gen_stub modules must not conflict
+        if let (Some(inline_mod), Some(standalone_mod)) =
+            (&attr.module, &gen_stub_standalone_module)
+        {
+            if inline_mod != standalone_mod {
+                return Err(Error::new(
+                    ident.span(),
+                    format!(
+                        "Conflicting module specifications: #[gen_stub_pyclass_complex_enum(module = \"{}\")] \
+                         and #[gen_stub(module = \"{}\")]. Please use only one.",
+                        inline_mod, standalone_mod
+                    ),
+                ));
+            }
+        }
+
+        // Priority: inline > standalone > pyo3 > default
+        let module = if let Some(inline_mod) = &attr.module {
+            Some(inline_mod.clone()) // Priority 1: #[gen_stub_pyclass_complex_enum(module = "...")]
+        } else if let Some(standalone_mod) = gen_stub_standalone_module {
+            Some(standalone_mod) // Priority 2: #[gen_stub(module = "...")]
+        } else {
+            pyo3_module // Priority 3: #[pyo3(module = "...")]
+        };
 
         let enum_type = parse_quote!(#ident);
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.clone().to_string());
@@ -69,6 +95,15 @@ impl TryFrom<ItemEnum> for PyComplexEnumInfo {
             module,
             variants: items,
         })
+    }
+}
+
+impl TryFrom<ItemEnum> for PyComplexEnumInfo {
+    type Error = Error;
+
+    fn try_from(item: ItemEnum) -> Result<Self> {
+        // Use the new method with default PyClassAttr
+        Self::from_item_with_attr(item, &PyClassAttr::default())
     }
 }
 
@@ -120,7 +155,7 @@ mod test {
             "#,
         )?;
         let out = PyComplexEnumInfo::try_from(input)?.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r###"
+        insta::assert_snapshot!(format_as_value(out), @r#"
         ::pyo3_stub_gen::type_info::PyComplexEnumInfo {
             pyclass_name: "Placeholder",
             enum_id: std::any::TypeId::of::<PyPlaceholder>,
@@ -182,8 +217,43 @@ mod test {
                             type_info: <f64 as ::pyo3_stub_gen::PyStubType>::type_input,
                             default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
                                 fn _fmt() -> String {
-                                    let v: f64 = 1.0;
-                                    ::pyo3_stub_gen::util::fmt_py_obj(v)
+                                    {
+                                        let v: f64 = 1.0;
+                                        let repr = ::pyo3_stub_gen::util::fmt_py_obj(v);
+                                        let type_info = <f64 as ::pyo3_stub_gen::PyStubType>::type_output();
+                                        let should_add_prefix = if let Some(dot_pos) = type_info
+                                            .name
+                                            .rfind('.')
+                                        {
+                                            let module_prefix = &type_info.name[..dot_pos];
+                                            type_info
+                                                .import
+                                                .iter()
+                                                .any(|imp| {
+                                                    if let ::pyo3_stub_gen::ImportRef::Module(module_ref) = imp {
+                                                        if let Some(module_name) = module_ref.get() {
+                                                            module_name.ends_with(&format!(".{}", module_prefix))
+                                                        } else {
+                                                            false
+                                                        }
+                                                    } else {
+                                                        false
+                                                    }
+                                                })
+                                        } else {
+                                            false
+                                        };
+                                        if should_add_prefix {
+                                            if let Some(dot_pos) = type_info.name.rfind('.') {
+                                                let module_prefix = &type_info.name[..dot_pos];
+                                                format!("{}.{}", module_prefix, repr)
+                                            } else {
+                                                repr
+                                            }
+                                        } else {
+                                            repr
+                                        }
+                                    }
                                 }
                                 _fmt
                             }),
@@ -225,7 +295,7 @@ mod test {
             module: Some("my_module"),
             doc: "",
         }
-        "###);
+        "#);
         Ok(())
     }
 

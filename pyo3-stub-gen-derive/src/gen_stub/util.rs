@@ -72,6 +72,7 @@ pub fn extract_return_type(
             r#type: ret.clone(),
             type_repr: attr.type_repr,
             imports: attr.imports,
+            rust_type_markers: vec![],
         }));
     }
     Ok(Some(TypeOrOverride::RustType { r#type: ret }))
@@ -103,6 +104,9 @@ pub enum TypeOrOverride {
         r#type: Type,
         type_repr: String,
         imports: IndexSet<String>,
+        /// List of Rust type names found in RustType markers within this type expression.
+        /// Used to generate code that collects type_refs from those types.
+        rust_type_markers: Vec<String>,
     },
 }
 

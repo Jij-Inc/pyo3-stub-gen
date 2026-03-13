@@ -3,6 +3,7 @@ name = "pure"
 description = "Example for pure-Rust layout"
 edition.workspace = true
 version.workspace = true
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -12,8 +13,10 @@ ahash.workspace = true
 env_logger.workspace = true
 pyo3-stub-gen = { path = "../../pyo3-stub-gen", features = ["rust_decimal"] }
 pyo3.workspace = true
-pyo3.features = ["experimental-async", "rust_decimal"]
+pyo3.features = ["experimental-async", "rust_decimal", "time", "chrono"]
 rust_decimal.workspace = true
+time.workspace = true
+chrono.workspace = true
 
 [[bin]]
 name = "stub_gen"

@@ -1,0 +1,20 @@
+[project]
+name = "type-statement-alias"
+version = "0.1"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
+[tool.pyo3-stub-gen]
+use-type-statement = true
+
+[tool.pyright]
+pythonVersion = "3.12"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]

@@ -140,6 +140,9 @@ pub enum Attr {
     Str,
     Subclass,
 
+    // Standalone #[gen_stub(...)] attribute
+    GenStubModule(String),
+
     // Attributes appears in components within `#[pymethods]`
     // <https://docs.rs/pyo3/latest/pyo3/attr.pymethods.html>
     New,
@@ -155,6 +158,10 @@ pub fn parse_pyo3_attrs(attrs: &[Attribute]) -> Result<Vec<Attr>> {
     for attr in attrs {
         let mut new = parse_pyo3_attr(attr)?;
         out.append(&mut new);
+        // Also parse standalone #[gen_stub(module = "...")] attributes
+        if let Some(gen_stub_attr) = parse_gen_stub_module_attr(attr)? {
+            out.push(gen_stub_attr);
+        }
     }
     Ok(out)
 }
@@ -279,6 +286,37 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
     }
 
     Ok(pyo3_attrs)
+}
+
+/// Parse standalone `#[gen_stub(module = "...")]` attribute for module override
+pub fn parse_gen_stub_module_attr(attr: &Attribute) -> Result<Option<Attr>> {
+    let path = attr.path();
+    if path.is_ident("gen_stub") {
+        // Parse the inner tokens to find module = "..."
+        if let Meta::List(MetaList { tokens, .. }) = &attr.meta {
+            use TokenTree::*;
+            let tokens: Vec<TokenTree> = tokens.clone().into_iter().collect();
+
+            // Split by comma and look for module = "..."
+            for tt in tokens.split(|tt| {
+                if let Punct(p) = tt {
+                    p.as_char() == ','
+                } else {
+                    false
+                }
+            }) {
+                match tt {
+                    [Ident(ident), Punct(_), Literal(lit)] if ident == "module" => {
+                        return Ok(Some(Attr::GenStubModule(
+                            lit.to_string().trim_matches('"').to_string(),
+                        )));
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    Ok(None)
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -546,11 +584,13 @@ impl Parse for OverrideTypeAttribute {
 #[derive(Default)]
 pub struct PyClassAttr {
     pub skip_stub_type: bool,
+    pub module: Option<String>,
 }
 
 impl Parse for PyClassAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut skip_stub_type = false;
+        let mut module = None;
 
         // Parse comma-separated flags
         while !input.is_empty() {
@@ -559,6 +599,11 @@ impl Parse for PyClassAttr {
             match key.to_string().as_str() {
                 "skip_stub_type" => {
                     skip_stub_type = true;
+                }
+                "module" => {
+                    let _: Token![=] = input.parse()?;
+                    let value: LitStr = input.parse()?;
+                    module = Some(value.value());
                 }
                 _ => {
                     return Err(syn::Error::new(
@@ -576,7 +621,10 @@ impl Parse for PyClassAttr {
             }
         }
 
-        Ok(Self { skip_stub_type })
+        Ok(Self {
+            skip_stub_type,
+            module,
+        })
     }
 }
 

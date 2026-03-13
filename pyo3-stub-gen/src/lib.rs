@@ -180,6 +180,7 @@
 pub use inventory;
 pub use pyo3_stub_gen_derive as derive; // re-export to use in generated code
 
+pub mod docgen;
 pub mod exception;
 pub mod generate;
 pub mod pyproject;
@@ -189,7 +190,8 @@ pub mod type_info;
 pub mod util;
 
 pub use generate::StubInfo;
-pub use stub_type::{PyStubType, TypeInfo};
+pub use pyproject::StubGenConfig;
+pub use stub_type::{ImportKind, ImportRef, ModuleRef, PyStubType, TypeIdentifierRef, TypeInfo};
 
 pub type Result<T> = anyhow::Result<T>;
 
@@ -270,6 +272,172 @@ macro_rules! module_variable {
                     }
                     _fmt
                 }),
+            }
+        }
+    };
+}
+
+/// Add module-level type alias using TypeInfo
+///
+/// This macro supports both single types and union types.
+///
+/// # Examples
+///
+/// Single type:
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", MyAlias = Option<usize>);
+/// ```
+///
+/// Union type (direct syntax):
+/// ```rust
+/// pyo3_stub_gen::type_alias!("module.name", MyUnion = i32 | String);
+/// ```
+/// ```rust,ignore
+/// pyo3_stub_gen::type_alias!("module.name", StructUnion = Bound<'static, TypeA> | Bound<'static, TypeB>);
+/// ```
+#[macro_export]
+macro_rules! type_alias {
+    // Pattern 1: Union types with docstring - must come first
+    ($module:expr, $name:ident = $($base:ty)|+, $doc:expr) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: $doc,
+                }
+            }
+        };
+    };
+
+    // Pattern 2: Union types without docstring (backward compatible)
+    ($module:expr, $name:ident = $($base:ty)|+) => {
+        const _: () = {
+            struct __TypeAliasImpl;
+
+            impl $crate::PyStubType for __TypeAliasImpl {
+                fn type_output() -> $crate::TypeInfo {
+                    $(<$base>::type_output()) | *
+                }
+                fn type_input() -> $crate::TypeInfo {
+                    $(<$base>::type_input()) | *
+                }
+            }
+
+            $crate::inventory::submit! {
+                $crate::type_info::TypeAliasInfo {
+                    name: stringify!($name),
+                    module: $module,
+                    r#type: <__TypeAliasImpl as $crate::PyStubType>::type_output,
+                    doc: "",
+                }
+            }
+        };
+    };
+
+    // Pattern 3: Single types with docstring
+    ($module:expr, $name:ident = $ty:ty, $doc:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: stringify!($name),
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: $doc,
+            }
+        }
+    };
+
+    // Pattern 4: Single types without docstring (backward compatible)
+    ($module:expr, $name:ident = $ty:ty) => {
+        $crate::inventory::submit! {
+            $crate::type_info::TypeAliasInfo {
+                name: stringify!($name),
+                module: $module,
+                r#type: <$ty as $crate::PyStubType>::type_output,
+                doc: "",
+            }
+        }
+    };
+}
+
+/// Re-export items from another module into __all__
+///
+/// # Wildcard re-export
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module");
+/// ```
+///
+/// # Specific items re-export
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module", "source.module", "item1", "item2");
+/// ```
+#[macro_export]
+macro_rules! reexport_module_members {
+    // Wildcard: reexport_module_members!("target", "source")
+    ($target:expr, $source:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: None,
+            }
+        }
+    };
+    // Specific items: reexport_module_members!("target", "source", "item1", "item2")
+    ($target:expr, $source:expr, $($item:expr),+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: Some(&[$($item),+]),
+            }
+        }
+    };
+}
+
+/// Add verbatim entry to __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::export_verbatim!("my.module", "my_name");
+/// ```
+#[macro_export]
+macro_rules! export_verbatim {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ExportVerbatim {
+                target_module: $module,
+                name: $name,
+            }
+        }
+    };
+}
+
+/// Exclude specific items from __all__
+///
+/// # Example
+/// ```rust
+/// pyo3_stub_gen::exclude_from_all!("my.module", "internal_function");
+/// ```
+#[macro_export]
+macro_rules! exclude_from_all {
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ExcludeFromAll {
+                target_module: $module,
+                name: $name,
             }
         }
     };

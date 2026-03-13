@@ -1,0 +1,17 @@
+[package]
+name = "avoid_name_collision_with_submod"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+doc = false
+name = "stub_gen"
+
+[dependencies]
+env_logger.workspace = true
+pyo3.workspace = true
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }

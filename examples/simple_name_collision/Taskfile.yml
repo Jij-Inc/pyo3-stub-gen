@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+  stub-gen:
+    cmds:
+      - cargo run --bin stub_gen
+    sources:
+      - src/**/*.rs
+      - Cargo.toml
+    generates:
+      - python/**/*.pyi
+
+  test:
+    deps: [stub-gen]
+    cmds:
+      - uv run pyright
+      - uvx ruff check
+      # The following two cases should fail, as the method and classes are treated in the same namespace.
+      - (uv run pyrefly check -c ./pyproject.toml . && echo "Expected to fail, but passed." && exit 1) || echo "Expected failure."
+      - (uv run ty check --project . && echo "Expected to fail, but passed." && exit 1) || echo "Expected failure."

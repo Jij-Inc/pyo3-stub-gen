@@ -81,6 +81,7 @@ impl TryFrom<FnArg> for ArgInfo {
                             r#type: (*ty).clone(),
                             type_repr: attr.type_repr,
                             imports: attr.imports,
+                            rust_type_markers: vec![],
                         },
                     });
                 }
