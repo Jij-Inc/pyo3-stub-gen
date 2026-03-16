@@ -31,7 +31,7 @@ jobs:
     needs: publish
     steps:
       - name: Generate GitHub App Token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ secrets.TOKEN_PROVIDER_PYO3_STUB_GEN_APP_ID }}
