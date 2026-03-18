@@ -211,6 +211,10 @@
                 "display": "int",
                 "link_target": null,
                 "children": []
+              },
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This constant is deprecated"
               }
             },
             {
@@ -222,7 +226,11 @@
                 "children": []
               },
               "is_property": true,
-              "is_readonly": true
+              "is_readonly": true,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This method is deprecated"
+              }
             },
             {
               "name": "fourty_two",
@@ -253,7 +261,11 @@
                 "link_target": null,
                 "children": []
               },
-              "is_property": true
+              "is_property": true,
+              "deprecated": {
+                "since": "1.0.0",
+                "note": "This setter is deprecated"
+              }
             }
           ],
           "deprecated": null

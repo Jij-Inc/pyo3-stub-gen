@@ -731,6 +731,38 @@ def _build_module_contents_table(env, doc_module, module_name):
 
     return [section]
 
+def _build_deprecated_note(deprecated):
+    """Build a deprecation notice paragraph if deprecated info is present."""
+    if deprecated is None:
+        return None
+    parts = ['**Deprecated**']
+    since = deprecated.get('since')
+    note = deprecated.get('note')
+    if since:
+        parts.append(f' since {since}')
+    if note:
+        parts.append(f' \u2014 {note}')
+    para = nodes.paragraph()
+    para += nodes.raw('', ''.join(parts), format='html')
+    container = nodes.admonition(classes=['deprecated'])
+    title = nodes.title(text='Deprecated')
+    container += title
+    content_para = nodes.paragraph()
+    text_parts = []
+    if since:
+        text_parts.append(f'since {since}')
+    if note:
+        if text_parts:
+            text_parts.append(f' \u2014 {note}')
+        else:
+            text_parts.append(note)
+    if text_parts:
+        content_para += nodes.Text(''.join(text_parts))
+    else:
+        content_para += nodes.Text('This item is deprecated.')
+    container += content_para
+    return container
+
 def _build_function(env, func, module_name):
     """Build function with all overload signatures"""
     fullname = f"{module_name}.{func['name']}"
@@ -747,10 +779,14 @@ def _build_function(env, func, module_name):
     ):
         desc_node += sig_node
 
-    # Docstring (using helper)
+    # Docstring and deprecation (using helper)
+    content = desc_content()
+    dep_note = _build_deprecated_note(func.get('deprecated'))
+    if dep_note is not None:
+        content += dep_note
     if func.get('doc'):
-        content = desc_content()
         _append_myst_doc(content, func['doc'], env)
+    if len(content.children) > 0:
         desc_node += content
 
     # Register (using helper)
@@ -826,7 +862,10 @@ def _build_class(env, cls, module_name):
     # Always create desc_content to hold docstring + methods + attributes
     content = desc_content()
 
-    # Add docstring if present (using helper)
+    # Add deprecation note and docstring
+    dep_note = _build_deprecated_note(cls.get('deprecated'))
+    if dep_note is not None:
+        content += dep_note
     _append_myst_doc(content, cls.get('doc'), env)
 
     # Register with Python domain (using helper)
@@ -850,10 +889,14 @@ def _build_class(env, cls, module_name):
         ):
             method_desc += sig_node
 
-        # Method docstring (using helper)
+        # Method deprecation and docstring (using helper)
+        method_content = desc_content()
+        dep_note = _build_deprecated_note(method.get('deprecated'))
+        if dep_note is not None:
+            method_content += dep_note
         if method.get('doc'):
-            method_content = desc_content()
             _append_myst_doc(method_content, method['doc'], env)
+        if len(method_content.children) > 0:
             method_desc += method_content
 
         # Register method (using helper)
@@ -890,8 +933,11 @@ def _build_class(env, cls, module_name):
 
         attr_desc += sig_node
 
-        # Attribute/property docstring (using helper)
+        # Attribute/property deprecation and docstring (using helper)
         attr_content = desc_content()
+        dep_note = _build_deprecated_note(attr.get('deprecated'))
+        if dep_note is not None:
+            attr_content += dep_note
         if is_readonly:
             attr_content += nodes.paragraph(text='Read-only property.')
         if attr.get('doc'):

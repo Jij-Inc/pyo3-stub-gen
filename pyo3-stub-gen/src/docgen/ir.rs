@@ -108,6 +108,8 @@ pub struct DocAttribute {
     pub is_property: bool,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub is_readonly: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<DeprecatedInfo>,
 }
 
 /// Type expression with separate display and link target

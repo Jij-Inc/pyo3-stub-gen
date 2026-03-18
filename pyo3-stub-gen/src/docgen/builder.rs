@@ -376,6 +376,10 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: Some(type_renderer.render_type(&attr.r#type)),
                 is_property: false,
                 is_readonly: false,
+                deprecated: attr.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                    since: dep.since.map(|s| s.to_string()),
+                    note: dep.note.map(|s| s.to_string()),
+                }),
             })
             .collect();
 
@@ -383,12 +387,22 @@ impl<'a> DocPackageBuilder<'a> {
         for (prop_name, (getter, setter)) in &class.getter_setters {
             let member = getter.as_ref().or(setter.as_ref());
             if let Some(member) = member {
+                // Use deprecation from getter preferentially, fall back to setter
+                let deprecated = getter
+                    .as_ref()
+                    .and_then(|g| g.deprecated.as_ref())
+                    .or_else(|| setter.as_ref().and_then(|s| s.deprecated.as_ref()))
+                    .map(|dep| DeprecatedInfo {
+                        since: dep.since.map(|s| s.to_string()),
+                        note: dep.note.map(|s| s.to_string()),
+                    });
                 attributes.push(DocAttribute {
                     name: prop_name.clone(),
                     doc: member.doc.to_string(),
                     type_: Some(type_renderer.render_type(&member.r#type)),
                     is_property: true,
                     is_readonly: setter.is_none(),
+                    deprecated,
                 });
             }
         }
@@ -421,6 +435,7 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: None, // Enum variants don't have explicit type annotations
                 is_property: false,
                 is_readonly: false,
+                deprecated: None,
             })
             .collect();
 
@@ -436,6 +451,10 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: Some(type_renderer.render_type(&getter.r#type)),
                 is_property: true,
                 is_readonly: !setter_names.contains(getter.name),
+                deprecated: getter.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                    since: dep.since.map(|s| s.to_string()),
+                    note: dep.note.map(|s| s.to_string()),
+                }),
             });
         }
 
