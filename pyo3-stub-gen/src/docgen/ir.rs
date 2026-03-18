@@ -104,6 +104,10 @@ pub struct DocAttribute {
     pub name: String,
     pub doc: String,
     pub type_: Option<DocTypeExpr>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_property: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_readonly: bool,
 }
 
 /// Type expression with separate display and link target

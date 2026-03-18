@@ -159,6 +159,12 @@ impl A {
     fn deprecated_staticmethod() -> usize {
         42
     }
+
+    #[getter]
+    /// Always returns `42`.
+    fn fourty_two(&self) -> i32 {
+        42
+    }
 }
 
 #[gen_stub_pyfunction]

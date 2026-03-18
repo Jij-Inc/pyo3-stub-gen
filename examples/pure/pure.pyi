@@ -204,6 +204,11 @@ class A:
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
+    @property
+    def fourty_two(self) -> builtins.int:
+        r"""
+        Always returns `42`.
+        """
     def __new__(cls, x: builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.

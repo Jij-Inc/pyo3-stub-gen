@@ -439,7 +439,7 @@ def _create_index_node(fullname, objtype, display_name=None):
                 entries.append(('single', f'{display_name}() (in module {module_name})', fullname, '', None))
             else:
                 entries.append(('single', f'{display_name} (in module {module_name})', fullname, '', None))
-    elif objtype in ('method', 'attribute'):
+    elif objtype in ('method', 'attribute', 'property'):
         # Nested items: add class-scoped entry
         parts = fullname.rsplit('.', 2)
         if len(parts) >= 3:
@@ -448,6 +448,8 @@ def _create_index_node(fullname, objtype, display_name=None):
             # "method() (ClassName method)"
             if objtype == 'method':
                 entries.append(('single', f'{member_name}() ({class_name} method)', fullname, '', None))
+            elif objtype == 'property':
+                entries.append(('single', f'{member_name} ({class_name} property)', fullname, '', None))
             else:
                 entries.append(('single', f'{member_name} ({class_name} attribute)', fullname, '', None))
         else:
@@ -859,21 +861,27 @@ def _build_class(env, cls, module_name):
 
         content += method_desc
 
-    # Render class attributes
+    # Render class attributes and properties
     attributes = cls.get('attributes', [])
     for attr in attributes:
+        is_property = attr.get('is_property', False)
+        is_readonly = attr.get('is_readonly', False)
+        objtype = 'property' if is_property else 'attribute'
         attr_fullname = f"{fullname}.{attr['name']}"
 
-        # ADD INDEX NODE for attribute
-        attr_index = _create_index_node(attr_fullname, 'attribute', attr['name'])
+        # ADD INDEX NODE for attribute/property
+        attr_index = _create_index_node(attr_fullname, objtype, attr['name'])
         content += attr_index
 
-        attr_desc = desc(domain='py', objtype='attribute', noindex=False)
+        attr_desc = desc(domain='py', objtype=objtype, noindex=False)
 
         sig_node = desc_signature(module=module_name, fullname=attr_fullname)
         sig_node['module'] = module_name
         sig_node['fullname'] = attr_fullname
         sig_node['ids'].append(attr_fullname)
+
+        if is_property:
+            sig_node += desc_annotation(text='property ')
 
         sig_node += desc_name(text=attr['name'])
         if attr.get('type_'):
@@ -882,14 +890,17 @@ def _build_class(env, cls, module_name):
 
         attr_desc += sig_node
 
-        # Attribute docstring (using helper)
+        # Attribute/property docstring (using helper)
+        attr_content = desc_content()
+        if is_readonly:
+            attr_content += nodes.paragraph(text='Read-only property.')
         if attr.get('doc'):
-            attr_content = desc_content()
             _append_myst_doc(attr_content, attr['doc'], env)
+        if len(attr_content.children) > 0:
             attr_desc += attr_content
 
-        # Register attribute (using helper)
-        _register_py_object(env, attr_fullname, 'attribute', attr_fullname)
+        # Register attribute/property (using helper)
+        _register_py_object(env, attr_fullname, objtype, attr_fullname)
 
         content += attr_desc
 

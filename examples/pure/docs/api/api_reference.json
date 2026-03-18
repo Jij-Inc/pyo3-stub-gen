@@ -185,7 +185,77 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "NUM",
+              "doc": "class attribute NUM1",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "NUM2",
+              "doc": "class attribute NUM2",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "NUM3",
+              "doc": "deprecated class attribute NUM3 (will show warning)",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "deprecated_getter",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            },
+            {
+              "name": "fourty_two",
+              "doc": "Always returns `42`.",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            },
+            {
+              "name": "x",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            },
+            {
+              "name": "y",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -449,7 +519,19 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "value",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -530,7 +612,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "value",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -566,7 +659,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "value",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -602,7 +706,19 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "value",
+              "doc": "",
+              "type_": {
+                "display": "Decimal",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -696,7 +812,19 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "name",
+              "doc": "",
+              "type_": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -732,7 +860,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "data",
+              "doc": "",
+              "type_": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -894,7 +1033,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "value",
+              "doc": "",
+              "type_": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -1003,6 +1153,28 @@
               "name": "INTEGER",
               "doc": "",
               "type_": null
+            },
+            {
+              "name": "is_float",
+              "doc": "Whether the number is a float.",
+              "type_": {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            },
+            {
+              "name": "is_integer",
+              "doc": "Whether the number is an integer.",
+              "type_": {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
             }
           ],
           "deprecated": null
@@ -1059,7 +1231,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "num",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
@@ -1340,7 +1523,18 @@
               "deprecated": null
             }
           ],
-          "attributes": [],
+          "attributes": [
+            {
+              "name": "name",
+              "doc": "",
+              "type_": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
           "deprecated": null
         },
         {
