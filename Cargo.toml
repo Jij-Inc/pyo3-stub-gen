@@ -6,6 +6,7 @@ members = [
   "examples/feature_gated",
   "examples/hidden_module_docgen_test",
   "examples/mixed",
+  "examples/mixed_with_py_init",
   "examples/pure",
   "examples/simple_name_collision",
   "examples/test-dash-package",

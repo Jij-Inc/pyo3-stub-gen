@@ -1,0 +1,18 @@
+[package]
+name = "mixed_with_py_init"
+description = "Example demonstrating __init__.py and __init__.pyi coexistence problem"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+env_logger.workspace = true
+pyo3.workspace = true
+pyo3-stub-gen = { path = "../../pyo3-stub-gen" }
+
+[[bin]]
+name = "stub_gen"
+doc = false
