@@ -3,6 +3,9 @@ name = "mixed_with_py_init"
 version = "0.1"
 requires-python = ">=3.10"
 
+[dependency-groups]
+dev = ["pyright>=1.1.408"]
+
 [build-system]
 requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"
@@ -11,15 +14,3 @@ build-backend = "maturin"
 features = ["pyo3/extension-module"]
 module-name = "mixed_with_py_init._native"
 python-source = "python"
-
-[tool.pyright]
-# This will fail because __init__.pyi shadows __init__.py re-exports
-# typeCheckingMode = "strict"
-
-[tool.mypy]
-
-[dependency-groups]
-dev = [
-    "pyright>=1.1.408",
-]
-# mypy will also have issues with the shadowing

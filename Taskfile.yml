@@ -9,6 +9,9 @@ includes:
   mixed:
     taskfile: examples/mixed/Taskfile.yml
     dir: examples/mixed
+  mixed_with_py_init:
+    taskfile: examples/mixed_with_py_init/Taskfile.yml
+    dir: examples/mixed_with_py_init
   test-dash-package:
     taskfile: examples/test-dash-package/Taskfile.yml
     dir: examples/test-dash-package
@@ -39,6 +42,7 @@ tasks:
     cmds:
       - task: pure:stub-gen
       - task: mixed:stub-gen
+      - task: mixed_with_py_init:stub-gen
       - task: test-dash-package:stub-gen
       - task: feature_gated:stub-gen
       - task: empty_super_module:stub-gen
@@ -52,6 +56,7 @@ tasks:
     cmds:
       - task: pure:test
       - task: mixed:test
+      - task: mixed_with_py_init:test
       - task: test-dash-package:test
       - task: feature_gated:test
       - task: empty_super_module:test
