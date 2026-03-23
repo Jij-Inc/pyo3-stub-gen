@@ -21,11 +21,11 @@ num-complex.workspace = true
 numpy = { workspace = true, optional = true }
 ordered-float = { workspace = true, optional = true }
 pyo3.workspace = true
-rustpython-parser = { version = "0.4", default-features = false, features = [
-    "location",
-    "num-bigint",
-] }
 rust_decimal = { workspace = true, optional = true }
+rustpython-parser = { version = "0.4", default-features = false, features = [
+  "location",
+  "num-bigint",
+] }
 serde.workspace = true
 serde_json.workspace = true
 time.workspace = true
@@ -33,7 +33,7 @@ toml.workspace = true
 
 [dependencies.pyo3-stub-gen-derive]
 path = "../pyo3-stub-gen-derive"
-version = "0.19.1"
+version = "0.20.0"
 
 [dev-dependencies]
 test-case.workspace = true

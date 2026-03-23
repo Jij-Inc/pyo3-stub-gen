@@ -582,6 +582,111 @@ uv run stubtest your_module_name --ignore-missing-stub --ignore-disjoint-bases
 
 **Stubtest does not work with PyO3 nested submodules.** Nested `#[pymodule]` creates runtime attributes (not importable modules), but stub files use directory structure. For projects with nested submodules, disable stubtest for those packages. See `examples/mixed/Taskfile.yml` for an example.
 
+## API Reference Documentation
+
+In addition to stub files, pyo3-stub-gen can generate [Sphinx](https://www.sphinx-doc.org/) API reference documentation from the same Rust type metadata. This provides rendered HTML documentation with cross-references, type links, and docstrings — without writing any Python documentation manually.
+
+### Configuration
+
+Add a `[tool.pyo3-stub-gen.doc-gen]` section to your `pyproject.toml`:
+
+```toml
+[tool.pyo3-stub-gen.doc-gen]
+output-dir = "docs/api"
+json-output = "api_reference.json"
+index-title = "API Reference"
+```
+
+No changes are needed to `src/bin/stub_gen.rs` — `stub.generate()` automatically generates documentation when this section is present.
+
+Available options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `output-dir` | Path | `"docs/api"` | Output directory for generated files (relative to `pyproject.toml`) |
+| `json-output` | String | `"api_reference.json"` | JSON data filename |
+| `separate-pages` | Boolean | `true` | Generate separate `.rst` page per module |
+| `index-title` | String | `"{package} API Reference"` | Title for `index.rst` |
+| `intro-message` | String | *(default blurb)* | Intro text for `index.rst` (empty string to omit) |
+| `contents-table` | Boolean | `false` | Show module contents summary table |
+
+### Sphinx Setup
+
+Add Sphinx and related packages to your dev dependencies:
+
+```toml
+[dependency-groups]
+dev = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+```
+
+Create a `docs/conf.py` that loads the generated extension:
+
+```python
+import sys
+from pathlib import Path
+
+# Add the API docs directory so Sphinx can find the generated extension
+sys.path.insert(0, str(Path(__file__).parent / "api"))
+
+project = "your_project"
+extensions = [
+    "pyo3_stub_gen_ext",       # Generated extension — reads api_reference.json
+    "sphinx.ext.intersphinx",  # Enables cross-references to external projects
+]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+}
+
+html_theme = "sphinx_rtd_theme"
+```
+
+### Generated Files
+
+Running `cargo run --bin stub_gen` produces the following in `output-dir`:
+
+- `api_reference.json` — structured API data (JSON intermediate representation)
+- `pyo3_stub_gen_ext.py` — Sphinx extension that renders the JSON into documentation
+- `index.rst` — table of contents with toctree (when `separate-pages = true`)
+- `<module>.rst` — one page per module (when `separate-pages = true`)
+
+Each module `.rst` file contains a single directive that the extension expands:
+
+```rst
+pure
+====
+
+.. pyo3-api:: pure
+```
+
+### Building the Documentation
+
+```bash
+cargo run --bin stub_gen                                        # Generate API data + Sphinx files
+uv run --with sphinx sphinx-build -W -b html docs docs/_build   # Build HTML
+```
+
+The first command regenerates documentation whenever your Rust code changes. The second invokes Sphinx, which uses the generated extension to build HTML.
+
+### Sphinx Directives
+
+The generated `pyo3_stub_gen_ext.py` extension provides two RST directives:
+
+- `.. pyo3-api:: module_name` — render a single module's API reference
+- `.. pyo3-api-package:: package_name` — render all modules in a package
+
+### Docstrings
+
+Rust doc comments (`/// ...`) are rendered as [MyST Markdown](https://myst-parser.readthedocs.io/) in the generated documentation. This supports cross-references (`` :class:`ClassName` ``), code blocks, admonitions, and other Sphinx/MyST features. The `myst-parser` extension is required for this.
+
+### Working Examples
+
+See the following directories for complete setups:
+- [examples/pure/docs/](./examples/pure/docs/) — single-module project
+- [examples/mixed/docs/](./examples/mixed/docs/) — multi-module project with submodules
+
+For in-depth architecture details, see [docs/docgen-architecture.md](./docs/docgen-architecture.md).
+
 # Contribution
 To be written.
 
