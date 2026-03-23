@@ -233,7 +233,7 @@
               }
             },
             {
-              "name": "fourty_two",
+              "name": "forty_two",
               "doc": "Always returns `42`.",
               "type_": {
                 "display": "int",

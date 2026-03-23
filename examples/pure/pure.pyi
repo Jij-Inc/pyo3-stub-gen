@@ -205,7 +205,7 @@ class A:
     @property
     def deprecated_getter(self) -> builtins.int: ...
     @property
-    def fourty_two(self) -> builtins.int:
+    def forty_two(self) -> builtins.int:
         r"""
         Always returns `42`.
         """

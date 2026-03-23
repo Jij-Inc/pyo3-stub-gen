@@ -162,7 +162,7 @@ impl A {
 
     #[getter]
     /// Always returns `42`.
-    fn fourty_two(&self) -> i32 {
+    fn forty_two(&self) -> i32 {
         42
     }
 }

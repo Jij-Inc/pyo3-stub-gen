@@ -735,15 +735,8 @@ def _build_deprecated_note(deprecated):
     """Build a deprecation notice paragraph if deprecated info is present."""
     if deprecated is None:
         return None
-    parts = ['**Deprecated**']
     since = deprecated.get('since')
     note = deprecated.get('note')
-    if since:
-        parts.append(f' since {since}')
-    if note:
-        parts.append(f' \u2014 {note}')
-    para = nodes.paragraph()
-    para += nodes.raw('', ''.join(parts), format='html')
     container = nodes.admonition(classes=['deprecated'])
     title = nodes.title(text='Deprecated')
     container += title
