@@ -14,6 +14,10 @@ from mixed_with_py_init import some_function  # Error: "some_function" is not ex
 from mixed_with_py_init import NativeClass  # Error: "NativeClass" is not exported
 from mixed_with_py_init import native_function  # Error: "native_function" is not exported
 
+# DirectClass is defined with module="mixed_with_py_init" in Rust,
+# so it IS in __init__.pyi - this should work!
+from mixed_with_py_init import DirectClass  # OK: DirectClass is in __init__.pyi
+
 
 def main() -> None:
     # These would work at runtime
@@ -27,6 +31,10 @@ def main() -> None:
     print(f"native.double() = {native.double()}")
 
     print(f"native_function(5) = {native_function(5)}")
+
+    # DirectClass works both at runtime and for type checking
+    direct = DirectClass("world")
+    print(direct.greet())
 
 
 if __name__ == "__main__":

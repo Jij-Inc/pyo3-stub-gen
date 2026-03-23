@@ -37,10 +37,35 @@ pub fn native_function(x: i32) -> i32 {
     x + 1
 }
 
+/// A class that is declared to belong directly to the top-level module.
+/// This simulates: #[pyclass(name = "A", module = "pkg")]
+/// The stub will be generated in pkg/__init__.pyi, not pkg/_native/__init__.pyi
+#[gen_stub_pyclass]
+#[pyclass(name = "DirectClass", module = "mixed_with_py_init")]
+#[derive(Debug, Clone)]
+pub struct DirectClassInternal {
+    #[pyo3(get, set)]
+    name: String,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl DirectClassInternal {
+    #[new]
+    fn new(name: String) -> Self {
+        DirectClassInternal { name }
+    }
+
+    fn greet(&self) -> String {
+        format!("Hello, {}!", self.name)
+    }
+}
+
 /// The native module that gets imported by __init__.py
 #[pymodule]
 fn _native(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NativeClass>()?;
+    m.add_class::<DirectClassInternal>()?;  // Also add here for runtime
     m.add_function(wrap_pyfunction!(native_function, m)?)?;
     Ok(())
 }

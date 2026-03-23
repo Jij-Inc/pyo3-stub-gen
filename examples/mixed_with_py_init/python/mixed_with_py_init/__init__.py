@@ -21,9 +21,14 @@ from mixed_with_py_init.submodule import SomeClass, some_function
 # Re-export from Rust native module
 from mixed_with_py_init._native import NativeClass, native_function
 
+# DirectClass is defined with module="mixed_with_py_init" in Rust,
+# but at runtime it's actually in _native
+from mixed_with_py_init._native import DirectClass
+
 __all__ = [
     "SomeClass",
     "some_function",
     "NativeClass",
     "native_function",
+    "DirectClass",
 ]
