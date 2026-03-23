@@ -20,6 +20,9 @@ pub struct StubInfo {
     pub config: StubGenConfig,
     /// Directory containing pyproject.toml (for relative path calculations)
     pub pyproject_dir: Option<PathBuf>,
+    /// The top-level module name of the PyO3 shared library (from `module-name` in pyproject.toml)
+    /// Only modules starting with this prefix should have `__init__.pyi` generated in mixed layout.
+    pub module_name: String,
 }
 
 impl StubInfo {
@@ -77,10 +80,24 @@ impl StubInfo {
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
+            let normalized_module_name = self.module_name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
 
             // Determine destination path based solely on layout type
             let dest = if self.is_mixed_layout {
+                // In mixed layout, only generate __init__.pyi for modules that are
+                // part of the PyO3 shared library (i.e., start with module_name).
+                // Parent modules above module_name are Pure Python and should not
+                // have their __init__.pyi generated (it would shadow __init__.py).
+                let is_pyo3_module = normalized_name == normalized_module_name
+                    || normalized_name.starts_with(&format!("{}.", normalized_module_name));
+                if !is_pyo3_module {
+                    log::info!(
+                        "Skipping stub generation for `{name}`: not part of PyO3 module `{}`",
+                        self.module_name
+                    );
+                    continue;
+                }
                 // Mixed Python/Rust: Always use directory-based structure
                 self.python_root.join(&path).join("__init__.pyi")
             } else {
@@ -546,6 +563,7 @@ impl StubInfoBuilder {
             is_mixed_layout: self.is_mixed_layout,
             config: self.config,
             pyproject_dir: None, // Will be set by from_pyproject_toml()
+            module_name: self.default_module_name,
         })
     }
 }
@@ -648,6 +666,7 @@ mod tests {
             is_mixed_layout: false,
             config: StubGenConfig::default(),
             pyproject_dir: None,
+            module_name: "mymodule".to_string(),
         };
 
         let result = stub_info.generate();
