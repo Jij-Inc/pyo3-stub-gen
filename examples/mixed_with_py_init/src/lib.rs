@@ -65,7 +65,7 @@ impl DirectClassInternal {
 #[pymodule]
 fn _native(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NativeClass>()?;
-    m.add_class::<DirectClassInternal>()?;  // Also add here for runtime
+    m.add_class::<DirectClassInternal>()?; // Also add here for runtime
     m.add_function(wrap_pyfunction!(native_function, m)?)?;
     Ok(())
 }
