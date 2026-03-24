@@ -20,9 +20,6 @@ pub struct StubInfo {
     pub config: StubGenConfig,
     /// Directory containing pyproject.toml (for relative path calculations)
     pub pyproject_dir: Option<PathBuf>,
-    /// The top-level module name of the PyO3 shared library (from `module-name` in pyproject.toml)
-    /// Only modules starting with this prefix should have `__init__.pyi` generated in mixed layout.
-    pub module_name: String,
 }
 
 impl StubInfo {
@@ -80,24 +77,10 @@ impl StubInfo {
         for (name, module) in self.modules.iter() {
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
-            let normalized_module_name = self.module_name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
 
             // Determine destination path based solely on layout type
             let dest = if self.is_mixed_layout {
-                // In mixed layout, only generate __init__.pyi for modules that are
-                // part of the PyO3 shared library (i.e., start with module_name).
-                // Parent modules above module_name are Pure Python and should not
-                // have their __init__.pyi generated (it would shadow __init__.py).
-                let is_pyo3_module = normalized_name == normalized_module_name
-                    || normalized_name.starts_with(&format!("{}.", normalized_module_name));
-                if !is_pyo3_module {
-                    log::info!(
-                        "Skipping stub generation for `{name}`: not part of PyO3 module `{}`",
-                        self.module_name
-                    );
-                    continue;
-                }
                 // Mixed Python/Rust: Always use directory-based structure
                 self.python_root.join(&path).join("__init__.pyi")
             } else {
@@ -225,10 +208,19 @@ impl StubInfoBuilder {
             }
         }
 
-        // Group children by parent
+        // Group children by parent, but only for PyO3-generated parent modules.
+        //
+        // In standard Python, `import main` does NOT automatically make `main.sub` accessible.
+        // However, PyO3's `add_submodule` adds submodules as attributes of the parent module,
+        // so `import main` makes `main.sub` accessible automatically.
+        //
+        // To reflect this PyO3 behavior in stub files, we generate `from . import sub` statements
+        // for PyO3-generated parent modules. Pure Python parent modules don't need this.
         let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         for (parent, child) in all_parent_child_pairs {
-            parent_to_children.entry(parent).or_default().insert(child);
+            if self.is_pyo3_generated(&parent) {
+                parent_to_children.entry(parent).or_default().insert(child);
+            }
         }
 
         // Create or update all parent modules
@@ -238,6 +230,28 @@ impl StubInfoBuilder {
             module.default_module_name = self.default_module_name.clone();
             module.submodules.extend(children);
         }
+    }
+
+    /// Check if a module is part of the PyO3 shared library.
+    ///
+    /// In mixed layout, modules at or below `module-name` are considered part of the
+    /// PyO3 shared library. Modules above `module-name` are Pure Python modules.
+    ///
+    /// FIXME: Currently this uses `module-name` from pyproject.toml as a heuristic.
+    /// Ideally, we should detect actual `add_submodule` calls in #[pymodule] functions
+    /// to more accurately determine which modules are part of the PyO3 library.
+    fn is_pyo3_generated(&self, module: &str) -> bool {
+        // In pure Rust layout, all modules are PyO3-generated
+        if !self.is_mixed_layout {
+            return true;
+        }
+
+        // In mixed layout, only modules at or below module-name are PyO3-generated
+        let normalized_module = module.replace("-", "_");
+        let normalized_module_name = self.default_module_name.replace("-", "_");
+
+        normalized_module == normalized_module_name
+            || normalized_module.starts_with(&format!("{}.", normalized_module_name))
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
@@ -563,7 +577,6 @@ impl StubInfoBuilder {
             is_mixed_layout: self.is_mixed_layout,
             config: self.config,
             pyproject_dir: None, // Will be set by from_pyproject_toml()
-            module_name: self.default_module_name,
         })
     }
 }
@@ -666,7 +679,6 @@ mod tests {
             is_mixed_layout: false,
             config: StubGenConfig::default(),
             pyproject_dir: None,
-            module_name: "mymodule".to_string(),
         };
 
         let result = stub_info.generate();

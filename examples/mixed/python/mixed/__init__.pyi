@@ -2,12 +2,8 @@
 # ruff: noqa: E501, F401, F403, F405
 
 import builtins
-from . import main_mod
-from . import test
 __all__ = [
     "custom_export_name",
-    "main_mod",
-    "test",
 ]
 
 custom_export_name: builtins.str = 'test_value'
