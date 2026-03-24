@@ -3,8 +3,10 @@
 
 import builtins
 import typing
+from . import deep
 __all__ = [
     "NativeClass",
+    "deep",
     "native_function",
 ]
 

@@ -1,32 +1,36 @@
-"""Test file to demonstrate the __init__.py vs __init__.pyi conflict.
+"""Test file demonstrating mixed Python/Rust module with user-managed re-exports.
 
 Run with: pyright test_imports.py
 
-Expected: All imports should work (as they do at runtime)
-Actual: Type checker errors because __init__.pyi shadows __init__.py
+This tests:
+1. Re-exports from __init__.py (SomeClass, some_function from pure Python)
+2. Re-exports from __init__.py (NativeClass, native_function from Rust)
+3. Deep nested submodules via add_submodule
 """
-
-# These imports work at RUNTIME but FAIL type checking
-# because __init__.pyi doesn't include the re-exports from __init__.py
 
 from mixed_with_py_init import SomeClass
 from mixed_with_py_init import some_function
 from mixed_with_py_init import NativeClass
 from mixed_with_py_init import native_function
+from mixed_with_py_init._native.deep.nested.module import deep_function
 
 
 def main() -> None:
-    # These would work at runtime
+    # Pure Python class and function
     obj = SomeClass("test")
     print(obj.greet())
 
     result = some_function(5)
     print(f"some_function(5) = {result}")
 
+    # Rust class and function (re-exported via __init__.py)
     native = NativeClass(10)
     print(f"native.double() = {native.double()}")
 
     print(f"native_function(5) = {native_function(5)}")
+
+    # Deep nested submodule
+    print(f"deep_function() = {deep_function()}")
 
 
 if __name__ == "__main__":

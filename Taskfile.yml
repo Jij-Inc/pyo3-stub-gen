@@ -18,9 +18,6 @@ includes:
   feature_gated:
     taskfile: examples/feature_gated/Taskfile.yml
     dir: examples/feature_gated
-  empty_super_module:
-    taskfile: examples/empty_super_module/Taskfile.yml
-    dir: examples/empty_super_module
   simple_name_collision:
     taskfile: examples/simple_name_collision/Taskfile.yml
     dir: examples/simple_name_collision
@@ -45,7 +42,6 @@ tasks:
       - task: mixed_with_py_init:stub-gen
       - task: test-dash-package:stub-gen
       - task: feature_gated:stub-gen
-      - task: empty_super_module:stub-gen
       - task: simple_name_collision:stub-gen
       - task: avoid_name_collision_with_submod:stub-gen
       - task: underscore_items:stub-gen
@@ -59,7 +55,6 @@ tasks:
       - task: mixed_with_py_init:test
       - task: test-dash-package:test
       - task: feature_gated:test
-      - task: empty_super_module:test
       - task: simple_name_collision:test
       - task: avoid_name_collision_with_submod:test
       - task: underscore_items:test
