@@ -1,13 +1,13 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
-#[gen_stub_pyfunction(module = "empty_super_module.sub_mod")]
+#[gen_stub_pyfunction(module = "empty_super_module.main_mod.sub_mod")]
 #[pyfunction(name = "greet")]
 pub fn greet() {
     println!("Hello from sub_mod!")
 }
 
-#[gen_stub_pyfunction(module = "empty_super_module.deep.nested.module")]
+#[gen_stub_pyfunction(module = "empty_super_module.main_mod.deep.nested.module")]
 #[pyfunction(name = "deep_function")]
 pub fn deep_function() {
     println!("Hello from deep nested module!")
