@@ -194,20 +194,6 @@ impl StubInfoBuilder {
     }
 
     fn register_submodules(&mut self) {
-        let mut all_parent_child_pairs: Vec<(String, String)> = Vec::new();
-
-        // For each existing module, collect all parent-child relationships
-        for module in self.modules.keys() {
-            let path = module.split('.').collect::<Vec<_>>();
-
-            // Generate all parent paths and their immediate children
-            for i in 1..path.len() {
-                let parent = path[..i].join(".");
-                let child = path[i].to_string();
-                all_parent_child_pairs.push((parent, child));
-            }
-        }
-
         // Group children by parent, but only for PyO3-generated parent modules.
         //
         // In standard Python, `import main` does NOT automatically make `main.sub` accessible.
@@ -217,9 +203,20 @@ impl StubInfoBuilder {
         // To reflect this PyO3 behavior in stub files, we generate `from . import sub` statements
         // for PyO3-generated parent modules. Pure Python parent modules don't need this.
         let mut parent_to_children: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
-        for (parent, child) in all_parent_child_pairs {
-            if self.is_pyo3_generated(&parent) {
-                parent_to_children.entry(parent).or_default().insert(child);
+
+        // For each existing module, collect parent-child relationships within PyO3-generated modules
+        for module in self.modules.keys() {
+            let path = module.split('.').collect::<Vec<_>>();
+
+            // Generate all parent paths and their immediate children
+            for i in 1..path.len() {
+                let parent = path[..i].join(".");
+
+                // Only collect if parent is PyO3-generated
+                if self.is_pyo3_generated(&parent) {
+                    let child = path[i].to_string();
+                    parent_to_children.entry(parent).or_default().insert(child);
+                }
             }
         }
 
