@@ -8,6 +8,7 @@ dev = [
   "mypy>=1.19.1",
   "myst-parser",
   "pyrefly>=0.50.1",
+  "pyright",
   "sphinx",
   "sphinx-rtd-theme",
   "sphinxcontrib-katex>=0.9.11",
