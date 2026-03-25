@@ -261,23 +261,31 @@ impl StubInfoBuilder {
             return Ok(());
         }
 
-        let mut invalid_modules: Vec<&str> = Vec::new();
+        let mut invalid_modules: Vec<(&str, Vec<String>)> = Vec::new();
         for (module_name, module) in &self.modules {
             if module.has_declared_items() && !self.is_pyo3_generated(module_name) {
-                invalid_modules.push(module_name);
+                invalid_modules.push((module_name, module.declared_item_names()));
             }
         }
 
         if !invalid_modules.is_empty() {
-            invalid_modules.sort();
-            bail!(
-                "Items declared for non-PyO3 modules: {:?}\n\
+            invalid_modules.sort_by_key(|(name, _)| *name);
+
+            let mut message = format!(
+                "Items declared for non-PyO3 modules.\n\
                  In mixed layout with module-name = \"{}\", \
-                 gen_stub_* macros should only use modules at or below this path.\n\
-                 These modules are above module-name and are considered pure Python modules.",
-                invalid_modules,
+                 gen_stub_* macros should only use modules at or below this path.\n\n",
                 self.default_module_name
             );
+
+            for (module_name, items) in &invalid_modules {
+                message.push_str(&format!("  {}:\n", module_name));
+                for item in items {
+                    message.push_str(&format!("    - {}\n", item));
+                }
+            }
+
+            bail!("{}", message);
         }
 
         Ok(())

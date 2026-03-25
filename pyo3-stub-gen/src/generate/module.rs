@@ -52,6 +52,35 @@ impl Module {
             || !self.verbatim_all_entries.is_empty()
     }
 
+    /// Get the names of all declared items in this module.
+    ///
+    /// Returns a list of item names that were declared via `gen_stub_*` macros.
+    pub fn declared_item_names(&self) -> Vec<String> {
+        let mut names = Vec::new();
+
+        for class in self.class.values() {
+            names.push(format!("class {}", class.name));
+        }
+        for enum_def in self.enum_.values() {
+            names.push(format!("enum {}", enum_def.name));
+        }
+        for func_name in self.function.keys() {
+            names.push(format!("function {}", func_name));
+        }
+        for var_name in self.variables.keys() {
+            names.push(format!("variable {}", var_name));
+        }
+        for alias_name in self.type_aliases.keys() {
+            names.push(format!("type_alias {}", alias_name));
+        }
+        for re_export in &self.module_re_exports {
+            names.push(format!("re-export from {}", re_export.source_module));
+        }
+
+        names.sort();
+        names
+    }
+
     /// Format module with configuration for type alias syntax, returning a String
     pub fn format_with_config(&self, use_type_statement: bool) -> String {
         use std::fmt::Write;
