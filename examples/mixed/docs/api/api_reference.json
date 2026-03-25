@@ -1,23 +1,6 @@
 {
   "name": "mixed.main_mod",
   "modules": {
-    "mixed": {
-      "name": "mixed",
-      "doc": "",
-      "items": [
-        {
-          "kind": "Variable",
-          "name": "custom_export_name",
-          "doc": "",
-          "type_": {
-            "display": "str",
-            "link_target": null,
-            "children": []
-          }
-        }
-      ],
-      "submodules": []
-    },
     "mixed.main_mod": {
       "name": "mixed.main_mod",
       "doc": "",
@@ -39,6 +22,12 @@
           "name": "mod_b",
           "doc": "",
           "fqn": "mixed.main_mod.mod_b"
+        },
+        {
+          "kind": "Module",
+          "name": "test",
+          "doc": "",
+          "fqn": "mixed.main_mod.test"
         },
         {
           "kind": "Class",
@@ -388,12 +377,23 @@
             "link_target": null,
             "children": []
           }
+        },
+        {
+          "kind": "Variable",
+          "name": "custom_export_name",
+          "doc": "",
+          "type_": {
+            "display": "str",
+            "link_target": null,
+            "children": []
+          }
         }
       ],
       "submodules": [
         "int",
         "mod_a",
-        "mod_b"
+        "mod_b",
+        "test"
       ]
     },
     "mixed.main_mod.int": {
@@ -699,8 +699,30 @@
       ],
       "submodules": []
     },
-    "mixed.test.from_inline": {
-      "name": "mixed.test.from_inline",
+    "mixed.main_mod.test": {
+      "name": "mixed.main_mod.test",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "from_inline",
+          "doc": "",
+          "fqn": "mixed.main_mod.test.from_inline"
+        },
+        {
+          "kind": "Module",
+          "name": "from_pyo3",
+          "doc": "",
+          "fqn": "mixed.main_mod.test.from_pyo3"
+        }
+      ],
+      "submodules": [
+        "from_inline",
+        "from_pyo3"
+      ]
+    },
+    "mixed.main_mod.test.from_inline": {
+      "name": "mixed.main_mod.test.from_inline",
       "doc": "",
       "items": [
         {
@@ -781,8 +803,8 @@
       ],
       "submodules": []
     },
-    "mixed.test.from_pyo3": {
-      "name": "mixed.test.from_pyo3",
+    "mixed.main_mod.test.from_pyo3": {
+      "name": "mixed.main_mod.test.from_pyo3",
       "doc": "",
       "items": [
         {
@@ -819,7 +841,6 @@
     }
   },
   "export_map": {
-    "mixed.custom_export_name": "mixed",
     "mixed.main_mod.A": "mixed.main_mod",
     "mixed.main_mod.B": "mixed.main_mod",
     "mixed.main_mod.C": "mixed.main_mod",
@@ -829,6 +850,7 @@
     "mixed.main_mod.create_a": "mixed.main_mod",
     "mixed.main_mod.create_b": "mixed.main_mod",
     "mixed.main_mod.create_c": "mixed.main_mod",
+    "mixed.main_mod.custom_export_name": "mixed.main_mod",
     "mixed.main_mod.greet_a": "mixed.main_mod",
     "mixed.main_mod.greet_b": "mixed.main_mod",
     "mixed.main_mod.greet_main": "mixed.main_mod",
@@ -846,14 +868,17 @@
     "mixed.main_mod.mod_b.greet_b": "mixed.main_mod.mod_b",
     "mixed.main_mod.mod_b.test_submit_with_module": "mixed.main_mod.mod_b",
     "mixed.main_mod.no_module_fn": "mixed.main_mod",
-    "mixed.main_mod.test_module_with_python": "mixed.main_mod",
-    "mixed.test.from_inline.InlineOverridesPyo3Class": "mixed.test.from_inline",
-    "mixed.test.from_inline.InlineOverridesPyo3Enum": "mixed.test.from_inline",
-    "mixed.test.from_inline.OnlyInlineClass": "mixed.test.from_inline",
-    "mixed.test.from_inline.OnlyInlineEnum": "mixed.test.from_inline",
-    "mixed.test.from_inline.only_inline_fn": "mixed.test.from_inline",
-    "mixed.test.from_pyo3.OnlyPyo3Enum": "mixed.test.from_pyo3",
-    "mixed.test.from_pyo3.OnlyPyo3Module": "mixed.test.from_pyo3"
+    "mixed.main_mod.test": "mixed.main_mod",
+    "mixed.main_mod.test.from_inline": "mixed.main_mod.test",
+    "mixed.main_mod.test.from_inline.InlineOverridesPyo3Class": "mixed.main_mod.test.from_inline",
+    "mixed.main_mod.test.from_inline.InlineOverridesPyo3Enum": "mixed.main_mod.test.from_inline",
+    "mixed.main_mod.test.from_inline.OnlyInlineClass": "mixed.main_mod.test.from_inline",
+    "mixed.main_mod.test.from_inline.OnlyInlineEnum": "mixed.main_mod.test.from_inline",
+    "mixed.main_mod.test.from_inline.only_inline_fn": "mixed.main_mod.test.from_inline",
+    "mixed.main_mod.test.from_pyo3": "mixed.main_mod.test",
+    "mixed.main_mod.test.from_pyo3.OnlyPyo3Enum": "mixed.main_mod.test.from_pyo3",
+    "mixed.main_mod.test.from_pyo3.OnlyPyo3Module": "mixed.main_mod.test.from_pyo3",
+    "mixed.main_mod.test_module_with_python": "mixed.main_mod"
   },
   "config": {
     "output-dir": "docs/api",

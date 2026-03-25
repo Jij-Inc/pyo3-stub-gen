@@ -37,6 +37,21 @@ pub struct Module {
 }
 
 impl Module {
+    /// Check if the module has any items declared via `gen_stub_*` macros.
+    ///
+    /// This returns true if the module has classes, enums, functions, variables,
+    /// type aliases, or explicit re-exports. It returns false if the module only
+    /// has submodules (which are created automatically by `register_submodules()`).
+    pub fn has_declared_items(&self) -> bool {
+        !self.class.is_empty()
+            || !self.enum_.is_empty()
+            || !self.function.is_empty()
+            || !self.variables.is_empty()
+            || !self.type_aliases.is_empty()
+            || !self.module_re_exports.is_empty()
+            || !self.verbatim_all_entries.is_empty()
+    }
+
     /// Format module with configuration for type alias syntax, returning a String
     pub fn format_with_config(&self, use_type_statement: bool) -> String {
         use std::fmt::Write;

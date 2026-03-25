@@ -8,6 +8,7 @@ from mixed.main_mod.mod_b import D, greet_b
 from . import int
 from . import mod_a
 from . import mod_b
+from . import test
 __all__ = [
     "A",
     "B",
@@ -18,6 +19,7 @@ __all__ = [
     "create_a",
     "create_b",
     "create_c",
+    "custom_export_name",
     "greet_a",
     "greet_b",
     "greet_main",
@@ -25,9 +27,11 @@ __all__ = [
     "mod_a",
     "mod_b",
     "no_module_fn",
+    "test",
     "test_module_with_python",
 ]
 
+custom_export_name: builtins.str = 'test_value'
 @typing.final
 class A:
     def show_x(self) -> None: ...

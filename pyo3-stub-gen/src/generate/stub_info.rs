@@ -3,7 +3,7 @@ use crate::{
     pyproject::{PyProject, StubGenConfig},
     type_info::*,
 };
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
@@ -252,6 +252,38 @@ impl StubInfoBuilder {
 
         normalized_module == normalized_module_name
             || normalized_module.starts_with(&format!("{}.", normalized_module_name))
+    }
+
+    /// Validate that all modules with declared items are PyO3-generated.
+    ///
+    /// In mixed layout, items should only be declared for modules at or below `module-name`.
+    /// Declaring items for modules above `module-name` (i.e., pure Python modules) is an error
+    /// because it would generate stub files that conflict with user's `__init__.py`.
+    fn validate_module_paths(&self) -> Result<()> {
+        if !self.is_mixed_layout {
+            return Ok(());
+        }
+
+        let mut invalid_modules: Vec<&str> = Vec::new();
+        for (module_name, module) in &self.modules {
+            if module.has_declared_items() && !self.is_pyo3_generated(module_name) {
+                invalid_modules.push(module_name);
+            }
+        }
+
+        if !invalid_modules.is_empty() {
+            invalid_modules.sort();
+            bail!(
+                "Items declared for non-PyO3 modules: {:?}\n\
+                 In mixed layout with module-name = \"{}\", \
+                 gen_stub_* macros should only use modules at or below this path.\n\
+                 These modules are above module-name and are considered pure Python modules.",
+                invalid_modules,
+                self.default_module_name
+            );
+        }
+
+        Ok(())
     }
 
     fn add_class(&mut self, info: &PyClassInfo) {
@@ -567,6 +599,9 @@ impl StubInfoBuilder {
             self.add_exclude(info);
         }
         self.register_submodules();
+
+        // Validate that all modules with declared items are PyO3-generated
+        self.validate_module_paths()?;
 
         // Resolve wildcard re-exports
         self.resolve_wildcard_re_exports()?;

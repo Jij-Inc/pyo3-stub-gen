@@ -212,10 +212,10 @@ pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_a"
 // This will add only D and greet_b to main_mod's __all__
 pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_b", "D", "greet_b");
 
-// Test 3: Verbatim entry to root mixed module
+// Test 3: Verbatim entry to main_mod module
 // This adds a custom entry. For testing, we define it as a module variable.
-pyo3_stub_gen::module_variable!("mixed", "custom_export_name", &str, "test_value");
-pyo3_stub_gen::export_verbatim!("mixed", "custom_export_name");
+pyo3_stub_gen::module_variable!("mixed.main_mod", "custom_export_name", &str, "test_value");
+pyo3_stub_gen::export_verbatim!("mixed.main_mod", "custom_export_name");
 
 define_stub_info_gatherer!(stub_info);
 
