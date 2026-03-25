@@ -140,6 +140,15 @@ fn test_module_with_python(_x: &Bound<PyAny>) -> PyResult<usize> {
     Ok(42)
 }
 
+/// A function in a deeply nested submodule.
+/// The module path must match the actual runtime structure:
+/// main_mod -> deep -> nested -> module
+#[gen_stub_pyfunction(module = "mixed.main_mod.deep.nested.module")]
+#[pyfunction]
+pub fn deep_function() -> String {
+    "Hello from deep nested module!".to_string()
+}
+
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     // Add classes and functions to main module
@@ -153,6 +162,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     mod_a(m)?;
     mod_b(m)?;
     int_mod(m)?;
+    deep_nested_mod(m)?;
     Ok(())
 }
 
@@ -183,6 +193,20 @@ fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     let sub = PyModule::new(py, "int")?;
     sub.add_function(wrap_pyfunction!(dummy_int_fun, &sub)?)?;
     parent.add_submodule(&sub)?;
+    Ok(())
+}
+
+/// Creates the deep.nested.module submodule hierarchy
+fn deep_nested_mod(parent: &Bound<PyModule>) -> PyResult<()> {
+    let py = parent.py();
+    let deep = PyModule::new(py, "deep")?;
+    let nested = PyModule::new(py, "nested")?;
+    let module = PyModule::new(py, "module")?;
+
+    module.add_function(wrap_pyfunction!(deep_function, &module)?)?;
+    nested.add_submodule(&module)?;
+    deep.add_submodule(&nested)?;
+    parent.add_submodule(&deep)?;
     Ok(())
 }
 

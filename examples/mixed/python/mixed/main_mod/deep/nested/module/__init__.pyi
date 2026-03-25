@@ -10,6 +10,6 @@ def deep_function() -> builtins.str:
     r"""
     A function in a deeply nested submodule.
     The module path must match the actual runtime structure:
-    _native -> deep -> nested -> module
+    main_mod -> deep -> nested -> module
     """
 

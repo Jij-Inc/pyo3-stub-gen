@@ -16,7 +16,6 @@ jobs:
         crate:
           - pure
           - mixed
-          - mixed_with_py_init
           - test-dash-package
           - feature_gated
           - simple_name_collision

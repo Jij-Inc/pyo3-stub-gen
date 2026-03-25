@@ -5,6 +5,7 @@ import builtins
 import typing
 from mixed.main_mod.mod_a import *
 from mixed.main_mod.mod_b import D, greet_b
+from . import deep
 from . import int
 from . import mod_a
 from . import mod_b
@@ -20,6 +21,7 @@ __all__ = [
     "create_b",
     "create_c",
     "custom_export_name",
+    "deep",
     "greet_a",
     "greet_b",
     "greet_main",

@@ -7,6 +7,12 @@
       "items": [
         {
           "kind": "Module",
+          "name": "deep",
+          "doc": "",
+          "fqn": "mixed.main_mod.deep"
+        },
+        {
+          "kind": "Module",
           "name": "int",
           "doc": "",
           "fqn": "mixed.main_mod.int"
@@ -390,11 +396,66 @@
         }
       ],
       "submodules": [
+        "deep",
         "int",
         "mod_a",
         "mod_b",
         "test"
       ]
+    },
+    "mixed.main_mod.deep": {
+      "name": "mixed.main_mod.deep",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "nested",
+          "doc": "",
+          "fqn": "mixed.main_mod.deep.nested"
+        }
+      ],
+      "submodules": [
+        "nested"
+      ]
+    },
+    "mixed.main_mod.deep.nested": {
+      "name": "mixed.main_mod.deep.nested",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Module",
+          "name": "module",
+          "doc": "",
+          "fqn": "mixed.main_mod.deep.nested.module"
+        }
+      ],
+      "submodules": [
+        "module"
+      ]
+    },
+    "mixed.main_mod.deep.nested.module": {
+      "name": "mixed.main_mod.deep.nested.module",
+      "doc": "",
+      "items": [
+        {
+          "kind": "Function",
+          "name": "deep_function",
+          "doc": "A function in a deeply nested submodule.\nThe module path must match the actual runtime structure:\nmain_mod -> deep -> nested -> module",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        }
+      ],
+      "submodules": []
     },
     "mixed.main_mod.int": {
       "name": "mixed.main_mod.int",
@@ -851,6 +912,10 @@
     "mixed.main_mod.create_b": "mixed.main_mod",
     "mixed.main_mod.create_c": "mixed.main_mod",
     "mixed.main_mod.custom_export_name": "mixed.main_mod",
+    "mixed.main_mod.deep": "mixed.main_mod",
+    "mixed.main_mod.deep.nested": "mixed.main_mod.deep",
+    "mixed.main_mod.deep.nested.module": "mixed.main_mod.deep.nested",
+    "mixed.main_mod.deep.nested.module.deep_function": "mixed.main_mod.deep.nested.module",
     "mixed.main_mod.greet_a": "mixed.main_mod",
     "mixed.main_mod.greet_b": "mixed.main_mod",
     "mixed.main_mod.greet_main": "mixed.main_mod",
