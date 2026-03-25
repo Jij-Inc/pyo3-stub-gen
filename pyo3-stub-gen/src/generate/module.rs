@@ -40,10 +40,12 @@ impl Module {
     /// Check if the module has any items declared via `gen_stub_*` macros.
     ///
     /// This returns true if the module has classes, enums, functions, variables,
-    /// type aliases, or explicit re-exports. It returns false if the module only
-    /// has submodules (which are created automatically by `register_submodules()`).
+    /// type aliases, explicit re-exports, or a module docstring. It returns false
+    /// if the module only has submodules (which are created automatically by
+    /// `register_submodules()`).
     pub fn has_declared_items(&self) -> bool {
-        !self.class.is_empty()
+        !self.doc.is_empty()
+            || !self.class.is_empty()
             || !self.enum_.is_empty()
             || !self.function.is_empty()
             || !self.variables.is_empty()
@@ -58,6 +60,9 @@ impl Module {
     pub fn declared_item_names(&self) -> Vec<String> {
         let mut names = Vec::new();
 
+        if !self.doc.is_empty() {
+            names.push("module_doc".to_string());
+        }
         for class in self.class.values() {
             names.push(format!("class {}", class.name));
         }
