@@ -297,23 +297,56 @@ impl TypeExpressionQualifier {
                     }
                 }
                 Token::DottedPath(parts) => {
-                    // Check if this is an over-qualified path (e.g., "my_module.Type" when we're already in "my_module")
-                    // If the dotted path starts with a module that matches target_module, strip the module prefix
-                    // This handles both 2-part paths (module.Type) and 3+ part paths (module.Class.Member)
+                    // Handle dotted paths like "module.Type" or "module.Class.Member"
+                    // We need to distinguish between:
+                    // 1. Local over-qualified paths: "_core.C.C1" in "pkg._core" → "C.C1"
+                    // 2. External paths: "collections.abc.Callable" → preserve as-is
+                    //
+                    // Strategy:
+                    // - If any part is a known Python builtin → external, preserve
+                    // - If the type is in type_refs → use that module info
+                    // - Otherwise, use suffix matching for local modules
                     if parts.len() >= 2 {
-                        let module_path = &parts[0];
+                        // Check if any part is a Python builtin (indicates external path)
+                        let contains_builtin = parts.iter().any(|p| Self::is_python_builtin(p));
 
-                        // Check if target_module matches or ends with the module_path
-                        // E.g., target="pkg.sub_mod" matches module_path="sub_mod"
-                        let is_same_module = module_path == target_module
-                            || target_module.ends_with(&format!(".{}", module_path));
-
-                        if is_same_module {
-                            // Over-qualified - strip the module prefix and join the rest
-                            result.push_str(&parts[1..].join("."));
-                        } else {
-                            // Different module - keep the full qualification
+                        if contains_builtin {
+                            // External type path - preserve as-is
                             result.push_str(&parts.join("."));
+                        } else {
+                            // Check if the type (parts[1] or last meaningful part) is in type_refs
+                            let type_name = &parts[1];
+                            let module_prefix = &parts[0];
+
+                            if let Some(type_ref) = type_refs.get(type_name) {
+                                // We have type info - use it to decide
+                                if let Some(module_name) = type_ref.module.get() {
+                                    // Check if the module matches target_module
+                                    if module_name == target_module {
+                                        // Same module - strip prefix
+                                        result.push_str(&parts[1..].join("."));
+                                    } else {
+                                        // Different module - preserve full path
+                                        result.push_str(&parts.join("."));
+                                    }
+                                } else {
+                                    // No module info in type_ref - preserve as-is
+                                    result.push_str(&parts.join("."));
+                                }
+                            } else {
+                                // Type not in type_refs - use suffix matching as fallback
+                                // This handles cases like "_core.C.C1" when C is not explicitly tracked
+                                let is_local_module = target_module == module_prefix
+                                    || target_module.ends_with(&format!(".{}", module_prefix));
+
+                                if is_local_module {
+                                    // Local module - strip prefix
+                                    result.push_str(&parts[1..].join("."));
+                                } else {
+                                    // Different module - preserve full path
+                                    result.push_str(&parts.join("."));
+                                }
+                            }
                         }
                     } else {
                         // Single-part path - preserve as-is (shouldn't happen for DottedPath)
@@ -552,5 +585,35 @@ mod tests {
         let result =
             TypeExpressionQualifier::qualify_expression("1.0", &HashMap::new(), "pkg._core");
         assert_eq!(result, "1.0");
+    }
+
+    #[test]
+    fn test_external_dotted_path_preserved() {
+        // Test: external paths like collections.abc.Callable should NEVER be stripped
+        // even if the target module happens to end with a matching component
+
+        // collections.abc.Callable should be preserved even in pkg.collections
+        let result = TypeExpressionQualifier::qualify_expression(
+            "collections.abc.Callable",
+            &HashMap::new(),
+            "pkg.collections",
+        );
+        assert_eq!(result, "collections.abc.Callable");
+
+        // typing.Optional should be preserved as-is
+        let result = TypeExpressionQualifier::qualify_expression(
+            "typing.Optional",
+            &HashMap::new(),
+            "pkg.typing",
+        );
+        assert_eq!(result, "typing.Optional");
+
+        // builtins.int should be preserved
+        let result = TypeExpressionQualifier::qualify_expression(
+            "builtins.int",
+            &HashMap::new(),
+            "pkg.builtins",
+        );
+        assert_eq!(result, "builtins.int");
     }
 }

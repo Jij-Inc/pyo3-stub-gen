@@ -92,12 +92,30 @@ impl ToTokens for ParameterWithKind {
                             || (value_str.starts_with('"') && value_str.ends_with('"'))
                             || (value_str.starts_with('\'') && value_str.ends_with('\''));
 
-                        // Use source_module from the first rust_type_marker if available,
-                        // but only for non-literal values that actually reference module-scoped symbols
-                        let source_module = if is_literal {
-                            quote! { None }
-                        } else if let Some(first_marker) = rust_type_markers.first() {
-                            if let Ok(marker_type) = syn::parse_str::<syn::Type>(first_marker) {
+                        // Find which rust_type_marker the default expression references
+                        // Extract the first identifier from expressions like "MyEnum::Value" or "MyEnum.Value"
+                        let referenced_type = value_str
+                            .split([':', '.'])
+                            .next()
+                            .map(|s| s.trim());
+
+                        // Find the matching marker for this default expression
+                        let matching_marker = if is_literal {
+                            None
+                        } else {
+                            referenced_type.and_then(|ref_type| {
+                                rust_type_markers.iter().find(|marker| {
+                                    // Extract the type name from the marker (e.g., "MyEnum" from "crate::MyEnum")
+                                    let marker_name = marker.rsplit("::").next().unwrap_or(marker);
+                                    marker_name == ref_type
+                                })
+                            })
+                        };
+
+                        // Use source_module from the matching marker if found,
+                        // otherwise None to avoid using the wrong module
+                        let source_module = if let Some(marker) = matching_marker {
+                            if let Ok(marker_type) = syn::parse_str::<syn::Type>(marker) {
                                 quote! {
                                     Some({
                                         fn _get_module() -> Option<::pyo3_stub_gen::ModuleRef> {
