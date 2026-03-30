@@ -1,12 +1,16 @@
 [dependency-groups]
 dev = [
-  "mypy",
+  "mypy>=1.19.1",
+  "myst-parser",
   "pydantic>=2.11.9",
-  "pyrefly>=0.46.1",
+  "pyrefly>=0.50.1",
   "pyright>=1.1.400",
-  "pytest>=8.3.5",
   "pytest-asyncio>=1.1.0",
   "pytest-insta>=0.3.0",
+  "pytest>=8.3.5",
+  "sphinx",
+  "sphinx-rtd-theme",
+  "sphinxcontrib-katex>=0.9.11",
   "ty>=0.0.7",
 ]
 

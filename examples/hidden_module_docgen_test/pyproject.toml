@@ -3,17 +3,6 @@ name = "hidden_module_docgen_test"
 version = "0.1"
 requires-python = ">=3.10"
 
-[dependency-groups]
-dev = [
-  "mypy>=1.19.1",
-  "myst-parser",
-  "pyrefly>=0.50.1",
-  "pyright",
-  "sphinx",
-  "sphinx-rtd-theme",
-  "sphinxcontrib-katex>=0.9.11",
-]
-
 [build-system]
 requires = ["maturin>=1.1,<2.0"]
 build-backend = "maturin"

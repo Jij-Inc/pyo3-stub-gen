@@ -17,13 +17,17 @@ members = [
 
 [manifest.dependency-groups]
 dev = [
-    { name = "mypy" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "myst-parser" },
     { name = "pydantic", specifier = ">=2.11.9" },
-    { name = "pyrefly", specifier = ">=0.46.1" },
+    { name = "pyrefly", specifier = ">=0.50.1" },
     { name = "pyright", specifier = ">=1.1.400" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", specifier = ">=1.1.0" },
     { name = "pytest-insta", specifier = ">=0.3.0" },
+    { name = "sphinx" },
+    { name = "sphinx-rtd-theme" },
+    { name = "sphinxcontrib-katex", specifier = ">=0.9.11" },
     { name = "ty", specifier = ">=0.0.7" },
 ]
 
@@ -151,30 +155,6 @@ source = { editable = "examples/feature_gated" }
 name = "hidden-module-docgen-test"
 version = "0.1"
 source = { editable = "examples/hidden_module_docgen_test" }
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "myst-parser" },
-    { name = "pyrefly" },
-    { name = "pyright" },
-    { name = "sphinx" },
-    { name = "sphinx-rtd-theme" },
-    { name = "sphinxcontrib-katex" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "myst-parser" },
-    { name = "pyrefly", specifier = ">=0.50.1" },
-    { name = "pyright" },
-    { name = "sphinx" },
-    { name = "sphinx-rtd-theme" },
-    { name = "sphinxcontrib-katex", specifier = ">=0.9.11" },
-]
 
 [[package]]
 name = "idna"
