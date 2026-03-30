@@ -2,6 +2,12 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+includes:
+  doc:
+    taskfile: ../doc.yml
+    flatten: true
+    dir: .
+
 tasks:
   stub-gen:
     desc: Generate stub file
@@ -19,21 +25,3 @@ tasks:
       # See README.md for details
       - uv run pyrefly check python
       - uv run ty check python
-
-  doc-build:
-    desc: Build Sphinx documentation
-    deps:
-      # stub-gen generates api_reference.json and pyo3_stub_gen_ext.py required by Sphinx
-      - stub-gen
-    cmds:
-      - uv run --with sphinx sphinx-build -W -b html docs docs/_build
-
-  doc-test:
-    desc: Test that Sphinx documentation builds and objects.inv exists
-    deps:
-      - doc-build
-    cmds:
-      - bash -c 'test -f docs/_build/index.html || (echo "ERROR index.html not generated" && exit 1)'
-      - bash -c 'test -f docs/_build/objects.inv || (echo "ERROR objects.inv not generated" && exit 1)'
-      - echo "✓ Documentation built successfully"
-      - echo "✓ objects.inv generated for intersphinx"

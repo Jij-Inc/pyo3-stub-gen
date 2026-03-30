@@ -4,7 +4,9 @@ uv.lock linguist-generated=true
 # Generated stub files
 examples/**/*.pyi linguist-generated=true
 
-# Generated docgen files
-examples/*/docs/api/pyo3_stub_gen_ext.py linguist-generated=true
+# Generated __init__.py (from generate-init-py feature)
+examples/generate_init_py/python/generate_init_py/__init__.py linguist-generated=true
+
+# Generated docgen files (pyo3_stub_gen_ext.py is gitignored)
 examples/*/docs/api/api_reference.json linguist-generated=true
 examples/*/docs/api/*.rst linguist-generated=true
