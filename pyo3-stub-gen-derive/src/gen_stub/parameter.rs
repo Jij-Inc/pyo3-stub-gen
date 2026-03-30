@@ -82,8 +82,21 @@ impl ToTokens for ParameterWithKind {
                             value_str = "True".to_string();
                         }
 
-                        // Use source_module from the first rust_type_marker if available
-                        let source_module = if let Some(first_marker) = rust_type_markers.first() {
+                        // Check if the value is a literal that should not have module qualification
+                        // Literals include: None, True, False, numeric literals, string literals
+                        let is_literal = value_str == "None"
+                            || value_str == "True"
+                            || value_str == "False"
+                            || value_str.parse::<f64>().is_ok()
+                            || value_str.parse::<i64>().is_ok()
+                            || (value_str.starts_with('"') && value_str.ends_with('"'))
+                            || (value_str.starts_with('\'') && value_str.ends_with('\''));
+
+                        // Use source_module from the first rust_type_marker if available,
+                        // but only for non-literal values that actually reference module-scoped symbols
+                        let source_module = if is_literal {
+                            quote! { None }
+                        } else if let Some(first_marker) = rust_type_markers.first() {
                             if let Ok(marker_type) = syn::parse_str::<syn::Type>(first_marker) {
                                 quote! {
                                     Some({

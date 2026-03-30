@@ -272,8 +272,8 @@ impl Parameters {
 
 /// Qualify a default value expression based on target module
 ///
-/// This function adds or removes module prefixes from default value expressions
-/// based on whether the source module matches the target module.
+/// This function adds module prefixes to default value expressions
+/// when the source module differs from the target module.
 fn qualify_default_value(
     value: &str,
     source_module: Option<&ModuleRef>,
@@ -286,14 +286,14 @@ fn qualify_default_value(
         return value.to_string();
     };
 
-    // Check if same module (exact match or suffix match)
-    let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
-    let is_same_module =
-        module_name == target_module || target_module.ends_with(&format!(".{}", module_component));
-
-    if is_same_module {
+    // Check if same module using exact match only
+    // This avoids incorrectly treating pkg.a._core and pkg.b._core as the same module
+    if module_name == target_module {
         value.to_string()
     } else {
+        // Use the last component of the module path for qualification
+        // This matches how imports are typically structured (e.g., `from pkg import _core`)
+        let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
         format!("{}.{}", module_component, value)
     }
 }
