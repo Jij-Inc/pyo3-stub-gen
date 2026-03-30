@@ -1,5 +1,5 @@
-generate_init_py._core API Reference
-====================================
+generate_init_py API Reference
+==============================
 
 Example for generate-init-py feature.
 

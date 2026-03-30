@@ -1,5 +1,5 @@
 {
-  "name": "generate_init_py._core",
+  "name": "generate_init_py",
   "modules": {
     "generate_init_py": {
       "name": "generate_init_py",

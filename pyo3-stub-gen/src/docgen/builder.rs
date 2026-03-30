@@ -103,8 +103,17 @@ impl<'a> DocPackageBuilder<'a> {
             json_config.output_dir = PathBuf::from(relative_posix);
         }
 
+        // Use public parent module name for the package name
+        // e.g., "generate_init_py._core" → "generate_init_py"
+        let package_name = crate::docgen::util::public_parent_module(&self.default_module_name);
+        let package_name = if package_name.is_empty() {
+            self.default_module_name.clone()
+        } else {
+            package_name
+        };
+
         Ok(DocPackage {
-            name: self.default_module_name.clone(),
+            name: package_name,
             modules,
             export_map,
             config: json_config,
