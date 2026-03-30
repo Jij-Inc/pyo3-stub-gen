@@ -110,9 +110,53 @@ impl StubInfo {
             );
         }
 
+        // Generate __init__.py files if configured
+        self.generate_init_py_files()?;
+
         // Generate documentation if configured
         if let Some(doc_config) = &self.config.doc_gen {
             self.generate_docs(doc_config)?;
+        }
+
+        Ok(())
+    }
+
+    fn generate_init_py_files(&self) -> Result<()> {
+        use crate::pyproject::GenerateInitPy;
+
+        // Skip if not configured or not mixed layout
+        if !self.config.generate_init_py.is_enabled() || !self.is_mixed_layout {
+            return Ok(());
+        }
+
+        for (name, module) in self.modules.iter() {
+            // Determine if we should generate for this module
+            let should_generate = match &self.config.generate_init_py {
+                GenerateInitPy::All(true) => module.has_re_exports(),
+                GenerateInitPy::All(false) => false,
+                GenerateInitPy::Modules(modules) => modules.iter().any(|m| m == name),
+            };
+
+            if !should_generate {
+                continue;
+            }
+
+            // Convert module name to path
+            let normalized_name = name.replace("-", "_");
+            let path = normalized_name.replace(".", "/");
+            let dest = self.python_root.join(&path).join("__init__.py");
+
+            let dir = dest.parent().context("Cannot get parent directory")?;
+            if !dir.exists() {
+                fs::create_dir_all(dir)?;
+            }
+
+            let content = module.format_init_py();
+            fs::write(&dest, content)?;
+            log::info!(
+                "Generate __init__.py for module `{name}` at {dest}",
+                dest = dest.display()
+            );
         }
 
         Ok(())

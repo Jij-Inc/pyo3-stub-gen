@@ -12,6 +12,9 @@ features = ["pyo3/extension-module"]
 module-name = "hidden_module_docgen_test"
 python-source = "python"
 
+[tool.pyo3-stub-gen]
+generate-init-py = true
+
 [tool.pyo3-stub-gen.doc-gen]
 output-dir = "docs/api"
 json-output = "api_reference.json"
