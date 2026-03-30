@@ -141,6 +141,22 @@ impl StubInfo {
                 continue;
             }
 
+            // Check if module has PyO3-generated items (not just re-exports)
+            // __init__.py should only be generated for pure Python parent modules
+            let has_pyo3_items = !module.class.is_empty()
+                || !module.enum_.is_empty()
+                || !module.function.is_empty()
+                || !module.variables.is_empty()
+                || !module.type_aliases.is_empty();
+
+            if has_pyo3_items {
+                anyhow::bail!(
+                    "Cannot generate __init__.py for module '{}': this module is PyO3-generated. \
+                     generate-init-py is only for pure Python parent modules that re-export from PyO3 submodules.",
+                    name
+                );
+            }
+
             // Convert module name to path
             let normalized_name = name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
