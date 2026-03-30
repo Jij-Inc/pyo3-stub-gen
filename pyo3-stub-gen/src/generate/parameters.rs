@@ -1,10 +1,10 @@
 use crate::{
-    generate::Import,
+    generate::{qualifier::TypeExpressionQualifier, Import},
     stub_type::ImportRef,
     type_info::{ParameterDefault as ParameterDefaultInfo, ParameterInfo, ParameterKind},
     TypeInfo,
 };
-use std::{collections::HashSet, fmt};
+use std::{collections::HashMap, collections::HashSet, fmt};
 
 /// Default value of a parameter (runtime version)
 #[derive(Debug, Clone, PartialEq)]
@@ -245,7 +245,16 @@ impl Parameters {
                 let base = format!("{}: {}", param.name, qualified_type);
                 match &param.default {
                     ParameterDefault::None => base,
-                    ParameterDefault::Expr(expr) => format!("{} = {}", base, expr),
+                    ParameterDefault::Expr(expr) => {
+                        // Qualify the default value expression to handle module-qualified
+                        // enum variants like _core.C.C1 -> C.C1 when in the same module
+                        let qualified_expr = TypeExpressionQualifier::qualify_expression(
+                            expr,
+                            &HashMap::new(),
+                            target_module,
+                        );
+                        format!("{} = {}", base, qualified_expr)
+                    }
                 }
             }
         }
