@@ -1,18 +1,23 @@
 use crate::{
-    generate::{qualifier::TypeExpressionQualifier, Import},
-    stub_type::ImportRef,
+    generate::Import,
+    stub_type::{ImportRef, ModuleRef},
     type_info::{ParameterDefault as ParameterDefaultInfo, ParameterInfo, ParameterKind},
     TypeInfo,
 };
-use std::{collections::HashMap, collections::HashSet, fmt};
+use std::{collections::HashSet, fmt};
 
 /// Default value of a parameter (runtime version)
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParameterDefault {
     /// No default value
     None,
-    /// Default value expression as a string
-    Expr(String),
+    /// Default value expression with optional module qualification info
+    Expr {
+        /// The default value expression (without module prefix)
+        value: String,
+        /// Source module of the type referenced in the default value
+        source_module: Option<ModuleRef>,
+    },
 }
 
 /// A single parameter in a Python function/method signature
@@ -44,7 +49,13 @@ impl From<&ParameterInfo> for Parameter {
             type_info: (info.type_info)(),
             default: match &info.default {
                 ParameterDefaultInfo::None => ParameterDefault::None,
-                ParameterDefaultInfo::Expr(f) => ParameterDefault::Expr(f()),
+                ParameterDefaultInfo::Expr {
+                    value,
+                    source_module,
+                } => ParameterDefault::Expr {
+                    value: value(),
+                    source_module: source_module.and_then(|f| f()),
+                },
             },
         }
     }
@@ -63,7 +74,7 @@ impl fmt::Display for Parameter {
                 write!(f, "{}: {}", self.name, self.type_info)?;
                 match &self.default {
                     ParameterDefault::None => Ok(()),
-                    ParameterDefault::Expr(expr) => write!(f, " = {}", expr),
+                    ParameterDefault::Expr { value, .. } => write!(f, " = {}", value),
                 }
             }
         }
@@ -245,19 +256,45 @@ impl Parameters {
                 let base = format!("{}: {}", param.name, qualified_type);
                 match &param.default {
                     ParameterDefault::None => base,
-                    ParameterDefault::Expr(expr) => {
-                        // Qualify the default value expression to handle module-qualified
-                        // enum variants like _core.C.C1 -> C.C1 when in the same module
-                        let qualified_expr = TypeExpressionQualifier::qualify_expression(
-                            expr,
-                            &HashMap::new(),
-                            target_module,
-                        );
+                    ParameterDefault::Expr {
+                        value,
+                        source_module,
+                    } => {
+                        let qualified_expr =
+                            qualify_default_value(value, source_module.as_ref(), target_module);
                         format!("{} = {}", base, qualified_expr)
                     }
                 }
             }
         }
+    }
+}
+
+/// Qualify a default value expression based on target module
+///
+/// This function adds or removes module prefixes from default value expressions
+/// based on whether the source module matches the target module.
+fn qualify_default_value(
+    value: &str,
+    source_module: Option<&ModuleRef>,
+    target_module: &str,
+) -> String {
+    let Some(module_ref) = source_module else {
+        return value.to_string();
+    };
+    let Some(module_name) = module_ref.get() else {
+        return value.to_string();
+    };
+
+    // Check if same module (exact match or suffix match)
+    let module_component = module_name.rsplit('.').next().unwrap_or(module_name);
+    let is_same_module =
+        module_name == target_module || target_module.ends_with(&format!(".{}", module_component));
+
+    if is_same_module {
+        value.to_string()
+    } else {
+        format!("{}.{}", module_component, value)
     }
 }
 
@@ -295,7 +332,10 @@ mod tests {
                 name: "kw",
                 kind: ParameterKind::KeywordOnly,
                 type_info: TypeInfo::builtin("str"),
-                default: ParameterDefault::Expr("None".to_string()),
+                default: ParameterDefault::Expr {
+                    value: "None".to_string(),
+                    source_module: None,
+                },
             }],
             ..Default::default()
         };
@@ -317,7 +357,10 @@ mod tests {
                     name: "retries",
                     kind: ParameterKind::KeywordOnly,
                     type_info: TypeInfo::builtin("int"),
-                    default: ParameterDefault::Expr("3".to_string()),
+                    default: ParameterDefault::Expr {
+                        value: "3".to_string(),
+                        source_module: None,
+                    },
                 },
                 Parameter {
                     name: "timeout",

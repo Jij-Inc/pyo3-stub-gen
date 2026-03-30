@@ -41,62 +41,37 @@ impl ToTokens for ParameterWithKind {
                 // Rust expression: needs runtime conversion via fmt_py_obj
                 match &self.arg_info.r#type {
                     TypeOrOverride::RustType { r#type } => {
-                        let default = if expr.to_token_stream().to_string() == "None" {
+                        let value = if expr.to_token_stream().to_string() == "None" {
                             quote! { "None".to_string() }
                         } else {
                             quote! {
                                 {
                                     let v: #r#type = #expr;
-                                    let repr = ::pyo3_stub_gen::util::fmt_py_obj(v);
-                                    let type_info = <#r#type as ::pyo3_stub_gen::PyStubType>::type_output();
-
-                                    // Check if the type is defined in another module within the current package.
-                                    // For locally-defined types: qualified name is "sub_mod.ClassA" and
-                                    // import is Module("package.sub_mod"). The import ends with the module prefix.
-                                    // For external types: qualified name is "numpy.ndarray" and
-                                    // import is Module("numpy"). The import equals the module prefix.
-                                    let should_add_prefix = if let Some(dot_pos) = type_info.name.rfind('.') {
-                                        let module_prefix = &type_info.name[..dot_pos];
-                                        type_info.import.iter().any(|imp| {
-                                            if let ::pyo3_stub_gen::ImportRef::Module(module_ref) = imp {
-                                                if let Some(module_name) = module_ref.get() {
-                                                    // Local cross-module ref: full path ends with module prefix
-                                                    // e.g., "package.sub_mod" ends with ".sub_mod"
-                                                    module_name.ends_with(&format!(".{}", module_prefix))
-                                                } else {
-                                                    false
-                                                }
-                                            } else {
-                                                false
-                                            }
-                                        })
-                                    } else {
-                                        false
-                                    };
-
-                                    if should_add_prefix {
-                                        if let Some(dot_pos) = type_info.name.rfind('.') {
-                                            let module_prefix = &type_info.name[..dot_pos];
-                                            format!("{}.{}", module_prefix, repr)
-                                        } else {
-                                            repr
-                                        }
-                                    } else {
-                                        repr
-                                    }
+                                    ::pyo3_stub_gen::util::fmt_py_obj(v)
                                 }
                             }
                         };
+                        // Use source_module from the type for module qualification at stub generation time
                         quote! {
-                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                                fn _fmt() -> String {
-                                    #default
-                                }
-                                _fmt
-                            })
+                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                                value: {
+                                    fn _fmt() -> String {
+                                        #value
+                                    }
+                                    _fmt
+                                },
+                                source_module: Some({
+                                    fn _get_module() -> Option<::pyo3_stub_gen::ModuleRef> {
+                                        <#r#type as ::pyo3_stub_gen::PyStubType>::type_output().source_module
+                                    }
+                                    _get_module
+                                }),
+                            }
                         }
                     }
-                    TypeOrOverride::OverrideType { .. } => {
+                    TypeOrOverride::OverrideType {
+                        rust_type_markers, ..
+                    } => {
                         // For OverrideType, convert the default value expression directly to a string
                         // since r#type may be a dummy type and we can't use it for type annotations
                         let mut value_str = expr.to_token_stream().to_string();
@@ -106,26 +81,52 @@ impl ToTokens for ParameterWithKind {
                         } else if value_str == "true" {
                             value_str = "True".to_string();
                         }
-                        quote! {
-                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                                fn _fmt() -> String {
-                                    #value_str.to_string()
+
+                        // Use source_module from the first rust_type_marker if available
+                        let source_module = if let Some(first_marker) = rust_type_markers.first() {
+                            if let Ok(marker_type) = syn::parse_str::<syn::Type>(first_marker) {
+                                quote! {
+                                    Some({
+                                        fn _get_module() -> Option<::pyo3_stub_gen::ModuleRef> {
+                                            <#marker_type as ::pyo3_stub_gen::PyStubType>::type_output().source_module
+                                        }
+                                        _get_module
+                                    })
                                 }
-                                _fmt
-                            })
+                            } else {
+                                quote! { None }
+                            }
+                        } else {
+                            quote! { None }
+                        };
+
+                        quote! {
+                            ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                                value: {
+                                    fn _fmt() -> String {
+                                        #value_str.to_string()
+                                    }
+                                    _fmt
+                                },
+                                source_module: #source_module,
+                            }
                         }
                     }
                 }
             }
             Some(DefaultExpr::Python(py_str)) => {
                 // Python expression: already in Python syntax, use directly
+                // No source_module since we don't know the module context from Python syntax
                 quote! {
-                    ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                        fn _fmt() -> String {
-                            #py_str.to_string()
-                        }
-                        _fmt
-                    })
+                    ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                        value: {
+                            fn _fmt() -> String {
+                                #py_str.to_string()
+                            }
+                            _fmt
+                        },
+                        source_module: None,
+                    }
                 }
             }
             None => quote! { ::pyo3_stub_gen::type_info::ParameterDefault::None },

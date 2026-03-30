@@ -279,9 +279,9 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: type_renderer.render_type(&param.type_info),
                 default: match &param.default {
                     crate::generate::ParameterDefault::None => None,
-                    crate::generate::ParameterDefault::Expr(s) => {
+                    crate::generate::ParameterDefault::Expr { value, .. } => {
                         // Parse default value and identify type references
-                        Some(default_parser.parse(s, &param.type_info))
+                        Some(default_parser.parse(value, &param.type_info))
                     }
                 },
             })
