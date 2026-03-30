@@ -180,6 +180,12 @@ cargo run --bin stub_gen
 
 The stub file is automatically found by `maturin`, and it is included in the wheel package. See also the [maturin document](https://www.maturin.rs/project_layout#adding-python-type-information) for more details.
 
+### Note for Mixed Layout Projects
+
+In [mixed Rust/Python projects](https://www.maturin.rs/project_layout#mixed-rustpython-project), pyo3-stub-gen only generates stub files for PyO3-generated modules (i.e., modules at or below `module-name` in `pyproject.toml`). Stub files are **not** generated for pure Python parent modules to avoid shadowing user's `__init__.py` files.
+
+If you are upgrading from pyo3-stub-gen v0.18.0–v0.20.0, you may have stale `__init__.pyi` files in pure Python directories that were previously generated. These stale files should be manually deleted, as type checkers prioritize `.pyi` files over `.py` files.
+
 ## Manual Overriding
 
 When the automatic Rust-to-Python type translation doesn't produce the desired result, you can manually specify type information using Python stub syntax. There are two main approaches:
