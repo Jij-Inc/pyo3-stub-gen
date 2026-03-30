@@ -187,7 +187,9 @@ pub(crate) fn tokenize(expr: &str) -> Vec<Token> {
             }
 
             // Numeric literals (e.g., 42, 3.14, -1)
-            _ if ch.is_ascii_digit() || (ch == '-' && chars.clone().nth(1).is_some_and(|c| c.is_ascii_digit())) => {
+            _ if ch.is_ascii_digit()
+                || (ch == '-' && chars.clone().nth(1).is_some_and(|c| c.is_ascii_digit())) =>
+            {
                 let mut num = String::new();
                 // Handle negative sign
                 if ch == '-' {
@@ -196,7 +198,13 @@ pub(crate) fn tokenize(expr: &str) -> Vec<Token> {
                 }
                 // Read digits, dots, and scientific notation
                 while let Some(&c) = chars.peek() {
-                    if c.is_ascii_digit() || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-' {
+                    if c.is_ascii_digit()
+                        || c == '.'
+                        || c == 'e'
+                        || c == 'E'
+                        || c == '+'
+                        || c == '-'
+                    {
                         // Special handling: dot must be followed by digit for float
                         if c == '.' {
                             let mut peek = chars.clone();
@@ -499,33 +507,24 @@ mod tests {
     #[test]
     fn test_qualify_dotted_path_three_parts_same_module() {
         // Test: _core.C.C1 in module "pkg._core" should become C.C1
-        let result = TypeExpressionQualifier::qualify_expression(
-            "_core.C.C1",
-            &HashMap::new(),
-            "pkg._core",
-        );
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C.C1", &HashMap::new(), "pkg._core");
         assert_eq!(result, "C.C1");
     }
 
     #[test]
     fn test_qualify_dotted_path_three_parts_different_module() {
         // Test: _core.C.C1 in module "pkg.other" should stay _core.C.C1
-        let result = TypeExpressionQualifier::qualify_expression(
-            "_core.C.C1",
-            &HashMap::new(),
-            "pkg.other",
-        );
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C.C1", &HashMap::new(), "pkg.other");
         assert_eq!(result, "_core.C.C1");
     }
 
     #[test]
     fn test_qualify_dotted_path_two_parts_same_module() {
         // Test: _core.C in module "pkg._core" should become C
-        let result = TypeExpressionQualifier::qualify_expression(
-            "_core.C",
-            &HashMap::new(),
-            "pkg._core",
-        );
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C", &HashMap::new(), "pkg._core");
         assert_eq!(result, "C");
     }
 
@@ -547,18 +546,11 @@ mod tests {
     #[test]
     fn test_qualify_numeric_literal_preserved() {
         // Test: numeric literals should be preserved as-is
-        let result = TypeExpressionQualifier::qualify_expression(
-            "2",
-            &HashMap::new(),
-            "pkg._core",
-        );
+        let result = TypeExpressionQualifier::qualify_expression("2", &HashMap::new(), "pkg._core");
         assert_eq!(result, "2");
 
-        let result = TypeExpressionQualifier::qualify_expression(
-            "1.0",
-            &HashMap::new(),
-            "pkg._core",
-        );
+        let result =
+            TypeExpressionQualifier::qualify_expression("1.0", &HashMap::new(), "pkg._core");
         assert_eq!(result, "1.0");
     }
 }
