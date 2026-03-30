@@ -575,7 +575,7 @@ impl<'a> DocPackageBuilder<'a> {
                     (link_target.fqn.clone(), module.clone())
                 } else {
                     // If not found, try to extract the type name and look for it under other modules
-                    // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
+                    // e.g., "pkg._core.A" -> try "pkg.A"
                     if let Some(type_name) = link_target.fqn.split('.').next_back() {
                         // Try each module in export_map to find a match
                         if let Some((fqn, module)) = self

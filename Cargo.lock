@@ -263,6 +263,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
+name = "generate_init_py"
+version = "0.21.0"
+dependencies = [
+ "env_logger",
+ "pyo3",
+ "pyo3-stub-gen",
+]
+
+[[package]]
 name = "getopts"
 version = "0.2.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -311,15 +320,6 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
-
-[[package]]
-name = "hidden_module_docgen_test"
-version = "0.21.0"
-dependencies = [
- "env_logger",
- "pyo3",
- "pyo3-stub-gen",
-]
 
 [[package]]
 name = "iana-time-zone"

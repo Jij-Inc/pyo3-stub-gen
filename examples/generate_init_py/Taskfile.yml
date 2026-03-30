@@ -14,7 +14,7 @@ tasks:
       - uv sync --dev
       - uv run pyright
       - uvx ruff check
-      - uv run mypy --show-error-codes -p hidden_module_docgen_test
+      - uv run mypy --show-error-codes -p generate_init_py
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details
       - uv run pyrefly check python

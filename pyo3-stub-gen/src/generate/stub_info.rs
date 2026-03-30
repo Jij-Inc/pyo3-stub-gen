@@ -316,6 +316,9 @@ impl StubInfoBuilder {
     /// In mixed layout, items should only be declared for modules at or below `module-name`.
     /// Declaring items for modules above `module-name` (i.e., pure Python modules) is an error
     /// because it would generate stub files that conflict with user's `__init__.py`.
+    ///
+    /// Exception: When `generate-init-py` is enabled for a module, that module is allowed to
+    /// have re-exports (via `reexport_module_members!`) and/or module docstrings (via `module_doc!`).
     fn validate_module_paths(&self) -> Result<()> {
         if !self.is_mixed_layout {
             return Ok(());
@@ -324,6 +327,12 @@ impl StubInfoBuilder {
         let mut invalid_modules: Vec<(&str, Vec<String>)> = Vec::new();
         for (module_name, module) in &self.modules {
             if module.has_declared_items() && !self.is_pyo3_generated(module_name) {
+                // Allow pure Python modules with only re-exports/docs when generate-init-py is enabled
+                if module.has_only_reexports_or_doc()
+                    && self.config.generate_init_py.is_enabled_for(module_name)
+                {
+                    continue;
+                }
                 invalid_modules.push((module_name, module.declared_item_names()));
             }
         }
@@ -921,6 +930,50 @@ mod tests {
             Module {
                 name: "pkg".to_string(),
                 // No doc, no items, just exists
+                ..Default::default()
+            },
+        );
+
+        // PyO3 module with content
+        builder.modules.insert(
+            "pkg.native".to_string(),
+            Module {
+                name: "pkg.native".to_string(),
+                doc: "Native module".to_string(),
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_module_paths_allows_reexports_with_generate_init_py() {
+        use crate::generate::module::ModuleReExport;
+        use crate::pyproject::GenerateInitPy;
+
+        // When generate-init-py is enabled, re-exports to parent modules should be allowed
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg.native".to_string(),
+            "/tmp".into(),
+            true, // mixed layout
+            StubGenConfig {
+                generate_init_py: GenerateInitPy::All(true),
+                ..Default::default()
+            },
+        );
+
+        // Parent module with re-exports - should be allowed when generate-init-py is enabled
+        builder.modules.insert(
+            "pkg".to_string(),
+            Module {
+                name: "pkg".to_string(),
+                doc: "Parent module doc".to_string(),
+                module_re_exports: vec![ModuleReExport {
+                    source_module: "pkg.native".to_string(),
+                    items: vec!["SomeClass".to_string()],
+                }],
                 ..Default::default()
             },
         );

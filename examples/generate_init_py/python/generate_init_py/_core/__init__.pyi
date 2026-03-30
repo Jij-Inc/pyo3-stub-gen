@@ -12,6 +12,7 @@ __all__ = [
     "C",
     "ModAAlias",
     "create_a",
+    "create_b",
     "default_c",
     "greet_main",
     "wrap_opt_a",
@@ -46,6 +47,20 @@ class C(enum.Enum):
     """
 
 def create_a(x: builtins.int) -> A: ...
+
+def create_b(x: builtins.int) -> B:
+    r"""
+    This is the docstring for {py:func}`great_main` function.
+    
+    These lines must be rendered as separate paragraphs.
+    
+    ```python
+    >>> 42
+    42
+    ```
+    
+    This must be rendered: $x + x$
+    """
 
 def default_c(c: C = C.C1) -> C:
     r"""

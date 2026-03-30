@@ -1,4 +1,4 @@
-"""Sphinx configuration for hidden_module_docgen_test example API documentation."""
+"""Sphinx configuration for generate_init_py example API documentation."""
 
 import sys
 from pathlib import Path
@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "api"))
 
 # Project information
-project = "hidden_module_docgen_test"
+project = "generate_init_py"
 copyright = "2024, pyo3-stub-gen"
 author = "pyo3-stub-gen"
 

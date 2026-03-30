@@ -1,5 +1,5 @@
 [project]
-name = "hidden_module_docgen_test"
+name = "generate_init_py"
 version = "0.1"
 requires-python = ">=3.10"
 
@@ -9,11 +9,14 @@ build-backend = "maturin"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "hidden_module_docgen_test"
+module-name = "generate_init_py._core"
 python-source = "python"
+
+[tool.pyo3-stub-gen]
+generate-init-py = true
 
 [tool.pyo3-stub-gen.doc-gen]
 output-dir = "docs/api"
 json-output = "api_reference.json"
-intro-message = "Re-export from hidden module should appear in the documentation."
+intro-message = "Example for generate-init-py feature."
 contents-table = true
