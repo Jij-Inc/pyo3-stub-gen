@@ -404,7 +404,6 @@ impl StubInfoBuilder {
     }
 
     fn add_module_export(&mut self, info: &ReexportModuleMembers) {
-        let use_wildcard = info.items.is_none();
         let items = info
             .items
             .map(|items| items.iter().map(|s| s.to_string()).collect())
@@ -415,7 +414,6 @@ impl StubInfoBuilder {
             .push(ModuleReExport {
                 source_module: info.source_module.to_string(),
                 items,
-                use_wildcard_import: use_wildcard,
             });
     }
 
@@ -437,7 +435,7 @@ impl StubInfoBuilder {
 
         for (module_name, module) in &self.modules {
             for (idx, re_export) in module.module_re_exports.iter().enumerate() {
-                if re_export.use_wildcard_import && re_export.items.is_empty() {
+                if re_export.items.is_empty() {
                     // Wildcard - resolve items for __all__
                     if let Some(source_mod) = self.modules.get(&re_export.source_module) {
                         // Internal module - collect all public items that would be in __all__
@@ -878,7 +876,6 @@ mod tests {
                 module_re_exports: vec![ModuleReExport {
                     source_module: "pkg.native".to_string(),
                     items: vec!["SomeClass".to_string()],
-                    use_wildcard_import: false,
                 }],
                 ..Default::default()
             },

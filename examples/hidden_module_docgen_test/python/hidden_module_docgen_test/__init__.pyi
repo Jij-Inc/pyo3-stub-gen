@@ -8,7 +8,7 @@ These lines are trimmed appropriately.
 """
 
 import builtins
-from hidden_module_docgen_test._core import *
+from hidden_module_docgen_test._core import A, AorB, B, C, ModAAlias, create_a, default_c, greet_main, wrap_opt_a
 from . import _core
 __all__ = [
     "A",

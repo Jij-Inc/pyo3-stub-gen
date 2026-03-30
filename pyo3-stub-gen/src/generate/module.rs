@@ -12,7 +12,6 @@ use std::{
 pub struct ModuleReExport {
     pub source_module: String,
     pub items: Vec<String>,
-    pub use_wildcard_import: bool,
 }
 
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
@@ -183,22 +182,21 @@ impl Module {
                     )?;
                 }
 
-                // Add imports for module re-exports
+                // Add imports for module re-exports (always explicit, not wildcard)
                 let mut sorted_re_exports = self.module.module_re_exports.clone();
                 sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
                 for re_export in &sorted_re_exports {
-                    if re_export.use_wildcard_import {
-                        writeln!(f, "from {} import *", re_export.source_module)?;
-                    } else {
-                        let mut sorted_items = re_export.items.clone();
-                        sorted_items.sort();
-                        writeln!(
-                            f,
-                            "from {} import {}",
-                            re_export.source_module,
-                            sorted_items.join(", ")
-                        )?;
+                    if re_export.items.is_empty() {
+                        continue;
                     }
+                    let mut sorted_items = re_export.items.clone();
+                    sorted_items.sort();
+                    writeln!(
+                        f,
+                        "from {} import {}",
+                        re_export.source_module,
+                        sorted_items.join(", ")
+                    )?;
                 }
                 for submod in &self.module.submodules {
                     writeln!(f, "from . import {submod}")?;
@@ -494,24 +492,21 @@ impl fmt::Display for Module {
                 sorted_type_names.join(", ")
             )?;
         }
-        // Add imports for module re-exports (sorted for deterministic output)
+        // Add imports for module re-exports (always explicit, not wildcard)
         let mut sorted_re_exports = self.module_re_exports.clone();
         sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
         for re_export in &sorted_re_exports {
-            if re_export.use_wildcard_import {
-                // Wildcard: from source import *
-                writeln!(f, "from {} import *", re_export.source_module)?;
-            } else {
-                // Specific items: from source import item1, item2
-                let mut sorted_items = re_export.items.clone();
-                sorted_items.sort();
-                writeln!(
-                    f,
-                    "from {} import {}",
-                    re_export.source_module,
-                    sorted_items.join(", ")
-                )?;
+            if re_export.items.is_empty() {
+                continue;
             }
+            let mut sorted_items = re_export.items.clone();
+            sorted_items.sort();
+            writeln!(
+                f,
+                "from {} import {}",
+                re_export.source_module,
+                sorted_items.join(", ")
+            )?;
         }
         for submod in &self.submodules {
             writeln!(f, "from . import {submod}")?;
