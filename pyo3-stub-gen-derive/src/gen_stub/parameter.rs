@@ -94,10 +94,7 @@ impl ToTokens for ParameterWithKind {
 
                         // Find which rust_type_marker the default expression references
                         // Extract the first identifier from expressions like "MyEnum::Value" or "MyEnum.Value"
-                        let referenced_type = value_str
-                            .split([':', '.'])
-                            .next()
-                            .map(|s| s.trim());
+                        let referenced_type = value_str.split([':', '.']).next().map(|s| s.trim());
 
                         // Find the matching marker for this default expression
                         let matching_marker = if is_literal {
