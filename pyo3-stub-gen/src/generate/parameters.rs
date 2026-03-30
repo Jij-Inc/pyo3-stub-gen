@@ -401,4 +401,36 @@ mod tests {
             "*args: builtins.str, **kwargs: typing.Any"
         );
     }
+
+    #[test]
+    fn test_qualify_default_value_same_module() {
+        // Same module: no qualification needed
+        let module_ref = ModuleRef::Named("pkg._core".to_string());
+        let result = qualify_default_value("C.C1", Some(&module_ref), "pkg._core");
+        assert_eq!(result, "C.C1");
+    }
+
+    #[test]
+    fn test_qualify_default_value_different_module() {
+        // Different module: add qualification
+        let module_ref = ModuleRef::Named("pkg._core".to_string());
+        let result = qualify_default_value("C.C1", Some(&module_ref), "pkg");
+        assert_eq!(result, "_core.C.C1");
+    }
+
+    #[test]
+    fn test_qualify_default_value_different_submodules() {
+        // P2 fix: pkg.a._core and pkg.b._core should be treated as different modules
+        // (previously suffix matching would incorrectly treat them as same)
+        let module_ref = ModuleRef::Named("pkg.a._core".to_string());
+        let result = qualify_default_value("C.C1", Some(&module_ref), "pkg.b._core");
+        assert_eq!(result, "_core.C.C1");
+    }
+
+    #[test]
+    fn test_qualify_default_value_no_source_module() {
+        // No source module: return value unchanged
+        let result = qualify_default_value("None", None, "pkg._core");
+        assert_eq!(result, "None");
+    }
 }
