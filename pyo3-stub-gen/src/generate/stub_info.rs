@@ -728,4 +728,157 @@ mod tests {
             err_msg.contains("Pure Rust layout does not support multiple modules or submodules")
         );
     }
+
+    #[test]
+    fn test_validate_module_paths_skips_pure_layout() {
+        // Pure layout should skip validation entirely
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg".to_string(),
+            "/tmp".into(),
+            false, // pure layout
+            StubGenConfig::default(),
+        );
+
+        // Add a module with declared items - should be allowed in pure layout
+        builder.modules.insert(
+            "some_other_module".to_string(),
+            Module {
+                name: "some_other_module".to_string(),
+                doc: "Some documentation".to_string(),
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_module_paths_accepts_pyo3_modules() {
+        // Mixed layout should accept modules at or below module-name
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg.native".to_string(),
+            "/tmp".into(),
+            true, // mixed layout
+            StubGenConfig::default(),
+        );
+
+        // Module at module-name level
+        builder.modules.insert(
+            "pkg.native".to_string(),
+            Module {
+                name: "pkg.native".to_string(),
+                doc: "Native module".to_string(),
+                ..Default::default()
+            },
+        );
+
+        // Module below module-name
+        builder.modules.insert(
+            "pkg.native.submodule".to_string(),
+            Module {
+                name: "pkg.native.submodule".to_string(),
+                doc: "Submodule".to_string(),
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_module_paths_rejects_parent_module() {
+        // Mixed layout should reject items declared in parent of module-name
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg.native".to_string(),
+            "/tmp".into(),
+            true, // mixed layout
+            StubGenConfig::default(),
+        );
+
+        // Parent module with declared items - should be rejected
+        builder.modules.insert(
+            "pkg".to_string(),
+            Module {
+                name: "pkg".to_string(),
+                doc: "This should not be allowed".to_string(),
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(err_msg.contains("pkg"));
+        assert!(err_msg.contains("module_doc"));
+    }
+
+    #[test]
+    fn test_validate_module_paths_rejects_reexport_to_non_pyo3() {
+        use crate::generate::module::ModuleReExport;
+
+        // Mixed layout should reject re-exports to non-PyO3 modules
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg.native".to_string(),
+            "/tmp".into(),
+            true, // mixed layout
+            StubGenConfig::default(),
+        );
+
+        // Re-export to parent module - should be rejected
+        builder.modules.insert(
+            "pkg".to_string(),
+            Module {
+                name: "pkg".to_string(),
+                module_re_exports: vec![ModuleReExport {
+                    source_module: "pkg.native".to_string(),
+                    items: vec!["SomeClass".to_string()],
+                    use_wildcard_import: false,
+                }],
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(err_msg.contains("pkg"));
+        assert!(err_msg.contains("re-export"));
+    }
+
+    #[test]
+    fn test_validate_module_paths_allows_empty_parent_modules() {
+        // Empty parent modules (no declared items) should be allowed
+        // They are created by register_submodules() for submodule imports
+        let mut builder = StubInfoBuilder::from_project_root(
+            "pkg.native".to_string(),
+            "/tmp".into(),
+            true, // mixed layout
+            StubGenConfig::default(),
+        );
+
+        // Empty parent module - should be allowed (has_declared_items() returns false)
+        builder.modules.insert(
+            "pkg".to_string(),
+            Module {
+                name: "pkg".to_string(),
+                // No doc, no items, just exists
+                ..Default::default()
+            },
+        );
+
+        // PyO3 module with content
+        builder.modules.insert(
+            "pkg.native".to_string(),
+            Module {
+                name: "pkg.native".to_string(),
+                doc: "Native module".to_string(),
+                ..Default::default()
+            },
+        );
+
+        let result = builder.validate_module_paths();
+        assert!(result.is_ok());
+    }
 }
