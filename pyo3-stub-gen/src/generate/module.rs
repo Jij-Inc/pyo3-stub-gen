@@ -37,6 +37,55 @@ pub struct Module {
 }
 
 impl Module {
+    /// Check if the module has any items declared via `gen_stub_*` macros.
+    ///
+    /// This returns true if the module has classes, enums, functions, variables,
+    /// type aliases, explicit re-exports, or a module docstring. It returns false
+    /// if the module only has submodules (which are created automatically by
+    /// `register_submodules()`).
+    pub fn has_declared_items(&self) -> bool {
+        !self.doc.is_empty()
+            || !self.class.is_empty()
+            || !self.enum_.is_empty()
+            || !self.function.is_empty()
+            || !self.variables.is_empty()
+            || !self.type_aliases.is_empty()
+            || !self.module_re_exports.is_empty()
+            || !self.verbatim_all_entries.is_empty()
+    }
+
+    /// Get the names of all declared items in this module.
+    ///
+    /// Returns a list of item names that were declared via `gen_stub_*` macros.
+    pub fn declared_item_names(&self) -> Vec<String> {
+        let mut names = Vec::new();
+
+        if !self.doc.is_empty() {
+            names.push("module_doc".to_string());
+        }
+        for class in self.class.values() {
+            names.push(format!("class {}", class.name));
+        }
+        for enum_def in self.enum_.values() {
+            names.push(format!("enum {}", enum_def.name));
+        }
+        for func_name in self.function.keys() {
+            names.push(format!("function {}", func_name));
+        }
+        for var_name in self.variables.keys() {
+            names.push(format!("variable {}", var_name));
+        }
+        for alias_name in self.type_aliases.keys() {
+            names.push(format!("type_alias {}", alias_name));
+        }
+        for re_export in &self.module_re_exports {
+            names.push(format!("re-export from {}", re_export.source_module));
+        }
+
+        names.sort();
+        names
+    }
+
     /// Format module with configuration for type alias syntax, returning a String
     pub fn format_with_config(&self, use_type_statement: bool) -> String {
         use std::fmt::Write;

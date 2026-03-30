@@ -1,4 +1,23 @@
+import mixed
 from mixed import main_mod
+
+
+def test_init_py_reexports():
+    """Test re-exports from __init__.py"""
+    # Pure Python class and function
+    obj = mixed.SomeClass("test")
+    assert obj.greet() == "Hello, test!"
+    assert mixed.some_function(5) == 10
+
+    # Rust class and function
+    assert isinstance(mixed.A, type)
+    mixed.greet_main()
+
+
+def test_deep_nested_module():
+    """Test deeply nested submodule via add_submodule"""
+    result = main_mod.deep.nested.module.deep_function()
+    assert result == "Hello from deep nested module!"
 
 
 def test_main_mod():
