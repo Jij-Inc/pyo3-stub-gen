@@ -194,9 +194,17 @@ In mixed layout projects, it's common to define PyO3 classes and functions in a 
 
 ```rust
 use pyo3::prelude::*;
-use pyo3_stub_gen::{define_stub_info_gatherer, reexport_module_members};
+use pyo3_stub_gen::{derive::*, reexport_module_members, define_stub_info_gatherer};
 
-// ... define classes and functions with module = "pkg._core" ...
+#[gen_stub_pyclass]
+#[pyclass(module = "pkg._core")]
+struct MyClass {
+    value: i32,
+}
+
+#[gen_stub_pyfunction(module = "pkg._core")]
+#[pyfunction]
+fn my_function() -> i32 { 42 }
 
 #[pymodule]
 fn _core(m: &Bound<PyModule>) -> PyResult<()> {
