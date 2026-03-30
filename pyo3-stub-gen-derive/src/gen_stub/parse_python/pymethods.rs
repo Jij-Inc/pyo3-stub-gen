@@ -618,7 +618,7 @@ mod test {
         assert_eq!(py_methods_info.methods.len(), 1);
 
         let out = py_methods_info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r#"
+        insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyMethodsInfo {
             struct_id: std::any::TypeId::of::<Placeholder>,
             attrs: &[],
@@ -696,12 +696,15 @@ mod test {
                                 ]),
                                 type_refs: ::std::collections::HashMap::new(),
                             },
-                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                                fn _fmt() -> String {
-                                    "False".to_string()
-                                }
-                                _fmt
-                            }),
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                                value: {
+                                    fn _fmt() -> String {
+                                        "False".to_string()
+                                    }
+                                    _fmt
+                                },
+                                source_module: None,
+                            },
                         },
                         ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "latex",
@@ -715,12 +718,15 @@ mod test {
                                 ]),
                                 type_refs: ::std::collections::HashMap::new(),
                             },
-                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                                fn _fmt() -> String {
-                                    "None".to_string()
-                                }
-                                _fmt
-                            }),
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                                value: {
+                                    fn _fmt() -> String {
+                                        "None".to_string()
+                                    }
+                                    _fmt
+                                },
+                                source_module: None,
+                            },
                         },
                         ::pyo3_stub_gen::type_info::ParameterInfo {
                             name: "description",
@@ -734,12 +740,15 @@ mod test {
                                 ]),
                                 type_refs: ::std::collections::HashMap::new(),
                             },
-                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                                fn _fmt() -> String {
-                                    "None".to_string()
-                                }
-                                _fmt
-                            }),
+                            default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                                value: {
+                                    fn _fmt() -> String {
+                                        "None".to_string()
+                                    }
+                                    _fmt
+                                },
+                                source_module: None,
+                            },
                         },
                     ],
                     r#return: <Placeholder as pyo3_stub_gen::PyStubType>::type_output,
@@ -755,7 +764,7 @@ mod test {
             line: line!(),
             column: column!(),
         }
-        "#);
+        "###);
         Ok(())
     }
 

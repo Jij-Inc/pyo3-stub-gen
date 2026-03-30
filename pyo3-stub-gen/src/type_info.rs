@@ -21,7 +21,7 @@
 //! This process is done at runtime in [gen_stub](../../gen_stub) executable.
 //!
 
-use crate::{PyStubType, TypeInfo};
+use crate::{stub_type::ModuleRef, PyStubType, TypeInfo};
 use std::any::TypeId;
 
 /// Represents the target of type ignore comments
@@ -70,15 +70,20 @@ pub enum ParameterKind {
 pub enum ParameterDefault {
     /// No default value
     None,
-    /// Default value expression as a string
-    Expr(fn() -> String),
+    /// Default value with optional module qualification info
+    Expr {
+        /// Function returning the default value expression (without module prefix)
+        value: fn() -> String,
+        /// Source module of the type referenced in the default value
+        source_module: Option<fn() -> Option<ModuleRef>>,
+    },
 }
 
 impl PartialEq for ParameterDefault {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Expr(l), Self::Expr(r)) => {
+            (Self::Expr { value: l, .. }, Self::Expr { value: r, .. }) => {
                 let l_val = l();
                 let r_val = r();
                 l_val.eq(&r_val)

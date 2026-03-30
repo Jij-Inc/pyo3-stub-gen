@@ -21,6 +21,7 @@ jobs:
           - simple_name_collision
           - avoid_name_collision_with_submod
           - type-statement-alias
+          - hidden_module_docgen_test
         python-version:
           - "3.10"
           - "3.11"

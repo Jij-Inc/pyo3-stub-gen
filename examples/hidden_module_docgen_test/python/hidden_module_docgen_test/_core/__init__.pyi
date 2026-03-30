@@ -47,7 +47,7 @@ class C(enum.Enum):
 
 def create_a(x: builtins.int) -> A: ...
 
-def default_c(c: C = _core.C.C1) -> C:
+def default_c(c: C = C.C1) -> C:
     r"""
     A function with a default argument
     """
