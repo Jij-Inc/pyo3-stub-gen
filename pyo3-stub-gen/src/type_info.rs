@@ -83,10 +83,7 @@ impl PartialEq for ParameterDefault {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (
-                Self::Expr { value: l, .. },
-                Self::Expr { value: r, .. },
-            ) => {
+            (Self::Expr { value: l, .. }, Self::Expr { value: r, .. }) => {
                 let l_val = l();
                 let r_val = r();
                 l_val.eq(&r_val)
