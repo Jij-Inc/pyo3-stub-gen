@@ -177,6 +177,26 @@ pub fn is_hidden_module(module_name: &str) -> bool {
     module_name.split('.').any(|part| part.starts_with('_'))
 }
 
+/// Extract the public parent module name from a module path.
+///
+/// If the module path contains hidden components (starting with '_'),
+/// returns the path up to (but not including) the first hidden component.
+/// If no hidden components exist, returns the original name.
+///
+/// # Examples
+/// - `"generate_init_py._core"` → `"generate_init_py"`
+/// - `"pkg._internal.core"` → `"pkg"`
+/// - `"pkg.mod._hidden"` → `"pkg.mod"`
+/// - `"pkg.mod"` → `"pkg.mod"` (unchanged)
+/// - `"_hidden"` → `""` (empty, entire module is hidden)
+pub fn public_parent_module(module_name: &str) -> String {
+    let public_parts: Vec<&str> = module_name
+        .split('.')
+        .take_while(|part| !part.starts_with('_'))
+        .collect();
+    public_parts.join(".")
+}
+
 #[cfg(test)]
 mod tests {
     use super::prefix_stripper::*;
@@ -244,5 +264,17 @@ mod tests {
         assert!(is_hidden_module("_hidden.submodule"));
         assert!(!is_hidden_module("public"));
         assert!(!is_hidden_module("package.submodule"));
+    }
+
+    #[test]
+    fn test_public_parent_module() {
+        assert_eq!(
+            public_parent_module("generate_init_py._core"),
+            "generate_init_py"
+        );
+        assert_eq!(public_parent_module("pkg._internal.core"), "pkg");
+        assert_eq!(public_parent_module("pkg.mod._hidden"), "pkg.mod");
+        assert_eq!(public_parent_module("pkg.mod"), "pkg.mod");
+        assert_eq!(public_parent_module("_hidden"), "");
     }
 }

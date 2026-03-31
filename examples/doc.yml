@@ -2,31 +2,18 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+# Note
+# ====
+# Following commands do not work when using this Taskfile directly.
+# You should include this with `flatten: true`.
+
 tasks:
-  stub-gen:
-    desc: Generate stub file
-    cmds:
-      - cargo run --bin stub_gen
-
-  test:
-    desc: Run tests
-    cmds:
-      - uv sync --dev
-      - uv run pyright
-      - uvx ruff check
-      - uv run mypy --show-error-codes -p hidden_module_docgen_test
-      # stubtest is disabled for this example due to PyO3 nested submodule limitations
-      # See README.md for details
-      - uv run pyrefly check python
-      - uv run ty check python
-
   doc-build:
     desc: Build Sphinx documentation
     deps:
-      # stub-gen generates api_reference.json and pyo3_stub_gen_ext.py required by Sphinx
       - stub-gen
     cmds:
-      - uv run --with sphinx sphinx-build -W -b html docs docs/_build
+      - uv run sphinx-build -W -b html docs docs/_build
 
   doc-test:
     desc: Test that Sphinx documentation builds and objects.inv exists
@@ -37,3 +24,10 @@ tasks:
       - bash -c 'test -f docs/_build/objects.inv || (echo "ERROR objects.inv not generated" && exit 1)'
       - echo "✓ Documentation built successfully"
       - echo "✓ objects.inv generated for intersphinx"
+
+  doc-open:
+    desc: Open Sphinx documentation in browser
+    deps:
+      - doc-build
+    cmds:
+      - uv run python -m webbrowser "file://${PWD}/docs/_build/index.html"

@@ -1,8 +1,8 @@
 [package]
-name = "hidden_module_docgen_test"
+name = "generate_init_py"
 version.workspace = true
 edition.workspace = true
-description = "Example for Hidden Module Docgen Test"
+description = "Example for generate-init-py feature"
 publish = false
 
 [lib]

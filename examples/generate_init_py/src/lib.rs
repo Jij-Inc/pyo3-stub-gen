@@ -1,9 +1,9 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
 
-// Classes that can be cross-referenced between modules (from hidden_module_docgen_test_import_type)
+// Example classes and functions for generate-init-py demonstration
 #[gen_stub_pyclass]
-#[pyclass(module = "hidden_module_docgen_test._core")]
+#[pyclass(module = "generate_init_py._core")]
 #[derive(Debug, Clone)]
 pub struct A {
     x: usize,
@@ -17,13 +17,13 @@ impl A {
     }
 }
 
-#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction]
 fn create_a(x: usize) -> A {
     A { x }
 }
 
-#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction]
 pub fn wrap_opt_a(x: Option<A>) -> Option<A> {
     x
@@ -31,7 +31,7 @@ pub fn wrap_opt_a(x: Option<A>) -> Option<A> {
 
 // Class without explicit module specification
 #[gen_stub_pyclass]
-#[pyclass(module = "hidden_module_docgen_test._core")]
+#[pyclass(module = "generate_init_py._core")]
 #[derive(Debug, Clone)]
 struct B {
     x: usize,
@@ -39,7 +39,7 @@ struct B {
 
 // Class without explicit module specification
 #[gen_stub_pyclass_enum]
-#[pyclass(module = "hidden_module_docgen_test._core", frozen, eq)]
+#[pyclass(module = "generate_init_py._core", frozen, eq)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// This is the docstring for enum C.
 enum C {
@@ -59,7 +59,7 @@ impl B {
     }
 }
 
-#[gen_stub_pyfunction]
+#[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction]
 /// This is the docstring for {py:func}`great_main` function.
 ///
@@ -76,19 +76,19 @@ fn create_b(x: usize) -> B {
 }
 
 /// A function with a default argument
-#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction(signature = (c = C::C1))]
 fn default_c(c: C) -> C {
     c
 }
 
 // Type alias in mod_a to test wildcard re-export
-pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", ModAAlias = A);
+pyo3_stub_gen::type_alias!("generate_init_py._core", ModAAlias = A);
 
 // Type alias in mod_a to test wildcard re-export
-pyo3_stub_gen::type_alias!("hidden_module_docgen_test._core", AorB = A | B);
+pyo3_stub_gen::type_alias!("generate_init_py._core", AorB = A | B);
 
-#[gen_stub_pyfunction(module = "hidden_module_docgen_test._core")]
+#[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction(name = "greet_main")]
 #[doc = r#"
     This is the docstring fo {py:func}`great_main` function.
@@ -106,50 +106,28 @@ pub fn greet_main() {
     println!("Hello from main_mod!")
 }
 
+/// The main PyO3 module entry point (exposed as generate_init_py._core)
 #[pymodule]
-fn hidden_module_docgen_test(m: &Bound<PyModule>) -> PyResult<()> {
-    // Add classes and functions to main module
+fn _core(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<A>()?;
     m.add_class::<B>()?;
+    m.add_class::<C>()?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
     m.add_function(wrap_pyfunction!(create_b, m)?)?;
     m.add_function(wrap_pyfunction!(greet_main, m)?)?;
     m.add_function(wrap_pyfunction!(wrap_opt_a, m)?)?;
     m.add_function(wrap_pyfunction!(default_c, m)?)?;
-
-    // Add submodules
-    core(m)?;
     Ok(())
 }
 
-fn core(parent: &Bound<PyModule>) -> PyResult<()> {
-    let py = parent.py();
-    let sub = PyModule::new(py, "_core")?;
-    sub.add_class::<A>()?;
-    sub.add_class::<B>()?;
-    sub.add_class::<C>()?;
-    sub.add_function(wrap_pyfunction!(create_a, &sub)?)?;
-    sub.add_function(wrap_pyfunction!(create_b, &sub)?)?;
-    sub.add_function(wrap_pyfunction!(greet_main, &sub)?)?;
-    sub.add_function(wrap_pyfunction!(wrap_opt_a, &sub)?)?;
-    sub.add_function(wrap_pyfunction!(default_c, &sub)?)?;
-    parent.add_submodule(&sub)?;
-    Ok(())
-}
-
-// Test cases for __all__ generation escape hatches
-
-// Test 1: Wildcard re-export from the submodule
-pyo3_stub_gen::reexport_module_members!(
-    "hidden_module_docgen_test",
-    "hidden_module_docgen_test._core"
-);
+// Re-export all items from _core to the parent module
+pyo3_stub_gen::reexport_module_members!("generate_init_py", "generate_init_py._core");
 
 pyo3_stub_gen::module_doc!(
-    "hidden_module_docgen_test",
+    "generate_init_py",
     r#"
-    This is the main module docstring for hidden_module_docgen_test.
-    These lines are trimmed appropriately.
+    This is the main module docstring for generate_init_py.
+    This example demonstrates the generate-init-py feature.
 
         This must be indented by four spaces.
     "#

@@ -3,7 +3,7 @@
 
 import builtins
 import typing
-from mixed.main_mod.mod_a import *
+from mixed.main_mod.mod_a import C, ModAAlias, create_c, greet_a, test_module_with_python
 from mixed.main_mod.mod_b import D, greet_b
 from . import deep
 from . import int

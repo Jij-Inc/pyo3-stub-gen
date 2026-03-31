@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 members = [
     "avoid-name-collision-with-submod",
     "feature-gated",
-    "hidden-module-docgen-test",
+    "generate-init-py",
     "mixed",
     "pure",
     "simple-name-collision",
@@ -152,9 +152,9 @@ name = "feature-gated"
 source = { editable = "examples/feature_gated" }
 
 [[package]]
-name = "hidden-module-docgen-test"
+name = "generate-init-py"
 version = "0.1"
-source = { editable = "examples/hidden_module_docgen_test" }
+source = { editable = "examples/generate_init_py" }
 
 [[package]]
 name = "idna"

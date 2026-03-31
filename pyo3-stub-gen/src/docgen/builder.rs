@@ -48,7 +48,6 @@ pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
     export_resolver: ExportResolver<'a>,
     export_map: BTreeMap<String, String>,
-    default_module_name: String,
 }
 
 impl<'a> DocPackageBuilder<'a> {
@@ -56,19 +55,10 @@ impl<'a> DocPackageBuilder<'a> {
         let export_resolver = ExportResolver::new(&stub_info.modules);
         let export_map = export_resolver.build_export_map();
 
-        // Get the default module name from the first module (they all share the same default_module_name)
-        let default_module_name = stub_info
-            .modules
-            .values()
-            .next()
-            .map(|m| m.default_module_name.clone())
-            .unwrap_or_default();
-
         Self {
             stub_info,
             export_resolver,
             export_map,
-            default_module_name,
         }
     }
 
@@ -104,7 +94,7 @@ impl<'a> DocPackageBuilder<'a> {
         }
 
         Ok(DocPackage {
-            name: self.default_module_name.clone(),
+            name: self.stub_info.project_name.clone(),
             modules,
             export_map,
             config: json_config,
@@ -575,7 +565,7 @@ impl<'a> DocPackageBuilder<'a> {
                     (link_target.fqn.clone(), module.clone())
                 } else {
                     // If not found, try to extract the type name and look for it under other modules
-                    // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
+                    // e.g., "pkg._core.A" -> try "pkg.A"
                     if let Some(type_name) = link_target.fqn.split('.').next_back() {
                         // Try each module in export_map to find a match
                         if let Some((fqn, module)) = self

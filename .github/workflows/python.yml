@@ -21,7 +21,7 @@ jobs:
           - simple_name_collision
           - avoid_name_collision_with_submod
           - type-statement-alias
-          - hidden_module_docgen_test
+          - generate_init_py
         python-version:
           - "3.10"
           - "3.11"
@@ -49,7 +49,7 @@ jobs:
         crate:
           - pure
           - mixed
-          - hidden_module_docgen_test
+          - generate_init_py
         python-version:
           - "3.13" # Only test on latest Python
     steps:

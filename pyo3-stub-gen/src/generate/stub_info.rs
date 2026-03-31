@@ -3,7 +3,7 @@ use crate::{
     pyproject::{PyProject, StubGenConfig},
     type_info::*,
 };
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
@@ -20,6 +20,11 @@ pub struct StubInfo {
     pub config: StubGenConfig,
     /// Directory containing pyproject.toml (for relative path calculations)
     pub pyproject_dir: Option<PathBuf>,
+    /// The default module name (from `module-name` in pyproject.toml or `#[pymodule]`)
+    pub default_module_name: String,
+    /// The project name (from `project.name` in pyproject.toml)
+    /// Used for documentation generation as the package display name
+    pub project_name: String,
 }
 
 impl StubInfo {
@@ -73,41 +78,78 @@ impl StubInfo {
             );
         }
 
-        // Generate stub files
         for (name, module) in self.modules.iter() {
+            // Skip empty modules (nothing to generate)
+            if module.is_empty() {
+                continue;
+            }
+
             // Convert dashes to underscores for Python compatibility
             let normalized_name = name.replace("-", "_");
             let path = normalized_name.replace(".", "/");
 
-            // Determine destination path based solely on layout type
-            let dest = if self.is_mixed_layout {
-                // Mixed Python/Rust: Always use directory-based structure
-                self.python_root.join(&path).join("__init__.pyi")
+            if self.is_pyo3_generated(name) {
+                // PyO3 module: generate .pyi stub file
+                let dest = if self.is_mixed_layout {
+                    self.python_root.join(&path).join("__init__.pyi")
+                } else {
+                    // Pure Rust: use single file at root
+                    let package_name = normalized_name
+                        .split('.')
+                        .next()
+                        .filter(|s| !s.is_empty())
+                        .ok_or_else(|| {
+                            anyhow::anyhow!(
+                                "Module name is empty after normalization: original name was `{name}`"
+                            )
+                        })?;
+                    self.python_root.join(format!("{package_name}.pyi"))
+                };
+
+                self.write_stub_file(&dest, module)?;
             } else {
-                // Pure Rust: Always use single file at root (use first segment of module name)
-                let package_name = normalized_name
-                    .split('.')
-                    .next()
-                    .filter(|s| !s.is_empty())
-                    .ok_or_else(|| {
-                        anyhow::anyhow!(
-                            "Module name is empty after normalization: original name was `{name}`"
-                        )
-                    })?;
-                self.python_root.join(format!("{package_name}.pyi"))
-            };
+                // Pure Python module: needs __init__.py generation
+                if !module.is_init_py_compatible() {
+                    // Has PyO3 items but not under module-name path
+                    anyhow::bail!(
+                        "Module '{}' has PyO3 items (classes, functions, etc.) but is not under \
+                         the PyO3 module path '{}'. Either move these items to a module under '{}', \
+                         or check your module path configuration.",
+                        name,
+                        self.default_module_name,
+                        self.default_module_name
+                    );
+                }
 
-            let dir = dest.parent().context("Cannot get parent directory")?;
-            if !dir.exists() {
-                fs::create_dir_all(dir)?;
+                if !self.config.generate_init_py.is_enabled_for(name) {
+                    anyhow::bail!(
+                        "Module '{}' is not a PyO3 module and requires `generate-init-py` to be enabled. \
+                         Add `generate-init-py = true` or `generate-init-py = [\"{}\"]` to \
+                         [tool.pyo3-stub-gen] in pyproject.toml.",
+                        name,
+                        name
+                    );
+                }
+
+                // Generate both __init__.py and __init__.pyi
+                let dir = self.python_root.join(&path);
+                if !dir.exists() {
+                    fs::create_dir_all(&dir)?;
+                }
+
+                // Generate __init__.py
+                let init_py_dest = dir.join("__init__.py");
+                let init_py_content = module.format_init_py();
+                fs::write(&init_py_dest, init_py_content)?;
+                log::info!(
+                    "Generate __init__.py for module `{name}` at {dest}",
+                    dest = init_py_dest.display()
+                );
+
+                // Generate __init__.pyi
+                let stub_dest = dir.join("__init__.pyi");
+                self.write_stub_file(&stub_dest, module)?;
             }
-
-            let content = module.format_with_config(self.config.use_type_statement);
-            fs::write(&dest, content)?;
-            log::info!(
-                "Generate stub file of a module `{name}` at {dest}",
-                dest = dest.display()
-            );
         }
 
         // Generate documentation if configured
@@ -116,6 +158,40 @@ impl StubInfo {
         }
 
         Ok(())
+    }
+
+    fn write_stub_file(&self, dest: &std::path::Path, module: &module::Module) -> Result<()> {
+        let dir = dest.parent().context("Cannot get parent directory")?;
+        if !dir.exists() {
+            fs::create_dir_all(dir)?;
+        }
+
+        let content = module.format_with_config(self.config.use_type_statement);
+        fs::write(dest, content)?;
+        log::info!(
+            "Generate stub file of a module `{}` at {dest}",
+            module.name,
+            dest = dest.display()
+        );
+        Ok(())
+    }
+
+    /// Check if a module is part of the PyO3 shared library.
+    ///
+    /// In mixed layout, modules at or below `module-name` are considered part of the
+    /// PyO3 shared library. Modules above `module-name` are Pure Python modules.
+    fn is_pyo3_generated(&self, module: &str) -> bool {
+        // In pure Rust layout, all modules are PyO3-generated
+        if !self.is_mixed_layout {
+            return true;
+        }
+
+        // In mixed layout, only modules at or below module-name are PyO3-generated
+        let normalized_module = module.replace("-", "_");
+        let normalized_module_name = self.default_module_name.replace("-", "_");
+
+        normalized_module == normalized_module_name
+            || normalized_module.starts_with(&format!("{}.", normalized_module_name))
     }
 
     fn generate_docs(&self, config: &crate::docgen::DocGenConfig) -> Result<()> {
@@ -149,6 +225,7 @@ impl StubInfo {
 struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
+    project_name: String,
     python_root: PathBuf,
     is_mixed_layout: bool,
     config: StubGenConfig,
@@ -164,6 +241,7 @@ impl StubInfoBuilder {
         Self {
             modules: BTreeMap::new(),
             default_module_name: pyproject.module_name().to_string(),
+            project_name: pyproject.project.name.clone(),
             python_root,
             is_mixed_layout,
             config,
@@ -176,9 +254,17 @@ impl StubInfoBuilder {
         is_mixed_layout: bool,
         config: StubGenConfig,
     ) -> Self {
+        // Derive project name from default_module_name (take root component)
+        let project_name = default_module_name
+            .split('.')
+            .next()
+            .unwrap_or(&default_module_name)
+            .to_string();
+
         Self {
             modules: BTreeMap::new(),
             default_module_name,
+            project_name,
             python_root: project_root,
             is_mixed_layout,
             config,
@@ -251,46 +337,6 @@ impl StubInfoBuilder {
             || normalized_module.starts_with(&format!("{}.", normalized_module_name))
     }
 
-    /// Validate that all modules with declared items are PyO3-generated.
-    ///
-    /// In mixed layout, items should only be declared for modules at or below `module-name`.
-    /// Declaring items for modules above `module-name` (i.e., pure Python modules) is an error
-    /// because it would generate stub files that conflict with user's `__init__.py`.
-    fn validate_module_paths(&self) -> Result<()> {
-        if !self.is_mixed_layout {
-            return Ok(());
-        }
-
-        let mut invalid_modules: Vec<(&str, Vec<String>)> = Vec::new();
-        for (module_name, module) in &self.modules {
-            if module.has_declared_items() && !self.is_pyo3_generated(module_name) {
-                invalid_modules.push((module_name, module.declared_item_names()));
-            }
-        }
-
-        if !invalid_modules.is_empty() {
-            invalid_modules.sort_by_key(|(name, _)| *name);
-
-            let mut message = format!(
-                "Items declared for non-PyO3 modules.\n\
-                 In mixed layout with module-name = \"{}\", \
-                 gen_stub_* macros should only use modules at or below this path.\n\n",
-                self.default_module_name
-            );
-
-            for (module_name, items) in &invalid_modules {
-                message.push_str(&format!("  {}:\n", module_name));
-                for item in items {
-                    message.push_str(&format!("    - {}\n", item));
-                }
-            }
-
-            bail!("{}", message);
-        }
-
-        Ok(())
-    }
-
     fn add_class(&mut self, info: &PyClassInfo) {
         let mut class_def = ClassDef::from(info);
         class_def.resolve_default_modules(&self.default_module_name);
@@ -360,7 +406,6 @@ impl StubInfoBuilder {
     }
 
     fn add_module_export(&mut self, info: &ReexportModuleMembers) {
-        let use_wildcard = info.items.is_none();
         let items = info
             .items
             .map(|items| items.iter().map(|s| s.to_string()).collect())
@@ -371,7 +416,6 @@ impl StubInfoBuilder {
             .push(ModuleReExport {
                 source_module: info.source_module.to_string(),
                 items,
-                use_wildcard_import: use_wildcard,
             });
     }
 
@@ -393,7 +437,7 @@ impl StubInfoBuilder {
 
         for (module_name, module) in &self.modules {
             for (idx, re_export) in module.module_re_exports.iter().enumerate() {
-                if re_export.use_wildcard_import && re_export.items.is_empty() {
+                if re_export.items.is_empty() {
                     // Wildcard - resolve items for __all__
                     if let Some(source_mod) = self.modules.get(&re_export.source_module) {
                         // Internal module - collect all public items that would be in __all__
@@ -605,9 +649,6 @@ impl StubInfoBuilder {
         }
         self.register_submodules();
 
-        // Validate that all modules with declared items are PyO3-generated
-        self.validate_module_paths()?;
-
         // Resolve wildcard re-exports
         self.resolve_wildcard_re_exports()?;
 
@@ -617,6 +658,8 @@ impl StubInfoBuilder {
             is_mixed_layout: self.is_mixed_layout,
             config: self.config,
             pyproject_dir: None, // Will be set by from_pyproject_toml()
+            default_module_name: self.default_module_name,
+            project_name: self.project_name,
         })
     }
 }
@@ -702,6 +745,8 @@ mod tests {
                     Module {
                         name: "mymodule".to_string(),
                         default_module_name: "mymodule".to_string(),
+                        // Add some content so module is not empty
+                        doc: "Test module".to_string(),
                         ..Default::default()
                     },
                 );
@@ -710,6 +755,8 @@ mod tests {
                     Module {
                         name: "mymodule.sub".to_string(),
                         default_module_name: "mymodule".to_string(),
+                        // Add some content so module is not empty
+                        doc: "Test submodule".to_string(),
                         ..Default::default()
                     },
                 );
@@ -719,6 +766,8 @@ mod tests {
             is_mixed_layout: false,
             config: StubGenConfig::default(),
             pyproject_dir: None,
+            default_module_name: "mymodule".to_string(),
+            project_name: "mymodule".to_string(),
         };
 
         let result = stub_info.generate();
@@ -727,158 +776,5 @@ mod tests {
         assert!(
             err_msg.contains("Pure Rust layout does not support multiple modules or submodules")
         );
-    }
-
-    #[test]
-    fn test_validate_module_paths_skips_pure_layout() {
-        // Pure layout should skip validation entirely
-        let mut builder = StubInfoBuilder::from_project_root(
-            "pkg".to_string(),
-            "/tmp".into(),
-            false, // pure layout
-            StubGenConfig::default(),
-        );
-
-        // Add a module with declared items - should be allowed in pure layout
-        builder.modules.insert(
-            "some_other_module".to_string(),
-            Module {
-                name: "some_other_module".to_string(),
-                doc: "Some documentation".to_string(),
-                ..Default::default()
-            },
-        );
-
-        let result = builder.validate_module_paths();
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_validate_module_paths_accepts_pyo3_modules() {
-        // Mixed layout should accept modules at or below module-name
-        let mut builder = StubInfoBuilder::from_project_root(
-            "pkg.native".to_string(),
-            "/tmp".into(),
-            true, // mixed layout
-            StubGenConfig::default(),
-        );
-
-        // Module at module-name level
-        builder.modules.insert(
-            "pkg.native".to_string(),
-            Module {
-                name: "pkg.native".to_string(),
-                doc: "Native module".to_string(),
-                ..Default::default()
-            },
-        );
-
-        // Module below module-name
-        builder.modules.insert(
-            "pkg.native.submodule".to_string(),
-            Module {
-                name: "pkg.native.submodule".to_string(),
-                doc: "Submodule".to_string(),
-                ..Default::default()
-            },
-        );
-
-        let result = builder.validate_module_paths();
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_validate_module_paths_rejects_parent_module() {
-        // Mixed layout should reject items declared in parent of module-name
-        let mut builder = StubInfoBuilder::from_project_root(
-            "pkg.native".to_string(),
-            "/tmp".into(),
-            true, // mixed layout
-            StubGenConfig::default(),
-        );
-
-        // Parent module with declared items - should be rejected
-        builder.modules.insert(
-            "pkg".to_string(),
-            Module {
-                name: "pkg".to_string(),
-                doc: "This should not be allowed".to_string(),
-                ..Default::default()
-            },
-        );
-
-        let result = builder.validate_module_paths();
-        assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
-        assert!(err_msg.contains("pkg"));
-        assert!(err_msg.contains("module_doc"));
-    }
-
-    #[test]
-    fn test_validate_module_paths_rejects_reexport_to_non_pyo3() {
-        use crate::generate::module::ModuleReExport;
-
-        // Mixed layout should reject re-exports to non-PyO3 modules
-        let mut builder = StubInfoBuilder::from_project_root(
-            "pkg.native".to_string(),
-            "/tmp".into(),
-            true, // mixed layout
-            StubGenConfig::default(),
-        );
-
-        // Re-export to parent module - should be rejected
-        builder.modules.insert(
-            "pkg".to_string(),
-            Module {
-                name: "pkg".to_string(),
-                module_re_exports: vec![ModuleReExport {
-                    source_module: "pkg.native".to_string(),
-                    items: vec!["SomeClass".to_string()],
-                    use_wildcard_import: false,
-                }],
-                ..Default::default()
-            },
-        );
-
-        let result = builder.validate_module_paths();
-        assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
-        assert!(err_msg.contains("pkg"));
-        assert!(err_msg.contains("re-export"));
-    }
-
-    #[test]
-    fn test_validate_module_paths_allows_empty_parent_modules() {
-        // Empty parent modules (no declared items) should be allowed
-        // They are created by register_submodules() for submodule imports
-        let mut builder = StubInfoBuilder::from_project_root(
-            "pkg.native".to_string(),
-            "/tmp".into(),
-            true, // mixed layout
-            StubGenConfig::default(),
-        );
-
-        // Empty parent module - should be allowed (has_declared_items() returns false)
-        builder.modules.insert(
-            "pkg".to_string(),
-            Module {
-                name: "pkg".to_string(),
-                // No doc, no items, just exists
-                ..Default::default()
-            },
-        );
-
-        // PyO3 module with content
-        builder.modules.insert(
-            "pkg.native".to_string(),
-            Module {
-                name: "pkg.native".to_string(),
-                doc: "Native module".to_string(),
-                ..Default::default()
-            },
-        );
-
-        let result = builder.validate_module_paths();
-        assert!(result.is_ok());
     }
 }

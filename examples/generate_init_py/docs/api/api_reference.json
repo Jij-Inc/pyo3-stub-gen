@@ -1,9 +1,9 @@
 {
-  "name": "hidden_module_docgen_test",
+  "name": "generate_init_py",
   "modules": {
-    "hidden_module_docgen_test": {
-      "name": "hidden_module_docgen_test",
-      "doc": "This is the main module docstring for hidden_module_docgen_test.\nThese lines are trimmed appropriately.\n\n    This must be indented by four spaces.",
+    "generate_init_py": {
+      "name": "generate_init_py",
+      "doc": "This is the main module docstring for generate_init_py.\nThis example demonstrates the generate-init-py feature.\n\n    This must be indented by four spaces.",
       "items": [
         {
           "kind": "Class",
@@ -102,8 +102,8 @@
               "return_type": {
                 "display": "A",
                 "link_target": {
-                  "fqn": "hidden_module_docgen_test.A",
-                  "doc_module": "hidden_module_docgen_test",
+                  "fqn": "generate_init_py.A",
+                  "doc_module": "generate_init_py",
                   "kind": "Class",
                   "attribute": null
                 },
@@ -134,8 +134,8 @@
               "return_type": {
                 "display": "B",
                 "link_target": {
-                  "fqn": "hidden_module_docgen_test.B",
-                  "doc_module": "hidden_module_docgen_test",
+                  "fqn": "generate_init_py.B",
+                  "doc_module": "generate_init_py",
                   "kind": "Class",
                   "attribute": null
                 },
@@ -158,8 +158,8 @@
                   "type_": {
                     "display": "C",
                     "link_target": {
-                      "fqn": "hidden_module_docgen_test.C",
-                      "doc_module": "hidden_module_docgen_test",
+                      "fqn": "generate_init_py.C",
+                      "doc_module": "generate_init_py",
                       "kind": "Class",
                       "attribute": null
                     },
@@ -173,8 +173,8 @@
                         "text": "C.C1",
                         "offset": 0,
                         "link_target": {
-                          "fqn": "hidden_module_docgen_test.C.C1",
-                          "doc_module": "hidden_module_docgen_test",
+                          "fqn": "generate_init_py.C.C1",
+                          "doc_module": "generate_init_py",
                           "kind": "Class",
                           "attribute": "C1"
                         }
@@ -186,8 +186,8 @@
               "return_type": {
                 "display": "C",
                 "link_target": {
-                  "fqn": "hidden_module_docgen_test.C",
-                  "doc_module": "hidden_module_docgen_test",
+                  "fqn": "generate_init_py.C",
+                  "doc_module": "generate_init_py",
                   "kind": "Class",
                   "attribute": null
                 },
@@ -231,8 +231,8 @@
                       {
                         "display": "A",
                         "link_target": {
-                          "fqn": "hidden_module_docgen_test.A",
-                          "doc_module": "hidden_module_docgen_test",
+                          "fqn": "generate_init_py.A",
+                          "doc_module": "generate_init_py",
                           "kind": "Class",
                           "attribute": null
                         },
@@ -250,8 +250,8 @@
                   {
                     "display": "A",
                     "link_target": {
-                      "fqn": "hidden_module_docgen_test.A",
-                      "doc_module": "hidden_module_docgen_test",
+                      "fqn": "generate_init_py.A",
+                      "doc_module": "generate_init_py",
                       "kind": "Class",
                       "attribute": null
                     },
@@ -275,8 +275,8 @@
               {
                 "display": "A",
                 "link_target": {
-                  "fqn": "hidden_module_docgen_test.A",
-                  "doc_module": "hidden_module_docgen_test",
+                  "fqn": "generate_init_py.A",
+                  "doc_module": "generate_init_py",
                   "kind": "Class",
                   "attribute": null
                 },
@@ -285,8 +285,8 @@
               {
                 "display": "B",
                 "link_target": {
-                  "fqn": "hidden_module_docgen_test.B",
-                  "doc_module": "hidden_module_docgen_test",
+                  "fqn": "generate_init_py.B",
+                  "doc_module": "generate_init_py",
                   "kind": "Class",
                   "attribute": null
                 },
@@ -302,8 +302,8 @@
           "definition": {
             "display": "A",
             "link_target": {
-              "fqn": "hidden_module_docgen_test.A",
-              "doc_module": "hidden_module_docgen_test",
+              "fqn": "generate_init_py.A",
+              "doc_module": "generate_init_py",
               "kind": "Class",
               "attribute": null
             },
@@ -315,22 +315,22 @@
     }
   },
   "export_map": {
-    "hidden_module_docgen_test.A": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.AorB": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.B": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.C": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.ModAAlias": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.create_a": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.create_b": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.default_c": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.greet_main": "hidden_module_docgen_test",
-    "hidden_module_docgen_test.wrap_opt_a": "hidden_module_docgen_test"
+    "generate_init_py.A": "generate_init_py",
+    "generate_init_py.AorB": "generate_init_py",
+    "generate_init_py.B": "generate_init_py",
+    "generate_init_py.C": "generate_init_py",
+    "generate_init_py.ModAAlias": "generate_init_py",
+    "generate_init_py.create_a": "generate_init_py",
+    "generate_init_py.create_b": "generate_init_py",
+    "generate_init_py.default_c": "generate_init_py",
+    "generate_init_py.greet_main": "generate_init_py",
+    "generate_init_py.wrap_opt_a": "generate_init_py"
   },
   "config": {
     "output-dir": "docs/api",
     "json-output": "api_reference.json",
     "separate-pages": true,
-    "intro-message": "Re-export from hidden module should appear in the documentation.",
+    "intro-message": "Example for generate-init-py feature.",
     "index-title": null,
     "contents-table": true
   }
