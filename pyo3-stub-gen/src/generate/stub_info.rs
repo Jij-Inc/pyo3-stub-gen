@@ -131,13 +131,12 @@ impl StubInfo {
                     );
                 }
 
-                // Generate both __init__.py and __init__.pyi
+                // Generate __init__.py only (no .pyi - types resolve through re-exports)
                 let dir = self.python_root.join(&path);
                 if !dir.exists() {
                     fs::create_dir_all(&dir)?;
                 }
 
-                // Generate __init__.py
                 let init_py_dest = dir.join("__init__.py");
                 let init_py_content = module.format_init_py();
                 fs::write(&init_py_dest, init_py_content)?;
@@ -145,10 +144,6 @@ impl StubInfo {
                     "Generate __init__.py for module `{name}` at {dest}",
                     dest = init_py_dest.display()
                 );
-
-                // Generate __init__.pyi
-                let stub_dest = dir.join("__init__.pyi");
-                self.write_stub_file(&stub_dest, module)?;
             }
         }
 
