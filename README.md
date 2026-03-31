@@ -220,9 +220,14 @@ define_stub_info_gatherer!(stub_info);
 ```
 
 This macro:
-- Includes re-exported items in the parent module's stub file
+- Includes re-exported items in the target module's stub file (adds `from source_module import ...`)
 - Provides re-export information to documentation generation
 - Serves as the single source of truth for what gets re-exported
+
+The macro can be used between PyO3-generated modules, or from a PyO3 module to a pure Python parent module:
+
+- **PyO3 → PyO3**: The stub file gets `from .submod import ...`. You must implement the re-export in your `#[pymodule]` function manually.
+- **PyO3 → Pure Python parent**: Requires `generate-init-py` to be enabled (see below). Otherwise, `stub_gen` will fail because it cannot generate a stub for a pure Python module without also generating its `__init__.py`.
 
 ### Auto-generating `__init__.py`
 
