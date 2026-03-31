@@ -48,7 +48,6 @@ pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
     export_resolver: ExportResolver<'a>,
     export_map: BTreeMap<String, String>,
-    default_module_name: String,
 }
 
 impl<'a> DocPackageBuilder<'a> {
@@ -56,19 +55,10 @@ impl<'a> DocPackageBuilder<'a> {
         let export_resolver = ExportResolver::new(&stub_info.modules);
         let export_map = export_resolver.build_export_map();
 
-        // Get the default module name from the first module (they all share the same default_module_name)
-        let default_module_name = stub_info
-            .modules
-            .values()
-            .next()
-            .map(|m| m.default_module_name.clone())
-            .unwrap_or_default();
-
         Self {
             stub_info,
             export_resolver,
             export_map,
-            default_module_name,
         }
     }
 
@@ -103,17 +93,8 @@ impl<'a> DocPackageBuilder<'a> {
             json_config.output_dir = PathBuf::from(relative_posix);
         }
 
-        // Use public parent module name for the package name
-        // e.g., "generate_init_py._core" → "generate_init_py"
-        let package_name = crate::docgen::util::public_parent_module(&self.default_module_name);
-        let package_name = if package_name.is_empty() {
-            self.default_module_name.clone()
-        } else {
-            package_name
-        };
-
         Ok(DocPackage {
-            name: package_name,
+            name: self.stub_info.project_name.clone(),
             modules,
             export_map,
             config: json_config,

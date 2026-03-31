@@ -22,6 +22,9 @@ pub struct StubInfo {
     pub pyproject_dir: Option<PathBuf>,
     /// The default module name (from `module-name` in pyproject.toml or `#[pymodule]`)
     pub default_module_name: String,
+    /// The project name (from `project.name` in pyproject.toml)
+    /// Used for documentation generation as the package display name
+    pub project_name: String,
 }
 
 impl StubInfo {
@@ -222,6 +225,7 @@ impl StubInfo {
 struct StubInfoBuilder {
     modules: BTreeMap<String, Module>,
     default_module_name: String,
+    project_name: String,
     python_root: PathBuf,
     is_mixed_layout: bool,
     config: StubGenConfig,
@@ -237,6 +241,7 @@ impl StubInfoBuilder {
         Self {
             modules: BTreeMap::new(),
             default_module_name: pyproject.module_name().to_string(),
+            project_name: pyproject.project.name.clone(),
             python_root,
             is_mixed_layout,
             config,
@@ -249,9 +254,17 @@ impl StubInfoBuilder {
         is_mixed_layout: bool,
         config: StubGenConfig,
     ) -> Self {
+        // Derive project name from default_module_name (take root component)
+        let project_name = default_module_name
+            .split('.')
+            .next()
+            .unwrap_or(&default_module_name)
+            .to_string();
+
         Self {
             modules: BTreeMap::new(),
             default_module_name,
+            project_name,
             python_root: project_root,
             is_mixed_layout,
             config,
@@ -646,6 +659,7 @@ impl StubInfoBuilder {
             config: self.config,
             pyproject_dir: None, // Will be set by from_pyproject_toml()
             default_module_name: self.default_module_name,
+            project_name: self.project_name,
         })
     }
 }
@@ -753,6 +767,7 @@ mod tests {
             config: StubGenConfig::default(),
             pyproject_dir: None,
             default_module_name: "mymodule".to_string(),
+            project_name: "mymodule".to_string(),
         };
 
         let result = stub_info.generate();
