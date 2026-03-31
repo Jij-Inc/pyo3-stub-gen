@@ -134,10 +134,18 @@ impl GenerateInitPy {
     /// - `All(true)`: Returns `true` for any module
     /// - `All(false)`: Returns `false` for any module
     /// - `Modules(list)`: Returns `true` if the module is in the list
+    ///
+    /// Module names are normalized (dashes to underscores) before comparison
+    /// to match Python's module name requirements.
     pub fn is_enabled_for(&self, module_name: &str) -> bool {
         match self {
             GenerateInitPy::All(enabled) => *enabled,
-            GenerateInitPy::Modules(modules) => modules.iter().any(|m| m == module_name),
+            GenerateInitPy::Modules(modules) => {
+                let normalized_name = module_name.replace('-', "_");
+                modules
+                    .iter()
+                    .any(|m| m.replace('-', "_") == normalized_name)
+            }
         }
     }
 
@@ -278,6 +286,26 @@ mod tests {
         assert!(config.generate_init_py.is_enabled());
         assert!(config.generate_init_py.is_enabled_for("pkg"));
         assert!(config.generate_init_py.is_enabled_for("pkg.submod"));
+        assert!(!config.generate_init_py.is_enabled_for("other"));
+    }
+
+
+    #[test]
+    fn test_generate_init_py_dash_underscore_normalization() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = ["my-package", "my_package.sub-mod"]
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        // Dashes in config should match underscores in module names
+        assert!(config.generate_init_py.is_enabled_for("my_package"));
+        assert!(config.generate_init_py.is_enabled_for("my-package"));
+        assert!(config.generate_init_py.is_enabled_for("my_package.sub_mod"));
+        assert!(config.generate_init_py.is_enabled_for("my_package.sub-mod"));
         assert!(!config.generate_init_py.is_enabled_for("other"));
     }
 
