@@ -36,21 +36,33 @@ pub struct Module {
 }
 
 impl Module {
-    /// Check if the module has any items declared via `gen_stub_*` macros.
+    /// Check if this module has no content to generate.
     ///
-    /// This returns true if the module has classes, enums, functions, variables,
-    /// type aliases, explicit re-exports, or a module docstring. It returns false
-    /// if the module only has submodules (which are created automatically by
-    /// `register_submodules()`).
-    pub fn has_declared_items(&self) -> bool {
-        !self.doc.is_empty()
-            || !self.class.is_empty()
-            || !self.enum_.is_empty()
-            || !self.function.is_empty()
-            || !self.variables.is_empty()
-            || !self.type_aliases.is_empty()
-            || !self.module_re_exports.is_empty()
-            || !self.verbatim_all_entries.is_empty()
+    /// Returns true if the module has no classes, enums, functions, variables,
+    /// type aliases, re-exports, docstrings, or verbatim entries.
+    /// Modules that are empty should be skipped during generation.
+    pub fn is_empty(&self) -> bool {
+        self.doc.is_empty()
+            && self.class.is_empty()
+            && self.enum_.is_empty()
+            && self.function.is_empty()
+            && self.variables.is_empty()
+            && self.type_aliases.is_empty()
+            && self.module_re_exports.is_empty()
+            && self.verbatim_all_entries.is_empty()
+    }
+
+    /// Check if this module can have `__init__.py` generated.
+    ///
+    /// Returns true if the module has no PyO3-generated items (classes, enums,
+    /// functions, variables, type aliases). Such modules can only contain
+    /// re-exports and docstrings, which can be represented in `__init__.py`.
+    pub fn is_init_py_compatible(&self) -> bool {
+        self.class.is_empty()
+            && self.enum_.is_empty()
+            && self.function.is_empty()
+            && self.variables.is_empty()
+            && self.type_aliases.is_empty()
     }
 
     /// Get the names of all declared items in this module.
@@ -374,25 +386,6 @@ impl Module {
         }
 
         output
-    }
-
-    /// Check if this module has re-exports (and thus can generate `__init__.py`).
-    pub fn has_re_exports(&self) -> bool {
-        !self.module_re_exports.is_empty()
-    }
-
-    /// Check if this module only has re-exports and/or docstrings, but no PyO3-generated items.
-    ///
-    /// This is used by `generate-init-py` validation: Pure Python parent modules that only
-    /// have re-exports (via `reexport_module_members!`) and/or module docstrings (via `module_doc!`)
-    /// are allowed when `generate-init-py` is enabled for them.
-    pub fn has_only_reexports_or_doc(&self) -> bool {
-        self.class.is_empty()
-            && self.enum_.is_empty()
-            && self.function.is_empty()
-            && self.variables.is_empty()
-            && self.type_aliases.is_empty()
-            && self.verbatim_all_entries.is_empty()
     }
 
     fn write_all_list(&self, f: &mut fmt::Formatter) -> fmt::Result {
