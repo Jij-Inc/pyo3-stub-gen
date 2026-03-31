@@ -273,10 +273,11 @@ impl Module {
         output
     }
 
-    /// Collect all items for the `__all__` list.
+    /// Collect all items for the `__all__` list in `.pyi` stub files.
     ///
-    /// This is shared between `__init__.pyi` and `__init__.py` generation
-    /// to ensure consistency.
+    /// This collects public items from classes, enums, functions, variables,
+    /// type aliases, submodules, re-exports, and verbatim entries.
+    /// Items starting with `_` are excluded unless added via `export_verbatim!`.
     fn collect_all_items(&self) -> BTreeSet<String> {
         let mut all_items: BTreeSet<String> = BTreeSet::new();
 
@@ -376,7 +377,7 @@ impl Module {
             all_items.remove(excluded);
         }
         if all_items.is_empty() {
-            writeln!(output, "__all__: list[str] = []").unwrap();
+            writeln!(output, "__all__ = []").unwrap();
         } else {
             writeln!(output, "__all__ = [").unwrap();
             for item in all_items {
