@@ -762,5 +762,4 @@ mod tests {
             err_msg.contains("Pure Rust layout does not support multiple modules or submodules")
         );
     }
-
 }

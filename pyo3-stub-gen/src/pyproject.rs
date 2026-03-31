@@ -289,7 +289,6 @@ mod tests {
         assert!(!config.generate_init_py.is_enabled_for("other"));
     }
 
-
     #[test]
     fn test_generate_init_py_dash_underscore_normalization() {
         let toml_str = r#"
