@@ -123,9 +123,9 @@ impl StubInfo {
 
                 if !self.config.generate_init_py.is_enabled_for(name) {
                     anyhow::bail!(
-                        "Module '{}' is a pure Python module with re-exports, but `generate-init-py` \
-                         is not enabled for it. Add `generate-init-py = true` or \
-                         `generate-init-py = [\"{}\"]` to [tool.pyo3-stub-gen] in pyproject.toml.",
+                        "Module '{}' is not a PyO3 module and requires `generate-init-py` to be enabled. \
+                         Add `generate-init-py = true` or `generate-init-py = [\"{}\"]` to \
+                         [tool.pyo3-stub-gen] in pyproject.toml.",
                         name,
                         name
                     );

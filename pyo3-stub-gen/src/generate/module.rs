@@ -39,7 +39,7 @@ impl Module {
     /// Check if this module has no content to generate.
     ///
     /// Returns true if the module has no classes, enums, functions, variables,
-    /// type aliases, re-exports, docstrings, or verbatim entries.
+    /// type aliases, submodules, re-exports, docstrings, or verbatim entries.
     /// Modules that are empty should be skipped during generation.
     pub fn is_empty(&self) -> bool {
         self.doc.is_empty()
@@ -48,6 +48,7 @@ impl Module {
             && self.function.is_empty()
             && self.variables.is_empty()
             && self.type_aliases.is_empty()
+            && self.submodules.is_empty()
             && self.module_re_exports.is_empty()
             && self.verbatim_all_entries.is_empty()
     }
