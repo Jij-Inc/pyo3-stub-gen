@@ -20,3 +20,6 @@ output-dir = "docs/api"
 json-output = "api_reference.json"
 intro-message = "Example for generate-init-py feature."
 contents-table = true
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]

@@ -25,7 +25,10 @@ mod readme {}
 
 use ahash::RandomState;
 use pyo3::{prelude::*, types::*};
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::*, module_doc, module_variable};
+use pyo3_stub_gen::{
+    define_stub_info_gatherer, derive::*, module_doc, module_variable,
+    runtime::PyModuleTypeAliasExt, type_alias,
+};
 use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
 
@@ -201,6 +204,13 @@ impl FromPyObject<'_> for C {
 impl pyo3_stub_gen::PyStubType for C {
     fn type_output() -> pyo3_stub_gen::TypeInfo {
         usize::type_output()
+    }
+}
+impl pyo3_stub_gen::runtime::PyRuntimeType for C {
+    fn runtime_type_object(
+        py: ::pyo3::Python<'_>,
+    ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+        usize::runtime_type_object(py)
     }
 }
 
@@ -492,6 +502,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add_class::<NotIntError>()?;
 
+    // Test case for runtime type alias (type_alias! macro)
+    m.add_type_alias::<RuntimeNumberOrString>()?;
+
     // Test class for type: ignore functionality
     m.add_class::<TypeIgnoreTest>()?;
 
@@ -634,6 +647,15 @@ pyo3_stub_gen::type_alias!(
     "pure",
     DocumentedMap = HashMap<String, Vec<i32>>,
     "A map type alias with detailed documentation.\n\nThis can have multiple lines of documentation."
+);
+
+// Test runtime type alias using type_alias! macro
+// This type alias is available both in stubs AND at runtime
+// Uses Rust types which are mapped to Python types via PyRuntimeType::runtime_type_object
+type_alias!(
+    "pure",
+    RuntimeNumberOrString = i32 | String,
+    "Either an integer or a string, available at runtime."
 );
 
 // Test type aliases using Python syntax (without docstrings)

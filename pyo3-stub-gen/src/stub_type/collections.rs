@@ -1,5 +1,8 @@
+use crate::runtime::PyRuntimeType;
 use crate::stub_type::*;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use ::pyo3::types::{PyList, PyNone};
+use ::pyo3::{Bound, PyAny, PyResult, Python};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 /// Extract type identifier from a pre-qualified type name
 ///
@@ -79,6 +82,14 @@ impl<T: PyStubType> PyStubType for Option<T> {
         }
     }
 }
+impl<T: PyRuntimeType> PyRuntimeType for Option<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        // Option<T> maps to T | None at runtime
+        let inner_type = T::runtime_type_object(py)?;
+        let none_type = py.get_type::<PyNone>().into_any();
+        crate::runtime::union_type(py, &[inner_type, none_type])
+    }
+}
 
 impl<T: PyStubType> PyStubType for Box<T> {
     fn type_input() -> TypeInfo {
@@ -88,6 +99,11 @@ impl<T: PyStubType> PyStubType for Box<T> {
         T::type_output()
     }
 }
+impl<T: PyRuntimeType> PyRuntimeType for Box<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::runtime_type_object(py)
+    }
+}
 
 impl<T: PyStubType, E> PyStubType for Result<T, E> {
     fn type_input() -> TypeInfo {
@@ -95,6 +111,11 @@ impl<T: PyStubType, E> PyStubType for Result<T, E> {
     }
     fn type_output() -> TypeInfo {
         T::type_output()
+    }
+}
+impl<T: PyRuntimeType, E> PyRuntimeType for Result<T, E> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -118,6 +139,12 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         TypeInfo::list_of::<T>()
     }
 }
+impl<T> PyRuntimeType for Vec<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        // Vec<T> maps to list at runtime (without generic parameter)
+        Ok(py.get_type::<PyList>().into_any())
+    }
+}
 
 impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
     fn type_input() -> TypeInfo {
@@ -139,10 +166,20 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
         TypeInfo::list_of::<T>()
     }
 }
+impl<T, const N: usize> PyRuntimeType for [T; N] {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<PyList>().into_any())
+    }
+}
 
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
+    }
+}
+impl<T, State> PyRuntimeType for HashSet<T, State> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
     }
 }
 
@@ -151,14 +188,24 @@ impl<T: PyStubType> PyStubType for BTreeSet<T> {
         TypeInfo::set_of::<T>()
     }
 }
+impl<T> PyRuntimeType for BTreeSet<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
+    }
+}
 
 impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
     }
 }
+impl<T> PyRuntimeType for indexmap::IndexSet<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
+    }
+}
 
-macro_rules! impl_map_inner {
+macro_rules! impl_map_stub_type {
     () => {
         fn type_input() -> TypeInfo {
             let key_info = Key::type_input();
@@ -200,20 +247,35 @@ macro_rules! impl_map_inner {
 }
 
 impl<Key: PyStubType, Value: PyStubType> PyStubType for BTreeMap<Key, Value> {
-    impl_map_inner!();
+    impl_map_stub_type!();
+}
+impl<Key, Value> PyRuntimeType for BTreeMap<Key, Value> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PyDict>().into_any())
+    }
 }
 
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType for HashMap<Key, Value, State> {
-    impl_map_inner!();
+    impl_map_stub_type!();
+}
+impl<Key, Value, State> PyRuntimeType for HashMap<Key, Value, State> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PyDict>().into_any())
+    }
 }
 
 impl<Key: PyStubType, Value: PyStubType, State> PyStubType
     for indexmap::IndexMap<Key, Value, State>
 {
-    impl_map_inner!();
+    impl_map_stub_type!();
+}
+impl<Key, Value, State> PyRuntimeType for indexmap::IndexMap<Key, Value, State> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PyDict>().into_any())
+    }
 }
 
-macro_rules! impl_tuple {
+macro_rules! impl_tuple_stub_type {
     ($($T:ident),*) => {
         impl<$($T: PyStubType),*> PyStubType for ($($T),* ,) {
             fn type_output() -> TypeInfo {
@@ -251,15 +313,20 @@ macro_rules! impl_tuple {
                 }
             }
         }
+        impl<$($T),*> PyRuntimeType for ($($T),* ,) {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+                Ok(py.get_type::<::pyo3::types::PyTuple>().into_any())
+            }
+        }
     };
 }
 
-impl_tuple!(T1);
-impl_tuple!(T1, T2);
-impl_tuple!(T1, T2, T3);
-impl_tuple!(T1, T2, T3, T4);
-impl_tuple!(T1, T2, T3, T4, T5);
-impl_tuple!(T1, T2, T3, T4, T5, T6);
-impl_tuple!(T1, T2, T3, T4, T5, T6, T7);
-impl_tuple!(T1, T2, T3, T4, T5, T6, T7, T8);
-impl_tuple!(T1, T2, T3, T4, T5, T6, T7, T8, T9);
+impl_tuple_stub_type!(T1);
+impl_tuple_stub_type!(T1, T2);
+impl_tuple_stub_type!(T1, T2, T3);
+impl_tuple_stub_type!(T1, T2, T3, T4);
+impl_tuple_stub_type!(T1, T2, T3, T4, T5);
+impl_tuple_stub_type!(T1, T2, T3, T4, T5, T6);
+impl_tuple_stub_type!(T1, T2, T3, T4, T5, T6, T7);
+impl_tuple_stub_type!(T1, T2, T3, T4, T5, T6, T7, T8);
+impl_tuple_stub_type!(T1, T2, T3, T4, T5, T6, T7, T8, T9);

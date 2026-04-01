@@ -4240,6 +4240,27 @@
         },
         {
           "kind": "TypeAlias",
+          "name": "RuntimeNumberOrString",
+          "doc": "Either an integer or a string, available at runtime.",
+          "definition": {
+            "display": "int | str",
+            "link_target": null,
+            "children": [
+              {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "name": "SequenceOfInts",
           "doc": "",
           "definition": {
@@ -4456,6 +4477,7 @@
     "pure.PartialManualSubmit": "pure",
     "pure.Placeholder": "pure",
     "pure.Problem": "pure",
+    "pure.RuntimeNumberOrString": "pure",
     "pure.SequenceOfInts": "pure",
     "pure.Shape1": "pure",
     "pure.Shape2": "pure",

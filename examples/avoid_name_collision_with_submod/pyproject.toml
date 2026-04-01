@@ -12,3 +12,6 @@ python-source = "python"
 
 [tool.pyrefly]
 search-path = ["python"]
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]

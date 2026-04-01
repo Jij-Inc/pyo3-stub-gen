@@ -1,5 +1,7 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::*};
+use pyo3_stub_gen::{
+    define_stub_info_gatherer, derive::*, runtime::PyModuleTypeAliasExt, type_alias,
+};
 
 // Example classes and functions for generate-init-py demonstration
 #[gen_stub_pyclass]
@@ -82,11 +84,13 @@ fn default_c(c: C) -> C {
     c
 }
 
-// Type alias in mod_a to test wildcard re-export
-pyo3_stub_gen::type_alias!("generate_init_py._core", ModAAlias = A);
-
-// Type alias in mod_a to test wildcard re-export
-pyo3_stub_gen::type_alias!("generate_init_py._core", AorB = A | B);
+// Runtime type alias using type_alias! - available both in stubs AND at runtime
+// This can be imported via the generated __init__.py
+type_alias!(
+    "generate_init_py._core",
+    AorB = A | B,
+    "A union type of A or B, available at runtime."
+);
 
 #[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction(name = "greet_main")]
@@ -117,6 +121,8 @@ fn _core(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(greet_main, m)?)?;
     m.add_function(wrap_pyfunction!(wrap_opt_a, m)?)?;
     m.add_function(wrap_pyfunction!(default_c, m)?)?;
+    // Register runtime type alias - now importable from Python
+    m.add_type_alias::<AorB>()?;
     Ok(())
 }
 

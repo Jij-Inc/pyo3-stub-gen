@@ -267,7 +267,7 @@
         {
           "kind": "TypeAlias",
           "name": "AorB",
-          "doc": "",
+          "doc": "A union type of A or B, available at runtime.",
           "definition": {
             "display": "_core.A | _core.B",
             "link_target": null,
@@ -294,21 +294,6 @@
               }
             ]
           }
-        },
-        {
-          "kind": "TypeAlias",
-          "name": "ModAAlias",
-          "doc": "",
-          "definition": {
-            "display": "A",
-            "link_target": {
-              "fqn": "generate_init_py.A",
-              "doc_module": "generate_init_py",
-              "kind": "Class",
-              "attribute": null
-            },
-            "children": []
-          }
         }
       ],
       "submodules": []
@@ -319,7 +304,6 @@
     "generate_init_py.AorB": "generate_init_py",
     "generate_init_py.B": "generate_init_py",
     "generate_init_py.C": "generate_init_py",
-    "generate_init_py.ModAAlias": "generate_init_py",
     "generate_init_py.create_a": "generate_init_py",
     "generate_init_py.create_b": "generate_init_py",
     "generate_init_py.default_c": "generate_init_py",

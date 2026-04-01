@@ -117,6 +117,7 @@ impl PyStubType for ClassACallback {
         }
     }
 }
+pyo3_stub_gen::impl_py_runtime_type!(ClassACallback);
 
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
