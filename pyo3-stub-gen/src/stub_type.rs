@@ -569,6 +569,12 @@ macro_rules! impl_stub_type {
             fn type_input() -> ::pyo3_stub_gen::TypeInfo {
                 $(<$base>::type_input()) | *
             }
+            fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
+                    $(<$base as ::pyo3_stub_gen::PyStubType>::type_object(py)?),*
+                ];
+                ::pyo3_stub_gen::runtime::union_type(py, &types)
+            }
         }
     };
     ($ty:ty = $base:ty) => {
@@ -578,6 +584,9 @@ macro_rules! impl_stub_type {
             }
             fn type_input() -> ::pyo3_stub_gen::TypeInfo {
                 <$base>::type_input()
+            }
+            fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                <$base as ::pyo3_stub_gen::PyStubType>::type_object(py)
             }
         }
     };
@@ -598,25 +607,16 @@ pub trait PyStubType {
 
     /// Returns the Python type object for this Rust type at runtime.
     ///
-    /// This is used by [`type_alias!`](crate::type_alias) macro to create runtime type aliases
-    /// that can be imported from Python.
+    /// This is used by [`define_type_alias!`](crate::define_type_alias) macro to create runtime
+    /// type aliases that can be imported from Python.
     ///
     /// # Example
     ///
     /// - `i32` → `<class 'int'>`
     /// - `String` → `<class 'str'>`
     /// - `Option<T>` → `T | None`
-    /// - `Vec<T>` → `list[T]`
-    ///
-    /// # Default Implementation
-    ///
-    /// The default implementation returns an error. Types that need runtime support
-    /// should override this method.
-    fn type_object(_py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-        Err(::pyo3::exceptions::PyNotImplementedError::new_err(
-            "type_object is not implemented for this type",
-        ))
-    }
+    /// - `Vec<T>` → `list`
+    fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>>;
 }
 
 #[cfg(test)]

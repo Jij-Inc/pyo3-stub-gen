@@ -310,6 +310,12 @@ macro_rules! type_alias {
                 fn type_input() -> $crate::TypeInfo {
                     $(<$base>::type_input()) | *
                 }
+                fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                    let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
+                        $(<$base as $crate::PyStubType>::type_object(py)?),*
+                    ];
+                    $crate::runtime::union_type(py, &types)
+                }
             }
 
             $crate::inventory::submit! {
@@ -334,6 +340,12 @@ macro_rules! type_alias {
                 }
                 fn type_input() -> $crate::TypeInfo {
                     $(<$base>::type_input()) | *
+                }
+                fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                    let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
+                        $(<$base as $crate::PyStubType>::type_object(py)?),*
+                    ];
+                    $crate::runtime::union_type(py, &types)
                 }
             }
 
@@ -460,6 +472,9 @@ macro_rules! define_type_alias {
             }
             fn type_input() -> $crate::TypeInfo {
                 $(<$base as $crate::PyStubType>::type_input()) | *
+            }
+            fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                <Self as $crate::runtime::PyTypeAlias>::create_type_object(py)
             }
         }
 

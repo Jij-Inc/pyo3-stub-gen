@@ -20,6 +20,11 @@ macro_rules! create_exception {
             fn type_output() -> $crate::TypeInfo {
                 $crate::TypeInfo::builtin(stringify!($name))
             }
+            fn type_object(
+                py: ::pyo3::Python<'_>,
+            ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                Ok(py.get_type::<$name>().into_any())
+            }
         }
 
         $crate::inventory::submit! {
@@ -47,6 +52,11 @@ macro_rules! impl_exception_stub_type {
         impl crate::PyStubType for $name {
             fn type_output() -> crate::TypeInfo {
                 crate::TypeInfo::builtin($type_name)
+            }
+            fn type_object(
+                py: ::pyo3::Python<'_>,
+            ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                Ok(py.get_type::<$name>().into_any())
             }
         }
     };

@@ -156,11 +156,17 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
     fn type_output() -> TypeInfo {
         TypeInfo::list_of::<T>()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<PyList>().into_any())
+    }
 }
 
 impl<T: PyStubType, State> PyStubType for HashSet<T, State> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
     }
 }
 
@@ -168,11 +174,17 @@ impl<T: PyStubType> PyStubType for BTreeSet<T> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
+    }
 }
 
 impl<T: PyStubType> PyStubType for indexmap::IndexSet<T> {
     fn type_output() -> TypeInfo {
         TypeInfo::set_of::<T>()
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        Ok(py.get_type::<::pyo3::types::PySet>().into_any())
     }
 }
 
@@ -213,6 +225,9 @@ macro_rules! impl_map_inner {
                 import,
                 type_refs,
             }
+        }
+        fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+            Ok(py.get_type::<::pyo3::types::PyDict>().into_any())
         }
     };
 }
@@ -267,6 +282,9 @@ macro_rules! impl_tuple {
                     import: merged,
                     type_refs,
                 }
+            }
+            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+                Ok(py.get_type::<::pyo3::types::PyTuple>().into_any())
             }
         }
     };

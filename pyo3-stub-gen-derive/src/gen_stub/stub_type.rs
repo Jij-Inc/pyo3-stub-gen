@@ -23,6 +23,10 @@ impl ToTokens for StubType {
                 fn type_output() -> ::pyo3_stub_gen::TypeInfo {
                     ::pyo3_stub_gen::TypeInfo::locally_defined(#name, #module_tt)
                 }
+
+                fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                    Ok(py.get_type::<Self>().into_any())
+                }
             }
         })
     }

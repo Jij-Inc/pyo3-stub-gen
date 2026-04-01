@@ -31,6 +31,13 @@ macro_rules! impl_with_module {
             fn type_output() -> TypeInfo {
                 TypeInfo::with_module($pytype, $module.into())
             }
+            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+                // Import the type from the Python module
+                let module = py.import($module)?;
+                // Extract just the type name from "module.TypeName"
+                let type_name = $pytype.rsplit('.').next().unwrap_or($pytype);
+                module.getattr(type_name)
+            }
         }
     };
 }
@@ -91,11 +98,19 @@ impl PyStubType for PathBuf {
             | TypeInfo::with_module("os.PathLike", "os".into())
             | TypeInfo::with_module("pathlib.Path", "pathlib".into())
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        let pathlib = py.import("pathlib")?;
+        pathlib.getattr("Path")
+    }
 }
 
 impl<Tz: chrono::TimeZone> PyStubType for chrono::DateTime<Tz> {
     fn type_output() -> TypeInfo {
         TypeInfo::with_module("datetime.datetime", "datetime".into())
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        let datetime = py.import("datetime")?;
+        datetime.getattr("datetime")
     }
 }
 
