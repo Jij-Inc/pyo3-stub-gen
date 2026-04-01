@@ -207,7 +207,9 @@ impl pyo3_stub_gen::PyStubType for C {
     }
 }
 impl pyo3_stub_gen::runtime::PyRuntimeType for C {
-    fn runtime_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+    fn runtime_type_object(
+        py: ::pyo3::Python<'_>,
+    ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
         usize::runtime_type_object(py)
     }
 }
