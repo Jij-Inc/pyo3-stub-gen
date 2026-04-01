@@ -469,7 +469,7 @@ macro_rules! define_type_alias {
 
             fn create_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
                 let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
-                    $(<$base as $crate::runtime::PyRuntimeType>::py_type(py)?),*
+                    $(<$base as $crate::runtime::PyRuntimeType>::py_type(py)?.into_any()),*
                 ];
                 $crate::runtime::union_type(py, &types)
             }

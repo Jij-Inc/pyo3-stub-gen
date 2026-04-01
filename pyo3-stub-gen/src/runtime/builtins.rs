@@ -2,13 +2,13 @@
 
 use super::PyRuntimeType;
 use pyo3::prelude::*;
-use pyo3::types::{PyBool, PyBytes, PyFloat, PyInt, PyString};
+use pyo3::types::{PyBool, PyBytes, PyFloat, PyInt, PyString, PyType};
 
 macro_rules! impl_runtime_builtin {
     ($rust_ty:ty, $py_ty:ty) => {
         impl PyRuntimeType for $rust_ty {
-            fn py_type(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
-                Ok(py.get_type::<$py_ty>().into_any())
+            fn py_type(py: Python<'_>) -> PyResult<Bound<'_, PyType>> {
+                Ok(py.get_type::<$py_ty>())
             }
         }
     };
@@ -53,7 +53,7 @@ mod tests {
     fn test_int_types() {
         pyo3::Python::initialize();
         Python::attach(|py| {
-            let int_type = py.get_type::<PyInt>().into_any();
+            let int_type = py.get_type::<PyInt>();
 
             assert!(i32::py_type(py).unwrap().is(&int_type));
             assert!(u64::py_type(py).unwrap().is(&int_type));
@@ -65,7 +65,7 @@ mod tests {
     fn test_float_types() {
         pyo3::Python::initialize();
         Python::attach(|py| {
-            let float_type = py.get_type::<PyFloat>().into_any();
+            let float_type = py.get_type::<PyFloat>();
 
             assert!(f32::py_type(py).unwrap().is(&float_type));
             assert!(f64::py_type(py).unwrap().is(&float_type));
@@ -76,7 +76,7 @@ mod tests {
     fn test_string_types() {
         pyo3::Python::initialize();
         Python::attach(|py| {
-            let str_type = py.get_type::<PyString>().into_any();
+            let str_type = py.get_type::<PyString>();
 
             assert!(String::py_type(py).unwrap().is(&str_type));
             assert!(<&str>::py_type(py).unwrap().is(&str_type));
@@ -87,7 +87,7 @@ mod tests {
     fn test_bool_type() {
         pyo3::Python::initialize();
         Python::attach(|py| {
-            let bool_type = py.get_type::<PyBool>().into_any();
+            let bool_type = py.get_type::<PyBool>();
             assert!(bool::py_type(py).unwrap().is(&bool_type));
         });
     }

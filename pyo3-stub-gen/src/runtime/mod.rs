@@ -28,7 +28,7 @@ mod builtins;
 mod pyo3_types;
 
 use ::pyo3::prelude::*;
-use ::pyo3::types::PyModule;
+use ::pyo3::types::{PyModule, PyType};
 
 /// Creates a Python union type using the `|` operator (Python 3.10+).
 ///
@@ -100,7 +100,7 @@ pub trait PyRuntimeType {
     /// # Returns
     ///
     /// The Python type object (e.g., `<class 'int'>` for `i32`)
-    fn py_type(py: Python<'_>) -> PyResult<Bound<'_, PyAny>>;
+    fn py_type(py: Python<'_>) -> PyResult<Bound<'_, PyType>>;
 }
 
 /// Trait for type aliases that can be registered at runtime.
@@ -197,8 +197,8 @@ mod tests {
         pyo3::Python::initialize();
         Python::attach(|py| {
             use ::pyo3::types::PyInt;
-            let int_type = py.get_type::<PyInt>().into_any();
-            let result = union_type(py, &[int_type.clone()]);
+            let int_type = py.get_type::<PyInt>();
+            let result = union_type(py, &[int_type.clone().into_any()]);
             assert!(result.is_ok());
             // Single type should just return itself
             let union = result.unwrap();
