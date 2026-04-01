@@ -644,9 +644,10 @@ pyo3_stub_gen::type_alias!(
 
 // Test runtime type alias using define_type_alias! macro
 // This type alias is available both in stubs AND at runtime
+// Uses Python types directly (PyInt, PyString) for runtime union type creation
 define_type_alias! {
     /// Either an integer or a string, available at runtime.
-    pub struct RuntimeNumberOrString in "pure"; i32 | String
+    pub struct RuntimeNumberOrString in "pure"; PyInt | PyString
 }
 
 // Test type aliases using Python syntax (without docstrings)

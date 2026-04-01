@@ -406,13 +406,14 @@ macro_rules! type_alias {
 ///
 /// ```rust,ignore
 /// use pyo3::prelude::*;
+/// use pyo3::types::{PyInt, PyString};
 /// use pyo3_stub_gen::define_type_alias;
 /// use pyo3_stub_gen::runtime::PyModuleTypeAliasExt;
 ///
-/// // Define a runtime type alias for a union type
+/// // Define a runtime type alias for a union type using Python types
 /// define_type_alias! {
 ///     /// Either an integer or a string.
-///     pub struct NumberOrString in "my_module"; i32 | String
+///     pub struct NumberOrString in "my_module"; PyInt | PyString
 /// }
 ///
 /// #[pymodule]
@@ -469,7 +470,7 @@ macro_rules! define_type_alias {
 
             fn create_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
                 let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
-                    $(<$base as $crate::runtime::PyRuntimeType>::py_type(py)?.into_any()),*
+                    $(<$base as ::pyo3::type_object::PyTypeInfo>::type_object(py).into_any()),*
                 ];
                 $crate::runtime::union_type(py, &types)
             }

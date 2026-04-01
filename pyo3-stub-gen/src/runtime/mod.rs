@@ -1,19 +1,20 @@
 //! Runtime support for type aliases.
 //!
-//! This module provides traits and utilities for creating Python type objects at runtime,
-//! enabling type aliases defined with [`define_type_alias!`](crate::define_type_alias) to be
-//! registered in Python modules.
+//! This module provides traits and utilities for registering type aliases
+//! in Python modules at runtime, enabling type aliases defined with
+//! [`define_type_alias!`](crate::define_type_alias) to be importable from Python.
 //!
 //! # Example
 //!
 //! ```rust,ignore
 //! use pyo3::prelude::*;
+//! use pyo3::types::{PyInt, PyString};
 //! use pyo3_stub_gen::define_type_alias;
 //! use pyo3_stub_gen::runtime::PyModuleTypeAliasExt;
 //!
-//! // Define a runtime type alias
+//! // Define a runtime type alias using Python types
 //! define_type_alias! {
-//!     pub struct NumberOrString in "my_module"; i32 | String
+//!     pub struct NumberOrString in "my_module"; PyInt | PyString
 //! }
 //!
 //! #[pymodule]
@@ -24,11 +25,8 @@
 //! }
 //! ```
 
-mod builtins;
-mod pyo3_types;
-
 use ::pyo3::prelude::*;
-use ::pyo3::types::{PyModule, PyType};
+use ::pyo3::types::PyModule;
 
 /// Creates a Python union type using the `|` operator (Python 3.10+).
 ///
@@ -39,7 +37,9 @@ use ::pyo3::types::{PyModule, PyType};
 ///
 /// # Returns
 ///
-/// A Python type object representing the union of all input types.
+/// A Python object representing the union of all input types.
+/// For a single type, returns that type unchanged.
+/// For multiple types, returns a `types.UnionType`.
 ///
 /// # Errors
 ///
@@ -50,6 +50,8 @@ use ::pyo3::types::{PyModule, PyType};
 /// # Example
 ///
 /// ```rust,ignore
+/// use pyo3::types::{PyInt, PyString};
+///
 /// let union = union_type(py, &[
 ///     py.get_type::<PyInt>().into_any(),
 ///     py.get_type::<PyString>().into_any(),
@@ -76,31 +78,6 @@ pub fn union_type<'py>(
         result = or_fn.call1((&result, ty))?;
     }
     Ok(result)
-}
-
-/// Trait for obtaining Python type objects from Rust types at runtime.
-///
-/// This trait enables conversion from Rust types to their corresponding Python type objects,
-/// which is necessary for creating union types at runtime.
-///
-/// # Implementation Notes
-///
-/// - For primitive types (i32, String, etc.), implementations return the corresponding
-///   Python built-in types (int, str, etc.)
-/// - For PyO3 classes (types implementing `PyTypeInfo`), implementations return the
-///   Python class object
-/// - Wrapper types like `Py<T>` and `Bound<T>` delegate to their inner type
-pub trait PyRuntimeType {
-    /// Returns the Python type object corresponding to this Rust type.
-    ///
-    /// # Arguments
-    ///
-    /// * `py` - Python interpreter token
-    ///
-    /// # Returns
-    ///
-    /// The Python type object (e.g., `<class 'int'>` for `i32`)
-    fn py_type(py: Python<'_>) -> PyResult<Bound<'_, PyType>>;
 }
 
 /// Trait for type aliases that can be registered at runtime.
@@ -214,9 +191,6 @@ mod tests {
             let int_type = py.get_type::<PyInt>().into_any();
             let str_type = py.get_type::<PyString>().into_any();
             let result = union_type(py, &[int_type, str_type]);
-            if let Err(ref e) = result {
-                eprintln!("Error: {:?}", e);
-            }
             assert!(result.is_ok(), "union_type failed: {:?}", result);
             // The result should be a union type (int | str)
             let union = result.unwrap();
