@@ -10,7 +10,6 @@ __all__ = [
     "AorB",
     "B",
     "C",
-    "ModAAlias",
     "create_a",
     "create_b",
     "default_c",
@@ -19,7 +18,6 @@ __all__ = [
 ]
 
 AorB: TypeAlias = A  |  B
-ModAAlias: TypeAlias = A
 @typing.final
 class A:
     def show_x(self) -> None: ...

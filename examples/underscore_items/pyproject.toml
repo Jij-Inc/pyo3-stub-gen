@@ -14,3 +14,6 @@ python-source = "python"
 [tool.pyo3-stub-gen.doc-gen]
 output-dir = "docs/api"
 json-output = "api_reference.json"
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]
