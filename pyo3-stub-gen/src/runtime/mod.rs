@@ -2,20 +2,17 @@
 //!
 //! This module provides traits and utilities for registering type aliases
 //! in Python modules at runtime, enabling type aliases defined with
-//! [`define_type_alias!`](crate::define_type_alias) to be importable from Python.
+//! [`type_alias!`](crate::type_alias) to be importable from Python.
 //!
 //! # Example
 //!
 //! ```rust,ignore
 //! use pyo3::prelude::*;
-//! use pyo3::types::{PyInt, PyString};
-//! use pyo3_stub_gen::define_type_alias;
+//! use pyo3_stub_gen::type_alias;
 //! use pyo3_stub_gen::runtime::PyModuleTypeAliasExt;
 //!
-//! // Define a runtime type alias using Python types
-//! define_type_alias! {
-//!     pub struct NumberOrString in "my_module"; PyInt | PyString
-//! }
+//! // Define a runtime type alias
+//! type_alias!("my_module", NumberOrString = i32 | String);
 //!
 //! #[pymodule]
 //! fn my_module(m: &Bound<PyModule>) -> PyResult<()> {
@@ -82,7 +79,7 @@ pub fn union_type<'py>(
 
 /// Trait for type aliases that can be registered at runtime.
 ///
-/// This trait is automatically implemented by the [`define_type_alias!`](crate::define_type_alias)
+/// This trait is automatically implemented by the [`type_alias!`](crate::type_alias)
 /// macro. It provides the metadata and factory method needed to register a type alias
 /// in a Python module.
 ///
@@ -228,11 +225,11 @@ mod tests {
         });
     }
 
-    // Test define_type_alias! macro with custom #[pyclass]
+    // Test type_alias! macro with custom #[pyclass]
     #[::pyo3::pyclass]
     struct MyCustomType;
 
-    // PyStubType implementation is required for define_type_alias!
+    // PyStubType implementation is required for type_alias!
     impl crate::PyStubType for MyCustomType {
         fn type_output() -> crate::TypeInfo {
             crate::TypeInfo::builtin("MyCustomType")

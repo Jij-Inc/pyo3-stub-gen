@@ -607,7 +607,7 @@ pub trait PyStubType {
 
     /// Returns the Python type object for this Rust type at runtime.
     ///
-    /// This is used by [`define_type_alias!`](crate::define_type_alias) macro to create runtime
+    /// This is used by [`type_alias!`](crate::type_alias) macro to create runtime
     /// type aliases that can be imported from Python.
     ///
     /// # Example
