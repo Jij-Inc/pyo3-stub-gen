@@ -267,7 +267,7 @@
         {
           "kind": "TypeAlias",
           "name": "AorB",
-          "doc": "",
+          "doc": "A union type of A or B, available at runtime.",
           "definition": {
             "display": "_core.A | _core.B",
             "link_target": null,

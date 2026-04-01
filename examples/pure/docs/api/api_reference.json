@@ -4241,7 +4241,7 @@
         {
           "kind": "TypeAlias",
           "name": "RuntimeNumberOrString",
-          "doc": "",
+          "doc": "Either an integer or a string, available at runtime.",
           "definition": {
             "display": "int | str",
             "link_target": null,

@@ -18,6 +18,10 @@ __all__ = [
 ]
 
 AorB: TypeAlias = A  |  B
+r"""
+A union type of A or B, available at runtime.
+"""
+
 @typing.final
 class A:
     def show_x(self) -> None: ...

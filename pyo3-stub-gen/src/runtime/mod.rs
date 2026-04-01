@@ -243,13 +243,10 @@ mod tests {
         }
     }
 
-    crate::define_type_alias! {
-        /// A union of a custom pyclass and int (using Rust type i32).
-        pub struct CustomTypeOrInt in "test_module"; MyCustomType | i32
-    }
+    crate::type_alias!("test_module", CustomTypeOrInt = MyCustomType | i32, "A union of a custom pyclass and int (using Rust type i32).");
 
     #[test]
-    fn test_define_type_alias_with_pyclass() {
+    fn test_type_alias_with_pyclass() {
         pyo3::Python::initialize();
         Python::attach(|py| {
             let type_obj = CustomTypeOrInt::create_type_object(py);

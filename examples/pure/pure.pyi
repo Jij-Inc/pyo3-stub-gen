@@ -161,6 +161,10 @@ NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
 OptionalContainer: TypeAlias = DataContainer  |  None
 RuntimeNumberOrString: TypeAlias = builtins.int | builtins.str
+r"""
+Either an integer or a string, available at runtime.
+"""
+
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
 SimpleContainer: TypeAlias = DataContainer

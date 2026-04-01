@@ -1,6 +1,6 @@
-"""Tests for runtime type alias (define_type_alias!) support.
+"""Tests for runtime type alias (type_alias!) support.
 
-This module tests that type aliases defined with define_type_alias! macro
+This module tests that type aliases defined with type_alias! macro
 can be imported from the generated __init__.py file.
 """
 
