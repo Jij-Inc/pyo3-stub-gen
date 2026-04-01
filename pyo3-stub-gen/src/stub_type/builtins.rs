@@ -1,6 +1,8 @@
 //! Define PyStubType for built-in types based on <https://pyo3.rs/v0.22.2/conversions/tables#argument-types>
 
 use crate::stub_type::*;
+use ::pyo3::prelude::*;
+use ::pyo3::types::{PyBool, PyComplex, PyFloat, PyInt, PyString};
 use std::{
     borrow::Cow,
     ffi::{OsStr, OsString},
@@ -11,10 +13,13 @@ use std::{
 };
 
 macro_rules! impl_builtin {
-    ($ty:ty, $pytype:expr) => {
+    ($ty:ty, $pytype:expr, $py_type_obj:ty) => {
         impl PyStubType for $ty {
             fn type_output() -> TypeInfo {
                 TypeInfo::builtin($pytype)
+            }
+            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+                Ok(py.get_type::<$py_type_obj>().into_any())
             }
         }
     };
@@ -35,41 +40,46 @@ impl PyStubType for () {
     fn type_output() -> TypeInfo {
         TypeInfo::none()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        // None type in Python
+        Ok(py.get_type::<::pyo3::types::PyNone>().into_any())
+    }
 }
-impl_builtin!(bool, "bool");
-impl_builtin!(u8, "int");
-impl_builtin!(u16, "int");
-impl_builtin!(u32, "int");
-impl_builtin!(u64, "int");
-impl_builtin!(u128, "int");
-impl_builtin!(usize, "int");
-impl_builtin!(i8, "int");
-impl_builtin!(i16, "int");
-impl_builtin!(i32, "int");
-impl_builtin!(i64, "int");
-impl_builtin!(i128, "int");
-impl_builtin!(isize, "int");
-impl_builtin!(f32, "float");
-impl_builtin!(f64, "float");
-impl_builtin!(num_complex::Complex32, "complex");
-impl_builtin!(num_complex::Complex64, "complex");
+impl_builtin!(bool, "bool", PyBool);
+impl_builtin!(u8, "int", PyInt);
+impl_builtin!(u16, "int", PyInt);
+impl_builtin!(u32, "int", PyInt);
+impl_builtin!(u64, "int", PyInt);
+impl_builtin!(u128, "int", PyInt);
+impl_builtin!(usize, "int", PyInt);
+impl_builtin!(i8, "int", PyInt);
+impl_builtin!(i16, "int", PyInt);
+impl_builtin!(i32, "int", PyInt);
+impl_builtin!(i64, "int", PyInt);
+impl_builtin!(i128, "int", PyInt);
+impl_builtin!(isize, "int", PyInt);
+impl_builtin!(f32, "float", PyFloat);
+impl_builtin!(f64, "float", PyFloat);
+impl_builtin!(num_complex::Complex32, "complex", PyComplex);
+impl_builtin!(num_complex::Complex64, "complex", PyComplex);
 
-impl_builtin!(char, "str");
-impl_builtin!(&str, "str");
-impl_builtin!(OsStr, "str");
-impl_builtin!(String, "str");
-impl_builtin!(OsString, "str");
-impl_builtin!(Cow<'_, str>, "str");
-impl_builtin!(Cow<'_, OsStr>, "str");
-impl_builtin!(Cow<'_, [u8]>, "bytes");
+impl_builtin!(char, "str", PyString);
+impl_builtin!(&str, "str", PyString);
+impl_builtin!(OsStr, "str", PyString);
+impl_builtin!(String, "str", PyString);
+impl_builtin!(OsString, "str", PyString);
+impl_builtin!(Cow<'_, str>, "str", PyString);
+impl_builtin!(Cow<'_, OsStr>, "str", PyString);
+impl_builtin!(Cow<'_, [u8]>, "bytes", ::pyo3::types::PyBytes);
 
 #[cfg(feature = "ordered-float")]
 mod impl_ordered_float {
     use super::*;
-    impl_builtin!(ordered_float::NotNan<f32>, "float");
-    impl_builtin!(ordered_float::NotNan<f64>, "float");
-    impl_builtin!(ordered_float::OrderedFloat<f32>, "float");
-    impl_builtin!(ordered_float::OrderedFloat<f64>, "float");
+    use ::pyo3::types::PyFloat;
+    impl_builtin!(ordered_float::NotNan<f32>, "float", PyFloat);
+    impl_builtin!(ordered_float::NotNan<f64>, "float", PyFloat);
+    impl_builtin!(ordered_float::OrderedFloat<f32>, "float", PyFloat);
+    impl_builtin!(ordered_float::OrderedFloat<f64>, "float", PyFloat);
 }
 
 impl PyStubType for PathBuf {
@@ -112,6 +122,9 @@ impl<T: PyStubType> PyStubType for &T {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::type_object(py)
+    }
 }
 
 impl<T: PyStubType> PyStubType for Rc<T> {
@@ -121,6 +134,9 @@ impl<T: PyStubType> PyStubType for Rc<T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::type_object(py)
+    }
 }
 
 impl<T: PyStubType> PyStubType for Arc<T> {
@@ -129,5 +145,8 @@ impl<T: PyStubType> PyStubType for Arc<T> {
     }
     fn type_output() -> TypeInfo {
         T::type_output()
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::type_object(py)
     }
 }

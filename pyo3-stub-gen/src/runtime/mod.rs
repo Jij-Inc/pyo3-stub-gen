@@ -237,11 +237,15 @@ mod tests {
         fn type_output() -> crate::TypeInfo {
             crate::TypeInfo::builtin("MyCustomType")
         }
+        fn type_object(py: Python<'_>) -> ::pyo3::PyResult<Bound<'_, ::pyo3::PyAny>> {
+            // Use PyTypeInfo for #[pyclass] types
+            Ok(py.get_type::<Self>().into_any())
+        }
     }
 
     crate::define_type_alias! {
-        /// A union of a custom pyclass and int.
-        pub struct CustomTypeOrInt in "test_module"; MyCustomType | ::pyo3::types::PyInt
+        /// A union of a custom pyclass and int (using Rust type i32).
+        pub struct CustomTypeOrInt in "test_module"; MyCustomType | i32
     }
 
     #[test]

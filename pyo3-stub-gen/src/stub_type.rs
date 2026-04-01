@@ -595,6 +595,28 @@ pub trait PyStubType {
     fn type_input() -> TypeInfo {
         Self::type_output()
     }
+
+    /// Returns the Python type object for this Rust type at runtime.
+    ///
+    /// This is used by [`type_alias!`](crate::type_alias) macro to create runtime type aliases
+    /// that can be imported from Python.
+    ///
+    /// # Example
+    ///
+    /// - `i32` → `<class 'int'>`
+    /// - `String` → `<class 'str'>`
+    /// - `Option<T>` → `T | None`
+    /// - `Vec<T>` → `list[T]`
+    ///
+    /// # Default Implementation
+    ///
+    /// The default implementation returns an error. Types that need runtime support
+    /// should override this method.
+    fn type_object(_py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+        Err(::pyo3::exceptions::PyNotImplementedError::new_err(
+            "type_object is not implemented for this type",
+        ))
+    }
 }
 
 #[cfg(test)]

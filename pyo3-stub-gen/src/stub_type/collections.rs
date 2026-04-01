@@ -1,4 +1,6 @@
 use crate::stub_type::*;
+use ::pyo3::types::{PyList, PyNone};
+use ::pyo3::{Bound, PyAny, PyResult, Python};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// Extract type identifier from a pre-qualified type name
@@ -78,6 +80,12 @@ impl<T: PyStubType> PyStubType for Option<T> {
             type_refs,
         }
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        // Option<T> maps to T | None at runtime
+        let inner_type = T::type_object(py)?;
+        let none_type = py.get_type::<PyNone>().into_any();
+        crate::runtime::union_type(py, &[inner_type, none_type])
+    }
 }
 
 impl<T: PyStubType> PyStubType for Box<T> {
@@ -87,6 +95,9 @@ impl<T: PyStubType> PyStubType for Box<T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::type_object(py)
+    }
 }
 
 impl<T: PyStubType, E> PyStubType for Result<T, E> {
@@ -95,6 +106,9 @@ impl<T: PyStubType, E> PyStubType for Result<T, E> {
     }
     fn type_output() -> TypeInfo {
         T::type_output()
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::type_object(py)
     }
 }
 
@@ -116,6 +130,10 @@ impl<T: PyStubType> PyStubType for Vec<T> {
     }
     fn type_output() -> TypeInfo {
         TypeInfo::list_of::<T>()
+    }
+    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        // Vec<T> maps to list at runtime (without generic parameter)
+        Ok(py.get_type::<PyList>().into_any())
     }
 }
 
