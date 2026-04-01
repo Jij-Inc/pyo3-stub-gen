@@ -651,7 +651,7 @@ pyo3_stub_gen::type_alias!(
 
 // Test runtime type alias using type_alias! macro
 // This type alias is available both in stubs AND at runtime
-// Uses Rust types which are mapped to Python types via PyStubType::type_object
+// Uses Rust types which are mapped to Python types via PyRuntimeType::runtime_type_object
 type_alias!(
     "pure",
     RuntimeNumberOrString = i32 | String,
