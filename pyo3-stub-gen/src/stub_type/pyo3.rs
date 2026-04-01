@@ -1,3 +1,4 @@
+use crate::runtime::PyRuntimeType;
 use crate::stub_type::*;
 use ::pyo3::{
     basic::CompareOp,
@@ -18,7 +19,9 @@ impl PyStubType for PyAny {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+}
+impl PyRuntimeType for PyAny {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
         // PyAny maps to `object` at runtime
         Ok(py.get_type::<::pyo3::types::PyAny>().into_any())
     }
@@ -31,8 +34,10 @@ impl<T: PyStubType> PyStubType for Py<T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
-        T::type_object(py)
+}
+impl<T: PyRuntimeType> PyRuntimeType for Py<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -43,8 +48,10 @@ impl<T: PyStubType + PyClass> PyStubType for PyRef<'_, T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
-        <T as PyStubType>::type_object(py)
+}
+impl<T: PyRuntimeType + PyClass> PyRuntimeType for PyRef<'_, T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -55,8 +62,10 @@ impl<T: PyStubType + PyClass<Frozen = False>> PyStubType for PyRefMut<'_, T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
-        <T as PyStubType>::type_object(py)
+}
+impl<T: PyRuntimeType + PyClass<Frozen = False>> PyRuntimeType for PyRefMut<'_, T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -67,8 +76,10 @@ impl<T: PyStubType> PyStubType for Bound<'_, T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
-        T::type_object(py)
+}
+impl<T: PyRuntimeType> PyRuntimeType for Bound<'_, T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -83,7 +94,9 @@ macro_rules! impl_builtin {
                     type_refs: HashMap::new(),
                 }
             }
-            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        }
+        impl PyRuntimeType for $ty {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
                 Ok(py.get_type::<$ty>().into_any())
             }
         }
@@ -114,7 +127,9 @@ impl PyStubType for PyBackedStr {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+}
+impl PyRuntimeType for PyBackedStr {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
         Ok(py.get_type::<PyString>().into_any())
     }
 }
@@ -128,7 +143,9 @@ impl PyStubType for PyBackedBytes {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+}
+impl PyRuntimeType for PyBackedBytes {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
         Ok(py.get_type::<PyBytes>().into_any())
     }
 }
@@ -143,7 +160,9 @@ impl PyStubType for CompareOp {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+}
+impl PyRuntimeType for CompareOp {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
         Ok(py.get_type::<PyInt>().into_any())
     }
 }
@@ -159,7 +178,9 @@ macro_rules! impl_simple {
                     type_refs: HashMap::new(),
                 }
             }
-            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        }
+        impl PyRuntimeType for $ty {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
                 Ok(py.get_type::<$ty>().into_any())
             }
         }

@@ -20,12 +20,9 @@ macro_rules! create_exception {
             fn type_output() -> $crate::TypeInfo {
                 $crate::TypeInfo::builtin(stringify!($name))
             }
-            fn type_object(
-                py: ::pyo3::Python<'_>,
-            ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-                Ok(py.get_type::<$name>().into_any())
-            }
         }
+
+        $crate::impl_py_runtime_type!($name);
 
         $crate::inventory::submit! {
             $crate::type_info::PyClassInfo {
@@ -46,14 +43,16 @@ macro_rules! create_exception {
     };
 }
 
-// Direct PyStubType implementations for PyO3 exception types
+// Direct PyStubType and PyRuntimeType implementations for PyO3 exception types
 macro_rules! impl_exception_stub_type {
     ($name:ident, $type_name:literal) => {
         impl crate::PyStubType for $name {
             fn type_output() -> crate::TypeInfo {
                 crate::TypeInfo::builtin($type_name)
             }
-            fn type_object(
+        }
+        impl crate::runtime::PyRuntimeType for $name {
+            fn runtime_type_object(
                 py: ::pyo3::Python<'_>,
             ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
                 Ok(py.get_type::<$name>().into_any())

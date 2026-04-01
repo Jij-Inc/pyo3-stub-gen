@@ -32,11 +32,8 @@ impl pyo3_stub_gen::PyStubType for CustomStubType {
         // For now, we keep it simple but this proves skip_stub_type works
         pyo3_stub_gen::TypeInfo::with_module("CustomStubType", "pure".into())
     }
-
-    fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-        Ok(py.get_type::<Self>().into_any())
-    }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomStubType);
 
 /// Test class without skip_stub_type (normal behavior)
 #[gen_stub_pyclass]
@@ -70,11 +67,8 @@ impl pyo3_stub_gen::PyStubType for CustomEnum {
     fn type_output() -> pyo3_stub_gen::TypeInfo {
         pyo3_stub_gen::TypeInfo::with_module("CustomEnum", "pure".into())
     }
-
-    fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-        Ok(py.get_type::<Self>().into_any())
-    }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomEnum);
 
 /// Test complex enum with skip_stub_type
 #[gen_stub_pyclass_complex_enum(skip_stub_type)]
@@ -91,8 +85,5 @@ impl pyo3_stub_gen::PyStubType for CustomComplexEnum {
     fn type_output() -> pyo3_stub_gen::TypeInfo {
         pyo3_stub_gen::TypeInfo::with_module("CustomComplexEnum", "pure".into())
     }
-
-    fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-        Ok(py.get_type::<Self>().into_any())
-    }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomComplexEnum);

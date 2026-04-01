@@ -25,6 +25,76 @@
 use ::pyo3::prelude::*;
 use ::pyo3::types::PyModule;
 
+/// Trait for Rust types that can be converted to Python type objects at runtime.
+///
+/// This trait is used by [`type_alias!`](crate::type_alias) to create runtime type aliases
+/// that can be imported from Python. Unlike [`PyStubType`](crate::PyStubType) which is used
+/// for stub file generation, this trait is only needed when you want to register type aliases
+/// at runtime.
+///
+/// # Implementing for Custom Types
+///
+/// For `#[pyclass]` types, use `py.get_type::<Self>()`:
+///
+/// ```rust,ignore
+/// use pyo3::prelude::*;
+/// use pyo3_stub_gen::runtime::PyRuntimeType;
+///
+/// #[pyclass]
+/// struct MyClass;
+///
+/// impl PyRuntimeType for MyClass {
+///     fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+///         Ok(py.get_type::<Self>().into_any())
+///     }
+/// }
+/// ```
+///
+/// # Note
+///
+/// This trait is automatically implemented for common Rust types (primitives, collections, etc.)
+/// and for types that use `#[gen_stub_pyclass]` derive macro.
+pub trait PyRuntimeType {
+    /// Returns the Python type object for this Rust type.
+    ///
+    /// # Examples
+    ///
+    /// - `i32` → `<class 'int'>`
+    /// - `String` → `<class 'str'>`
+    /// - `Option<T>` → `T | None`
+    /// - `Vec<T>` → `list`
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>>;
+}
+
+/// Implements `PyRuntimeType` for a type using `py.get_type::<$ty>()`.
+///
+/// This is a convenience macro for the common case where the runtime type object
+/// can be obtained directly via `pyo3::type_object::PyTypeInfo`.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use pyo3::prelude::*;
+/// use pyo3_stub_gen::impl_py_runtime_type;
+///
+/// #[pyclass]
+/// struct MyClass;
+///
+/// impl_py_runtime_type!(MyClass);
+/// ```
+#[macro_export]
+macro_rules! impl_py_runtime_type {
+    ($ty:ty) => {
+        impl $crate::runtime::PyRuntimeType for $ty {
+            fn runtime_type_object(
+                py: ::pyo3::Python<'_>,
+            ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                Ok(py.get_type::<$ty>().into_any())
+            }
+        }
+    };
+}
+
 /// Creates a Python union type using the `|` operator (Python 3.10+).
 ///
 /// # Arguments
@@ -233,16 +303,15 @@ mod tests {
     #[::pyo3::pyclass]
     struct MyCustomType;
 
-    // PyStubType implementation is required for type_alias!
+    // PyStubType implementation is required for type_alias! (stub generation)
     impl crate::PyStubType for MyCustomType {
         fn type_output() -> crate::TypeInfo {
             crate::TypeInfo::builtin("MyCustomType")
         }
-        fn type_object(py: Python<'_>) -> ::pyo3::PyResult<Bound<'_, ::pyo3::PyAny>> {
-            // Use PyTypeInfo for #[pyclass] types
-            Ok(py.get_type::<Self>().into_any())
-        }
     }
+
+    // PyRuntimeType implementation is required for type_alias! (runtime registration)
+    crate::impl_py_runtime_type!(MyCustomType);
 
     crate::type_alias!(
         "test_module",

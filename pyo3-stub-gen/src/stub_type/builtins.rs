@@ -1,5 +1,6 @@
 //! Define PyStubType for built-in types based on <https://pyo3.rs/v0.22.2/conversions/tables#argument-types>
 
+use crate::runtime::PyRuntimeType;
 use crate::stub_type::*;
 use ::pyo3::prelude::*;
 use ::pyo3::types::{PyBool, PyComplex, PyFloat, PyInt, PyString};
@@ -18,7 +19,9 @@ macro_rules! impl_builtin {
             fn type_output() -> TypeInfo {
                 TypeInfo::builtin($pytype)
             }
-            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        }
+        impl PyRuntimeType for $ty {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
                 Ok(py.get_type::<$py_type_obj>().into_any())
             }
         }
@@ -31,7 +34,9 @@ macro_rules! impl_with_module {
             fn type_output() -> TypeInfo {
                 TypeInfo::with_module($pytype, $module.into())
             }
-            fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        }
+        impl PyRuntimeType for $ty {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
                 // Import the type from the Python module
                 let module = py.import($module)?;
                 // Extract just the type name from "module.TypeName"
@@ -47,11 +52,14 @@ impl PyStubType for () {
     fn type_output() -> TypeInfo {
         TypeInfo::none()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl PyRuntimeType for () {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         // None type in Python
         Ok(py.get_type::<::pyo3::types::PyNone>().into_any())
     }
 }
+
 impl_builtin!(bool, "bool", PyBool);
 impl_builtin!(u8, "int", PyInt);
 impl_builtin!(u16, "int", PyInt);
@@ -98,7 +106,9 @@ impl PyStubType for PathBuf {
             | TypeInfo::with_module("os.PathLike", "os".into())
             | TypeInfo::with_module("pathlib.Path", "pathlib".into())
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl PyRuntimeType for PathBuf {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let pathlib = py.import("pathlib")?;
         pathlib.getattr("Path")
     }
@@ -108,7 +118,9 @@ impl<Tz: chrono::TimeZone> PyStubType for chrono::DateTime<Tz> {
     fn type_output() -> TypeInfo {
         TypeInfo::with_module("datetime.datetime", "datetime".into())
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl<Tz: chrono::TimeZone> PyRuntimeType for chrono::DateTime<Tz> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let datetime = py.import("datetime")?;
         datetime.getattr("datetime")
     }
@@ -137,8 +149,10 @@ impl<T: PyStubType> PyStubType for &T {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
-        T::type_object(py)
+}
+impl<T: PyRuntimeType> PyRuntimeType for &T {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -149,8 +163,10 @@ impl<T: PyStubType> PyStubType for Rc<T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
-        T::type_object(py)
+}
+impl<T: PyRuntimeType> PyRuntimeType for Rc<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::runtime_type_object(py)
     }
 }
 
@@ -161,7 +177,9 @@ impl<T: PyStubType> PyStubType for Arc<T> {
     fn type_output() -> TypeInfo {
         T::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
-        T::type_object(py)
+}
+impl<T: PyRuntimeType> PyRuntimeType for Arc<T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        T::runtime_type_object(py)
     }
 }

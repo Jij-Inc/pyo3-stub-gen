@@ -1,3 +1,5 @@
+use crate::runtime::PyRuntimeType;
+
 use super::{PyStubType, TypeInfo};
 use ::pyo3::prelude::*;
 use maplit::hashset;
@@ -52,7 +54,9 @@ impl<T: NumPyScalar, D> PyStubType for PyArray<T, D> {
             type_refs: HashMap::new(), // TODO: Track type refs for compound types
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl<T, D> PyRuntimeType for PyArray<T, D> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("ndarray")
     }
@@ -67,7 +71,9 @@ impl PyStubType for PyUntypedArray {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl PyRuntimeType for PyUntypedArray {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("ndarray")
     }
@@ -81,7 +87,13 @@ where
     fn type_output() -> TypeInfo {
         PyArray::<T, D>::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl<T, D> PyRuntimeType for PyReadonlyArray<'_, T, D>
+where
+    T: Element,
+    D: Dimension,
+{
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("ndarray")
     }
@@ -95,7 +107,13 @@ where
     fn type_output() -> TypeInfo {
         PyArray::<T, D>::type_output()
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl<T, D> PyRuntimeType for PyReadwriteArray<'_, T, D>
+where
+    T: Element,
+    D: Dimension,
+{
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("ndarray")
     }
@@ -110,7 +128,9 @@ impl PyStubType for PyArrayDescr {
             type_refs: HashMap::new(),
         }
     }
-    fn type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+}
+impl PyRuntimeType for PyArrayDescr {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("dtype")
     }

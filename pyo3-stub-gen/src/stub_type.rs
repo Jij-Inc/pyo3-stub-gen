@@ -569,9 +569,11 @@ macro_rules! impl_stub_type {
             fn type_input() -> ::pyo3_stub_gen::TypeInfo {
                 $(<$base>::type_input()) | *
             }
-            fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+        }
+        impl ::pyo3_stub_gen::runtime::PyRuntimeType for $ty {
+            fn runtime_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
                 let types: ::std::vec::Vec<::pyo3::Bound<'_, ::pyo3::PyAny>> = ::std::vec![
-                    $(<$base as ::pyo3_stub_gen::PyStubType>::type_object(py)?),*
+                    $(<$base as ::pyo3_stub_gen::runtime::PyRuntimeType>::runtime_type_object(py)?),*
                 ];
                 ::pyo3_stub_gen::runtime::union_type(py, &types)
             }
@@ -585,14 +587,19 @@ macro_rules! impl_stub_type {
             fn type_input() -> ::pyo3_stub_gen::TypeInfo {
                 <$base>::type_input()
             }
-            fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
-                <$base as ::pyo3_stub_gen::PyStubType>::type_object(py)
+        }
+        impl ::pyo3_stub_gen::runtime::PyRuntimeType for $ty {
+            fn runtime_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                <$base as ::pyo3_stub_gen::runtime::PyRuntimeType>::runtime_type_object(py)
             }
         }
     };
 }
 
-/// Annotate Rust types with Python type information.
+/// Annotate Rust types with Python type information for stub file generation.
+///
+/// This trait is used to generate Python stub files (`.pyi`) from Rust types.
+/// For runtime type alias support, see [`runtime::PyRuntimeType`](crate::runtime::PyRuntimeType).
 pub trait PyStubType {
     /// The type to be used in the output signature, i.e. return type of the Python function or methods.
     fn type_output() -> TypeInfo;
@@ -604,19 +611,6 @@ pub trait PyStubType {
     fn type_input() -> TypeInfo {
         Self::type_output()
     }
-
-    /// Returns the Python type object for this Rust type at runtime.
-    ///
-    /// This is used by [`type_alias!`](crate::type_alias) macro to create runtime
-    /// type aliases that can be imported from Python.
-    ///
-    /// # Example
-    ///
-    /// - `i32` → `<class 'int'>`
-    /// - `String` → `<class 'str'>`
-    /// - `Option<T>` → `T | None`
-    /// - `Vec<T>` → `list`
-    fn type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>>;
 }
 
 #[cfg(test)]

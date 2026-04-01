@@ -116,11 +116,8 @@ impl PyStubType for ClassACallback {
             .into(),
         }
     }
-
-    fn type_object(py: pyo3::Python<'_>) -> pyo3::PyResult<pyo3::Bound<'_, pyo3::PyAny>> {
-        Ok(py.get_type::<Self>().into_any())
-    }
 }
+pyo3_stub_gen::impl_py_runtime_type!(ClassACallback);
 
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
