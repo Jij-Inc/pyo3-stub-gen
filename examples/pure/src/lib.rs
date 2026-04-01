@@ -26,8 +26,8 @@ mod readme {}
 use ahash::RandomState;
 use pyo3::{prelude::*, types::*};
 use pyo3_stub_gen::{
-    define_stub_info_gatherer, derive::*, module_doc, module_variable, runtime::PyModuleTypeAliasExt,
-    type_alias,
+    define_stub_info_gatherer, derive::*, module_doc, module_variable,
+    runtime::PyModuleTypeAliasExt, type_alias,
 };
 use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
@@ -649,7 +649,11 @@ pyo3_stub_gen::type_alias!(
 // Test runtime type alias using type_alias! macro
 // This type alias is available both in stubs AND at runtime
 // Uses Rust types which are mapped to Python types via PyStubType::type_object
-type_alias!("pure", RuntimeNumberOrString = i32 | String, "Either an integer or a string, available at runtime.");
+type_alias!(
+    "pure",
+    RuntimeNumberOrString = i32 | String,
+    "Either an integer or a string, available at runtime."
+);
 
 // Test type aliases using Python syntax (without docstrings)
 pyo3_stub_gen::derive::gen_type_alias_from_python!(

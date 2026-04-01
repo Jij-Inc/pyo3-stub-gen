@@ -1,5 +1,7 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::*, runtime::PyModuleTypeAliasExt, type_alias};
+use pyo3_stub_gen::{
+    define_stub_info_gatherer, derive::*, runtime::PyModuleTypeAliasExt, type_alias,
+};
 
 // Example classes and functions for generate-init-py demonstration
 #[gen_stub_pyclass]
@@ -84,7 +86,11 @@ fn default_c(c: C) -> C {
 
 // Runtime type alias using type_alias! - available both in stubs AND at runtime
 // This can be imported via the generated __init__.py
-type_alias!("generate_init_py._core", AorB = A | B, "A union type of A or B, available at runtime.");
+type_alias!(
+    "generate_init_py._core",
+    AorB = A | B,
+    "A union type of A or B, available at runtime."
+);
 
 #[gen_stub_pyfunction(module = "generate_init_py._core")]
 #[pyfunction(name = "greet_main")]

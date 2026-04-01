@@ -213,7 +213,11 @@ mod tests {
             let int_type = PyInt::type_object(py).into_any();
             let custom_type = TestCustomClass::type_object(py).into_any();
             let result = union_type(py, &[int_type, custom_type]);
-            assert!(result.is_ok(), "union_type with pyclass failed: {:?}", result);
+            assert!(
+                result.is_ok(),
+                "union_type with pyclass failed: {:?}",
+                result
+            );
             // The result should be a union type (int | TestCustomClass)
             let union = result.unwrap();
             let repr = union.repr().unwrap().to_string();
@@ -240,7 +244,11 @@ mod tests {
         }
     }
 
-    crate::type_alias!("test_module", CustomTypeOrInt = MyCustomType | i32, "A union of a custom pyclass and int (using Rust type i32).");
+    crate::type_alias!(
+        "test_module",
+        CustomTypeOrInt = MyCustomType | i32,
+        "A union of a custom pyclass and int (using Rust type i32)."
+    );
 
     #[test]
     fn test_type_alias_with_pyclass() {
