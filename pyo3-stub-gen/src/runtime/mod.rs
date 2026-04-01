@@ -185,8 +185,8 @@ mod tests {
 
     #[test]
     fn test_union_type_empty() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             let result = union_type(py, &[]);
             assert!(result.is_err());
         });
@@ -194,8 +194,8 @@ mod tests {
 
     #[test]
     fn test_union_type_single() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             use ::pyo3::types::PyInt;
             let int_type = py.get_type::<PyInt>().into_any();
             let result = union_type(py, &[int_type.clone()]);
@@ -208,8 +208,8 @@ mod tests {
 
     #[test]
     fn test_union_type_multiple() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             use ::pyo3::types::{PyInt, PyString};
             let int_type = py.get_type::<PyInt>().into_any();
             let str_type = py.get_type::<PyString>().into_any();

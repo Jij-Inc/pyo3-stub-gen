@@ -51,8 +51,8 @@ mod tests {
 
     #[test]
     fn test_int_types() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             let int_type = py.get_type::<PyInt>().into_any();
 
             assert!(i32::py_type(py).unwrap().is(&int_type));
@@ -63,8 +63,8 @@ mod tests {
 
     #[test]
     fn test_float_types() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             let float_type = py.get_type::<PyFloat>().into_any();
 
             assert!(f32::py_type(py).unwrap().is(&float_type));
@@ -74,8 +74,8 @@ mod tests {
 
     #[test]
     fn test_string_types() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             let str_type = py.get_type::<PyString>().into_any();
 
             assert!(String::py_type(py).unwrap().is(&str_type));
@@ -85,8 +85,8 @@ mod tests {
 
     #[test]
     fn test_bool_type() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             let bool_type = py.get_type::<PyBool>().into_any();
             assert!(bool::py_type(py).unwrap().is(&bool_type));
         });

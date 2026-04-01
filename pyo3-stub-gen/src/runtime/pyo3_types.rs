@@ -46,8 +46,8 @@ mod tests {
 
     #[test]
     fn test_bound_wrapper() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             // Bound<PyString> should return the str type
             let str_type = <Bound<'_, PyString> as PyRuntimeType>::py_type(py).unwrap();
             let expected = py.get_type::<PyString>().into_any();
@@ -65,8 +65,8 @@ mod tests {
 
     #[test]
     fn test_py_wrapper() {
-        pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
             // Py<PyString> should return the str type
             let str_type = <Py<PyString> as PyRuntimeType>::py_type(py).unwrap();
             let expected = py.get_type::<PyString>().into_any();
