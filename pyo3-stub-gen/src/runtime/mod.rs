@@ -159,6 +159,7 @@ impl PyModuleTypeAliasExt for Bound<'_, PyModule> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ::pyo3::type_object::PyTypeInfo;
 
     #[test]
     fn test_union_type_empty() {
@@ -198,5 +199,74 @@ mod tests {
             let repr = union.repr().unwrap().to_string();
             assert!(repr.contains("int") && repr.contains("str"));
         });
+    }
+
+    // Test custom #[pyclass] with union_type
+    #[::pyo3::pyclass]
+    struct TestCustomClass {
+        #[allow(dead_code)]
+        value: i32,
+    }
+
+    #[test]
+    fn test_union_type_with_pyclass() {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
+            use ::pyo3::types::PyInt;
+            let int_type = PyInt::type_object(py).into_any();
+            let custom_type = TestCustomClass::type_object(py).into_any();
+            let result = union_type(py, &[int_type, custom_type]);
+            assert!(result.is_ok(), "union_type with pyclass failed: {:?}", result);
+            // The result should be a union type (int | TestCustomClass)
+            let union = result.unwrap();
+            let repr = union.repr().unwrap().to_string();
+            assert!(
+                repr.contains("int") && repr.contains("TestCustomClass"),
+                "Expected union repr to contain 'int' and 'TestCustomClass', got: {}",
+                repr
+            );
+        });
+    }
+
+    // Test define_type_alias! macro with custom #[pyclass]
+    #[::pyo3::pyclass]
+    struct MyCustomType;
+
+    // PyStubType implementation is required for define_type_alias!
+    impl crate::PyStubType for MyCustomType {
+        fn type_output() -> crate::TypeInfo {
+            crate::TypeInfo::builtin("MyCustomType")
+        }
+    }
+
+    crate::define_type_alias! {
+        /// A union of a custom pyclass and int.
+        pub struct CustomTypeOrInt in "test_module"; MyCustomType | ::pyo3::types::PyInt
+    }
+
+    #[test]
+    fn test_define_type_alias_with_pyclass() {
+        pyo3::Python::initialize();
+        Python::attach(|py| {
+            let type_obj = CustomTypeOrInt::create_type_object(py);
+            assert!(
+                type_obj.is_ok(),
+                "create_type_object failed: {:?}",
+                type_obj
+            );
+            let union = type_obj.unwrap();
+            let repr = union.repr().unwrap().to_string();
+            assert!(
+                repr.contains("MyCustomType") && repr.contains("int"),
+                "Expected union repr to contain 'MyCustomType' and 'int', got: {}",
+                repr
+            );
+        });
+    }
+
+    #[test]
+    fn test_py_type_alias_constants() {
+        assert_eq!(CustomTypeOrInt::NAME, "CustomTypeOrInt");
+        assert_eq!(CustomTypeOrInt::MODULE, "test_module");
     }
 }
