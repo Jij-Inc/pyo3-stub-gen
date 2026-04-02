@@ -55,24 +55,38 @@ impl MemberInfo {
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         let pyo3_attrs = parse_pyo3_attrs(attrs)?;
-        for attr in pyo3_attrs {
-            if let Attr::Getter(name) = attr {
+
+        // First, get the name from #[getter] or #[getter(name)]
+        let mut name = None;
+        for attr in &pyo3_attrs {
+            if let Attr::Getter(getter_name) = attr {
                 let fn_name = sig.ident.to_string();
                 let fn_getter_name = match fn_name.strip_prefix("get_") {
                     Some(s) => s.to_owned(),
                     None => fn_name,
                 };
-                return Ok(MemberInfo {
-                    doc,
-                    name: name.unwrap_or(fn_getter_name),
-                    r#type: extract_return_type(&sig.output, attrs)?
-                        .expect("Getter must return a type"),
-                    default,
-                    deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
-                });
+                name = Some(getter_name.clone().unwrap_or(fn_getter_name));
+                break;
             }
         }
-        unreachable!("Not a getter: {:?}", item)
+
+        // Then, check for #[pyo3(name = "...")] which takes precedence
+        for attr in &pyo3_attrs {
+            if let Attr::Name(pyo3_name) = attr {
+                name = Some(pyo3_name.clone());
+                break;
+            }
+        }
+
+        let name = name.expect("Not a getter");
+        Ok(MemberInfo {
+            doc,
+            name,
+            r#type: extract_return_type(&sig.output, attrs)?
+                .expect("Getter must return a type"),
+            default,
+            deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
+        })
     }
     pub fn new_setter(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_setter(&item.attrs)?);
@@ -80,46 +94,63 @@ impl MemberInfo {
         let default = parse_gen_stub_default(attrs)?;
         let doc = extract_documents(attrs).join("\n");
         let pyo3_attrs = parse_pyo3_attrs(attrs)?;
-        for attr in pyo3_attrs {
-            if let Attr::Setter(name) = attr {
+
+        // First, get the name from #[setter] or #[setter(name)]
+        let mut name = None;
+        let mut r#type = None;
+        for attr in &pyo3_attrs {
+            if let Attr::Setter(setter_name) = attr {
                 let fn_name = sig.ident.to_string();
                 let fn_setter_name = match fn_name.strip_prefix("set_") {
                     Some(s) => s.to_owned(),
                     None => fn_name,
                 };
-                let r#type = sig
-                    .inputs
-                    .get(1)
-                    .ok_or(syn::Error::new_spanned(&item, "Setter must input a type"))
-                    .and_then(|arg| {
-                        if let FnArg::Typed(t) = arg {
-                            Ok(match parse_gen_stub_override_type(&t.attrs)? {
-                                Some(OverrideTypeAttribute { type_repr, imports }) => {
-                                    TypeOrOverride::OverrideType {
-                                        r#type: *t.ty.clone(),
-                                        type_repr,
-                                        imports,
-                                        rust_type_markers: vec![],
+                name = Some(setter_name.clone().unwrap_or(fn_setter_name));
+                r#type = Some(
+                    sig.inputs
+                        .get(1)
+                        .ok_or(syn::Error::new_spanned(&item, "Setter must input a type"))
+                        .and_then(|arg| {
+                            if let FnArg::Typed(t) = arg {
+                                Ok(match parse_gen_stub_override_type(&t.attrs)? {
+                                    Some(OverrideTypeAttribute { type_repr, imports }) => {
+                                        TypeOrOverride::OverrideType {
+                                            r#type: *t.ty.clone(),
+                                            type_repr,
+                                            imports,
+                                            rust_type_markers: vec![],
+                                        }
                                     }
-                                }
-                                _ => TypeOrOverride::RustType {
-                                    r#type: *t.ty.clone(),
-                                },
-                            })
-                        } else {
-                            Err(syn::Error::new_spanned(&item, "Setter must input a type"))
-                        }
-                    })?;
-                return Ok(MemberInfo {
-                    doc,
-                    name: name.unwrap_or(fn_setter_name),
-                    r#type,
-                    default,
-                    deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
-                });
+                                    _ => TypeOrOverride::RustType {
+                                        r#type: *t.ty.clone(),
+                                    },
+                                })
+                            } else {
+                                Err(syn::Error::new_spanned(&item, "Setter must input a type"))
+                            }
+                        })?,
+                );
+                break;
             }
         }
-        unreachable!("Not a setter: {:?}", item)
+
+        // Then, check for #[pyo3(name = "...")] which takes precedence
+        for attr in &pyo3_attrs {
+            if let Attr::Name(pyo3_name) = attr {
+                name = Some(pyo3_name.clone());
+                break;
+            }
+        }
+
+        let name = name.expect("Not a setter");
+        let r#type = r#type.expect("Not a setter");
+        Ok(MemberInfo {
+            doc,
+            name,
+            r#type,
+            default,
+            deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
+        })
     }
     pub fn new_classattr_fn(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_classattr(&item.attrs)?);
