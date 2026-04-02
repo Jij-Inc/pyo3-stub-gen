@@ -408,9 +408,10 @@ impl StubInfoBuilder {
             ReexportItems::Explicit(items) => {
                 (items.iter().map(|s| s.to_string()).collect(), Vec::new())
             }
-            ReexportItems::WildcardPlus(additional) => {
-                (Vec::new(), additional.iter().map(|s| s.to_string()).collect())
-            }
+            ReexportItems::WildcardPlus(additional) => (
+                Vec::new(),
+                additional.iter().map(|s| s.to_string()).collect(),
+            ),
         };
 
         self.get_module(Some(info.target_module))
