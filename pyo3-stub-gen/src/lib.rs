@@ -409,34 +409,93 @@ macro_rules! type_alias {
 
 /// Re-export items from another module into __all__
 ///
-/// # Wildcard re-export
+/// # New syntax (recommended)
+///
+/// ## Wildcard re-export (all public items)
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module" from "source.module");
+/// ```
+///
+/// ## Wildcard with additional items (e.g., `__version__`)
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module" from "source.module"; *, "__version__");
+/// ```
+///
+/// ## Specific items only
+/// ```rust
+/// pyo3_stub_gen::reexport_module_members!("target.module" from "source.module"; "item1", "item2");
+/// ```
+///
+/// # Legacy syntax (still supported)
+///
+/// ## Wildcard re-export
 /// ```rust
 /// pyo3_stub_gen::reexport_module_members!("target.module", "source.module");
 /// ```
 ///
-/// # Specific items re-export
+/// ## Specific items re-export
 /// ```rust
 /// pyo3_stub_gen::reexport_module_members!("target.module", "source.module", "item1", "item2");
 /// ```
 #[macro_export]
 macro_rules! reexport_module_members {
-    // Wildcard: reexport_module_members!("target", "source")
+    // New syntax: Wildcard - reexport_module_members!("target" from "source")
+    ($target:literal from $source:literal) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: $crate::type_info::ReexportItems::Wildcard,
+            }
+        }
+    };
+    // New syntax: Explicit wildcard - reexport_module_members!("target" from "source"; *)
+    ($target:literal from $source:literal; *) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: $crate::type_info::ReexportItems::Wildcard,
+            }
+        }
+    };
+    // New syntax: Wildcard + additional items - reexport_module_members!("target" from "source"; *, "item1", "item2")
+    ($target:literal from $source:literal; *, $($item:literal),+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: $crate::type_info::ReexportItems::WildcardPlus(&[$($item),+]),
+            }
+        }
+    };
+    // New syntax: Specific items only - reexport_module_members!("target" from "source"; "item1", "item2")
+    ($target:literal from $source:literal; $($item:literal),+) => {
+        $crate::inventory::submit! {
+            $crate::type_info::ReexportModuleMembers {
+                target_module: $target,
+                source_module: $source,
+                items: $crate::type_info::ReexportItems::Explicit(&[$($item),+]),
+            }
+        }
+    };
+    // Legacy syntax: Wildcard - reexport_module_members!("target", "source")
     ($target:expr, $source:expr) => {
         $crate::inventory::submit! {
             $crate::type_info::ReexportModuleMembers {
                 target_module: $target,
                 source_module: $source,
-                items: None,
+                items: $crate::type_info::ReexportItems::Wildcard,
             }
         }
     };
-    // Specific items: reexport_module_members!("target", "source", "item1", "item2")
+    // Legacy syntax: Specific items - reexport_module_members!("target", "source", "item1", "item2")
     ($target:expr, $source:expr, $($item:expr),+) => {
         $crate::inventory::submit! {
             $crate::type_info::ReexportModuleMembers {
                 target_module: $target,
                 source_module: $source,
-                items: Some(&[$($item),+]),
+                items: $crate::type_info::ReexportItems::Explicit(&[$($item),+]),
             }
         }
     };

@@ -299,12 +299,23 @@ pub struct ModuleDocInfo {
 
 inventory::collect!(ModuleDocInfo);
 
+/// Specifies which items to re-export from a source module
+#[derive(Debug, Clone, Copy)]
+pub enum ReexportItems {
+    /// Re-export all public items (excluding `_` prefixed)
+    Wildcard,
+    /// Re-export only the specified items
+    Explicit(&'static [&'static str]),
+    /// Re-export all public items plus additional specified items (e.g., `__version__`)
+    WildcardPlus(&'static [&'static str]),
+}
+
 /// Re-export items from another module into __all__
 #[derive(Debug)]
 pub struct ReexportModuleMembers {
     pub target_module: &'static str,
     pub source_module: &'static str,
-    pub items: Option<&'static [&'static str]>,
+    pub items: ReexportItems,
 }
 
 inventory::collect!(ReexportModuleMembers);

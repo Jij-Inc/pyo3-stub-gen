@@ -126,8 +126,8 @@ fn _core(m: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-// Re-export all items from _core to the parent module
-pyo3_stub_gen::reexport_module_members!("generate_init_py", "generate_init_py._core");
+// Re-export all items from _core to the parent module (using new syntax)
+pyo3_stub_gen::reexport_module_members!("generate_init_py" from "generate_init_py._core");
 
 pyo3_stub_gen::module_doc!(
     "generate_init_py",
