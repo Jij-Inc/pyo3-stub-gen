@@ -215,6 +215,8 @@ class A:
         r"""
         Always returns `42`.
         """
+    @property
+    def renamed_getter(self) -> builtins.int: ...
     def __new__(cls, x: builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.

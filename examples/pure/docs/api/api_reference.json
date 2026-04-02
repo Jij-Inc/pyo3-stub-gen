@@ -244,6 +244,17 @@
               "is_readonly": true
             },
             {
+              "name": "renamed_getter",
+              "doc": "",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true,
+              "is_readonly": true
+            },
+            {
               "name": "x",
               "doc": "",
               "type_": {
