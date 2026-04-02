@@ -401,16 +401,25 @@ impl StubInfoBuilder {
     }
 
     fn add_module_export(&mut self, info: &ReexportModuleMembers) {
-        let items = info
-            .items
-            .map(|items| items.iter().map(|s| s.to_string()).collect())
-            .unwrap_or_default();
+        use crate::type_info::ReexportItems;
+
+        let (items, additional_items) = match info.items {
+            ReexportItems::Wildcard => (Vec::new(), Vec::new()),
+            ReexportItems::Explicit(items) => {
+                (items.iter().map(|s| s.to_string()).collect(), Vec::new())
+            }
+            ReexportItems::WildcardPlus(additional) => (
+                Vec::new(),
+                additional.iter().map(|s| s.to_string()).collect(),
+            ),
+        };
 
         self.get_module(Some(info.target_module))
             .module_re_exports
             .push(ModuleReExport {
                 source_module: info.source_module.to_string(),
                 items,
+                additional_items,
             });
     }
 
@@ -428,7 +437,8 @@ impl StubInfoBuilder {
 
     fn resolve_wildcard_re_exports(&mut self) -> Result<()> {
         // Collect wildcard re-exports and their resolved items for __all__
-        let mut resolutions: Vec<(String, usize, Vec<String>)> = Vec::new();
+        // (module_name, re_export_idx, resolved_items, additional_items_to_merge)
+        let mut resolutions: Vec<(String, usize, Vec<String>, Vec<String>)> = Vec::new();
 
         for (module_name, module) in &self.modules {
             for (idx, re_export) in module.module_re_exports.iter().enumerate() {
@@ -462,13 +472,14 @@ impl StubInfoBuilder {
                                 items.push(alias_name.to_string());
                             }
                         }
-                        // FIX: Add underscore filtering for submodules in wildcard resolution
                         for submod in &source_mod.submodules {
                             if !submod.starts_with('_') {
                                 items.push(submod.to_string());
                             }
                         }
-                        resolutions.push((module_name.clone(), idx, items));
+                        // Include additional_items (e.g., __version__) for WildcardPlus
+                        let additional = re_export.additional_items.clone();
+                        resolutions.push((module_name.clone(), idx, items, additional));
                     } else {
                         // External module - cannot resolve, error
                         anyhow::bail!(
@@ -482,10 +493,16 @@ impl StubInfoBuilder {
             }
         }
 
-        // Apply resolutions (populate items for wildcard imports)
-        for (module_name, idx, items) in resolutions {
+        // Apply resolutions (populate items for wildcard imports and merge additional items)
+        for (module_name, idx, mut items, additional) in resolutions {
+            // Merge additional items (for WildcardPlus)
+            items.extend(additional);
+            // Deduplicate items to avoid redundant imports like `from m import A, A`
+            let mut seen = BTreeSet::new();
+            items.retain(|item| seen.insert(item.clone()));
             if let Some(module) = self.modules.get_mut(&module_name) {
                 module.module_re_exports[idx].items = items;
+                module.module_re_exports[idx].additional_items.clear();
             }
         }
 

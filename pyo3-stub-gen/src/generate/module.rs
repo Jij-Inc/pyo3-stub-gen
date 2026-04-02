@@ -11,7 +11,11 @@ use std::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct ModuleReExport {
     pub source_module: String,
+    /// Items to re-export. Empty means wildcard (will be resolved).
     pub items: Vec<String>,
+    /// Additional items to include with wildcard (e.g., `__version__`).
+    /// These are merged into `items` after wildcard resolution.
+    pub additional_items: Vec<String>,
 }
 
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
