@@ -87,11 +87,13 @@ impl MemberInfo {
             }
         }
 
-        let name = name.expect("Not a getter");
+        let name = name.ok_or_else(|| Error::new_spanned(&item, "Not a getter"))?;
+        let r#type = extract_return_type(&sig.output, attrs)?
+            .ok_or_else(|| Error::new_spanned(&item, "Getter must return a type"))?;
         Ok(MemberInfo {
             doc,
             name,
-            r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
+            r#type,
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
         })
@@ -159,8 +161,8 @@ impl MemberInfo {
             }
         }
 
-        let name = name.expect("Not a setter");
-        let r#type = r#type.expect("Not a setter");
+        let name = name.ok_or_else(|| Error::new_spanned(&item, "Not a setter"))?;
+        let r#type = r#type.ok_or_else(|| Error::new_spanned(&item, "Setter type not found"))?;
         Ok(MemberInfo {
             doc,
             name,
