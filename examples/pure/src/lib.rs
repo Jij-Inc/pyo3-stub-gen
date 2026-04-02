@@ -168,6 +168,13 @@ impl A {
     fn forty_two(&self) -> i32 {
         42
     }
+
+    // Test case: #[pyo3(name = "...")] should override the function name for getter
+    #[getter]
+    #[pyo3(name = "renamed_getter")]
+    fn py_renamed_getter(&self) -> i32 {
+        100
+    }
 }
 
 #[gen_stub_pyfunction]

@@ -49,6 +49,15 @@ impl MemberInfo {
 }
 
 impl MemberInfo {
+    /// Create a new `MemberInfo` from a getter function.
+    ///
+    /// The property name is determined by the following precedence:
+    /// 1. `#[pyo3(name = "...")]` - explicit name via pyo3 attribute
+    /// 2. `#[getter(name)]` - explicit name via getter attribute
+    /// 3. Function name with `get_` prefix stripped
+    ///
+    /// Note: pyo3 does not allow specifying both `#[getter(name)]` and
+    /// `#[pyo3(name = "...")]` at the same time (compile error: "name may only be specified once").
     pub fn new_getter(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_getter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
@@ -82,12 +91,20 @@ impl MemberInfo {
         Ok(MemberInfo {
             doc,
             name,
-            r#type: extract_return_type(&sig.output, attrs)?
-                .expect("Getter must return a type"),
+            r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
         })
     }
+    /// Create a new `MemberInfo` from a setter function.
+    ///
+    /// The property name is determined by the following precedence:
+    /// 1. `#[pyo3(name = "...")]` - explicit name via pyo3 attribute
+    /// 2. `#[setter(name)]` - explicit name via setter attribute
+    /// 3. Function name with `set_` prefix stripped
+    ///
+    /// Note: pyo3 does not allow specifying both `#[setter(name)]` and
+    /// `#[pyo3(name = "...")]` at the same time (compile error: "name may only be specified once").
     pub fn new_setter(item: ImplItemFn) -> Result<Self> {
         assert!(Self::is_setter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
