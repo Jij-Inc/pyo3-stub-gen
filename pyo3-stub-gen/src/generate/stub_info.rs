@@ -497,6 +497,9 @@ impl StubInfoBuilder {
         for (module_name, idx, mut items, additional) in resolutions {
             // Merge additional items (for WildcardPlus)
             items.extend(additional);
+            // Deduplicate items to avoid redundant imports like `from m import A, A`
+            let mut seen = BTreeSet::new();
+            items.retain(|item| seen.insert(item.clone()));
             if let Some(module) = self.modules.get_mut(&module_name) {
                 module.module_re_exports[idx].items = items;
                 module.module_re_exports[idx].additional_items.clear();
