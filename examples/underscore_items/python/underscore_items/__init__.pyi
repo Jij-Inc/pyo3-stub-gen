@@ -7,6 +7,7 @@ __all__ = [
     "PublicClass",
     "_PrivateClass",
     "_private_function",
+    "_private_mod",
     "public_function",
 ]
 

@@ -167,7 +167,7 @@ impl<'a> DocPackageBuilder<'a> {
 
         // Process submodules - convert to DocItem::Module entries
         for submod_name in &module.submodules {
-            if !submod_name.starts_with('_') && exports.contains(submod_name) {
+            if exports.contains(submod_name) {
                 // Construct FQN for the submodule
                 let submod_fqn = if name.is_empty() {
                     submod_name.clone()
@@ -201,12 +201,7 @@ impl<'a> DocPackageBuilder<'a> {
             name: name.to_string(),
             doc: module.doc.clone(),
             items,
-            submodules: module
-                .submodules
-                .iter()
-                .filter(|s| !s.starts_with('_'))
-                .cloned()
-                .collect(),
+            submodules: module.submodules.iter().cloned().collect(),
         })
     }
 

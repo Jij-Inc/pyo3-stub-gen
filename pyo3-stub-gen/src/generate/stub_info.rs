@@ -435,38 +435,25 @@ impl StubInfoBuilder {
                 if re_export.items.is_empty() {
                     // Wildcard - resolve items for __all__
                     if let Some(source_mod) = self.modules.get(&re_export.source_module) {
-                        // Internal module - collect all public items that would be in __all__
+                        // Internal module - collect all items that would be in __all__
                         let mut items = Vec::new();
                         for class in source_mod.class.values() {
-                            if !class.name.starts_with('_') {
-                                items.push(class.name.to_string());
-                            }
+                            items.push(class.name.to_string());
                         }
                         for enum_ in source_mod.enum_.values() {
-                            if !enum_.name.starts_with('_') {
-                                items.push(enum_.name.to_string());
-                            }
+                            items.push(enum_.name.to_string());
                         }
                         for func_name in source_mod.function.keys() {
-                            if !func_name.starts_with('_') {
-                                items.push(func_name.to_string());
-                            }
+                            items.push(func_name.to_string());
                         }
                         for var_name in source_mod.variables.keys() {
-                            if !var_name.starts_with('_') {
-                                items.push(var_name.to_string());
-                            }
+                            items.push(var_name.to_string());
                         }
                         for alias_name in source_mod.type_aliases.keys() {
-                            if !alias_name.starts_with('_') {
-                                items.push(alias_name.to_string());
-                            }
+                            items.push(alias_name.to_string());
                         }
-                        // FIX: Add underscore filtering for submodules in wildcard resolution
                         for submod in &source_mod.submodules {
-                            if !submod.starts_with('_') {
-                                items.push(submod.to_string());
-                            }
+                            items.push(submod.to_string());
                         }
                         resolutions.push((module_name.clone(), idx, items));
                     } else {

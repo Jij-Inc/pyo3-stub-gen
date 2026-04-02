@@ -16,49 +16,36 @@ impl<'a> ExportResolver<'a> {
 
     /// Resolve which items are exported from a module
     /// Rules:
-    /// 1. If __all__ exists (re-exports or verbatim): use it
-    /// 2. Otherwise: all non-underscore items
-    /// 3. Add re-exported items
-    /// 4. Add verbatim entries
-    /// 5. Remove excluded items
+    /// 1. Add all directly-defined items
+    /// 2. Add re-exported items
+    /// 3. Add verbatim entries
+    /// 4. Remove excluded items
     pub fn resolve_exports(&self, module: &Module) -> BTreeSet<String> {
         let mut exports = BTreeSet::new();
 
-        // Add directly-defined public items
+        // Add directly-defined items
         for name in module.function.keys() {
-            if !name.starts_with('_') {
-                exports.insert((*name).to_string());
-            }
+            exports.insert((*name).to_string());
         }
 
         for class in module.class.values() {
-            if !class.name.starts_with('_') {
-                exports.insert(class.name.to_string());
-            }
+            exports.insert(class.name.to_string());
         }
 
         for enum_def in module.enum_.values() {
-            if !enum_def.name.starts_with('_') {
-                exports.insert(enum_def.name.to_string());
-            }
+            exports.insert(enum_def.name.to_string());
         }
 
         for type_alias in module.type_aliases.keys() {
-            if !type_alias.starts_with('_') {
-                exports.insert((*type_alias).to_string());
-            }
+            exports.insert((*type_alias).to_string());
         }
 
         for var in module.variables.keys() {
-            if !var.starts_with('_') {
-                exports.insert((*var).to_string());
-            }
+            exports.insert((*var).to_string());
         }
 
         for submod in &module.submodules {
-            if !submod.starts_with('_') {
-                exports.insert(submod.to_string());
-            }
+            exports.insert(submod.to_string());
         }
 
         // Add items from module re-exports (from reexport_module_members!)
@@ -66,7 +53,7 @@ impl<'a> ExportResolver<'a> {
             exports.extend(re_export.items.iter().cloned());
         }
 
-        // Add verbatim entries (allows explicitly exporting underscore items)
+        // Add verbatim entries (allows explicitly exporting items)
         exports.extend(module.verbatim_all_entries.iter().cloned());
 
         // Remove excluded items

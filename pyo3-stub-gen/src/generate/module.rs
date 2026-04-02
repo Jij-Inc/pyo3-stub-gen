@@ -276,42 +276,29 @@ impl Module {
 
     /// Collect all items for the `__all__` list in `.pyi` stub files.
     ///
-    /// This collects public items from classes, enums, functions, variables,
+    /// This collects items from classes, enums, functions, variables,
     /// type aliases, submodules, re-exports, and verbatim entries.
-    /// Items starting with `_` are excluded unless added via `export_verbatim!`.
     fn collect_all_items(&self) -> BTreeSet<String> {
         let mut all_items: BTreeSet<String> = BTreeSet::new();
 
-        // Collect public items from this module
+        // Collect items from this module
         for class in self.class.values() {
-            if !class.name.starts_with('_') {
-                all_items.insert(class.name.to_string());
-            }
+            all_items.insert(class.name.to_string());
         }
         for enum_ in self.enum_.values() {
-            if !enum_.name.starts_with('_') {
-                all_items.insert(enum_.name.to_string());
-            }
+            all_items.insert(enum_.name.to_string());
         }
         for func_name in self.function.keys() {
-            if !func_name.starts_with('_') {
-                all_items.insert(func_name.to_string());
-            }
+            all_items.insert(func_name.to_string());
         }
         for var_name in self.variables.keys() {
-            if !var_name.starts_with('_') {
-                all_items.insert(var_name.to_string());
-            }
+            all_items.insert(var_name.to_string());
         }
         for alias_name in self.type_aliases.keys() {
-            if !alias_name.starts_with('_') {
-                all_items.insert(alias_name.to_string());
-            }
+            all_items.insert(alias_name.to_string());
         }
         for submod in &self.submodules {
-            if !submod.starts_with('_') {
-                all_items.insert(submod.to_string());
-            }
+            all_items.insert(submod.to_string());
         }
 
         // Add items from re-exports
@@ -319,7 +306,7 @@ impl Module {
             all_items.extend(re_export.items.iter().cloned());
         }
 
-        // Add verbatim entries (allows explicit inclusion of underscore items)
+        // Add verbatim entries (allows explicit inclusion of items)
         all_items.extend(self.verbatim_all_entries.iter().cloned());
 
         // Remove explicitly excluded items

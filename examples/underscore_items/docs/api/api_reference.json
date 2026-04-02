@@ -6,6 +6,12 @@
       "doc": "",
       "items": [
         {
+          "kind": "Module",
+          "name": "_private_mod",
+          "doc": "",
+          "fqn": "underscore_items._private_mod"
+        },
+        {
           "kind": "Class",
           "name": "PublicClass",
           "doc": "",
@@ -58,13 +64,16 @@
           "deprecated": null
         }
       ],
-      "submodules": []
+      "submodules": [
+        "_private_mod"
+      ]
     }
   },
   "export_map": {
     "underscore_items.PublicClass": "underscore_items",
     "underscore_items._PrivateClass": "underscore_items",
     "underscore_items._private_function": "underscore_items",
+    "underscore_items._private_mod": "underscore_items",
     "underscore_items.public_function": "underscore_items"
   },
   "config": {

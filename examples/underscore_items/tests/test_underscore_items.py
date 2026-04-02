@@ -23,15 +23,15 @@ def read_stub_all(stub_path: Path) -> list[str]:
     return all_items
 
 
-def test_underscore_submodule_excluded():
-    """Underscore-prefixed submodules should be excluded from __all__"""
+def test_underscore_submodule_included():
+    """Underscore-prefixed submodules should be included in __all__"""
     stub_path = Path(__file__).parent.parent / "python" / "underscore_items" / "__init__.pyi"
     all_items = read_stub_all(stub_path)
-    assert "_private_mod" not in all_items
+    assert "_private_mod" in all_items
 
 
-def test_explicit_inclusion():
-    """Explicitly added underscore items should be in __all__"""
+def test_underscore_items_included():
+    """Underscore-prefixed items should be in __all__"""
     stub_path = Path(__file__).parent.parent / "python" / "underscore_items" / "__init__.pyi"
     all_items = read_stub_all(stub_path)
     assert "_private_function" in all_items
