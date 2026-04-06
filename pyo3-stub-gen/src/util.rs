@@ -53,6 +53,28 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
     Ok(globals)
 }
 
+/// Check if a PyFloat is a special value (inf, -inf, nan) and return its Python repr.
+///
+/// Python's `repr(float('inf'))` returns `"inf"` which is not valid Python syntax.
+/// This function returns `float('inf')` style which works without imports.
+fn try_special_float_repr(any: &Bound<'_, PyAny>) -> Option<String> {
+    if !any.is_instance_of::<PyFloat>() {
+        return None;
+    }
+    let value: f64 = any.extract().ok()?;
+    if value.is_nan() {
+        Some("float('nan')".to_string())
+    } else if value.is_infinite() {
+        if value.is_sign_positive() {
+            Some("float('inf')".to_string())
+        } else {
+            Some("float('-inf')".to_string())
+        }
+    } else {
+        None
+    }
+}
+
 #[cfg_attr(not(feature = "infer_signature"), allow(unused_variables))]
 pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     #[cfg(feature = "infer_signature")]
@@ -60,6 +82,10 @@ pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| -> String {
             if let Ok(any) = obj.into_bound_py_any(py) {
+                // Check for special float values first (inf, nan)
+                if let Some(special) = try_special_float_repr(&any) {
+                    return special;
+                }
                 if all_builtin_types(&any) || valid_external_repr(&any).is_some_and(|valid| valid) {
                     if let Ok(py_str) = any.repr() {
                         return py_str.to_string();
@@ -136,6 +162,17 @@ mod test {
         assert_eq!("None", fmt_py_obj(none));
         // class A variable can not be formatted
         assert_eq!("...", fmt_py_obj(A {}));
+    }
+    #[test]
+    fn test_fmt_special_float_values() {
+        // Special float values should be converted to valid Python syntax
+        assert_eq!("float('inf')", fmt_py_obj(f64::INFINITY));
+        assert_eq!("float('-inf')", fmt_py_obj(f64::NEG_INFINITY));
+        assert_eq!("float('nan')", fmt_py_obj(f64::NAN));
+        // f32 special values should also work
+        assert_eq!("float('inf')", fmt_py_obj(f32::INFINITY));
+        assert_eq!("float('-inf')", fmt_py_obj(f32::NEG_INFINITY));
+        assert_eq!("float('nan')", fmt_py_obj(f32::NAN));
     }
     #[test]
     fn test_fmt_enum() {

@@ -746,6 +746,69 @@
         },
         {
           "kind": "Class",
+          "name": "FloatValues",
+          "doc": "A class to test f64 special values",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "FloatValues",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "NAN_VALUE",
+              "doc": "Class attribute: NaN",
+              "type_": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "NEGATIVE_INF",
+              "doc": "Class attribute: negative infinity",
+              "type_": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "POSITIVE_INF",
+              "doc": "Class attribute: positive infinity",
+              "type_": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "REGULAR_FLOAT",
+              "doc": "Class attribute: regular float",
+              "type_": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "HashableStruct",
           "doc": "Test struct for hash and str methods",
           "bases": [],
@@ -3891,6 +3954,126 @@
           "deprecated": null
         },
         {
+          "kind": "Function",
+          "name": "with_float_default",
+          "doc": "Function with regular float default value",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Simple",
+                    "value": "1.5"
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "with_infinity_default",
+          "doc": "Function with infinity as default value",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "threshold",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Simple",
+                    "value": "float('inf')"
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "with_nan_default",
+          "doc": "Function with NaN as default value",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Simple",
+                    "value": "float('nan')"
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "with_neg_infinity_default",
+          "doc": "Function with negative infinity as default value",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "threshold",
+                  "type_": {
+                    "display": "float",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Simple",
+                    "value": "float('-inf')"
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "float",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
           "kind": "TypeAlias",
           "name": "CallbackType",
           "doc": "",
@@ -4465,6 +4648,7 @@
     "pure.DocumentedCallback": "pure",
     "pure.DocumentedMap": "pure",
     "pure.DocumentedUnion": "pure",
+    "pure.FloatValues": "pure",
     "pure.GenericUnion": "pure",
     "pure.HashableStruct": "pure",
     "pure.InstanceValue": "pure",
@@ -4551,7 +4735,11 @@
     "pure.test_type_ignore_no_comment_specific": "pure",
     "pure.test_type_ignore_pyright": "pure",
     "pure.test_type_ignore_specific": "pure",
-    "pure.time_difference": "pure"
+    "pure.time_difference": "pure",
+    "pure.with_float_default": "pure",
+    "pure.with_infinity_default": "pure",
+    "pure.with_nan_default": "pure",
+    "pure.with_neg_infinity_default": "pure"
   },
   "config": {
     "output-dir": "docs/api",
