@@ -57,6 +57,7 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
 ///
 /// Python's `repr(float('inf'))` returns `"inf"` which is not valid Python syntax.
 /// This function returns `float('inf')` style which works without imports.
+#[cfg(feature = "infer_signature")]
 fn try_special_float_repr(any: &Bound<'_, PyAny>) -> Option<String> {
     if !any.is_instance_of::<PyFloat>() {
         return None;
