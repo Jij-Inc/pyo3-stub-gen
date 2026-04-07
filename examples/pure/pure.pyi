@@ -336,7 +336,7 @@ class FloatValues:
     r"""
     Class attribute: NaN
     """
-    REGULAR_FLOAT: builtins.float = 3.14
+    REGULAR_FLOAT: builtins.float = 2.14
     r"""
     Class attribute: regular float
     """
