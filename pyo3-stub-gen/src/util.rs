@@ -55,8 +55,12 @@ fn get_globals<'py>(any: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyDict>> {
 
 /// Check if a PyFloat is a special value (inf, -inf, nan) and return its Python repr.
 ///
-/// Python's `repr(float('inf'))` returns `"inf"` which is not valid Python syntax.
+/// Python's `repr(float('inf'))` returns `"inf"`, which is not a self-contained
+/// expression that can be evaluated without first defining or importing `inf`.
 /// This function returns `float('inf')` style which works without imports.
+///
+/// FIXME: This only handles top-level PyFloat. Containers like `[inf]` or complex
+/// numbers like `(inf+0j)` are not yet handled and will produce invalid stubs.
 #[cfg(feature = "infer_signature")]
 fn try_special_float_repr(any: &Bound<'_, PyAny>) -> Option<String> {
     if !any.is_instance_of::<PyFloat>() {
