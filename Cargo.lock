@@ -103,7 +103,7 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "avoid_name_collision_with_submod"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -248,7 +248,7 @@ checksum = "a043dc74da1e37d6afe657061213aa6f425f855399a11d3463c6ecccc4dfda1f"
 
 [[package]]
 name = "feature_gated"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -264,7 +264,7 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "generate_init_py"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -518,7 +518,7 @@ dependencies = [
 
 [[package]]
 name = "mixed"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -709,7 +709,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "ahash",
  "chrono",
@@ -786,7 +786,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "anyhow",
  "chrono",
@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "heck",
  "indexmap",
@@ -1072,7 +1072,7 @@ checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "simple_name_collision"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -1171,7 +1171,7 @@ dependencies = [
 
 [[package]]
 name = "test-dash-package"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
@@ -1261,7 +1261,7 @@ dependencies = [
 
 [[package]]
 name = "type_statement_alias"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -1271,7 +1271,7 @@ dependencies = [
 
 [[package]]
 name = "underscore_items"
-version = "0.21.1"
+version = "0.21.2"
 dependencies = [
  "env_logger",
  "pyo3",
