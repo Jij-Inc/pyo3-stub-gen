@@ -32,6 +32,7 @@ __all__ = [
     "DocumentedCallback",
     "DocumentedMap",
     "DocumentedUnion",
+    "FloatValues",
     "GenericUnion",
     "HashableStruct",
     "InstanceValue",
@@ -119,6 +120,10 @@ __all__ = [
     "test_type_ignore_pyright",
     "test_type_ignore_specific",
     "time_difference",
+    "with_float_default",
+    "with_infinity_default",
+    "with_nan_default",
+    "with_neg_infinity_default",
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
@@ -313,6 +318,29 @@ class DecimalHolder:
     @property
     def value(self) -> decimal.Decimal: ...
     def __new__(cls, value: decimal.Decimal) -> DecimalHolder: ...
+
+@typing.final
+class FloatValues:
+    r"""
+    A class to test f64 special values
+    """
+    POSITIVE_INF: builtins.float = float('inf')
+    r"""
+    Class attribute: positive infinity
+    """
+    NEGATIVE_INF: builtins.float = float('-inf')
+    r"""
+    Class attribute: negative infinity
+    """
+    NAN_VALUE: builtins.float = float('nan')
+    r"""
+    Class attribute: NaN
+    """
+    REGULAR_FLOAT: builtins.float = 2.14
+    r"""
+    Class attribute: regular float
+    """
+    def __new__(cls) -> FloatValues: ...
 
 @typing.final
 class HashableStruct:
@@ -864,5 +892,25 @@ def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return
 def time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
     r"""
     Calculate the difference between two times as duration
+    """
+
+def with_float_default(value: builtins.float = 1.5) -> builtins.float:
+    r"""
+    Function with regular float default value
+    """
+
+def with_infinity_default(threshold: builtins.float = float('inf')) -> builtins.float:
+    r"""
+    Function with infinity as default value
+    """
+
+def with_nan_default(value: builtins.float = float('nan')) -> builtins.float:
+    r"""
+    Function with NaN as default value
+    """
+
+def with_neg_infinity_default(threshold: builtins.float = float('-inf')) -> builtins.float:
+    r"""
+    Function with negative infinity as default value
     """
 

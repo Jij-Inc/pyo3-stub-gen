@@ -2,6 +2,7 @@
 
 mod chrono_types;
 mod custom_exceptions;
+mod float_values;
 mod manual_overloading;
 mod manual_submit;
 mod overloading;
@@ -12,6 +13,7 @@ mod time_types;
 
 use chrono_types::*;
 use custom_exceptions::*;
+use float_values::*;
 use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
@@ -537,6 +539,13 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_utc, m)?)?;
     m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
+
+    // Test cases for f64 special values (INFINITY, NEG_INFINITY, NAN)
+    m.add_class::<FloatValues>()?;
+    m.add_function(wrap_pyfunction!(with_infinity_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_neg_infinity_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_nan_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_float_default, m)?)?;
     Ok(())
 }
 
