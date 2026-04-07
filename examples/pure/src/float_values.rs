@@ -25,7 +25,7 @@ impl FloatValues {
 
     /// Class attribute: regular float
     #[classattr]
-    const REGULAR_FLOAT: f64 = 3.14;
+    const REGULAR_FLOAT: f64 = 2.14;
 
     #[new]
     fn new() -> Self {
