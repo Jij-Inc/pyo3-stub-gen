@@ -179,6 +179,36 @@ impl A {
     }
 }
 
+/// Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
+///
+/// For `Vec<i32>`:
+/// - getter should produce `-> list[int]`
+/// - setter should produce `value: Sequence[int]`
+#[gen_stub_pyclass]
+#[pyclass]
+struct GetterSetterTypeTest {
+    values: Vec<i32>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl GetterSetterTypeTest {
+    #[new]
+    fn new(values: Vec<i32>) -> Self {
+        Self { values }
+    }
+
+    #[getter]
+    fn values(&self) -> Vec<i32> {
+        self.values.clone()
+    }
+
+    #[setter]
+    fn set_values(&mut self, values: Vec<i32>) {
+        self.values = values;
+    }
+}
+
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (x = 2))]
@@ -470,6 +500,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NormalClass>()?;
     m.add_class::<CustomEnum>()?;
     m.add_class::<CustomComplexEnum>()?;
+    m.add_class::<GetterSetterTypeTest>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;

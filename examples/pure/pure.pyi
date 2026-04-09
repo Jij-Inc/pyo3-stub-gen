@@ -34,6 +34,7 @@ __all__ = [
     "DocumentedUnion",
     "FloatValues",
     "GenericUnion",
+    "GetterSetterTypeTest",
     "HashableStruct",
     "InstanceValue",
     "MY_CONSTANT1",
@@ -341,6 +342,21 @@ class FloatValues:
     Class attribute: regular float
     """
     def __new__(cls) -> FloatValues: ...
+
+@typing.final
+class GetterSetterTypeTest:
+    r"""
+    Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
+    
+    For `Vec<i32>`:
+    - getter should produce `-> list[int]`
+    - setter should produce `value: Sequence[int]`
+    """
+    @property
+    def values(self) -> builtins.list[builtins.int]: ...
+    @values.setter
+    def values(self, value: typing.Sequence[builtins.int]) -> None: ...
+    def __new__(cls, values: typing.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
 
 @typing.final
 class HashableStruct:
