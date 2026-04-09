@@ -18,11 +18,6 @@ pub enum MemberKind {
     Getter,
     /// Setter: uses `type_input` (the parameter type)
     Setter,
-    /// `#[pyo3(get, set)]` field: currently uses `type_output`.
-    /// Getter and setter metadata are constructed separately with their own `MemberKind`.
-    /// This variant is unused in the current implementation but kept for future use.
-    #[allow(dead_code)]
-    GetSet,
 }
 
 impl MemberKind {
@@ -355,7 +350,7 @@ impl ToTokens for MemberInfo {
                             {
                                 let mut type_name = #type_repr.to_string();
                                 #(
-                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::#type_fn();
                                     type_name = type_name.replace(#rust_names, &type_info.name);
                                 )*
                                 type_name
@@ -365,7 +360,7 @@ impl ToTokens for MemberInfo {
                             {
                                 let mut type_refs = ::std::collections::HashMap::new();
                                 #(
-                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::#type_fn();
                                     if let Some(module) = type_info.source_module {
                                         type_refs.insert(
                                             type_info.name.split('[').next().unwrap_or(&type_info.name).split('.').last().unwrap_or(&type_info.name).to_string(),
