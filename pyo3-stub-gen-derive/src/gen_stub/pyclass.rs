@@ -1,9 +1,6 @@
 use super::{
-    extract_documents,
-    member::MemberKind,
-    parse_pyo3_attrs,
-    util::quote_option,
-    Attr, MemberInfo, PyClassAttr, StubType,
+    extract_documents, member::MemberKind, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo,
+    PyClassAttr, StubType,
 };
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
