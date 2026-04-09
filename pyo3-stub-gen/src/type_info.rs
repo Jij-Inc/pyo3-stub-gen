@@ -134,7 +134,7 @@ pub struct MethodInfo {
     pub is_overload: bool,
 }
 
-/// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
+/// Info of getter/setter method decorated with `#[getter]`/`#[setter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
 #[derive(Debug)]
 pub struct MemberInfo {
     pub name: &'static str,

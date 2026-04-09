@@ -809,6 +809,65 @@
         },
         {
           "kind": "Class",
+          "name": "GetterSetterTypeTest",
+          "doc": "Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).\n\nFor `Vec<i32>`:\n- getter should produce `-> list[int]`\n- setter should produce `value: Sequence[int]`",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "values",
+                      "type_": {
+                        "display": "Sequence[int]",
+                        "link_target": null,
+                        "children": [
+                          {
+                            "display": "int",
+                            "link_target": null,
+                            "children": []
+                          }
+                        ]
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "GetterSetterTypeTest",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "values",
+              "doc": "",
+              "type_": {
+                "display": "list[int]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
+              },
+              "is_property": true
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "HashableStruct",
           "doc": "Test struct for hash and str methods",
           "bases": [],
@@ -4650,6 +4709,7 @@
     "pure.DocumentedUnion": "pure",
     "pure.FloatValues": "pure",
     "pure.GenericUnion": "pure",
+    "pure.GetterSetterTypeTest": "pure",
     "pure.HashableStruct": "pure",
     "pure.InstanceValue": "pure",
     "pure.MY_CONSTANT1": "pure",

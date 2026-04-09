@@ -11,6 +11,21 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{Attribute, Error, Expr, Field, FnArg, ImplItemConst, ImplItemFn, Result};
 
+/// Determines which `PyStubType` method to use when generating the type annotation.
+#[derive(Debug, Clone, Copy)]
+pub enum MemberKind {
+    /// Getter or classattr: uses `type_output` (the return type)
+    Getter,
+    /// Setter: uses `type_input` (the parameter type)
+    Setter,
+}
+
+impl MemberKind {
+    fn use_type_input(self) -> bool {
+        matches!(self, MemberKind::Setter)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct MemberInfo {
     doc: String,
@@ -18,6 +33,7 @@ pub struct MemberInfo {
     r#type: TypeOrOverride,
     default: Option<Expr>,
     deprecated: Option<crate::gen_stub::attr::DeprecatedInfo>,
+    kind: MemberKind,
 }
 
 impl MemberInfo {
@@ -96,6 +112,7 @@ impl MemberInfo {
             r#type,
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
+            kind: MemberKind::Getter,
         })
     }
     /// Create a new `MemberInfo` from a setter function.
@@ -169,6 +186,7 @@ impl MemberInfo {
             r#type,
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
+            kind: MemberKind::Setter,
         })
     }
     pub fn new_classattr_fn(item: ImplItemFn) -> Result<Self> {
@@ -188,6 +206,7 @@ impl MemberInfo {
             r#type: extract_return_type(&sig.output, attrs)?.expect("Getter must return a type"),
             default,
             deprecated: crate::gen_stub::attr::extract_deprecated(attrs),
+            kind: MemberKind::Getter,
         })
     }
     pub fn new_classattr_const(item: ImplItemConst) -> Result<Self> {
@@ -212,13 +231,13 @@ impl MemberInfo {
             r#type: TypeOrOverride::RustType { r#type: ty },
             default: Some(expr),
             deprecated: crate::gen_stub::attr::extract_deprecated(&attrs),
+            kind: MemberKind::Getter,
         })
     }
 }
 
-impl TryFrom<Field> for MemberInfo {
-    type Error = Error;
-    fn try_from(field: Field) -> Result<Self> {
+impl MemberInfo {
+    pub fn from_field(field: Field, kind: MemberKind) -> Result<Self> {
         let Field {
             ident, ty, attrs, ..
         } = field;
@@ -237,6 +256,7 @@ impl TryFrom<Field> for MemberInfo {
             doc,
             default,
             deprecated,
+            kind,
         })
     }
 }
@@ -249,7 +269,9 @@ impl ToTokens for MemberInfo {
             doc,
             default,
             deprecated,
+            kind,
         } = self;
+        let use_type_input = kind.use_type_input();
         let default = default
             .as_ref()
             .map(|value| {
@@ -285,11 +307,16 @@ impl ToTokens for MemberInfo {
                 }
             })
             .unwrap_or_else(|| quote! { None });
+        let type_fn = if use_type_input {
+            quote! { type_input }
+        } else {
+            quote! { type_output }
+        };
         match r#type {
             TypeOrOverride::RustType { r#type: ty } => tokens.append_all(quote! {
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: #name,
-                    r#type: <#ty as ::pyo3_stub_gen::PyStubType>::type_output,
+                    r#type: <#ty as ::pyo3_stub_gen::PyStubType>::#type_fn,
                     doc: #doc,
                     default: #default,
                     deprecated: #deprecated_info,
@@ -323,7 +350,7 @@ impl ToTokens for MemberInfo {
                             {
                                 let mut type_name = #type_repr.to_string();
                                 #(
-                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::#type_fn();
                                     type_name = type_name.replace(#rust_names, &type_info.name);
                                 )*
                                 type_name
@@ -333,7 +360,7 @@ impl ToTokens for MemberInfo {
                             {
                                 let mut type_refs = ::std::collections::HashMap::new();
                                 #(
-                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::type_input();
+                                    let type_info = <#marker_types as ::pyo3_stub_gen::PyStubType>::#type_fn();
                                     if let Some(module) = type_info.source_module {
                                         type_refs.insert(
                                             type_info.name.split('[').next().unwrap_or(&type_info.name).split('.').last().unwrap_or(&type_info.name).to_string(),
