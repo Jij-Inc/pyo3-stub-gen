@@ -190,6 +190,8 @@ impl StubInfo {
     }
 
     fn generate_docs(&self, config: &crate::docgen::DocGenConfig) -> Result<()> {
+        config.validate()?;
+
         log::info!("Generating API documentation...");
 
         // 1. Build DocPackage IR
@@ -207,8 +209,16 @@ impl StubInfo {
 
         // 5. Generate RST files
         if config.separate_pages {
-            crate::docgen::render::generate_module_pages(&doc_package, &config.output_dir)?;
+            crate::docgen::render::generate_module_pages(
+                &doc_package,
+                &config.output_dir,
+                config,
+            )?;
             crate::docgen::render::generate_index_rst(&doc_package, &config.output_dir, config)?;
+            if config.separate_items {
+                crate::docgen::render::generate_item_pages(&doc_package, &config.output_dir)?;
+                log::info!("Generated separate .rst pages for each class/function");
+            }
             log::info!("Generated separate .rst pages for each module");
         }
 
