@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 /// Configuration for documentation generation from pyproject.toml
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocGenConfig {
     /// Output directory for generated documentation
     #[serde(rename = "output-dir", default = "default_output_dir")]

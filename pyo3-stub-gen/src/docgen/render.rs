@@ -34,11 +34,7 @@ pub fn generate_module_pages(
     for module_name in module_names {
         let module = &package.modules[module_name];
 
-        let mut rst_content = format!(
-            "{}\n{}\n\n",
-            module_name,
-            "=".repeat(module_name.len()),
-        );
+        let mut rst_content = format!("{}\n{}\n\n", module_name, "=".repeat(module_name.len()),);
 
         if config.separate_items {
             // Summary directive instead of full rendering
