@@ -1,6 +1,9 @@
 use super::{
-    extract_documents, parse_pyo3_attrs, util::quote_option, Attr, MemberInfo, PyClassAttr,
-    StubType,
+    extract_documents,
+    member::MemberKind,
+    parse_pyo3_attrs,
+    util::quote_option,
+    Attr, MemberInfo, PyClassAttr, StubType,
 };
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens, TokenStreamExt};
@@ -108,11 +111,13 @@ impl PyClassInfo {
         let mut getters = Vec::new();
         let mut setters = Vec::new();
         for field in fields {
-            if is_get_all || MemberInfo::is_get(&field)? {
-                getters.push(MemberInfo::try_from(field.clone())?)
+            let has_get = is_get_all || MemberInfo::is_get(&field)?;
+            let has_set = is_set_all || MemberInfo::is_set(&field)?;
+            if has_get {
+                getters.push(MemberInfo::from_field(field.clone(), MemberKind::Getter)?)
             }
-            if is_set_all || MemberInfo::is_set(&field)? {
-                setters.push(MemberInfo::try_from(field)?)
+            if has_set {
+                setters.push(MemberInfo::from_field(field, MemberKind::Setter)?)
             }
         }
         let doc = extract_documents(&attrs).join("\n");

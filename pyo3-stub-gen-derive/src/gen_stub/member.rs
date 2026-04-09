@@ -18,8 +18,10 @@ pub enum MemberKind {
     Getter,
     /// Setter: uses `type_input` (the parameter type)
     Setter,
-    /// `#[pyo3(get, set)]` field: uses `type_output` for now
-    /// (one MemberInfo is shared by both getter and setter)
+    /// `#[pyo3(get, set)]` field: currently uses `type_output`.
+    /// Getter and setter metadata are constructed separately with their own `MemberKind`.
+    /// This variant is unused in the current implementation but kept for future use.
+    #[allow(dead_code)]
     GetSet,
 }
 
@@ -239,9 +241,8 @@ impl MemberInfo {
     }
 }
 
-impl TryFrom<Field> for MemberInfo {
-    type Error = Error;
-    fn try_from(field: Field) -> Result<Self> {
+impl MemberInfo {
+    pub fn from_field(field: Field, kind: MemberKind) -> Result<Self> {
         let Field {
             ident, ty, attrs, ..
         } = field;
@@ -260,7 +261,7 @@ impl TryFrom<Field> for MemberInfo {
             doc,
             default,
             deprecated,
-            kind: MemberKind::GetSet,
+            kind,
         })
     }
 }
