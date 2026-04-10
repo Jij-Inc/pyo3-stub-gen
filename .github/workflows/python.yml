@@ -62,4 +62,10 @@ jobs:
       - name: Test documentation generation
         run: task ${{ matrix.crate }}:doc-test
       - name: Check if generated API docs are up to date
-        run: git diff --exit-code
+        run: |
+          git diff --exit-code
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Untracked or unstaged files detected:"
+            git status --short
+            exit 1
+          fi

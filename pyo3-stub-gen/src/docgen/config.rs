@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 /// Configuration for documentation generation from pyproject.toml
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DocGenConfig {
     /// Output directory for generated documentation
     #[serde(rename = "output-dir", default = "default_output_dir")]
@@ -29,6 +30,11 @@ pub struct DocGenConfig {
     /// Generate module contents tables (default: false)
     #[serde(rename = "contents-table", default)]
     pub contents_table: bool,
+
+    /// Generate separate .rst pages for each class/function (default: false)
+    /// When true, module pages show a summary table with links to individual item pages.
+    #[serde(rename = "separate-items", default)]
+    pub separate_items: bool,
 }
 
 impl Default for DocGenConfig {
@@ -40,6 +46,7 @@ impl Default for DocGenConfig {
             intro_message: None,
             index_title: None,
             contents_table: false,
+            separate_items: false,
         }
     }
 }
@@ -57,6 +64,21 @@ fn default_separate_pages() -> bool {
 }
 
 impl DocGenConfig {
+    /// Validate configuration consistency
+    pub fn validate(&self) -> anyhow::Result<()> {
+        anyhow::ensure!(
+            !(self.separate_items && !self.contents_table),
+            "separate-items = true requires contents-table = true. \
+             Module pages need a summary table to link to individual item pages."
+        );
+        anyhow::ensure!(
+            !(self.separate_items && !self.separate_pages),
+            "separate-items = true requires separate-pages = true. \
+             Item pages need separate module pages to link from."
+        );
+        Ok(())
+    }
+
     /// Convert output_dir to relative POSIX path for JSON serialization
     pub fn to_relative_posix_path(&self, base_dir: &std::path::Path) -> String {
         let relative_path = if self.output_dir.is_absolute() {

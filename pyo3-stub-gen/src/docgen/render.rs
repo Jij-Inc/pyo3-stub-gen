@@ -1,6 +1,7 @@
 //! JSON rendering and Sphinx extension embedding
 
-use crate::docgen::ir::DocPackage;
+use crate::docgen::config::DocGenConfig;
+use crate::docgen::ir::{DocItem, DocPackage};
 use crate::Result;
 use std::path::Path;
 
@@ -21,18 +22,52 @@ pub fn copy_sphinx_extension(output_dir: &Path) -> Result<()> {
 }
 
 /// Generate RST files for each module
-pub fn generate_module_pages(package: &DocPackage, output_dir: &Path) -> Result<()> {
+pub fn generate_module_pages(
+    package: &DocPackage,
+    output_dir: &Path,
+    config: &DocGenConfig,
+) -> Result<()> {
     // Sort modules to ensure consistent ordering
     let mut module_names: Vec<_> = package.modules.keys().collect();
     module_names.sort();
 
     for module_name in module_names {
-        let rst_content = format!(
-            "{}\n{}\n\n.. pyo3-api:: {}\n",
-            module_name,
-            "=".repeat(module_name.len()),
-            module_name
-        );
+        let module = &package.modules[module_name];
+
+        let mut rst_content = format!("{}\n{}\n\n", module_name, "=".repeat(module_name.len()),);
+
+        if config.separate_items {
+            // Summary directive instead of full rendering
+            rst_content.push_str(&format!(".. pyo3-api-summary:: {}\n\n", module_name));
+
+            // Collect all items that get their own pages
+            let item_pages: Vec<String> = module
+                .items
+                .iter()
+                .filter_map(|item| {
+                    let name = match item {
+                        DocItem::Class(c) => &c.name,
+                        DocItem::Function(f) => &f.name,
+                        DocItem::TypeAlias(t) => &t.name,
+                        DocItem::Variable(v) => &v.name,
+                        DocItem::Module(_) => return None,
+                    };
+                    Some(format!("   _items/{}.{}", module_name, name))
+                })
+                .collect();
+
+            // Add hidden toctree referencing item pages
+            if !item_pages.is_empty() {
+                rst_content.push_str(".. toctree::\n");
+                rst_content.push_str("   :hidden:\n\n");
+                for page in &item_pages {
+                    rst_content.push_str(page);
+                    rst_content.push('\n');
+                }
+            }
+        } else {
+            rst_content.push_str(&format!(".. pyo3-api:: {}\n", module_name));
+        }
 
         // Convert module name to filename: mixed.main_mod -> mixed.main_mod.rst
         let filename = format!("{}.rst", module_name);
@@ -44,11 +79,52 @@ pub fn generate_module_pages(package: &DocPackage, output_dir: &Path) -> Result<
     Ok(())
 }
 
+/// Generate individual RST pages for each item (class, function, type alias, variable)
+///
+/// Item pages are placed in `_items/` subdirectory to avoid filename collisions
+/// with module pages (e.g., a class `pkg.Foo` vs submodule `pkg.Foo`).
+///
+/// The `_items/` directory is cleared before generation to remove stale pages
+/// from renamed or deleted items.
+pub fn generate_item_pages(package: &DocPackage, output_dir: &Path) -> Result<()> {
+    let items_dir = output_dir.join("_items");
+    if items_dir.exists() {
+        std::fs::remove_dir_all(&items_dir)?;
+    }
+    std::fs::create_dir_all(&items_dir)?;
+
+    for (module_name, module) in &package.modules {
+        for item in &module.items {
+            let (item_name, directive) = match item {
+                DocItem::Class(c) => (c.name.as_str(), "pyo3-api-class"),
+                DocItem::Function(f) => (f.name.as_str(), "pyo3-api-function"),
+                DocItem::TypeAlias(t) => (t.name.as_str(), "pyo3-api-type-alias"),
+                DocItem::Variable(v) => (v.name.as_str(), "pyo3-api-variable"),
+                DocItem::Module(_) => continue,
+            };
+
+            let rst_content = format!(
+                "{}\n{}\n\n.. {}:: {} {}\n",
+                item_name,
+                "=".repeat(item_name.len()),
+                directive,
+                module_name,
+                item_name,
+            );
+
+            let filename = format!("{}.{}.rst", module_name, item_name);
+            std::fs::write(items_dir.join(&filename), rst_content)?;
+        }
+    }
+
+    Ok(())
+}
+
 /// Generate index.rst that references all module pages
 pub fn generate_index_rst(
     package: &DocPackage,
     output_dir: &Path,
-    config: &crate::docgen::config::DocGenConfig,
+    config: &DocGenConfig,
 ) -> Result<()> {
     let mut content = String::new();
 

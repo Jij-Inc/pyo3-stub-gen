@@ -33,10 +33,13 @@ toml.workspace = true
 
 [dependencies.pyo3-stub-gen-derive]
 path = "../pyo3-stub-gen-derive"
-version = "0.21.3"
+version = "0.22.0"
 
 [dev-dependencies]
 test-case.workspace = true
+
+[lints]
+workspace = true
 
 [features]
 default = ["either", "infer_signature", "numpy", "ordered-float"]

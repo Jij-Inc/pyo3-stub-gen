@@ -14,8 +14,13 @@ members = [
   "pyo3-stub-gen-derive",
 ]
 
+[workspace.lints.clippy]
+# This lint suggests De Morgan transforms (e.g., !(a && !b) -> !a || b) but the
+# original form is often more readable and clippy fix cannot auto-fix it.
+nonminimal_bool = "allow"
+
 [workspace.package]
-version = "0.21.3"
+version = "0.22.0"
 edition = "2021"
 description = "Stub file (*.pyi) generator for PyO3"
 readme = "README.md"

@@ -10,3 +10,4 @@ examples/generate_init_py/python/generate_init_py/__init__.py linguist-generated
 # Generated docgen files (pyo3_stub_gen_ext.py is gitignored)
 examples/*/docs/api/api_reference.json linguist-generated=true
 examples/*/docs/api/*.rst linguist-generated=true
+examples/*/docs/api/_items/*.rst linguist-generated=true

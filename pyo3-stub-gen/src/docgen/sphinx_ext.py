@@ -1010,6 +1010,30 @@ def _build_submodule(env, submod, parent_module_name):
     # Return just the list item (caller will add to bullet list)
     return [list_item]
 
+@lru_cache(maxsize=1)
+def _load_doc_package(srcdir):
+    """Load JSON IR from the source directory (cached per build)"""
+    json_path = Path(srcdir) / "api" / "api_reference.json"
+    if not json_path.exists():
+        json_path = Path(srcdir) / "api_reference.json"
+    with open(json_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _register_module(env, module_name, doc_module):
+    """Register a module with Python domain for py-modindex"""
+    if hasattr(env, 'domaindata'):
+        py_domain = env.get_domain('py')
+        synopsis = _extract_first_line_doc(doc_module.get('doc', ''))
+        py_domain.note_module(
+            module_name,
+            env.docname,
+            synopsis,
+            '',
+            False
+        )
+
+
 class Pyo3APIDirective(SphinxDirective):
     """Render API from pyo3-stub-gen JSON IR"""
 
@@ -1018,13 +1042,7 @@ class Pyo3APIDirective(SphinxDirective):
     def run(self):
         module_name = self.arguments[0]
 
-        # Load JSON IR - check both api/ subdirectory and srcdir
-        json_path = Path(self.env.srcdir) / "api" / "api_reference.json"
-        if not json_path.exists():
-            json_path = Path(self.env.srcdir) / "api_reference.json"
-
-        with open(json_path) as f:
-            doc_package = json.load(f)
+        doc_package = _load_doc_package(self.env.srcdir)
 
         # Find module
         if module_name not in doc_package['modules']:
@@ -1036,17 +1054,7 @@ class Pyo3APIDirective(SphinxDirective):
         result = []
 
         # REGISTER MODULE with Python domain for py-modindex
-        if hasattr(self.env, 'domaindata'):
-            py_domain = self.env.get_domain('py')
-            synopsis = _extract_first_line_doc(doc_module.get('doc', ''))
-            # Sphinx 9.x signature: note_module(name, node_id, synopsis, platform, deprecated)
-            py_domain.note_module(
-                module_name,
-                self.env.docname,
-                synopsis,
-                '',
-                False
-            )
+        _register_module(self.env, module_name, doc_module)
 
         # OPTIONALLY: Add module index entry to genindex
         module_index = _create_index_node(module_name, 'module')
@@ -1147,13 +1155,7 @@ class Pyo3APIPackageDirective(SphinxDirective):
     def run(self):
         package_name = self.arguments[0]
 
-        # Load JSON IR - check both api/ subdirectory and srcdir
-        json_path = Path(self.env.srcdir) / "api" / "api_reference.json"
-        if not json_path.exists():
-            json_path = Path(self.env.srcdir) / "api_reference.json"
-
-        with open(json_path) as f:
-            doc_package = json.load(f)
+        doc_package = _load_doc_package(self.env.srcdir)
 
         # Find all modules matching the package
         result = []
@@ -1163,17 +1165,7 @@ class Pyo3APIPackageDirective(SphinxDirective):
                 doc_module = doc_package['modules'][module_name]
 
                 # REGISTER EACH MODULE
-                if hasattr(self.env, 'domaindata'):
-                    py_domain = self.env.get_domain('py')
-                    synopsis = _extract_first_line_doc(doc_module.get('doc', ''))
-                    # Sphinx 9.x signature: note_module(name, node_id, synopsis, platform, deprecated)
-                    py_domain.note_module(
-                        module_name,
-                        self.env.docname,
-                        synopsis,
-                        '',
-                        False
-                    )
+                _register_module(self.env, module_name, doc_module)
 
                 # Add section header for each module
                 section = nodes.section(ids=[f'module-{module_name}'])
@@ -1276,7 +1268,211 @@ class Pyo3APIPackageDirective(SphinxDirective):
     def _build_submodule(self, submod, module_name):
         return _build_submodule(self.env, submod, module_name)
 
+class Pyo3APISummaryDirective(SphinxDirective):
+    """Render module summary with links to individual item pages.
+
+    Used when separate-items is enabled. Shows:
+    - Module docstring
+    - Summary tables with links to individual item pages
+    """
+
+    required_arguments = 1  # Module name
+
+    def run(self):
+        module_name = self.arguments[0]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        result = []
+
+        # Register module with Python domain
+        _register_module(self.env, module_name, doc_module)
+
+        # Module index entry
+        module_index = _create_index_node(module_name, 'module')
+        result.append(module_index)
+
+        # Render module docstring
+        if doc_module.get('doc'):
+            result.extend(_parse_myst(doc_module['doc'], self.env))
+
+        # Group items by kind
+        functions = [item for item in doc_module['items'] if item['kind'] == 'Function']
+        classes = [item for item in doc_module['items'] if item['kind'] == 'Class']
+        type_aliases = [item for item in doc_module['items'] if item['kind'] == 'TypeAlias']
+        variables = [item for item in doc_module['items'] if item['kind'] == 'Variable']
+        modules = [item for item in doc_module['items'] if item['kind'] == 'Module']
+
+        # Submodules section
+        if modules:
+            mod_section = nodes.section(ids=[f'{module_name}-submodules'])
+            mod_section += nodes.title(text='Submodules')
+            bullet_list = nodes.bullet_list()
+            for submod in modules:
+                bullet_list.extend(_build_submodule(self.env, submod, module_name))
+            mod_section += bullet_list
+            result.append(mod_section)
+
+        # Summary tables for all item kinds (they each have their own pages)
+        # contents-table must be true when separate-items is true (validated at generation time)
+        if doc_package.get('config', {}).get('contents-table', False):
+            if classes:
+                result.extend(_build_contents_table(
+                    self.env, 'Classes', classes, module_name
+                ))
+
+            if functions:
+                result.extend(_build_contents_table(
+                    self.env, 'Functions', functions, module_name
+                ))
+
+            if type_aliases:
+                result.extend(_build_contents_table(
+                    self.env, 'Type Aliases', type_aliases, module_name
+                ))
+
+            if variables:
+                result.extend(_build_contents_table(
+                    self.env, 'Variables', variables, module_name
+                ))
+
+        return result
+
+
+class Pyo3APIClassDirective(SphinxDirective):
+    """Render a single class on its own page"""
+
+    required_arguments = 2  # module_name class_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        class_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        # Find the class item
+        cls = None
+        for item in doc_module['items']:
+            if item['kind'] == 'Class' and item['name'] == class_name:
+                cls = item
+                break
+
+        if cls is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Class not found: {class_name} in {module_name}"))]
+
+        return _build_class(self.env, cls, module_name)
+
+
+class Pyo3APIFunctionDirective(SphinxDirective):
+    """Render a single function on its own page"""
+
+    required_arguments = 2  # module_name function_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        function_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        # Find the function item
+        func = None
+        for item in doc_module['items']:
+            if item['kind'] == 'Function' and item['name'] == function_name:
+                func = item
+                break
+
+        if func is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Function not found: {function_name} in {module_name}"))]
+
+        return _build_function(self.env, func, module_name)
+
+
+class Pyo3APITypeAliasDirective(SphinxDirective):
+    """Render a single type alias on its own page"""
+
+    required_arguments = 2  # module_name alias_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        alias_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        alias = None
+        for item in doc_module['items']:
+            if item['kind'] == 'TypeAlias' and item['name'] == alias_name:
+                alias = item
+                break
+
+        if alias is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Type alias not found: {alias_name} in {module_name}"))]
+
+        return _build_type_alias(self.env, alias, module_name)
+
+
+class Pyo3APIVariableDirective(SphinxDirective):
+    """Render a single variable on its own page"""
+
+    required_arguments = 2  # module_name variable_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        variable_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        var = None
+        for item in doc_module['items']:
+            if item['kind'] == 'Variable' and item['name'] == variable_name:
+                var = item
+                break
+
+        if var is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Variable not found: {variable_name} in {module_name}"))]
+
+        return _build_variable(self.env, var, module_name)
+
+
 def setup(app):
     app.add_directive('pyo3-api', Pyo3APIDirective)
     app.add_directive('pyo3-api-package', Pyo3APIPackageDirective)
+    app.add_directive('pyo3-api-summary', Pyo3APISummaryDirective)
+    app.add_directive('pyo3-api-class', Pyo3APIClassDirective)
+    app.add_directive('pyo3-api-function', Pyo3APIFunctionDirective)
+    app.add_directive('pyo3-api-type-alias', Pyo3APITypeAliasDirective)
+    app.add_directive('pyo3-api-variable', Pyo3APIVariableDirective)
     return {'version': '0.1', 'parallel_read_safe': True}

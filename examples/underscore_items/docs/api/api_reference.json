@@ -73,6 +73,7 @@
     "separate-pages": true,
     "intro-message": null,
     "index-title": null,
-    "contents-table": false
+    "contents-table": false,
+    "separate-items": false
   }
 }
