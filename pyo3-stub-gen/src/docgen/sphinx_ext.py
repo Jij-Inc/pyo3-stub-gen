@@ -1016,7 +1016,7 @@ def _load_doc_package(srcdir):
     json_path = Path(srcdir) / "api" / "api_reference.json"
     if not json_path.exists():
         json_path = Path(srcdir) / "api_reference.json"
-    with open(json_path) as f:
+    with open(json_path, encoding="utf-8") as f:
         return json.load(f)
 
 

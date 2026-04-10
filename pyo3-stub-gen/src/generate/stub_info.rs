@@ -213,7 +213,7 @@ impl StubInfo {
             crate::docgen::render::generate_index_rst(&doc_package, &config.output_dir, config)?;
             if config.separate_items {
                 crate::docgen::render::generate_item_pages(&doc_package, &config.output_dir)?;
-                log::info!("Generated separate .rst pages for each class/function");
+                log::info!("Generated separate .rst pages for each item");
             }
             log::info!("Generated separate .rst pages for each module");
         }

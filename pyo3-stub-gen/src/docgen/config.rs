@@ -71,6 +71,11 @@ impl DocGenConfig {
             "separate-items = true requires contents-table = true. \
              Module pages need a summary table to link to individual item pages."
         );
+        anyhow::ensure!(
+            !(self.separate_items && !self.separate_pages),
+            "separate-items = true requires separate-pages = true. \
+             Item pages need separate module pages to link from."
+        );
         Ok(())
     }
 

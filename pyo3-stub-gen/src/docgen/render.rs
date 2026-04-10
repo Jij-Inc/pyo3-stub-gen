@@ -83,8 +83,14 @@ pub fn generate_module_pages(
 ///
 /// Item pages are placed in `_items/` subdirectory to avoid filename collisions
 /// with module pages (e.g., a class `pkg.Foo` vs submodule `pkg.Foo`).
+///
+/// The `_items/` directory is cleared before generation to remove stale pages
+/// from renamed or deleted items.
 pub fn generate_item_pages(package: &DocPackage, output_dir: &Path) -> Result<()> {
     let items_dir = output_dir.join("_items");
+    if items_dir.exists() {
+        std::fs::remove_dir_all(&items_dir)?;
+    }
     std::fs::create_dir_all(&items_dir)?;
 
     for (module_name, module) in &package.modules {
