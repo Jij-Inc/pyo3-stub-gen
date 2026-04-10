@@ -4807,7 +4807,7 @@
     "separate-pages": true,
     "intro-message": null,
     "index-title": "API Reference",
-    "contents-table": false,
-    "separate-items": false
+    "contents-table": true,
+    "separate-items": true
   }
 }
