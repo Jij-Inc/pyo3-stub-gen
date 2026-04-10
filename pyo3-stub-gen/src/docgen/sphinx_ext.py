@@ -1272,8 +1272,7 @@ class Pyo3APISummaryDirective(SphinxDirective):
 
     Used when separate-items is enabled. Shows:
     - Module docstring
-    - Summary table (classes, functions with links to their own pages)
-    - Full details for type aliases and variables (they stay on this page)
+    - Summary tables with links to individual item pages
     """
 
     required_arguments = 1  # Module name
@@ -1319,7 +1318,7 @@ class Pyo3APISummaryDirective(SphinxDirective):
             mod_section += bullet_list
             result.append(mod_section)
 
-        # Summary tables for classes and functions (they have their own pages)
+        # Summary tables for all item kinds (they each have their own pages)
         # contents-table must be true when separate-items is true (validated at generation time)
         if doc_package.get('config', {}).get('contents-table', False):
             if classes:
@@ -1332,21 +1331,15 @@ class Pyo3APISummaryDirective(SphinxDirective):
                     self.env, 'Functions', functions, module_name
                 ))
 
-        # Type aliases rendered in full (they stay on module page)
-        if type_aliases:
-            alias_section = nodes.section(ids=[f'{module_name}-type-aliases'])
-            alias_section += nodes.title(text='Type Aliases')
-            for alias in type_aliases:
-                alias_section.extend(_build_type_alias(self.env, alias, module_name))
-            result.append(alias_section)
+            if type_aliases:
+                result.extend(_build_contents_table(
+                    self.env, 'Type Aliases', type_aliases, module_name
+                ))
 
-        # Variables rendered in full (they stay on module page)
-        if variables:
-            var_section = nodes.section(ids=[f'{module_name}-variables'])
-            var_section += nodes.title(text='Variables')
-            for var in variables:
-                var_section.extend(_build_variable(self.env, var, module_name))
-            result.append(var_section)
+            if variables:
+                result.extend(_build_contents_table(
+                    self.env, 'Variables', variables, module_name
+                ))
 
         return result
 
@@ -1413,10 +1406,72 @@ class Pyo3APIFunctionDirective(SphinxDirective):
         return _build_function(self.env, func, module_name)
 
 
+class Pyo3APITypeAliasDirective(SphinxDirective):
+    """Render a single type alias on its own page"""
+
+    required_arguments = 2  # module_name alias_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        alias_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        alias = None
+        for item in doc_module['items']:
+            if item['kind'] == 'TypeAlias' and item['name'] == alias_name:
+                alias = item
+                break
+
+        if alias is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Type alias not found: {alias_name} in {module_name}"))]
+
+        return _build_type_alias(self.env, alias, module_name)
+
+
+class Pyo3APIVariableDirective(SphinxDirective):
+    """Render a single variable on its own page"""
+
+    required_arguments = 2  # module_name variable_name
+
+    def run(self):
+        module_name = self.arguments[0]
+        variable_name = self.arguments[1]
+
+        doc_package = _load_doc_package(self.env.srcdir)
+
+        if module_name not in doc_package['modules']:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Module not found: {module_name}"))]
+
+        doc_module = doc_package['modules'][module_name]
+
+        var = None
+        for item in doc_module['items']:
+            if item['kind'] == 'Variable' and item['name'] == variable_name:
+                var = item
+                break
+
+        if var is None:
+            return [nodes.error('', nodes.paragraph(
+                text=f"Variable not found: {variable_name} in {module_name}"))]
+
+        return _build_variable(self.env, var, module_name)
+
+
 def setup(app):
     app.add_directive('pyo3-api', Pyo3APIDirective)
     app.add_directive('pyo3-api-package', Pyo3APIPackageDirective)
     app.add_directive('pyo3-api-summary', Pyo3APISummaryDirective)
     app.add_directive('pyo3-api-class', Pyo3APIClassDirective)
     app.add_directive('pyo3-api-function', Pyo3APIFunctionDirective)
+    app.add_directive('pyo3-api-type-alias', Pyo3APITypeAliasDirective)
+    app.add_directive('pyo3-api-variable', Pyo3APIVariableDirective)
     return {'version': '0.1', 'parallel_read_safe': True}

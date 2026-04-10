@@ -40,14 +40,19 @@ pub fn generate_module_pages(
             // Summary directive instead of full rendering
             rst_content.push_str(&format!(".. pyo3-api-summary:: {}\n\n", module_name));
 
-            // Collect class/function items that get their own pages
+            // Collect all items that get their own pages
             let item_pages: Vec<String> = module
                 .items
                 .iter()
-                .filter_map(|item| match item {
-                    DocItem::Class(c) => Some(format!("   {}.{}", module_name, c.name)),
-                    DocItem::Function(f) => Some(format!("   {}.{}", module_name, f.name)),
-                    _ => None,
+                .filter_map(|item| {
+                    let name = match item {
+                        DocItem::Class(c) => &c.name,
+                        DocItem::Function(f) => &f.name,
+                        DocItem::TypeAlias(t) => &t.name,
+                        DocItem::Variable(v) => &v.name,
+                        DocItem::Module(_) => return None,
+                    };
+                    Some(format!("   {}.{}", module_name, name))
                 })
                 .collect();
 
@@ -74,15 +79,16 @@ pub fn generate_module_pages(
     Ok(())
 }
 
-/// Generate individual RST pages for each class and function
+/// Generate individual RST pages for each item (class, function, type alias, variable)
 pub fn generate_item_pages(package: &DocPackage, output_dir: &Path) -> Result<()> {
     for (module_name, module) in &package.modules {
         for item in &module.items {
             let (item_name, directive) = match item {
                 DocItem::Class(c) => (c.name.as_str(), "pyo3-api-class"),
                 DocItem::Function(f) => (f.name.as_str(), "pyo3-api-function"),
-                // Type aliases and variables stay on the module page
-                _ => continue,
+                DocItem::TypeAlias(t) => (t.name.as_str(), "pyo3-api-type-alias"),
+                DocItem::Variable(v) => (v.name.as_str(), "pyo3-api-variable"),
+                DocItem::Module(_) => continue,
             };
 
             let rst_content = format!(
