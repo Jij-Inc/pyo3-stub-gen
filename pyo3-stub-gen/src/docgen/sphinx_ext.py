@@ -1010,6 +1010,7 @@ def _build_submodule(env, submod, parent_module_name):
     # Return just the list item (caller will add to bullet list)
     return [list_item]
 
+@lru_cache(maxsize=1)
 def _load_doc_package(srcdir):
     """Load JSON IR from the source directory (cached per build)"""
     json_path = Path(srcdir) / "api" / "api_reference.json"

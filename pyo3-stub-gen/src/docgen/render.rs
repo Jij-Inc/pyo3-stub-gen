@@ -52,7 +52,7 @@ pub fn generate_module_pages(
                         DocItem::Variable(v) => &v.name,
                         DocItem::Module(_) => return None,
                     };
-                    Some(format!("   {}.{}", module_name, name))
+                    Some(format!("   _items/{}.{}", module_name, name))
                 })
                 .collect();
 
@@ -80,7 +80,13 @@ pub fn generate_module_pages(
 }
 
 /// Generate individual RST pages for each item (class, function, type alias, variable)
+///
+/// Item pages are placed in `_items/` subdirectory to avoid filename collisions
+/// with module pages (e.g., a class `pkg.Foo` vs submodule `pkg.Foo`).
 pub fn generate_item_pages(package: &DocPackage, output_dir: &Path) -> Result<()> {
+    let items_dir = output_dir.join("_items");
+    std::fs::create_dir_all(&items_dir)?;
+
     for (module_name, module) in &package.modules {
         for item in &module.items {
             let (item_name, directive) = match item {
@@ -101,7 +107,7 @@ pub fn generate_item_pages(package: &DocPackage, output_dir: &Path) -> Result<()
             );
 
             let filename = format!("{}.{}.rst", module_name, item_name);
-            std::fs::write(output_dir.join(&filename), rst_content)?;
+            std::fs::write(items_dir.join(&filename), rst_content)?;
         }
     }
 

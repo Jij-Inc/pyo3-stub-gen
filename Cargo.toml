@@ -15,6 +15,8 @@ members = [
 ]
 
 [workspace.lints.clippy]
+# This lint suggests De Morgan transforms (e.g., !(a && !b) -> !a || b) but the
+# original form is often more readable and clippy fix cannot auto-fix it.
 nonminimal_bool = "allow"
 
 [workspace.package]
