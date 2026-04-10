@@ -14,6 +14,9 @@ members = [
   "pyo3-stub-gen-derive",
 ]
 
+[workspace.lints.clippy]
+nonminimal_bool = "allow"
+
 [workspace.package]
 version = "0.22.0"
 edition = "2021"
