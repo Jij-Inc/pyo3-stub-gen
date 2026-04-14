@@ -35,6 +35,11 @@ pub struct DocGenConfig {
     /// When true, module pages show a summary table with links to individual item pages.
     #[serde(rename = "separate-items", default)]
     pub separate_items: bool,
+
+    /// Generate index.rst file (default: true)
+    /// Set to false to skip generating index.rst, useful when a hand-maintained index.rst exists.
+    #[serde(rename = "generate-index", default = "default_generate_index")]
+    pub generate_index: bool,
 }
 
 impl Default for DocGenConfig {
@@ -47,6 +52,7 @@ impl Default for DocGenConfig {
             index_title: None,
             contents_table: false,
             separate_items: false,
+            generate_index: default_generate_index(),
         }
     }
 }
@@ -60,6 +66,10 @@ fn default_json_output() -> String {
 }
 
 fn default_separate_pages() -> bool {
+    true
+}
+
+fn default_generate_index() -> bool {
     true
 }
 

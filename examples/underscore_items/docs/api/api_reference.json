@@ -74,6 +74,7 @@
     "intro-message": null,
     "index-title": null,
     "contents-table": false,
-    "separate-items": false
+    "separate-items": false,
+    "generate-index": true
   }
 }
