@@ -4808,6 +4808,7 @@
     "intro-message": null,
     "index-title": "API Reference",
     "contents-table": true,
-    "separate-items": true
+    "separate-items": true,
+    "generate-index": true
   }
 }

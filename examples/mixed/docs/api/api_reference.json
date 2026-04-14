@@ -952,6 +952,7 @@
     "intro-message": "Custom documentation for the mixed example project demonstrating PyO3 stub generation.",
     "index-title": "Mixed Example API Documentation",
     "contents-table": false,
-    "separate-items": false
+    "separate-items": false,
+    "generate-index": true
   }
 }

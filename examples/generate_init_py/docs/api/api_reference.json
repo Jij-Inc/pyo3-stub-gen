@@ -317,6 +317,7 @@
     "intro-message": "Example for generate-init-py feature.",
     "index-title": null,
     "contents-table": true,
-    "separate-items": false
+    "separate-items": false,
+    "generate-index": true
   }
 }
