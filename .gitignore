@@ -18,3 +18,11 @@ dist/
 # Taskfile
 .task/
 .claude/settings.local.json
+workspace
+
+# Sphinx documentation build output
+_build/
+.playwright-mcp
+
+# pyo3-stub-gen docgen generated files (not tracked)
+**/docs/api/pyo3_stub_gen_ext.py

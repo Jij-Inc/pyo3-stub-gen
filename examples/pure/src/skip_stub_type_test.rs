@@ -33,6 +33,7 @@ impl pyo3_stub_gen::PyStubType for CustomStubType {
         pyo3_stub_gen::TypeInfo::with_module("CustomStubType", "pure".into())
     }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomStubType);
 
 /// Test class without skip_stub_type (normal behavior)
 #[gen_stub_pyclass]
@@ -67,6 +68,7 @@ impl pyo3_stub_gen::PyStubType for CustomEnum {
         pyo3_stub_gen::TypeInfo::with_module("CustomEnum", "pure".into())
     }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomEnum);
 
 /// Test complex enum with skip_stub_type
 #[gen_stub_pyclass_complex_enum(skip_stub_type)]
@@ -84,3 +86,4 @@ impl pyo3_stub_gen::PyStubType for CustomComplexEnum {
         pyo3_stub_gen::TypeInfo::with_module("CustomComplexEnum", "pure".into())
     }
 }
+pyo3_stub_gen::impl_py_runtime_type!(CustomComplexEnum);

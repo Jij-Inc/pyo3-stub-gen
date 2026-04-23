@@ -1,6 +1,6 @@
 use crate::gen_stub::arg::ArgInfo;
 use crate::gen_stub::attr::{extract_documents, parse_pyo3_attrs, Attr};
-use crate::gen_stub::member::MemberInfo;
+use crate::gen_stub::member::{MemberInfo, MemberKind};
 use crate::gen_stub::parameter::Parameters;
 use crate::gen_stub::renaming::RenamingRule;
 use crate::gen_stub::signature::Signature;
@@ -75,7 +75,7 @@ impl VariantInfo {
             Fields::Unit => VariantForm::Unit,
             Fields::Named(fields) => {
                 for field in fields.named {
-                    members.push(MemberInfo::try_from(field)?)
+                    members.push(MemberInfo::from_field(field, MemberKind::Getter)?)
                 }
                 VariantForm::Struct
             }
@@ -83,7 +83,7 @@ impl VariantInfo {
                 for (i, field) in fields.unnamed.iter().enumerate() {
                     let mut named_field = field.clone();
                     named_field.ident = Some(Ident::new(&format!("_{i}"), field.ident.span()));
-                    members.push(MemberInfo::try_from(named_field)?)
+                    members.push(MemberInfo::from_field(named_field, MemberKind::Getter)?)
                 }
                 VariantForm::Tuple
             }

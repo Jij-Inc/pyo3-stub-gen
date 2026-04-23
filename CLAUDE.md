@@ -194,6 +194,7 @@ Manual type specification is supported for edge cases where automatic translatio
 For in-depth design documentation and implementation details, see the `docs/` directory:
 
 - [`docs/architecture.md`](./docs/architecture.md) - Overall system architecture and three-phase generation process
+- [`docs/docgen-architecture.md`](./docs/docgen-architecture.md) - Sphinx API documentation generation architecture
 - [`docs/stub-file-generation.md`](./docs/stub-file-generation.md) - Stub file generation rules and maturin layout behavior
 - [`docs/procedural-macro-design.md`](./docs/procedural-macro-design.md) - Three-layer architecture pattern for proc-macros
 - [`docs/type-system.md`](./docs/type-system.md) - Rust to Python type mappings and `PyStubType` trait

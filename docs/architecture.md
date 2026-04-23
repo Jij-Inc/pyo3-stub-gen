@@ -309,6 +309,7 @@ The architecture supports extension through:
 
 ## Related Documentation
 
+- [Documentation Generation Architecture](./docgen-architecture.md) - Sphinx API documentation generation
 - [Procedural Macro Design Pattern](./procedural-macro-design.md) - Detailed design of the derive crate
 - [Type System](./type-system.md) - Rust to Python type mappings
 - [Python Stub Syntax Support](./python-stub-syntax.md) - Using Python type annotations directly

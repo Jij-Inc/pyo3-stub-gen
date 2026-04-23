@@ -2,6 +2,12 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+includes:
+  doc:
+    taskfile: ../doc.yml
+    flatten: true
+    dir: .
+
 tasks:
   stub-gen:
     desc: Generate stub file

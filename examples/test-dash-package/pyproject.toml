@@ -11,3 +11,6 @@ build-backend = "maturin"
 
 [tool.maturin]
 # For cases where we define `module-name` explicitly here are tested in other examples.
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]

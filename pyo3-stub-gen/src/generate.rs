@@ -2,7 +2,7 @@
 
 mod class;
 mod deprecated;
-mod docstring;
+pub(crate) mod docstring;
 mod enum_;
 mod function;
 mod member;
@@ -16,6 +16,7 @@ mod variable;
 mod variant_methods;
 
 pub use class::*;
+pub use docstring::normalize_docstring;
 pub use enum_::*;
 pub use function::*;
 pub use member::*;

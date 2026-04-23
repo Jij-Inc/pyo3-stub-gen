@@ -1,27 +1,36 @@
 #![allow(deprecated)]
 
+mod chrono_types;
 mod custom_exceptions;
+mod float_values;
 mod manual_overloading;
 mod manual_submit;
 mod overloading;
 mod overriding;
 mod rust_type_marker;
 mod skip_stub_type_test;
+mod time_types;
 
+use chrono_types::*;
 use custom_exceptions::*;
+use float_values::*;
 use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
 use overriding::*;
 use rust_type_marker::*;
 use skip_stub_type_test::*;
+use time_types::*;
 
 #[cfg_attr(target_os = "macos", doc = include_str!("../../../README.md"))]
 mod readme {}
 
 use ahash::RandomState;
 use pyo3::{prelude::*, types::*};
-use pyo3_stub_gen::{define_stub_info_gatherer, derive::*, module_doc, module_variable};
+use pyo3_stub_gen::{
+    define_stub_info_gatherer, derive::*, module_doc, module_variable,
+    runtime::PyModuleTypeAliasExt, type_alias,
+};
 use rust_decimal::Decimal;
 use std::{collections::HashMap, path::PathBuf};
 
@@ -155,6 +164,49 @@ impl A {
     fn deprecated_staticmethod() -> usize {
         42
     }
+
+    #[getter]
+    /// Always returns `42`.
+    fn forty_two(&self) -> i32 {
+        42
+    }
+
+    // Test case: #[pyo3(name = "...")] should override the function name for getter
+    #[getter]
+    #[pyo3(name = "renamed_getter")]
+    fn py_renamed_getter(&self) -> i32 {
+        100
+    }
+}
+
+/// Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
+///
+/// For `Vec<i32>`:
+/// - getter should produce `-> list[int]`
+/// - setter should produce `value: Sequence[int]`
+#[gen_stub_pyclass]
+#[pyclass]
+struct GetterSetterTypeTest {
+    values: Vec<i32>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl GetterSetterTypeTest {
+    #[new]
+    fn new(values: Vec<i32>) -> Self {
+        Self { values }
+    }
+
+    #[getter]
+    fn values(&self) -> Vec<i32> {
+        self.values.clone()
+    }
+
+    #[setter]
+    fn set_values(&mut self, values: Vec<i32>) {
+        self.values = values;
+    }
 }
 
 #[gen_stub_pyfunction]
@@ -191,6 +243,13 @@ impl FromPyObject<'_> for C {
 impl pyo3_stub_gen::PyStubType for C {
     fn type_output() -> pyo3_stub_gen::TypeInfo {
         usize::type_output()
+    }
+}
+impl pyo3_stub_gen::runtime::PyRuntimeType for C {
+    fn runtime_type_object(
+        py: ::pyo3::Python<'_>,
+    ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+        usize::runtime_type_object(py)
     }
 }
 
@@ -441,6 +500,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<NormalClass>()?;
     m.add_class::<CustomEnum>()?;
     m.add_class::<CustomComplexEnum>()?;
+    m.add_class::<GetterSetterTypeTest>()?;
     m.add_function(wrap_pyfunction!(sum, m)?)?;
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
@@ -482,8 +542,41 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add("MyError", m.py().get_type::<MyError>())?;
     m.add_class::<NotIntError>()?;
 
+    // Test case for runtime type alias (type_alias! macro)
+    m.add_type_alias::<RuntimeNumberOrString>()?;
+
     // Test class for type: ignore functionality
     m.add_class::<TypeIgnoreTest>()?;
+
+    // Test cases for time crate types
+    m.add_function(wrap_pyfunction!(get_date, m)?)?;
+    m.add_function(wrap_pyfunction!(get_time, m)?)?;
+    m.add_function(wrap_pyfunction!(get_duration, m)?)?;
+    m.add_function(wrap_pyfunction!(get_primitive_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_offset_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(add_duration_to_date, m)?)?;
+    m.add_function(wrap_pyfunction!(time_difference, m)?)?;
+
+    // Test cases for chrono crate types
+    m.add_function(wrap_pyfunction!(get_naive_date, m)?)?;
+    m.add_function(wrap_pyfunction!(get_naive_time, m)?)?;
+    m.add_function(wrap_pyfunction!(get_naive_datetime, m)?)?;
+    m.add_function(wrap_pyfunction!(get_datetime_utc, m)?)?;
+    m.add_function(wrap_pyfunction!(get_datetime_fixed_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_chrono_duration, m)?)?;
+    m.add_function(wrap_pyfunction!(get_fixed_offset, m)?)?;
+    m.add_function(wrap_pyfunction!(get_utc, m)?)?;
+    m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
+    m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
+
+    // Test cases for f64 special values (INFINITY, NEG_INFINITY, NAN)
+    m.add_class::<FloatValues>()?;
+    m.add_function(wrap_pyfunction!(with_infinity_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_neg_infinity_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_nan_default, m)?)?;
+    m.add_function(wrap_pyfunction!(with_float_default, m)?)?;
     Ok(())
 }
 
@@ -601,6 +694,15 @@ pyo3_stub_gen::type_alias!(
     "pure",
     DocumentedMap = HashMap<String, Vec<i32>>,
     "A map type alias with detailed documentation.\n\nThis can have multiple lines of documentation."
+);
+
+// Test runtime type alias using type_alias! macro
+// This type alias is available both in stubs AND at runtime
+// Uses Rust types which are mapped to Python types via PyRuntimeType::runtime_type_object
+type_alias!(
+    "pure",
+    RuntimeNumberOrString = i32 | String,
+    "Either an integer or a string, available at runtime."
 );
 
 // Test type aliases using Python syntax (without docstrings)

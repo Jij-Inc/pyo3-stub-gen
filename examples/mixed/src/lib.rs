@@ -140,6 +140,15 @@ fn test_module_with_python(_x: &Bound<PyAny>) -> PyResult<usize> {
     Ok(42)
 }
 
+/// A function in a deeply nested submodule.
+/// The module path must match the actual runtime structure:
+/// main_mod -> deep -> nested -> module
+#[gen_stub_pyfunction(module = "mixed.main_mod.deep.nested.module")]
+#[pyfunction]
+pub fn deep_function() -> String {
+    "Hello from deep nested module!".to_string()
+}
+
 #[pymodule]
 fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     // Add classes and functions to main module
@@ -153,6 +162,7 @@ fn main_mod(m: &Bound<PyModule>) -> PyResult<()> {
     mod_a(m)?;
     mod_b(m)?;
     int_mod(m)?;
+    deep_nested_mod(m)?;
     Ok(())
 }
 
@@ -186,6 +196,20 @@ fn int_mod(parent: &Bound<PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+/// Creates the deep.nested.module submodule hierarchy
+fn deep_nested_mod(parent: &Bound<PyModule>) -> PyResult<()> {
+    let py = parent.py();
+    let deep = PyModule::new(py, "deep")?;
+    let nested = PyModule::new(py, "nested")?;
+    let module = PyModule::new(py, "module")?;
+
+    module.add_function(wrap_pyfunction!(deep_function, &module)?)?;
+    nested.add_submodule(&module)?;
+    deep.add_submodule(&nested)?;
+    parent.add_submodule(&deep)?;
+    Ok(())
+}
+
 // Test gen_function_from_python! with module parameter
 use pyo3_stub_gen::inventory::submit;
 
@@ -212,10 +236,10 @@ pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_a"
 // This will add only D and greet_b to main_mod's __all__
 pyo3_stub_gen::reexport_module_members!("mixed.main_mod", "mixed.main_mod.mod_b", "D", "greet_b");
 
-// Test 3: Verbatim entry to root mixed module
+// Test 3: Verbatim entry to main_mod module
 // This adds a custom entry. For testing, we define it as a module variable.
-pyo3_stub_gen::module_variable!("mixed", "custom_export_name", &str, "test_value");
-pyo3_stub_gen::export_verbatim!("mixed", "custom_export_name");
+pyo3_stub_gen::module_variable!("mixed.main_mod", "custom_export_name", &str, "test_value");
+pyo3_stub_gen::export_verbatim!("mixed.main_mod", "custom_export_name");
 
 define_stub_info_gatherer!(stub_info);
 

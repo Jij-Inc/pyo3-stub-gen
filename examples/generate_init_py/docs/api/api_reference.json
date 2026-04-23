@@ -1,0 +1,323 @@
+{
+  "name": "generate_init_py",
+  "modules": {
+    "generate_init_py": {
+      "name": "generate_init_py",
+      "doc": "This is the main module docstring for generate_init_py.\nThis example demonstrates the generate-init-py feature.\n\n    This must be indented by four spaces.",
+      "items": [
+        {
+          "kind": "Class",
+          "name": "A",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "B",
+          "doc": "",
+          "bases": [],
+          "methods": [
+            {
+              "name": "show_x",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "C",
+          "doc": "This is the docstring for enum C.",
+          "bases": [],
+          "methods": [],
+          "attributes": [
+            {
+              "name": "C0",
+              "doc": "This is 0th variant",
+              "type_": null
+            },
+            {
+              "name": "C1",
+              "doc": "This is 1st variant",
+              "type_": null
+            },
+            {
+              "name": "C2",
+              "doc": "This is 2nd variant",
+              "type_": null
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "generate_init_py.A",
+                  "doc_module": "generate_init_py",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "create_b",
+          "doc": "This is the docstring for {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nThis must be rendered: $x + x$",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "B",
+                "link_target": {
+                  "fqn": "generate_init_py.B",
+                  "doc_module": "generate_init_py",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "default_c",
+          "doc": "A function with a default argument",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "c",
+                  "type_": {
+                    "display": "C",
+                    "link_target": {
+                      "fqn": "generate_init_py.C",
+                      "doc_module": "generate_init_py",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": {
+                    "kind": "Expression",
+                    "display": "C.C1",
+                    "type_refs": [
+                      {
+                        "text": "C.C1",
+                        "offset": 0,
+                        "link_target": {
+                          "fqn": "generate_init_py.C.C1",
+                          "doc_module": "generate_init_py",
+                          "kind": "Class",
+                          "attribute": "C1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "return_type": {
+                "display": "C",
+                "link_target": {
+                  "fqn": "generate_init_py.C",
+                  "doc_module": "generate_init_py",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "greet_main",
+          "doc": "This is the docstring fo {py:func}`great_main` function.\n\nThese lines must be rendered as separate paragraphs.\n\n```python\n>>> 42\n42\n```\n\nAnother math test $\\int_{-\\infty}^\\infty e^{-x^2} \\mathrm{d}x$.",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "None",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "wrap_opt_a",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "x",
+                  "type_": {
+                    "display": "Optional[_core.A]",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "A",
+                        "link_target": {
+                          "fqn": "generate_init_py.A",
+                          "doc_module": "generate_init_py",
+                          "kind": "Class",
+                          "attribute": null
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "Optional[_core.A]",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "generate_init_py.A",
+                      "doc_module": "generate_init_py",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "TypeAlias",
+          "name": "AorB",
+          "doc": "A union type of A or B, available at runtime.",
+          "definition": {
+            "display": "_core.A | _core.B",
+            "link_target": null,
+            "children": [
+              {
+                "display": "A",
+                "link_target": {
+                  "fqn": "generate_init_py.A",
+                  "doc_module": "generate_init_py",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              },
+              {
+                "display": "B",
+                "link_target": {
+                  "fqn": "generate_init_py.B",
+                  "doc_module": "generate_init_py",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            ]
+          }
+        }
+      ],
+      "submodules": []
+    }
+  },
+  "export_map": {
+    "generate_init_py.A": "generate_init_py",
+    "generate_init_py.AorB": "generate_init_py",
+    "generate_init_py.B": "generate_init_py",
+    "generate_init_py.C": "generate_init_py",
+    "generate_init_py.create_a": "generate_init_py",
+    "generate_init_py.create_b": "generate_init_py",
+    "generate_init_py.default_c": "generate_init_py",
+    "generate_init_py.greet_main": "generate_init_py",
+    "generate_init_py.wrap_opt_a": "generate_init_py"
+  },
+  "config": {
+    "output-dir": "docs/api",
+    "json-output": "api_reference.json",
+    "separate-pages": true,
+    "intro-message": "Example for generate-init-py feature.",
+    "index-title": null,
+    "contents-table": true,
+    "separate-items": false,
+    "generate-index": true
+  }
+}

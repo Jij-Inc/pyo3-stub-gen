@@ -34,7 +34,7 @@ jobs:
         run: cargo doc --all --no-deps --document-private-items
 
       - name: Upload html
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: rustdoc
           path: ./target/doc
@@ -49,13 +49,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download rustdoc
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: rustdoc
           path: .
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
@@ -65,4 +65,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

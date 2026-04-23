@@ -69,6 +69,22 @@ impl PyProject {
             .and_then(|t| t.pyo3_stub_gen.clone())
             .unwrap_or_default()
     }
+
+    /// Return doc-gen configuration with output_dir resolved relative to pyproject.toml directory
+    pub fn doc_gen_config_resolved(&self) -> Option<crate::docgen::DocGenConfig> {
+        if let Some(mut config) = self.stub_gen_config().doc_gen {
+            // Resolve output_dir relative to pyproject.toml directory
+            // Only resolve if the path is relative (absolute paths stay unchanged)
+            if config.output_dir.is_relative() {
+                if let Some(base) = self.toml_path.parent() {
+                    config.output_dir = base.join(&config.output_dir);
+                }
+            }
+            Some(config)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -91,6 +107,57 @@ pub struct Maturin {
     pub module_name: Option<String>,
 }
 
+/// Configuration for `__init__.py` generation.
+///
+/// This can be:
+/// - `false` or unset: Disable generation (default)
+/// - `true`: Generate for all modules with re-exports
+/// - `["pkg", "pkg.submod"]`: Generate for specific modules only
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum GenerateInitPy {
+    /// Enable/disable for all modules with re-exports
+    All(bool),
+    /// Generate for specific modules only
+    Modules(Vec<String>),
+}
+
+impl Default for GenerateInitPy {
+    fn default() -> Self {
+        GenerateInitPy::All(false)
+    }
+}
+
+impl GenerateInitPy {
+    /// Check if generation is enabled for a given module name.
+    ///
+    /// - `All(true)`: Returns `true` for any module
+    /// - `All(false)`: Returns `false` for any module
+    /// - `Modules(list)`: Returns `true` if the module is in the list
+    ///
+    /// Module names are normalized (dashes to underscores) before comparison
+    /// to match Python's module name requirements.
+    pub fn is_enabled_for(&self, module_name: &str) -> bool {
+        match self {
+            GenerateInitPy::All(enabled) => *enabled,
+            GenerateInitPy::Modules(modules) => {
+                let normalized_name = module_name.replace('-', "_");
+                modules
+                    .iter()
+                    .any(|m| m.replace('-', "_") == normalized_name)
+            }
+        }
+    }
+
+    /// Check if any generation is enabled.
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            GenerateInitPy::All(enabled) => *enabled,
+            GenerateInitPy::Modules(modules) => !modules.is_empty(),
+        }
+    }
+}
+
 /// Configuration options for stub generation from `[tool.pyo3-stub-gen]` in pyproject.toml.
 ///
 /// This struct is marked as `#[non_exhaustive]` to allow adding new configuration
@@ -102,6 +169,12 @@ pub struct StubGenConfig {
     /// Default is `false` (use pre-3.12 `TypeAlias` syntax).
     #[serde(rename = "use-type-statement", default)]
     pub use_type_statement: bool,
+    /// Documentation generation configuration
+    #[serde(rename = "doc-gen")]
+    pub doc_gen: Option<crate::docgen::DocGenConfig>,
+    /// Configuration for `__init__.py` generation
+    #[serde(rename = "generate-init-py", default)]
+    pub generate_init_py: GenerateInitPy,
 }
 
 #[cfg(test)]
@@ -154,5 +227,98 @@ mod tests {
         "#;
         let pyproject: PyProject = toml::from_str(toml_str).unwrap();
         assert!(!pyproject.stub_gen_config().use_type_statement);
+    }
+
+    #[test]
+    fn test_generate_init_py_default() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        assert!(!config.generate_init_py.is_enabled());
+        assert!(!config.generate_init_py.is_enabled_for("pkg"));
+    }
+
+    #[test]
+    fn test_generate_init_py_true() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = true
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        assert!(config.generate_init_py.is_enabled());
+        assert!(config.generate_init_py.is_enabled_for("pkg"));
+        assert!(config.generate_init_py.is_enabled_for("any_module"));
+    }
+
+    #[test]
+    fn test_generate_init_py_false() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = false
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        assert!(!config.generate_init_py.is_enabled());
+        assert!(!config.generate_init_py.is_enabled_for("pkg"));
+    }
+
+    #[test]
+    fn test_generate_init_py_modules() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = ["pkg", "pkg.submod"]
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        assert!(config.generate_init_py.is_enabled());
+        assert!(config.generate_init_py.is_enabled_for("pkg"));
+        assert!(config.generate_init_py.is_enabled_for("pkg.submod"));
+        assert!(!config.generate_init_py.is_enabled_for("other"));
+    }
+
+    #[test]
+    fn test_generate_init_py_dash_underscore_normalization() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = ["my-package", "my_package.sub-mod"]
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        // Dashes in config should match underscores in module names
+        assert!(config.generate_init_py.is_enabled_for("my_package"));
+        assert!(config.generate_init_py.is_enabled_for("my-package"));
+        assert!(config.generate_init_py.is_enabled_for("my_package.sub_mod"));
+        assert!(config.generate_init_py.is_enabled_for("my_package.sub-mod"));
+        assert!(!config.generate_init_py.is_enabled_for("other"));
+    }
+
+    #[test]
+    fn test_generate_init_py_empty_modules() {
+        let toml_str = r#"
+            [project]
+            name = "test"
+
+            [tool.pyo3-stub-gen]
+            generate-init-py = []
+        "#;
+        let pyproject: PyProject = toml::from_str(toml_str).unwrap();
+        let config = pyproject.stub_gen_config();
+        assert!(!config.generate_init_py.is_enabled());
     }
 }

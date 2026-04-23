@@ -1,0 +1,33 @@
+# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+# Note
+# ====
+# Following commands do not work when using this Taskfile directly.
+# You should include this with `flatten: true`.
+
+tasks:
+  doc-build:
+    desc: Build Sphinx documentation
+    deps:
+      - stub-gen
+    cmds:
+      - uv run sphinx-build -W -b html docs docs/_build
+
+  doc-test:
+    desc: Test that Sphinx documentation builds and objects.inv exists
+    deps:
+      - doc-build
+    cmds:
+      - bash -c 'test -f docs/_build/index.html || (echo "ERROR index.html not generated" && exit 1)'
+      - bash -c 'test -f docs/_build/objects.inv || (echo "ERROR objects.inv not generated" && exit 1)'
+      - echo "✓ Documentation built successfully"
+      - echo "✓ objects.inv generated for intersphinx"
+
+  doc-open:
+    desc: Open Sphinx documentation in browser
+    deps:
+      - doc-build
+    cmds:
+      - uv run python -m webbrowser "file://${PWD}/docs/_build/index.html"

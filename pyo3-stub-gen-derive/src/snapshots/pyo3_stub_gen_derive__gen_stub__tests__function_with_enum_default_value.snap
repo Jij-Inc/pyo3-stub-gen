@@ -1,0 +1,23 @@
+---
+source: pyo3-stub-gen-derive/src/gen_stub.rs
+expression: formatted
+---
+#[automatically_derived]
+pyo3_stub_gen::inventory::submit! {
+    ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "function_with_enum_default",
+    parameters : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "c", kind :
+    ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : < MyEnum
+    as ::pyo3_stub_gen::PyStubType > ::type_input, default :
+    ::pyo3_stub_gen::type_info::ParameterDefault::Expr { value : { fn _fmt() -> String {
+    { let v : MyEnum = MyEnum::Value1; ::pyo3_stub_gen::util::fmt_py_obj(v) } } _fmt },
+    source_module : Some({ fn _get_module() -> Option < ::pyo3_stub_gen::ModuleRef > { <
+    MyEnum as ::pyo3_stub_gen::PyStubType > ::type_output().source_module } _get_module
+    }), }, }], r#return : < MyEnum as pyo3_stub_gen::PyStubType > ::type_output, doc :
+    "", module : None, is_async : false, deprecated : None, type_ignored : None,
+    is_overload : false, file : file!(), line : line!(), column : column!(), index :
+    0usize, }
+}
+#[pyfunction(signature = (c = MyEnum::Value1))]
+pub fn function_with_enum_default(c: MyEnum) -> MyEnum {
+    c
+}

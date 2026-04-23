@@ -32,7 +32,9 @@ __all__ = [
     "DocumentedCallback",
     "DocumentedMap",
     "DocumentedUnion",
+    "FloatValues",
     "GenericUnion",
+    "GetterSetterTypeTest",
     "HashableStruct",
     "InstanceValue",
     "MY_CONSTANT1",
@@ -55,6 +57,7 @@ __all__ = [
     "PartialManualSubmit",
     "Placeholder",
     "Problem",
+    "RuntimeNumberOrString",
     "SequenceOfInts",
     "Shape1",
     "Shape2",
@@ -66,7 +69,9 @@ __all__ = [
     "TripleUnion",
     "TypeIgnoreTest",
     "UndocumentedCallback",
+    "add_chrono_duration_to_date",
     "add_decimals",
+    "add_duration_to_date",
     "ahash_dict",
     "as_tuple",
     "async_num",
@@ -82,9 +87,25 @@ __all__ = [
     "func_with_kwargs",
     "func_with_star_arg",
     "func_with_star_arg_typed",
+    "get_chrono_duration",
+    "get_date",
+    "get_datetime_fixed_offset",
+    "get_datetime_utc",
+    "get_duration",
+    "get_fixed_offset",
+    "get_naive_date",
+    "get_naive_datetime",
+    "get_naive_time",
+    "get_offset_datetime",
+    "get_primitive_datetime",
+    "get_time",
+    "get_utc",
+    "get_utc_datetime",
+    "get_utc_offset",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
+    "naive_time_difference",
     "overload_example_1",
     "overload_example_2",
     "print_c",
@@ -99,6 +120,11 @@ __all__ = [
     "test_type_ignore_no_comment_specific",
     "test_type_ignore_pyright",
     "test_type_ignore_specific",
+    "time_difference",
+    "with_float_default",
+    "with_infinity_default",
+    "with_nan_default",
+    "with_neg_infinity_default",
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
@@ -140,6 +166,11 @@ NestedContainer: TypeAlias = list[list[DataContainer]]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
 OptionalContainer: TypeAlias = DataContainer  |  None
+RuntimeNumberOrString: TypeAlias = builtins.int | builtins.str
+r"""
+Either an integer or a string, available at runtime.
+"""
+
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
 SimpleContainer: TypeAlias = DataContainer
@@ -185,6 +216,13 @@ class A:
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
+    @property
+    def forty_two(self) -> builtins.int:
+        r"""
+        Always returns `42`.
+        """
+    @property
+    def renamed_getter(self) -> builtins.int: ...
     def __new__(cls, x: builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
@@ -281,6 +319,44 @@ class DecimalHolder:
     @property
     def value(self) -> decimal.Decimal: ...
     def __new__(cls, value: decimal.Decimal) -> DecimalHolder: ...
+
+@typing.final
+class FloatValues:
+    r"""
+    A class to test f64 special values
+    """
+    POSITIVE_INF: builtins.float = float('inf')
+    r"""
+    Class attribute: positive infinity
+    """
+    NEGATIVE_INF: builtins.float = float('-inf')
+    r"""
+    Class attribute: negative infinity
+    """
+    NAN_VALUE: builtins.float = float('nan')
+    r"""
+    Class attribute: NaN
+    """
+    REGULAR_FLOAT: builtins.float = 2.14
+    r"""
+    Class attribute: regular float
+    """
+    def __new__(cls) -> FloatValues: ...
+
+@typing.final
+class GetterSetterTypeTest:
+    r"""
+    Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
+    
+    For `Vec<i32>`:
+    - getter should produce `-> list[int]`
+    - setter should produce `value: Sequence[int]`
+    """
+    @property
+    def values(self) -> builtins.list[builtins.int]: ...
+    @values.setter
+    def values(self, value: typing.Sequence[builtins.int]) -> None: ...
+    def __new__(cls, values: typing.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
 
 @typing.final
 class HashableStruct:
@@ -569,9 +645,19 @@ class NumberRenameAll(enum.Enum):
     """
     INTEGER = ...
 
+def add_chrono_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+    r"""
+    Add duration to a NaiveDate
+    """
+
 def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
     r"""
     Add two decimal numbers with high precision
+    """
+
+def add_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+    r"""
+    Add duration to a date
     """
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
@@ -637,6 +723,81 @@ def func_with_star_arg_typed(*args: str) -> builtins.str:
     Takes a variable number of arguments and returns their string representation.
     """
 
+def get_chrono_duration(seconds: builtins.int) -> datetime.timedelta:
+    r"""
+    Returns a chrono::Duration from seconds
+    """
+
+def get_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+    r"""
+    Returns a time::Date from year, month, day
+    """
+
+def get_datetime_fixed_offset(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::DateTime<FixedOffset> from components with offset
+    """
+
+def get_datetime_utc(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::DateTime<Utc> from components
+    """
+
+def get_duration(seconds: builtins.int) -> datetime.timedelta:
+    r"""
+    Returns a time::Duration from seconds
+    """
+
+def get_fixed_offset(hours: builtins.int) -> datetime.tzinfo:
+    r"""
+    Returns a chrono::FixedOffset from hours
+    """
+
+def get_naive_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+    r"""
+    Returns a chrono::NaiveDate from year, month, day
+    """
+
+def get_naive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a chrono::NaiveDateTime from date and time components
+    """
+
+def get_naive_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+    r"""
+    Returns a chrono::NaiveTime from hour, minute, second
+    """
+
+def get_offset_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::OffsetDateTime from components with UTC offset
+    """
+
+def get_primitive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::PrimitiveDateTime from date and time components
+    """
+
+def get_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+    r"""
+    Returns a time::Time from hour, minute, second
+    """
+
+def get_utc() -> datetime.tzinfo:
+    r"""
+    Returns chrono::Utc timezone
+    """
+
+def get_utc_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+    r"""
+    Returns a time::UtcDateTime from components
+    """
+
+def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
+    r"""
+    Returns a time::UtcOffset from hours
+    """
+
 @typing.overload
 def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
     r"""
@@ -665,6 +826,11 @@ def manual_overload_example_2(ob: int) -> int:
 def manual_overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
+    """
+
+def naive_time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
+    r"""
+    Calculate the difference between two NaiveTimes as duration
     """
 
 @typing.overload
@@ -737,5 +903,30 @@ def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTyp
 def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return-value]
     r"""
     Test function with type: ignore for specific rules
+    """
+
+def time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
+    r"""
+    Calculate the difference between two times as duration
+    """
+
+def with_float_default(value: builtins.float = 1.5) -> builtins.float:
+    r"""
+    Function with regular float default value
+    """
+
+def with_infinity_default(threshold: builtins.float = float('inf')) -> builtins.float:
+    r"""
+    Function with infinity as default value
+    """
+
+def with_nan_default(value: builtins.float = float('nan')) -> builtins.float:
+    r"""
+    Function with NaN as default value
+    """
+
+def with_neg_infinity_default(threshold: builtins.float = float('-inf')) -> builtins.float:
+    r"""
+    Function with negative infinity as default value
     """
 
