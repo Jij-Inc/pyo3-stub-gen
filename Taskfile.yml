@@ -55,3 +55,15 @@ tasks:
       - task: underscore_items:test
       - task: type-statement-alias:test
       - task: generate_init_py:test
+
+  update-locks:
+    desc: Upgrade and regenerate lockfiles for all examples
+    cmds:
+      - for: [pure, mixed, test-dash-package, feature_gated, simple_name_collision, avoid_name_collision_with_submod, underscore_items, type-statement-alias, generate_init_py]
+        cmd: uv --directory examples/{{.ITEM}} lock --upgrade
+
+  bump-dev-dep:
+    desc: "Add/upgrade a dev dep in all examples (usage: task bump-dev-dep -- pyright)"
+    cmds:
+      - for: [pure, mixed, test-dash-package, feature_gated, simple_name_collision, avoid_name_collision_with_submod, underscore_items, type-statement-alias, generate_init_py]
+        cmd: uv --directory examples/{{.ITEM}} add --dev {{.CLI_ARGS}}

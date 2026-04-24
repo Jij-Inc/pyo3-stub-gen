@@ -16,5 +16,13 @@ use-type-statement = true
 [tool.pyright]
 pythonVersion = "3.12"
 
+[dependency-groups]
+dev = [
+  "mypy>=1.19.1",
+  "pyrefly>=0.50.1",
+  "pyright>=1.1.400",
+  "ty>=0.0.7",
+]
+
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
