@@ -53,5 +53,5 @@ def test_pyright_type_errors(snapshot):
     for case in [p for p in ERROR_CASES_DIR.iterdir() if p.suffix == ".py"]:
         diagnostics = call_pyright_error_case(case)
         for i, (message, meta) in enumerate(diagnostics):
-            assert snapshot(f"{case.stem}__{i}.txt") == message
-            assert snapshot(f"{case.stem}__{i}.json") == meta.model_dump()
+            assert snapshot(name=f"{case.stem}__{i}.txt") == message
+            assert snapshot(name=f"{case.stem}__{i}.json") == meta.model_dump()
