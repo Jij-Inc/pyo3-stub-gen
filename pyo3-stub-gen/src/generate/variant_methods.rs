@@ -57,9 +57,9 @@ pub(super) fn get_variant_methods(
             .push(MethodDef {
                 name: getitem_name,
                 parameters: Parameters {
-                    positional_or_keyword: vec![Parameter {
+                    positional_only: vec![Parameter {
                         name: "key",
-                        kind: ParameterKind::PositionalOrKeyword,
+                        kind: ParameterKind::PositionalOnly,
                         type_info: TypeInfo::builtin("int"),
                         default: ParameterDefault::None,
                     }],
