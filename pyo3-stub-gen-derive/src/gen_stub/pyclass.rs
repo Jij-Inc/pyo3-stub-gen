@@ -263,14 +263,14 @@ mod test {
             setters: &[
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "type",
-                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
                     doc: "",
                     default: None,
                     deprecated: None,
                 },
                 ::pyo3_stub_gen::type_info::MemberInfo {
                     name: "pub",
-                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
                     doc: "",
                     default: None,
                     deprecated: None,
