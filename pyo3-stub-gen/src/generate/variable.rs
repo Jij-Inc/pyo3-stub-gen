@@ -123,10 +123,7 @@ mod tests {
             covariant: false,
             contravariant: false,
         };
-        assert_eq!(
-            typevar.to_string(),
-            "T = typing.TypeVar(\"T\", str, int)"
-        );
+        assert_eq!(typevar.to_string(), "T = typing.TypeVar(\"T\", str, int)");
     }
 
     #[test]
