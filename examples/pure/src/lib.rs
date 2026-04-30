@@ -127,6 +127,14 @@ impl A {
     #[classmethod]
     fn classmethod_test2(_: &Bound<'_, PyType>) {}
 
+    // Qualified-path classmethod receiver: `cls` must still be detected
+    // as a receiver when the user writes `pyo3::types::PyType` instead of
+    // the unqualified `PyType`.
+    #[classmethod]
+    fn classmethod_test_qualified(cls: &Bound<'_, pyo3::types::PyType>) {
+        _ = cls;
+    }
+
     fn show_x(&self) {
         println!("x = {}", self.x);
     }

@@ -86,6 +86,22 @@
               "deprecated": null
             },
             {
+              "name": "classmethod_test_qualified",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
               "name": "deprecated_classmethod",
               "doc": "",
               "signatures": [
