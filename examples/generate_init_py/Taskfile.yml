@@ -17,7 +17,6 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - uv sync --dev
       - uv run pytest
       - uv run pyright
       - uvx ruff check

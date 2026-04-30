@@ -21,5 +21,17 @@ json-output = "api_reference.json"
 intro-message = "Example for generate-init-py feature."
 contents-table = true
 
+[dependency-groups]
+dev = [
+  "mypy>=1.19.1",
+  "myst-parser",
+  "pyrefly>=0.50.1",
+  "pyright>=1.1.400",
+  "pytest>=9.0.3",
+  "sphinx",
+  "sphinx-rtd-theme",
+  "ty>=0.0.7",
+]
+
 [tool.uv]
 cache-keys = [{ file = "src/**/*.rs" }]

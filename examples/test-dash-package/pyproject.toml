@@ -12,5 +12,14 @@ build-backend = "maturin"
 [tool.maturin]
 # For cases where we define `module-name` explicitly here are tested in other examples.
 
+[dependency-groups]
+dev = [
+  "mypy>=1.19.1",
+  "pyrefly>=0.50.1",
+  "pyright>=1.1.400",
+  "pytest>=9.0.3",
+  "ty>=0.0.7",
+]
+
 [tool.uv]
 cache-keys = [{ file = "src/**/*.rs" }]

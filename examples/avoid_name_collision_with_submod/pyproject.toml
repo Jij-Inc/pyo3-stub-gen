@@ -13,5 +13,12 @@ python-source = "python"
 [tool.pyrefly]
 search-path = ["python"]
 
+[dependency-groups]
+dev = [
+  "pyrefly>=0.50.1",
+  "pyright>=1.1.400",
+  "ty>=0.0.7",
+]
+
 [tool.uv]
 cache-keys = [{ file = "src/**/*.rs" }]

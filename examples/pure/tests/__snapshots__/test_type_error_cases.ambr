@@ -1,0 +1,23 @@
+# serializer version: 1
+# name: test_pyright_type_errors[basic__0.json]
+  dict({
+    'range': dict({
+      'end': dict({
+        'character': 10,
+        'line': 2,
+      }),
+      'start': dict({
+        'character': 9,
+        'line': 2,
+      }),
+    }),
+    'rule': 'reportArgumentType',
+    'severity': 'error',
+  })
+# ---
+# name: test_pyright_type_errors[basic__0.txt]
+  '''
+  Argument of type "Literal[1]" cannot be assigned to parameter "v" of type "Sequence[int]" in function "sum"
+    "Literal[1]" is not assignable to "Sequence[int]"
+  '''
+# ---
