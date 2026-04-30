@@ -131,6 +131,28 @@ impl A {
         println!("x = {}", self.x);
     }
 
+    // Test cases: every self-receiver shape `#[pymethods]` accepts
+    // should be rendered as `self` in the generated stub.
+    fn show_x_pyref(slf: PyRef<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_pyrefmut(slf: PyRefMut<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_bound(slf: Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_bound_ref(slf: &Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_py(slf: Py<Self>, py: Python<'_>) -> PyResult<usize> {
+        Ok(slf.borrow(py).x)
+    }
+
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
         x
     }
