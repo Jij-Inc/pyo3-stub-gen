@@ -187,6 +187,12 @@ StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
 TripleUnion: TypeAlias = builtins.int | builtins.str | builtins.bool
 UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
+BOUNDED = typing.TypeVar("BOUNDED", bound=str)
+CONTRAVARIANT_T = typing.TypeVar("CONTRAVARIANT_T", contravariant=True)
+COVARIANT_T = typing.TypeVar("COVARIANT_T", covariant=True)
+STR_OR_INT = typing.TypeVar("STR_OR_INT", str, int)
+T = typing.TypeVar("T")
+U = typing.TypeVar("U")
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
 class A:

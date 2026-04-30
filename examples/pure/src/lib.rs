@@ -30,7 +30,7 @@ mod readme {}
 use ahash::RandomState;
 use pyo3::{prelude::*, types::*};
 use pyo3_stub_gen::{
-    define_stub_info_gatherer, derive::*, module_doc, module_variable,
+    define_stub_info_gatherer, derive::*, module_doc, module_typevar, module_variable,
     runtime::PyModuleTypeAliasExt, type_alias,
 };
 use rust_decimal::Decimal;
@@ -431,6 +431,14 @@ impl DecimalHolder {
 
 module_variable!("pure", "MY_CONSTANT1", usize);
 module_variable!("pure", "MY_CONSTANT2", usize, 123);
+
+// Test module-level TypeVar
+module_typevar!("pure", "T");
+module_typevar!("pure", "U");
+module_typevar!("pure", "STR_OR_INT", constraints = &["str", "int"]);
+module_typevar!("pure", "BOUNDED", bound = "str");
+module_typevar!("pure", "COVARIANT_T", covariant = true);
+module_typevar!("pure", "CONTRAVARIANT_T", contravariant = true);
 
 #[gen_stub_pyfunction]
 #[pyfunction]
