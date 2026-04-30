@@ -28,9 +28,8 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
                 let last = path.segments.last().unwrap();
                 if n == 0 && last.ident == "Bound" {
                     if let PathArguments::AngleBracketed(args, ..) = &last.arguments {
-                        if let Some(GenericArgument::Type(Type::Path(TypePath {
-                            path, ..
-                        }))) = args.args.last()
+                        if let Some(GenericArgument::Type(Type::Path(TypePath { path, .. }))) =
+                            args.args.last()
                         {
                             let inner_last = path.segments.last().unwrap();
                             if inner_last.ident == "PyType" || inner_last.ident == "Self" {
