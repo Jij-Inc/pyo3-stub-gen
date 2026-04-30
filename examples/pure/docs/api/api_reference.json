@@ -3548,6 +3548,78 @@
         },
         {
           "kind": "Function",
+          "name": "ipv4_localhost",
+          "doc": "Returns the IPv4 loopback address (127.0.0.1).",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "IPv4Address",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "ipv6_localhost",
+          "doc": "Returns the IPv6 loopback address (::1).",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "IPv6Address",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "is_loopback",
+          "doc": "Returns whether the given IP address is a loopback address.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "addr",
+                  "type_": {
+                    "display": "IPv4Address | IPv6Address",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "IPv4Address",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "IPv6Address",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "manual_overload_as_tuple",
           "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
@@ -3860,6 +3932,44 @@
                 "display": "float",
                 "link_target": null,
                 "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "parse_ip",
+          "doc": "Parses a string into an IpAddr (either IPv4 or IPv6).",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "s",
+                  "type_": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "IPv4Address | IPv6Address",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "IPv4Address",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "IPv6Address",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -4987,12 +5097,16 @@
     "pure.get_utc": "pure",
     "pure.get_utc_datetime": "pure",
     "pure.get_utc_offset": "pure",
+    "pure.ipv4_localhost": "pure",
+    "pure.ipv6_localhost": "pure",
+    "pure.is_loopback": "pure",
     "pure.manual_overload_as_tuple": "pure",
     "pure.manual_overload_example_1": "pure",
     "pure.manual_overload_example_2": "pure",
     "pure.naive_time_difference": "pure",
     "pure.overload_example_1": "pure",
     "pure.overload_example_2": "pure",
+    "pure.parse_ip": "pure",
     "pure.print_c": "pure",
     "pure.process_container": "pure",
     "pure.read_dict": "pure",

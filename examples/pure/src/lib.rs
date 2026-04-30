@@ -3,6 +3,7 @@
 mod chrono_types;
 mod custom_exceptions;
 mod float_values;
+mod ip_types;
 mod manual_overloading;
 mod manual_submit;
 mod overloading;
@@ -14,6 +15,7 @@ mod time_types;
 use chrono_types::*;
 use custom_exceptions::*;
 use float_values::*;
+use ip_types::*;
 use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
@@ -624,6 +626,12 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_utc, m)?)?;
     m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
+
+    // Test cases for std::net IP address types
+    m.add_function(wrap_pyfunction!(ipv4_localhost, m)?)?;
+    m.add_function(wrap_pyfunction!(ipv6_localhost, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_ip, m)?)?;
+    m.add_function(wrap_pyfunction!(is_loopback, m)?)?;
 
     // Test cases for f64 special values (INFINITY, NEG_INFINITY, NAN)
     m.add_class::<FloatValues>()?;

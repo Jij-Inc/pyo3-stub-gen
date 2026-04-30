@@ -1,6 +1,6 @@
 //! Define PyStubType for built-in types based on <https://pyo3.rs/v0.22.2/conversions/tables#argument-types>
 
-use crate::runtime::PyRuntimeType;
+use crate::runtime::{union_type, PyRuntimeType};
 use crate::stub_type::*;
 use ::pyo3::prelude::*;
 use ::pyo3::types::{PyBool, PyComplex, PyFloat, PyInt, PyString};
@@ -141,6 +141,28 @@ impl_with_module!(time::PrimitiveDateTime, "datetime.datetime", "datetime");
 impl_with_module!(time::UtcDateTime, "datetime.datetime", "datetime");
 impl_with_module!(time::Time, "datetime.time", "datetime");
 impl_with_module!(time::UtcOffset, "datetime.tzinfo", "datetime");
+impl_with_module!(std::net::Ipv4Addr, "ipaddress.IPv4Address", "ipaddress");
+impl_with_module!(std::net::Ipv6Addr, "ipaddress.IPv6Address", "ipaddress");
+
+impl PyStubType for std::net::IpAddr {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module(
+            "ipaddress.IPv4Address",
+            ModuleRef::Named("ipaddress".to_string()),
+        ) | TypeInfo::with_module(
+            "ipaddress.IPv6Address",
+            ModuleRef::Named("ipaddress".to_string()),
+        )
+    }
+}
+impl PyRuntimeType for std::net::IpAddr {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        let module = py.import("ipaddress")?;
+        let type_v4 = module.getattr("IPv4Address")?;
+        let type_v6 = module.getattr("IPv6Address")?;
+        union_type(py, &[type_v4, type_v6])
+    }
+}
 
 impl<T: PyStubType> PyStubType for &T {
     fn type_input() -> TypeInfo {
