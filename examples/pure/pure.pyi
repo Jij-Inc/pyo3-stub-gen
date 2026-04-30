@@ -80,6 +80,9 @@ __all__ = [
     "create_dict",
     "default_value",
     "deprecated_function",
+    "echo_a_bound",
+    "echo_a_bound_ref",
+    "echo_a_py",
     "echo_path",
     "fn_override_type",
     "fn_with_python_param",
@@ -696,6 +699,12 @@ def default_value(num: Number = Number.FLOAT) -> Number: ...
 
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
+
+def echo_a_bound(a: A) -> A: ...
+
+def echo_a_bound_ref(a: A) -> A: ...
+
+def echo_a_py(a: A) -> A: ...
 
 def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 

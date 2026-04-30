@@ -238,6 +238,27 @@ fn create_a(x: usize) -> A {
     A { x, y: 10 }
 }
 
+// Negative regression tests: free `#[pyfunction]`s whose first argument
+// is `Bound<'_, A>` / `&Bound<'_, A>` / `Py<A>` must NOT be mistaken for
+// self receivers — only the literal `Self` spelling is a receiver.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound_ref<'py>(a: &Bound<'py, A>) -> Bound<'py, A> {
+    a.clone()
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound(a: Bound<'_, A>) -> Bound<'_, A> {
+    a
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_py(a: Py<A>) -> Py<A> {
+    a
+}
+
 #[gen_stub_pyclass]
 #[pyclass(extends=A)]
 #[derive(Debug)]
@@ -527,6 +548,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound_ref, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_py, m)?)?;
     m.add_function(wrap_pyfunction!(print_c, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;

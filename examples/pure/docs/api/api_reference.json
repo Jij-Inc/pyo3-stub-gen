@@ -2359,6 +2359,117 @@
         },
         {
           "kind": "Function",
+          "name": "echo_a_bound",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "echo_a_bound_ref",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "echo_a_py",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "echo_path",
           "doc": "",
           "signatures": [
@@ -4835,6 +4946,9 @@
     "pure.create_dict": "pure",
     "pure.default_value": "pure",
     "pure.deprecated_function": "pure",
+    "pure.echo_a_bound": "pure",
+    "pure.echo_a_bound_ref": "pure",
+    "pure.echo_a_py": "pure",
     "pure.echo_path": "pure",
     "pure.fn_override_type": "pure",
     "pure.fn_with_python_param": "pure",
