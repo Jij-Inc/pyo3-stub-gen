@@ -127,8 +127,38 @@ impl A {
     #[classmethod]
     fn classmethod_test2(_: &Bound<'_, PyType>) {}
 
+    // Qualified-path classmethod receiver: `cls` must still be detected
+    // as a receiver when the user writes `pyo3::types::PyType` instead of
+    // the unqualified `PyType`.
+    #[classmethod]
+    fn classmethod_test_qualified(cls: &Bound<'_, pyo3::types::PyType>) {
+        _ = cls;
+    }
+
     fn show_x(&self) {
         println!("x = {}", self.x);
+    }
+
+    // Test cases: every self-receiver shape `#[pymethods]` accepts
+    // should be rendered as `self` in the generated stub.
+    fn show_x_pyref(slf: PyRef<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_pyrefmut(slf: PyRefMut<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_bound(slf: Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_bound_ref(slf: &Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_py(slf: Py<Self>, py: Python<'_>) -> PyResult<usize> {
+        Ok(slf.borrow(py).x)
     }
 
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
@@ -214,6 +244,27 @@ impl GetterSetterTypeTest {
 #[pyo3(signature = (x = 2))]
 fn create_a(x: usize) -> A {
     A { x, y: 10 }
+}
+
+// Negative regression tests: free `#[pyfunction]`s whose first argument
+// is `Bound<'_, A>` / `&Bound<'_, A>` / `Py<A>` must NOT be mistaken for
+// self receivers — only the literal `Self` spelling is a receiver.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound_ref<'py>(a: &Bound<'py, A>) -> Bound<'py, A> {
+    a.clone()
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound(a: Bound<'_, A>) -> Bound<'_, A> {
+    a
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_py(a: Py<A>) -> Py<A> {
+    a
 }
 
 #[gen_stub_pyclass]
@@ -505,6 +556,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound_ref, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_py, m)?)?;
     m.add_function(wrap_pyfunction!(print_c, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
