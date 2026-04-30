@@ -9,6 +9,7 @@ import collections.abc
 import datetime
 import decimal
 import enum
+import ipaddress
 import os
 import pathlib
 import typing
@@ -102,12 +103,16 @@ __all__ = [
     "get_utc",
     "get_utc_datetime",
     "get_utc_offset",
+    "ipv4_localhost",
+    "ipv6_localhost",
+    "is_loopback",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
     "naive_time_difference",
     "overload_example_1",
     "overload_example_2",
+    "parse_ip",
     "print_c",
     "process_container",
     "read_dict",
@@ -798,6 +803,21 @@ def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
     Returns a time::UtcOffset from hours
     """
 
+def ipv4_localhost() -> ipaddress.IPv4Address:
+    r"""
+    Returns the IPv4 loopback address (127.0.0.1).
+    """
+
+def ipv6_localhost() -> ipaddress.IPv6Address:
+    r"""
+    Returns the IPv6 loopback address (::1).
+    """
+
+def is_loopback(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> builtins.bool:
+    r"""
+    Returns whether the given IP address is a loopback address.
+    """
+
 @typing.overload
 def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
     r"""
@@ -849,6 +869,11 @@ def overload_example_2(ob: int) -> int:
 def overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
+    """
+
+def parse_ip(s: builtins.str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+    r"""
+    Parses a string into an IpAddr (either IPv4 or IPv6).
     """
 
 def print_c(c: typing.Optional[builtins.int] = None) -> None: ...
