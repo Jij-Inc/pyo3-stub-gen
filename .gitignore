@@ -26,3 +26,6 @@ _build/
 
 # pyo3-stub-gen docgen generated files (not tracked)
 **/docs/api/pyo3_stub_gen_ext.py
+
+# Claude Code
+.claude/

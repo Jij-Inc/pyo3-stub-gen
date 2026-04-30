@@ -1,4 +1,5 @@
 from pure import (
+    A,
     sum,
     create_a,
     create_dict,
@@ -13,12 +14,31 @@ from pure import (
     HashableStruct,
     add_decimals,
     DecimalHolder,
+    echo_a_bound,
+    echo_a_bound_ref,
+    echo_a_py,
     fn_override_type,
     fn_with_python_param,
     fn_with_python_stub,
 )
 import pytest
 import pathlib
+
+
+def test_self_receiver_shapes():
+    a = A(7)
+    assert a.show_x_pyref() == 7
+    assert a.show_x_pyrefmut() == 7
+    assert a.show_x_bound() == 7
+    assert a.show_x_bound_ref() == 7
+    assert a.show_x_py() == 7
+
+
+def test_free_pyfunction_class_arg_not_receiver():
+    a = A(11)
+    assert echo_a_bound(a).x == 11
+    assert echo_a_bound_ref(a).x == 11
+    assert echo_a_py(a).x == 11
 
 
 def test_sum():

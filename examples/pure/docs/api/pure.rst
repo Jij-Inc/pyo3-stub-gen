@@ -17,6 +17,9 @@ pure
    _items/pure.create_dict
    _items/pure.default_value
    _items/pure.deprecated_function
+   _items/pure.echo_a_bound
+   _items/pure.echo_a_bound_ref
+   _items/pure.echo_a_py
    _items/pure.echo_path
    _items/pure.fn_override_type
    _items/pure.fn_with_python_param
