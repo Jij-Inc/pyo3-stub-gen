@@ -143,7 +143,7 @@ mod test {
     fn test_fmt_tuple() {
         #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
-        pyo3::Python::attach(|py| {
+        pyo3::Python::attach(|py| -> String {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
             assert_eq!("(1, 2)", fmt_py_obj(tuple.as_unbound()));
             let tuple = PyTuple::new(py, [1]).unwrap();
