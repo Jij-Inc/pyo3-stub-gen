@@ -800,6 +800,7 @@ dependencies = [
  "numpy",
  "ordered-float",
  "pyo3",
+ "pyo3-build-config",
  "pyo3-stub-gen-derive",
  "rust_decimal",
  "rustpython-parser",

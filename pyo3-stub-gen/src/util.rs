@@ -86,7 +86,7 @@ pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     {
         #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
-        pyo3::Python::attach(|py| {
+        pyo3::Python::attach(|py| -> String {
             if let Ok(any) = obj.into_bound_py_any(py) {
                 // Check for special float values first (inf, nan)
                 if let Some(special) = try_special_float_repr(&any) {
@@ -143,7 +143,7 @@ mod test {
     fn test_fmt_tuple() {
         #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
-        pyo3::Python::attach(|py| -> String {
+        pyo3::Python::attach(|py| {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
             assert_eq!("(1, 2)", fmt_py_obj(tuple.as_unbound()));
             let tuple = PyTuple::new(py, [1]).unwrap();
