@@ -40,7 +40,7 @@ version = "0.22.3"
 test-case.workspace = true
 
 [build-dependencies]
-pyo3-build-config = "0.26"
+pyo3-build-config = { version = "0.26", features = ["resolve-config"] }
 
 [lints]
 workspace = true
