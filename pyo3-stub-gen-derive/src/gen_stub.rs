@@ -326,4 +326,46 @@ mod tests {
 
         insta::assert_snapshot!(formatted);
     }
+
+    #[test]
+    fn test_function_with_enum_default_value() {
+        // Test a function with enum default value in signature
+        // This should generate source_module from the enum type for module qualification
+        let attr = quote! {};
+
+        let item = quote! {
+            #[pyfunction(signature = (c = MyEnum::Value1))]
+            pub fn function_with_enum_default(c: MyEnum) -> MyEnum {
+                c
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
+
+    #[test]
+    fn test_function_with_literal_default_value() {
+        // Test a function with literal default value (None, True, False, numbers)
+        // These should NOT have source_module (P1 fix)
+        let attr = quote! {};
+
+        let item = quote! {
+            #[pyfunction(signature = (a = None, b = true, c = 42))]
+            pub fn function_with_literal_defaults(
+                a: Option<i32>,
+                b: bool,
+                c: i32
+            ) -> i32 {
+                c
+            }
+        };
+
+        let result = pyfunction(attr, item).unwrap();
+        let formatted = format_tokens(result);
+
+        insta::assert_snapshot!(formatted);
+    }
 }

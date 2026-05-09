@@ -21,22 +21,22 @@ pub struct NoModuleAttr {
 
 /// Test 2: Only pyo3 module → uses pyo3 module
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed.test.from_pyo3")]
+#[pyclass(module = "mixed.main_mod.test.from_pyo3")]
 #[derive(Debug, Clone)]
 pub struct OnlyPyo3Module {
     pub x: usize,
 }
 
 /// Test 3: Inline parameter overrides pyo3
-#[gen_stub_pyclass(module = "mixed.test.from_inline")]
-#[pyclass(module = "mixed.test.from_pyo3")]
+#[gen_stub_pyclass(module = "mixed.main_mod.test.from_inline")]
+#[pyclass(module = "mixed.main_mod.test.from_pyo3")]
 #[derive(Debug, Clone)]
 pub struct InlineOverridesPyo3Class {
     pub x: usize,
 }
 
 /// Test 4: Only inline (no pyo3)
-#[gen_stub_pyclass(module = "mixed.test.from_inline")]
+#[gen_stub_pyclass(module = "mixed.main_mod.test.from_inline")]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct OnlyInlineClass {
@@ -57,7 +57,7 @@ pub fn no_module_fn() -> usize {
 
 /// Test 2: Only inline module
 #[allow(dead_code)]
-#[gen_stub_pyfunction(module = "mixed.test.from_inline")]
+#[gen_stub_pyfunction(module = "mixed.main_mod.test.from_inline")]
 #[pyfunction]
 pub fn only_inline_fn() -> usize {
     42
@@ -69,7 +69,7 @@ pub fn only_inline_fn() -> usize {
 
 /// Test 1: Only pyo3 module
 #[gen_stub_pyclass_enum]
-#[pyclass(module = "mixed.test.from_pyo3")]
+#[pyclass(module = "mixed.main_mod.test.from_pyo3")]
 #[derive(Debug, Clone)]
 pub enum OnlyPyo3Enum {
     A,
@@ -77,8 +77,8 @@ pub enum OnlyPyo3Enum {
 }
 
 /// Test 2: Inline overrides pyo3
-#[gen_stub_pyclass_enum(module = "mixed.test.from_inline")]
-#[pyclass(module = "mixed.test.from_pyo3")]
+#[gen_stub_pyclass_enum(module = "mixed.main_mod.test.from_inline")]
+#[pyclass(module = "mixed.main_mod.test.from_pyo3")]
 #[derive(Debug, Clone)]
 pub enum InlineOverridesPyo3Enum {
     A,
@@ -86,7 +86,7 @@ pub enum InlineOverridesPyo3Enum {
 }
 
 /// Test 3: Only inline (no pyo3)
-#[gen_stub_pyclass_enum(module = "mixed.test.from_inline")]
+#[gen_stub_pyclass_enum(module = "mixed.main_mod.test.from_inline")]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub enum OnlyInlineEnum {

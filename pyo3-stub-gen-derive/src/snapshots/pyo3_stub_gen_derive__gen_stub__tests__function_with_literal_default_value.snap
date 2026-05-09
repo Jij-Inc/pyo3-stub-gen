@@ -1,0 +1,36 @@
+---
+source: pyo3-stub-gen-derive/src/gen_stub.rs
+expression: formatted
+---
+#[automatically_derived]
+pyo3_stub_gen::inventory::submit! {
+    ::pyo3_stub_gen::type_info::PyFunctionInfo { name : "function_with_literal_defaults",
+    parameters : & [::pyo3_stub_gen::type_info::ParameterInfo { name : "a", kind :
+    ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : < Option
+    < i32 > as ::pyo3_stub_gen::PyStubType > ::type_input, default :
+    ::pyo3_stub_gen::type_info::ParameterDefault::Expr { value : { fn _fmt() -> String {
+    "None".to_string() } _fmt }, source_module : Some({ fn _get_module() -> Option <
+    ::pyo3_stub_gen::ModuleRef > { < Option < i32 > as ::pyo3_stub_gen::PyStubType >
+    ::type_output().source_module } _get_module }), }, },
+    ::pyo3_stub_gen::type_info::ParameterInfo { name : "b", kind :
+    ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : < bool as
+    ::pyo3_stub_gen::PyStubType > ::type_input, default :
+    ::pyo3_stub_gen::type_info::ParameterDefault::Expr { value : { fn _fmt() -> String {
+    { let v : bool = true; ::pyo3_stub_gen::util::fmt_py_obj(v) } } _fmt }, source_module
+    : Some({ fn _get_module() -> Option < ::pyo3_stub_gen::ModuleRef > { < bool as
+    ::pyo3_stub_gen::PyStubType > ::type_output().source_module } _get_module }), }, },
+    ::pyo3_stub_gen::type_info::ParameterInfo { name : "c", kind :
+    ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword, type_info : < i32 as
+    ::pyo3_stub_gen::PyStubType > ::type_input, default :
+    ::pyo3_stub_gen::type_info::ParameterDefault::Expr { value : { fn _fmt() -> String {
+    { let v : i32 = 42; ::pyo3_stub_gen::util::fmt_py_obj(v) } } _fmt }, source_module :
+    Some({ fn _get_module() -> Option < ::pyo3_stub_gen::ModuleRef > { < i32 as
+    ::pyo3_stub_gen::PyStubType > ::type_output().source_module } _get_module }), }, }],
+    r#return : < i32 as pyo3_stub_gen::PyStubType > ::type_output, doc : "", module :
+    None, is_async : false, deprecated : None, type_ignored : None, is_overload : false,
+    file : file!(), line : line!(), column : column!(), index : 0usize, }
+}
+#[pyfunction(signature = (a = None, b = true, c = 42))]
+pub fn function_with_literal_defaults(a: Option<i32>, b: bool, c: i32) -> i32 {
+    c
+}

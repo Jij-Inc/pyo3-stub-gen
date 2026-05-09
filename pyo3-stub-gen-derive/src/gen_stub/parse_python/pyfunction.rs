@@ -800,7 +800,7 @@ mod test {
         })?;
         let info = parse_python_function_stub(stub_str)?;
         let out = info.to_token_stream();
-        insta::assert_snapshot!(format_as_value(out), @r#"
+        insta::assert_snapshot!(format_as_value(out), @r###"
         ::pyo3_stub_gen::type_info::PyFunctionInfo {
             name: "configure",
             parameters: &[
@@ -846,12 +846,15 @@ mod test {
                         import: ::std::collections::HashSet::from(["typing".into()]),
                         type_refs: ::std::collections::HashMap::new(),
                     },
-                    default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr({
-                        fn _fmt() -> String {
-                            "False".to_string()
-                        }
-                        _fmt
-                    }),
+                    default: ::pyo3_stub_gen::type_info::ParameterDefault::Expr {
+                        value: {
+                            fn _fmt() -> String {
+                                "False".to_string()
+                            }
+                            _fmt
+                        },
+                        source_module: None,
+                    },
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
@@ -871,7 +874,7 @@ mod test {
             column: column!(),
             index: 0usize,
         }
-        "#);
+        "###);
         Ok(())
     }
 

@@ -48,7 +48,6 @@ pub struct DocPackageBuilder<'a> {
     stub_info: &'a StubInfo,
     export_resolver: ExportResolver<'a>,
     export_map: BTreeMap<String, String>,
-    default_module_name: String,
 }
 
 impl<'a> DocPackageBuilder<'a> {
@@ -56,19 +55,10 @@ impl<'a> DocPackageBuilder<'a> {
         let export_resolver = ExportResolver::new(&stub_info.modules);
         let export_map = export_resolver.build_export_map();
 
-        // Get the default module name from the first module (they all share the same default_module_name)
-        let default_module_name = stub_info
-            .modules
-            .values()
-            .next()
-            .map(|m| m.default_module_name.clone())
-            .unwrap_or_default();
-
         Self {
             stub_info,
             export_resolver,
             export_map,
-            default_module_name,
         }
     }
 
@@ -104,7 +94,7 @@ impl<'a> DocPackageBuilder<'a> {
         }
 
         Ok(DocPackage {
-            name: self.default_module_name.clone(),
+            name: self.stub_info.project_name.clone(),
             modules,
             export_map,
             config: json_config,
@@ -279,9 +269,9 @@ impl<'a> DocPackageBuilder<'a> {
                 type_: type_renderer.render_type(&param.type_info),
                 default: match &param.default {
                     crate::generate::ParameterDefault::None => None,
-                    crate::generate::ParameterDefault::Expr(s) => {
+                    crate::generate::ParameterDefault::Expr { value, .. } => {
                         // Parse default value and identify type references
-                        Some(default_parser.parse(s, &param.type_info))
+                        Some(default_parser.parse(value, &param.type_info))
                     }
                 },
             })
@@ -366,7 +356,46 @@ impl<'a> DocPackageBuilder<'a> {
             });
         }
 
-        let attributes = Vec::new(); // TODO: implement attributes
+        // Convert plain #[pyo3(get, set)] field attributes
+        let mut attributes: Vec<DocAttribute> = class
+            .attrs
+            .iter()
+            .map(|attr| DocAttribute {
+                name: attr.name.to_string(),
+                doc: attr.doc.to_string(),
+                type_: Some(type_renderer.render_type(&attr.r#type)),
+                is_property: false,
+                is_readonly: false,
+                deprecated: attr.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                    since: dep.since.map(|s| s.to_string()),
+                    note: dep.note.map(|s| s.to_string()),
+                }),
+            })
+            .collect();
+
+        // Convert #[getter]/#[setter] method properties
+        for (prop_name, (getter, setter)) in &class.getter_setters {
+            let member = getter.as_ref().or(setter.as_ref());
+            if let Some(member) = member {
+                // Use deprecation from getter preferentially, fall back to setter
+                let deprecated = getter
+                    .as_ref()
+                    .and_then(|g| g.deprecated.as_ref())
+                    .or_else(|| setter.as_ref().and_then(|s| s.deprecated.as_ref()))
+                    .map(|dep| DeprecatedInfo {
+                        since: dep.since.map(|s| s.to_string()),
+                        note: dep.note.map(|s| s.to_string()),
+                    });
+                attributes.push(DocAttribute {
+                    name: prop_name.clone(),
+                    doc: member.doc.to_string(),
+                    type_: Some(type_renderer.render_type(&member.r#type)),
+                    is_property: true,
+                    is_readonly: setter.is_none(),
+                    deprecated,
+                });
+            }
+        }
 
         Ok(DocItem::Class(DocClass {
             name: class.name.to_string(),
@@ -380,22 +409,44 @@ impl<'a> DocPackageBuilder<'a> {
 
     fn build_enum_as_class(
         &self,
-        _module: &str,
+        module: &str,
         enum_def: &crate::generate::EnumDef,
     ) -> Result<DocItem> {
-        // Convert enum to class-like representation
-        // EnumDef doesn't have bases field
+        let ctx = self.create_context(module);
+        let type_renderer = ctx.type_renderer();
 
         // Convert enum variants to DocAttributes
-        let attributes: Vec<DocAttribute> = enum_def
+        let mut attributes: Vec<DocAttribute> = enum_def
             .variants
             .iter()
             .map(|(variant_name, variant_doc)| DocAttribute {
                 name: (*variant_name).to_string(),
                 doc: (*variant_doc).to_string(),
                 type_: None, // Enum variants don't have explicit type annotations
+                is_property: false,
+                is_readonly: false,
+                deprecated: None,
             })
             .collect();
+
+        // Collect setter names for determining readonly status
+        let setter_names: std::collections::HashSet<&str> =
+            enum_def.setters.iter().map(|s| s.name).collect();
+
+        // Convert enum getters to property attributes
+        for getter in &enum_def.getters {
+            attributes.push(DocAttribute {
+                name: getter.name.to_string(),
+                doc: getter.doc.to_string(),
+                type_: Some(type_renderer.render_type(&getter.r#type)),
+                is_property: true,
+                is_readonly: !setter_names.contains(getter.name),
+                deprecated: getter.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                    since: dep.since.map(|s| s.to_string()),
+                    note: dep.note.map(|s| s.to_string()),
+                }),
+            });
+        }
 
         Ok(DocItem::Class(DocClass {
             name: enum_def.name.to_string(),
@@ -514,7 +565,7 @@ impl<'a> DocPackageBuilder<'a> {
                     (link_target.fqn.clone(), module.clone())
                 } else {
                     // If not found, try to extract the type name and look for it under other modules
-                    // e.g., "hidden_module_docgen_test._core.A" -> try "hidden_module_docgen_test.A"
+                    // e.g., "pkg._core.A" -> try "pkg.A"
                     if let Some(type_name) = link_target.fqn.split('.').next_back() {
                         // Try each module in export_map to find a match
                         if let Some((fqn, module)) = self

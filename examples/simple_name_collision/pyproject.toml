@@ -9,3 +9,6 @@ build-backend = "maturin"
 
 [tool.maturin]
 python-source = "python"
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]

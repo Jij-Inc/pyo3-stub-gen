@@ -21,7 +21,7 @@
 //! This process is done at runtime in [gen_stub](../../gen_stub) executable.
 //!
 
-use crate::{PyStubType, TypeInfo};
+use crate::{stub_type::ModuleRef, PyStubType, TypeInfo};
 use std::any::TypeId;
 
 /// Represents the target of type ignore comments
@@ -70,15 +70,20 @@ pub enum ParameterKind {
 pub enum ParameterDefault {
     /// No default value
     None,
-    /// Default value expression as a string
-    Expr(fn() -> String),
+    /// Default value with optional module qualification info
+    Expr {
+        /// Function returning the default value expression (without module prefix)
+        value: fn() -> String,
+        /// Source module of the type referenced in the default value
+        source_module: Option<fn() -> Option<ModuleRef>>,
+    },
 }
 
 impl PartialEq for ParameterDefault {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Expr(l), Self::Expr(r)) => {
+            (Self::Expr { value: l, .. }, Self::Expr { value: r, .. }) => {
                 let l_val = l();
                 let r_val = r();
                 l_val.eq(&r_val)
@@ -129,7 +134,7 @@ pub struct MethodInfo {
     pub is_overload: bool,
 }
 
-/// Info of getter method decorated with `#[getter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
+/// Info of getter/setter method decorated with `#[getter]`/`#[setter]` or `#[pyo3(get, set)]` appears in `#[pyclass]`
 #[derive(Debug)]
 pub struct MemberInfo {
     pub name: &'static str,
@@ -294,12 +299,23 @@ pub struct ModuleDocInfo {
 
 inventory::collect!(ModuleDocInfo);
 
+/// Specifies which items to re-export from a source module
+#[derive(Debug, Clone, Copy)]
+pub enum ReexportItems {
+    /// Re-export all public items (excluding `_` prefixed)
+    Wildcard,
+    /// Re-export only the specified items
+    Explicit(&'static [&'static str]),
+    /// Re-export all public items plus additional specified items (e.g., `__version__`)
+    WildcardPlus(&'static [&'static str]),
+}
+
 /// Re-export items from another module into __all__
 #[derive(Debug)]
 pub struct ReexportModuleMembers {
     pub target_module: &'static str,
     pub source_module: &'static str,
-    pub items: Option<&'static [&'static str]>,
+    pub items: ReexportItems,
 }
 
 inventory::collect!(ReexportModuleMembers);

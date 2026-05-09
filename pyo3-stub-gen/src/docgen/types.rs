@@ -204,6 +204,7 @@ impl TypeStructure {
                     result.push('"');
                 }
                 Token::Whitespace(ws) => result.push_str(ws),
+                Token::NumericLiteral(num) => result.push_str(num),
             }
         }
         result

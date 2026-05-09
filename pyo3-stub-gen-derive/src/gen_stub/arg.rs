@@ -21,14 +21,18 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             r#type: TypeOrOverride::OverrideType { r#type, .. },
             ..
         }) = &arg;
-        // Regard the first argument with `&Bound<'_, PyType>`
+        // Regard the first argument with `&Bound<'_, PyType>` (classmethod
+        // `cls`) or `&Bound<'_, Self>` (explicit borrowed self) as a receiver.
         if let Type::Reference(TypeReference { elem, .. }) = &r#type {
             if let Type::Path(TypePath { path, .. }) = elem.as_ref() {
                 let last = path.segments.last().unwrap();
                 if n == 0 && last.ident == "Bound" {
                     if let PathArguments::AngleBracketed(args, ..) = &last.arguments {
-                        if let Some(last_type) = args.args.last() {
-                            if last_type.to_token_stream().to_string() == "PyType" {
+                        if let Some(GenericArgument::Type(Type::Path(TypePath { path, .. }))) =
+                            args.args.last()
+                        {
+                            let inner_last = path.segments.last().unwrap();
+                            if inner_last.ident == "PyType" || inner_last.ident == "Self" {
                                 continue;
                             }
                         }
@@ -41,8 +45,15 @@ pub fn parse_args(iter: impl IntoIterator<Item = FnArg>) -> Result<Vec<ArgInfo>>
             if last.ident == "Python" {
                 continue;
             }
-            // Regard the first argument with `PyRef<'_, Self>` and `PyMutRef<'_, Self>` types as a receiver.
-            if n == 0 && (last.ident == "PyRef" || last.ident == "PyRefMut") {
+            // Regard the first argument with `PyRef<'_, Self>` /
+            // `PyRefMut<'_, Self>` / `Bound<'_, Self>` / `Py<Self>` as a
+            // receiver. PyO3 accepts all four shapes for self in `#[pymethods]`.
+            if n == 0
+                && (last.ident == "PyRef"
+                    || last.ident == "PyRefMut"
+                    || last.ident == "Bound"
+                    || last.ident == "Py")
+            {
                 if let PathArguments::AngleBracketed(inner) = &last.arguments {
                     if let GenericArgument::Type(Type::Path(TypePath { path, .. })) =
                         &inner.args[inner.args.len() - 1]

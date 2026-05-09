@@ -28,6 +28,8 @@ pub(crate) enum Token {
     StringLiteral(String),
     /// Whitespace (preserved for formatting)
     Whitespace(String),
+    /// Numeric literal (e.g., "42", "3.14", "-1")
+    NumericLiteral(String),
 }
 
 /// Tokenizes a Python type expression into tokens.
@@ -184,6 +186,46 @@ pub(crate) fn tokenize(expr: &str) -> Vec<Token> {
                 }
             }
 
+            // Numeric literals (e.g., 42, 3.14, -1)
+            _ if ch.is_ascii_digit()
+                || (ch == '-' && chars.clone().nth(1).is_some_and(|c| c.is_ascii_digit())) =>
+            {
+                let mut num = String::new();
+                // Handle negative sign
+                if ch == '-' {
+                    num.push(ch);
+                    chars.next();
+                }
+                // Read digits, dots, and scientific notation
+                while let Some(&c) = chars.peek() {
+                    if c.is_ascii_digit()
+                        || c == '.'
+                        || c == 'e'
+                        || c == 'E'
+                        || c == '+'
+                        || c == '-'
+                    {
+                        // Special handling: dot must be followed by digit for float
+                        if c == '.' {
+                            let mut peek = chars.clone();
+                            peek.next();
+                            if !peek.peek().is_some_and(|&d| d.is_ascii_digit()) {
+                                break;
+                            }
+                        }
+                        // For +/- in scientific notation, must be after e/E
+                        if (c == '+' || c == '-') && !num.ends_with('e') && !num.ends_with('E') {
+                            break;
+                        }
+                        num.push(c);
+                        chars.next();
+                    } else {
+                        break;
+                    }
+                }
+                tokens.push(Token::NumericLiteral(num));
+            }
+
             // Skip other characters (shouldn't happen in valid type expressions)
             _ => {
                 chars.next();
@@ -255,26 +297,59 @@ impl TypeExpressionQualifier {
                     }
                 }
                 Token::DottedPath(parts) => {
-                    // Check if this is an over-qualified path (e.g., "my_module.Type" when we're already in "my_module")
-                    // If the dotted path is module.Type and module matches target_module, simplify to just Type
-                    if parts.len() == 2 {
-                        let module_path = &parts[0];
-                        let type_name = &parts[1];
+                    // Handle dotted paths like "module.Type" or "module.Class.Member"
+                    // We need to distinguish between:
+                    // 1. Local over-qualified paths: "_core.C.C1" in "pkg._core" → "C.C1"
+                    // 2. External paths: "collections.abc.Callable" → preserve as-is
+                    //
+                    // Strategy:
+                    // - If any part is a known Python builtin → external, preserve
+                    // - If the type is in type_refs → use that module info
+                    // - Otherwise, use suffix matching for local modules
+                    if parts.len() >= 2 {
+                        // Check if any part is a Python builtin (indicates external path)
+                        let contains_builtin = parts.iter().any(|p| Self::is_python_builtin(p));
 
-                        // Check if target_module matches or ends with the module_path
-                        // E.g., target="pkg.sub_mod" matches module_path="sub_mod"
-                        let is_same_module = module_path == target_module
-                            || target_module.ends_with(&format!(".{}", module_path));
-
-                        if is_same_module {
-                            // Over-qualified - just use the type name
-                            result.push_str(type_name);
-                        } else {
-                            // Different module - keep the qualification
+                        if contains_builtin {
+                            // External type path - preserve as-is
                             result.push_str(&parts.join("."));
+                        } else {
+                            // Check if the type (parts[1] or last meaningful part) is in type_refs
+                            let type_name = &parts[1];
+                            let module_prefix = &parts[0];
+
+                            if let Some(type_ref) = type_refs.get(type_name) {
+                                // We have type info - use it to decide
+                                if let Some(module_name) = type_ref.module.get() {
+                                    // Check if the module matches target_module
+                                    if module_name == target_module {
+                                        // Same module - strip prefix
+                                        result.push_str(&parts[1..].join("."));
+                                    } else {
+                                        // Different module - preserve full path
+                                        result.push_str(&parts.join("."));
+                                    }
+                                } else {
+                                    // No module info in type_ref - preserve as-is
+                                    result.push_str(&parts.join("."));
+                                }
+                            } else {
+                                // Type not in type_refs - use suffix matching as fallback
+                                // This handles cases like "_core.C.C1" when C is not explicitly tracked
+                                let is_local_module = target_module == module_prefix
+                                    || target_module.ends_with(&format!(".{}", module_prefix));
+
+                                if is_local_module {
+                                    // Local module - strip prefix
+                                    result.push_str(&parts[1..].join("."));
+                                } else {
+                                    // Different module - preserve full path
+                                    result.push_str(&parts.join("."));
+                                }
+                            }
                         }
                     } else {
-                        // More complex path - preserve as-is
+                        // Single-part path - preserve as-is (shouldn't happen for DottedPath)
                         result.push_str(&parts.join("."));
                     }
                 }
@@ -290,6 +365,7 @@ impl TypeExpressionQualifier {
                     result.push('"');
                 }
                 Token::Whitespace(ws) => result.push_str(&ws),
+                Token::NumericLiteral(num) => result.push_str(&num),
             }
         }
 
@@ -459,5 +535,85 @@ mod tests {
             result,
             "collections.abc.Callable[[sub_mod.ClassA, str], other_mod.ClassB]"
         );
+    }
+
+    #[test]
+    fn test_qualify_dotted_path_three_parts_same_module() {
+        // Test: _core.C.C1 in module "pkg._core" should become C.C1
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C.C1", &HashMap::new(), "pkg._core");
+        assert_eq!(result, "C.C1");
+    }
+
+    #[test]
+    fn test_qualify_dotted_path_three_parts_different_module() {
+        // Test: _core.C.C1 in module "pkg.other" should stay _core.C.C1
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C.C1", &HashMap::new(), "pkg.other");
+        assert_eq!(result, "_core.C.C1");
+    }
+
+    #[test]
+    fn test_qualify_dotted_path_two_parts_same_module() {
+        // Test: _core.C in module "pkg._core" should become C
+        let result =
+            TypeExpressionQualifier::qualify_expression("_core.C", &HashMap::new(), "pkg._core");
+        assert_eq!(result, "C");
+    }
+
+    #[test]
+    fn test_tokenize_numeric_literals() {
+        // Test integer
+        let tokens = tokenize("42");
+        assert_eq!(tokens, vec![Token::NumericLiteral("42".to_string())]);
+
+        // Test float
+        let tokens = tokenize("3.14");
+        assert_eq!(tokens, vec![Token::NumericLiteral("3.14".to_string())]);
+
+        // Test negative integer
+        let tokens = tokenize("-1");
+        assert_eq!(tokens, vec![Token::NumericLiteral("-1".to_string())]);
+    }
+
+    #[test]
+    fn test_qualify_numeric_literal_preserved() {
+        // Test: numeric literals should be preserved as-is
+        let result = TypeExpressionQualifier::qualify_expression("2", &HashMap::new(), "pkg._core");
+        assert_eq!(result, "2");
+
+        let result =
+            TypeExpressionQualifier::qualify_expression("1.0", &HashMap::new(), "pkg._core");
+        assert_eq!(result, "1.0");
+    }
+
+    #[test]
+    fn test_external_dotted_path_preserved() {
+        // Test: external paths like collections.abc.Callable should NEVER be stripped
+        // even if the target module happens to end with a matching component
+
+        // collections.abc.Callable should be preserved even in pkg.collections
+        let result = TypeExpressionQualifier::qualify_expression(
+            "collections.abc.Callable",
+            &HashMap::new(),
+            "pkg.collections",
+        );
+        assert_eq!(result, "collections.abc.Callable");
+
+        // typing.Optional should be preserved as-is
+        let result = TypeExpressionQualifier::qualify_expression(
+            "typing.Optional",
+            &HashMap::new(),
+            "pkg.typing",
+        );
+        assert_eq!(result, "typing.Optional");
+
+        // builtins.int should be preserved
+        let result = TypeExpressionQualifier::qualify_expression(
+            "builtins.int",
+            &HashMap::new(),
+            "pkg.builtins",
+        );
+        assert_eq!(result, "builtins.int");
     }
 }

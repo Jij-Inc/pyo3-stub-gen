@@ -1,6 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
+use ::pyo3::prelude::*;
+
 use super::{ImportKind, PyStubType, TypeIdentifierRef, TypeInfo};
+use crate::runtime::PyRuntimeType;
 
 /// Extract type identifier from a pre-qualified type name
 fn extract_type_identifier(type_name: &str) -> Option<&str> {
@@ -79,5 +82,12 @@ impl<L: PyStubType, R: PyStubType> PyStubType for either::Either<L, R> {
             import,
             type_refs,
         }
+    }
+}
+impl<L: PyRuntimeType, R: PyRuntimeType> PyRuntimeType for either::Either<L, R> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        let l_type = L::runtime_type_object(py)?;
+        let r_type = R::runtime_type_object(py)?;
+        crate::runtime::union_type(py, &[l_type, r_type])
     }
 }

@@ -9,6 +9,7 @@ import collections.abc
 import datetime
 import decimal
 import enum
+import ipaddress
 import os
 import pathlib
 import typing
@@ -32,7 +33,9 @@ __all__ = [
     "DocumentedCallback",
     "DocumentedMap",
     "DocumentedUnion",
+    "FloatValues",
     "GenericUnion",
+    "GetterSetterTypeTest",
     "HashableStruct",
     "InstanceValue",
     "MY_CONSTANT1",
@@ -55,6 +58,7 @@ __all__ = [
     "PartialManualSubmit",
     "Placeholder",
     "Problem",
+    "RuntimeNumberOrString",
     "SequenceOfInts",
     "Shape1",
     "Shape2",
@@ -77,6 +81,9 @@ __all__ = [
     "create_dict",
     "default_value",
     "deprecated_function",
+    "echo_a_bound",
+    "echo_a_bound_ref",
+    "echo_a_py",
     "echo_path",
     "fn_override_type",
     "fn_with_python_param",
@@ -99,12 +106,16 @@ __all__ = [
     "get_utc",
     "get_utc_datetime",
     "get_utc_offset",
+    "ipv4_localhost",
+    "ipv6_localhost",
+    "is_loopback",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
     "naive_time_difference",
     "overload_example_1",
     "overload_example_2",
+    "parse_ip",
     "print_c",
     "process_container",
     "read_dict",
@@ -118,6 +129,10 @@ __all__ = [
     "test_type_ignore_pyright",
     "test_type_ignore_specific",
     "time_difference",
+    "with_float_default",
+    "with_infinity_default",
+    "with_nan_default",
+    "with_neg_infinity_default",
 ]
 
 CallbackType: TypeAlias = collections.abc.Callable[[str], None]
@@ -159,6 +174,11 @@ NestedContainer: TypeAlias = list[list[DataContainer]]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
 OptionalContainer: TypeAlias = DataContainer  |  None
+RuntimeNumberOrString: TypeAlias = builtins.int | builtins.str
+r"""
+Either an integer or a string, available at runtime.
+"""
+
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
 SimpleAlias: TypeAlias = typing.Optional[builtins.int]
 SimpleContainer: TypeAlias = DataContainer
@@ -204,6 +224,13 @@ class A:
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
     @property
     def deprecated_getter(self) -> builtins.int: ...
+    @property
+    def forty_two(self) -> builtins.int:
+        r"""
+        Always returns `42`.
+        """
+    @property
+    def renamed_getter(self) -> builtins.int: ...
     def __new__(cls, x: builtins.int) -> A:
         r"""
         This is a constructor of :class:`A`.
@@ -215,7 +242,14 @@ class A:
     def deprecated_classmethod(cls) -> None: ...
     @classmethod
     def classmethod_test2(cls) -> None: ...
+    @classmethod
+    def classmethod_test_qualified(cls) -> None: ...
     def show_x(self) -> None: ...
+    def show_x_pyref(self) -> builtins.int: ...
+    def show_x_pyrefmut(self) -> builtins.int: ...
+    def show_x_bound(self) -> builtins.int: ...
+    def show_x_bound_ref(self) -> builtins.int: ...
+    def show_x_py(self) -> builtins.int: ...
     def ref_test(self, x: dict) -> dict: ...
     async def async_get_x(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
@@ -246,11 +280,11 @@ class ComparableStruct:
     """
     @property
     def value(self) -> builtins.int: ...
-    def __eq__(self, other: builtins.object) -> builtins.bool: ...
-    def __lt__(self, other: builtins.object) -> builtins.bool: ...
-    def __le__(self, other: builtins.object) -> builtins.bool: ...
-    def __gt__(self, other: builtins.object) -> builtins.bool: ...
-    def __ge__(self, other: builtins.object) -> builtins.bool: ...
+    def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __lt__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __le__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __gt__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __ge__(self, other: builtins.object, /) -> builtins.bool: ...
     def __new__(cls, value: builtins.int) -> ComparableStruct: ...
 
 class CustomComplexEnum:
@@ -271,7 +305,7 @@ class CustomComplexEnum:
         def _0(self) -> builtins.str: ...
         def __new__(cls, _0: builtins.str) -> CustomComplexEnum.VARIANT_B: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     ...
 
@@ -302,13 +336,51 @@ class DecimalHolder:
     def __new__(cls, value: decimal.Decimal) -> DecimalHolder: ...
 
 @typing.final
+class FloatValues:
+    r"""
+    A class to test f64 special values
+    """
+    POSITIVE_INF: builtins.float = float('inf')
+    r"""
+    Class attribute: positive infinity
+    """
+    NEGATIVE_INF: builtins.float = float('-inf')
+    r"""
+    Class attribute: negative infinity
+    """
+    NAN_VALUE: builtins.float = float('nan')
+    r"""
+    Class attribute: NaN
+    """
+    REGULAR_FLOAT: builtins.float = 2.14
+    r"""
+    Class attribute: regular float
+    """
+    def __new__(cls) -> FloatValues: ...
+
+@typing.final
+class GetterSetterTypeTest:
+    r"""
+    Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
+    
+    For `Vec<i32>`:
+    - getter should produce `-> list[int]`
+    - setter should produce `value: Sequence[int]`
+    """
+    @property
+    def values(self) -> builtins.list[builtins.int]: ...
+    @values.setter
+    def values(self, value: typing.Sequence[builtins.int]) -> None: ...
+    def __new__(cls, values: typing.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
+
+@typing.final
 class HashableStruct:
     r"""
     Test struct for hash and str methods
     """
     @property
     def name(self) -> builtins.str: ...
-    def __eq__(self, other: builtins.object) -> builtins.bool: ...
+    def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
     def __hash__(self) -> builtins.int: ...
     def __str__(self) -> builtins.str: ...
     def __new__(cls, name: builtins.str) -> HashableStruct: ...
@@ -392,7 +464,7 @@ class NumberComplex:
         def _0(self) -> builtins.float: ...
         def __new__(cls, _0: builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     @typing.final
     class INTEGER(NumberComplex):
@@ -495,7 +567,7 @@ class Shape1:
         def _1(self) -> builtins.float: ...
         def __new__(cls, _0: builtins.int, _1: builtins.float) -> Shape1.RegularPolygon: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     @typing.final
     class Nothing(Shape1):
@@ -635,6 +707,12 @@ def default_value(num: Number = Number.FLOAT) -> Number: ...
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
 
+def echo_a_bound(a: A) -> A: ...
+
+def echo_a_bound_ref(a: A) -> A: ...
+
+def echo_a_py(a: A) -> A: ...
+
 def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
 
 def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
@@ -741,6 +819,21 @@ def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
     Returns a time::UtcOffset from hours
     """
 
+def ipv4_localhost() -> ipaddress.IPv4Address:
+    r"""
+    Returns the IPv4 loopback address (127.0.0.1).
+    """
+
+def ipv6_localhost() -> ipaddress.IPv6Address:
+    r"""
+    Returns the IPv6 loopback address (::1).
+    """
+
+def is_loopback(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> builtins.bool:
+    r"""
+    Returns whether the given IP address is a loopback address.
+    """
+
 @typing.overload
 def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
     r"""
@@ -792,6 +885,11 @@ def overload_example_2(ob: int) -> int:
 def overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
+    """
+
+def parse_ip(s: builtins.str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+    r"""
+    Parses a string into an IpAddr (either IPv4 or IPv6).
     """
 
 def print_c(c: typing.Optional[builtins.int] = None) -> None: ...
@@ -851,5 +949,25 @@ def test_type_ignore_specific() -> builtins.int:  # type: ignore[arg-type,return
 def time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
     r"""
     Calculate the difference between two times as duration
+    """
+
+def with_float_default(value: builtins.float = 1.5) -> builtins.float:
+    r"""
+    Function with regular float default value
+    """
+
+def with_infinity_default(threshold: builtins.float = float('inf')) -> builtins.float:
+    r"""
+    Function with infinity as default value
+    """
+
+def with_nan_default(value: builtins.float = float('nan')) -> builtins.float:
+    r"""
+    Function with NaN as default value
+    """
+
+def with_neg_infinity_default(threshold: builtins.float = float('-inf')) -> builtins.float:
+    r"""
+    Function with negative infinity as default value
     """
 

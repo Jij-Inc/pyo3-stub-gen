@@ -11,8 +11,11 @@ use std::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct ModuleReExport {
     pub source_module: String,
+    /// Items to re-export. Empty means wildcard (will be resolved).
     pub items: Vec<String>,
-    pub use_wildcard_import: bool,
+    /// Additional items to include with wildcard (e.g., `__version__`).
+    /// These are merged into `items` after wildcard resolution.
+    pub additional_items: Vec<String>,
 }
 
 /// Type info for a Python (sub-)module. This corresponds to a single `*.pyi` file.
@@ -37,6 +40,68 @@ pub struct Module {
 }
 
 impl Module {
+    /// Check if this module has no content to generate.
+    ///
+    /// Returns true if the module has no classes, enums, functions, variables,
+    /// type aliases, submodules, re-exports, docstrings, or verbatim entries.
+    /// Modules that are empty should be skipped during generation.
+    pub fn is_empty(&self) -> bool {
+        self.doc.is_empty()
+            && self.class.is_empty()
+            && self.enum_.is_empty()
+            && self.function.is_empty()
+            && self.variables.is_empty()
+            && self.type_aliases.is_empty()
+            && self.submodules.is_empty()
+            && self.module_re_exports.is_empty()
+            && self.verbatim_all_entries.is_empty()
+    }
+
+    /// Check if this module can have `__init__.py` generated.
+    ///
+    /// Returns true if the module has no PyO3-generated items (classes, enums,
+    /// functions, variables, type aliases). Such modules can only contain
+    /// re-exports and docstrings, which can be represented in `__init__.py`.
+    pub fn is_init_py_compatible(&self) -> bool {
+        self.class.is_empty()
+            && self.enum_.is_empty()
+            && self.function.is_empty()
+            && self.variables.is_empty()
+            && self.type_aliases.is_empty()
+    }
+
+    /// Get the names of all declared items in this module.
+    ///
+    /// Returns a list of item names that were declared via `gen_stub_*` macros.
+    pub fn declared_item_names(&self) -> Vec<String> {
+        let mut names = Vec::new();
+
+        if !self.doc.is_empty() {
+            names.push("module_doc".to_string());
+        }
+        for class in self.class.values() {
+            names.push(format!("class {}", class.name));
+        }
+        for enum_def in self.enum_.values() {
+            names.push(format!("enum {}", enum_def.name));
+        }
+        for func_name in self.function.keys() {
+            names.push(format!("function {}", func_name));
+        }
+        for var_name in self.variables.keys() {
+            names.push(format!("variable {}", var_name));
+        }
+        for alias_name in self.type_aliases.keys() {
+            names.push(format!("type_alias {}", alias_name));
+        }
+        for re_export in &self.module_re_exports {
+            names.push(format!("re-export from {}", re_export.source_module));
+        }
+
+        names.sort();
+        names
+    }
+
     /// Format module with configuration for type alias syntax, returning a String
     pub fn format_with_config(&self, use_type_statement: bool) -> String {
         use std::fmt::Write;
@@ -134,22 +199,21 @@ impl Module {
                     )?;
                 }
 
-                // Add imports for module re-exports
+                // Add imports for module re-exports (always explicit, not wildcard)
                 let mut sorted_re_exports = self.module.module_re_exports.clone();
                 sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
                 for re_export in &sorted_re_exports {
-                    if re_export.use_wildcard_import {
-                        writeln!(f, "from {} import *", re_export.source_module)?;
-                    } else {
-                        let mut sorted_items = re_export.items.clone();
-                        sorted_items.sort();
-                        writeln!(
-                            f,
-                            "from {} import {}",
-                            re_export.source_module,
-                            sorted_items.join(", ")
-                        )?;
+                    if re_export.items.is_empty() {
+                        continue;
                     }
+                    let mut sorted_items = re_export.items.clone();
+                    sorted_items.sort();
+                    writeln!(
+                        f,
+                        "from {} import {}",
+                        re_export.source_module,
+                        sorted_items.join(", ")
+                    )?;
                 }
                 for submod in &self.module.submodules {
                     writeln!(f, "from . import {submod}")?;
@@ -214,7 +278,12 @@ impl Module {
         output
     }
 
-    fn write_all_list(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    /// Collect all items for the `__all__` list in `.pyi` stub files.
+    ///
+    /// This collects public items from classes, enums, functions, variables,
+    /// type aliases, submodules, re-exports, and verbatim entries.
+    /// Items starting with `_` are excluded unless added via `export_verbatim!`.
+    fn collect_all_items(&self) -> BTreeSet<String> {
         let mut all_items: BTreeSet<String> = BTreeSet::new();
 
         // Collect public items from this module
@@ -243,7 +312,6 @@ impl Module {
                 all_items.insert(alias_name.to_string());
             }
         }
-        // FIX: Add underscore filtering for submodules
         for submod in &self.submodules {
             if !submod.starts_with('_') {
                 all_items.insert(submod.to_string());
@@ -262,6 +330,72 @@ impl Module {
         for excluded in &self.excluded_all_entries {
             all_items.remove(excluded);
         }
+
+        all_items
+    }
+
+    /// Format module as `__init__.py` content.
+    ///
+    /// This generates a Python `__init__.py` file with re-exports and `__all__` list.
+    /// Unlike `format_with_config()` which generates `.pyi` stub files, this generates
+    /// actual Python code for runtime use.
+    pub fn format_init_py(&self) -> String {
+        use std::fmt::Write;
+        let mut output = String::new();
+
+        // Header
+        writeln!(
+            output,
+            "# This file is automatically generated by pyo3_stub_gen"
+        )
+        .unwrap();
+        writeln!(output, "# ruff: noqa: F401").unwrap();
+        writeln!(output).unwrap();
+
+        // Re-export imports (sorted for deterministic output)
+        // Always use explicit imports (not wildcard) for better tooling support
+        let mut sorted_re_exports = self.module_re_exports.clone();
+        sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
+        for re_export in &sorted_re_exports {
+            if re_export.items.is_empty() {
+                continue;
+            }
+            let mut sorted_items = re_export.items.clone();
+            sorted_items.sort();
+            writeln!(
+                output,
+                "from {} import {}",
+                re_export.source_module,
+                sorted_items.join(", ")
+            )
+            .unwrap();
+        }
+
+        // Collect __all__ items from re-exports only
+        // (Unlike __init__.pyi, __init__.py can only contain re-exported items)
+        let mut all_items: BTreeSet<String> = BTreeSet::new();
+        for re_export in &self.module_re_exports {
+            all_items.extend(re_export.items.iter().cloned());
+        }
+        all_items.extend(self.verbatim_all_entries.iter().cloned());
+        for excluded in &self.excluded_all_entries {
+            all_items.remove(excluded);
+        }
+        if all_items.is_empty() {
+            writeln!(output, "__all__ = []").unwrap();
+        } else {
+            writeln!(output, "__all__ = [").unwrap();
+            for item in all_items {
+                writeln!(output, "    \"{}\",", item).unwrap();
+            }
+            writeln!(output, "]").unwrap();
+        }
+
+        output
+    }
+
+    fn write_all_list(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let all_items = self.collect_all_items();
 
         // Always write __all__ list (even if empty for consistency)
         if all_items.is_empty() {
@@ -375,24 +509,21 @@ impl fmt::Display for Module {
                 sorted_type_names.join(", ")
             )?;
         }
-        // Add imports for module re-exports (sorted for deterministic output)
+        // Add imports for module re-exports (always explicit, not wildcard)
         let mut sorted_re_exports = self.module_re_exports.clone();
         sorted_re_exports.sort_by(|a, b| a.source_module.cmp(&b.source_module));
         for re_export in &sorted_re_exports {
-            if re_export.use_wildcard_import {
-                // Wildcard: from source import *
-                writeln!(f, "from {} import *", re_export.source_module)?;
-            } else {
-                // Specific items: from source import item1, item2
-                let mut sorted_items = re_export.items.clone();
-                sorted_items.sort();
-                writeln!(
-                    f,
-                    "from {} import {}",
-                    re_export.source_module,
-                    sorted_items.join(", ")
-                )?;
+            if re_export.items.is_empty() {
+                continue;
             }
+            let mut sorted_items = re_export.items.clone();
+            sorted_items.sort();
+            writeln!(
+                f,
+                "from {} import {}",
+                re_export.source_module,
+                sorted_items.join(", ")
+            )?;
         }
         for submod in &self.submodules {
             writeln!(f, "from . import {submod}")?;

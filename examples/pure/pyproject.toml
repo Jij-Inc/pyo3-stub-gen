@@ -17,6 +17,8 @@ features = ["pyo3/extension-module"]
 output-dir = "docs/api"
 json-output = "api_reference.json"
 index-title = "API Reference"
+contents-table = true
+separate-items = true
 
 [tool.pyrefly]
 project-excludes = ["**/type_error_cases/*.py", "docs/api/**"]

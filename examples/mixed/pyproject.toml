@@ -30,3 +30,6 @@ exclude = ["docs/api"]
 [tool.pyrefly]
 project-excludes = ["docs/api/**"]
 enabled-ignores = ["type", "pyrefly"]
+
+[tool.uv]
+cache-keys = [{ file = "src/**/*.rs" }]
