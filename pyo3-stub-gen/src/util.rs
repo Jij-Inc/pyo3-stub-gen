@@ -84,7 +84,7 @@ fn try_special_float_repr(any: &Bound<'_, PyAny>) -> Option<String> {
 pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     #[cfg(feature = "infer_signature")]
     {
-        #[cfg(feature = "manual-python-init")]
+        #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| {
             if let Ok(any) = obj.into_bound_py_any(py) {
