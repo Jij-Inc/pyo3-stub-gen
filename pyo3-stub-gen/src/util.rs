@@ -115,7 +115,9 @@ mod test {
     struct A {}
     #[test]
     fn test_fmt_dict() {
-        pyo3::Python::try_attach(|py| {
+        #[cfg(not(any(PyPy, GraalPy)))]
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let dict = PyDict::new(py);
             _ = dict.set_item("k1", "v1");
             _ = dict.set_item("k2", 2);
@@ -127,7 +129,9 @@ mod test {
     }
     #[test]
     fn test_fmt_list() {
-        pyo3::Python::try_attach(|py| {
+        #[cfg(not(any(PyPy, GraalPy)))]
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let list = PyList::new(py, [1, 2]).unwrap();
             assert_eq!("[1, 2]", fmt_py_obj(list.as_unbound()));
             // class A variable can not be formatted
@@ -137,7 +141,9 @@ mod test {
     }
     #[test]
     fn test_fmt_tuple() {
-        pyo3::Python::try_attach(|py| {
+        #[cfg(not(any(PyPy, GraalPy)))]
+        pyo3::Python::initialize();
+        pyo3::Python::attach(|py| {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
             assert_eq!("(1, 2)", fmt_py_obj(tuple.as_unbound()));
             let tuple = PyTuple::new(py, [1]).unwrap();
