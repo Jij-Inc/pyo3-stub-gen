@@ -1,7 +1,7 @@
 use indexmap::IndexSet;
 
 use super::{RenamingRule, Signature};
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
+use proc_macro2::{Delimiter, TokenStream as TokenStream2, TokenTree};
 use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{
     parenthesized,
@@ -189,7 +189,12 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
         // https://pyo3.rs/v0.19.1/function/signature
         if let Meta::List(MetaList { tokens, .. }) = &attr.meta {
             use TokenTree::*;
-            let tokens: Vec<TokenTree> = tokens.clone().into_iter().collect();
+            // `macro_rules!` substitutions (e.g. `#[pyclass(name = $name)]` where
+            // `$name:literal`) wrap the inserted token in an "invisible group"
+            // (`Group { delimiter: None, .. }`). Flattening these first lets a
+            // single pattern arm handle both direct literals and macro-substituted
+            // values uniformly.
+            let tokens: Vec<TokenTree> = flatten_invisible_groups(tokens.clone()).collect();
             // Since `(...)` part with `signature` becomes `TokenTree::Group`,
             // we can split entire stream by `,` first, and then pattern match to each cases.
             for tt in tokens.split(|tt| {
@@ -288,6 +293,22 @@ pub fn parse_pyo3_attr(attr: &Attribute) -> Result<Vec<Attr>> {
     Ok(pyo3_attrs)
 }
 
+/// Flatten `Group { delimiter: None, .. }` tokens (produced by `macro_rules!`
+/// substitutions) into their contents so downstream pattern matching can treat
+/// macro-substituted values the same as written-out literals.
+fn flatten_invisible_groups(tokens: TokenStream2) -> impl Iterator<Item = TokenTree> {
+    tokens
+        .into_iter()
+        .flat_map(|tt| -> Box<dyn Iterator<Item = TokenTree>> {
+            match tt {
+                TokenTree::Group(g) if g.delimiter() == Delimiter::None => {
+                    Box::new(flatten_invisible_groups(g.stream()))
+                }
+                other => Box::new(std::iter::once(other)),
+            }
+        })
+}
+
 /// Parse standalone `#[gen_stub(module = "...")]` attribute for module override
 pub fn parse_gen_stub_module_attr(attr: &Attribute) -> Result<Option<Attr>> {
     let path = attr.path();
@@ -295,7 +316,8 @@ pub fn parse_gen_stub_module_attr(attr: &Attribute) -> Result<Option<Attr>> {
         // Parse the inner tokens to find module = "..."
         if let Meta::List(MetaList { tokens, .. }) = &attr.meta {
             use TokenTree::*;
-            let tokens: Vec<TokenTree> = tokens.clone().into_iter().collect();
+            // See note in `parse_pyo3_attr` about invisible groups.
+            let tokens: Vec<TokenTree> = flatten_invisible_groups(tokens.clone()).collect();
 
             // Split by comma and look for module = "..."
             for tt in tokens.split(|tt| {
@@ -696,6 +718,70 @@ mod test {
         }
         Ok(())
     }
+    /// Build a `Vec<Attribute>` whose tokens contain an "invisible group"
+    /// (`Group { delimiter: None, .. }`) for the value of a key, simulating
+    /// what `macro_rules!` produces when substituting a meta-variable into an
+    /// attribute argument list (e.g. `#[pyclass(name = $name)]`).
+    fn attrs_with_invisible_group(
+        attr_path: TokenStream2,
+        prefix: TokenStream2,
+        value: TokenStream2,
+    ) -> Vec<Attribute> {
+        let invisible = TokenTree::Group(proc_macro2::Group::new(Delimiter::None, value));
+        let item: ItemStruct = syn::parse2(quote! {
+            #[#attr_path(#prefix = #invisible)]
+            struct Dummy;
+        })
+        .unwrap();
+        item.attrs
+    }
+
+    #[test]
+    fn test_parse_pyo3_attr_name_from_macro_substitution() -> Result<()> {
+        // Simulates `macro_rules! { ($n:literal) => { #[pyclass(name = $n)] ... } }`.
+        let attrs = attrs_with_invisible_group(quote!(pyclass), quote!(name), quote!("FromMacro"));
+        let parsed = parse_pyo3_attrs(&attrs)?;
+        assert_eq!(parsed, vec![Attr::Name("FromMacro".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_pyo3_attr_module_from_macro_substitution() -> Result<()> {
+        let attrs =
+            attrs_with_invisible_group(quote!(pyclass), quote!(module), quote!("my.mod.path"));
+        let parsed = parse_pyo3_attrs(&attrs)?;
+        assert_eq!(parsed, vec![Attr::Module("my.mod.path".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_pyo3_attr_rename_all_from_macro_substitution() -> Result<()> {
+        let attrs = attrs_with_invisible_group(
+            quote!(pyo3),
+            quote!(rename_all),
+            quote!("SCREAMING_SNAKE_CASE"),
+        );
+        let parsed = parse_pyo3_attrs(&attrs)?;
+        assert_eq!(
+            parsed,
+            vec![Attr::RenameAll(RenamingRule::ScreamingSnakeCase)]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_gen_stub_module_attr_from_macro_substitution() -> Result<()> {
+        let attrs =
+            attrs_with_invisible_group(quote!(gen_stub), quote!(module), quote!("explicit.mod"));
+        // `parse_pyo3_attrs` also dispatches to `parse_gen_stub_module_attr`.
+        let parsed = parse_pyo3_attrs(&attrs)?;
+        assert_eq!(
+            parsed,
+            vec![Attr::GenStubModule("explicit.mod".to_string())]
+        );
+        Ok(())
+    }
+
     #[test]
     fn test_parse_gen_stub_field_attr() -> Result<()> {
         let item: ItemStruct = parse_str(
