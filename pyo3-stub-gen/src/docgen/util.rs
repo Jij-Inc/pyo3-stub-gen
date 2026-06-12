@@ -204,7 +204,10 @@ mod tests {
 
     #[test]
     fn test_strip_stdlib_prefixes() {
-        assert_eq!(strip_stdlib_prefixes("collections.abc.Sequence"), "Sequence");
+        assert_eq!(
+            strip_stdlib_prefixes("collections.abc.Sequence"),
+            "Sequence"
+        );
         assert_eq!(strip_stdlib_prefixes("builtins.str"), "str");
         assert_eq!(
             strip_stdlib_prefixes("collections.abc.Callable"),

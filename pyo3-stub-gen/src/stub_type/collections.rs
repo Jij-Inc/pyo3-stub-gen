@@ -217,7 +217,10 @@ macro_rules! impl_map_stub_type {
             type_refs.extend(build_type_refs_from_inner(&value_info));
 
             TypeInfo {
-                name: format!("collections.abc.Mapping[{}, {}]", key_info.name, value_info.name),
+                name: format!(
+                    "collections.abc.Mapping[{}, {}]",
+                    key_info.name,
+                    value_info.name),
                 source_module: None,
                 import,
                 type_refs,

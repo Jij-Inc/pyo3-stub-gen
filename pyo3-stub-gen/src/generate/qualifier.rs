@@ -409,7 +409,11 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::DottedPath(vec!["collections".to_string(), "abc".to_string(), "Sequence".to_string()]),
+                Token::DottedPath(vec![
+                    "collections".to_string(),
+                    "abc".to_string(),
+                    "Sequence".to_string()
+                ]),
                 Token::OpenBracket('['),
                 Token::Identifier("ClassA".to_string()),
                 Token::CloseBracket(']'),
