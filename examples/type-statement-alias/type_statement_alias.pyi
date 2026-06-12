@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 type CallbackType = collections.abc.Callable[[str], None]
-type ComplexNested = typing.Optional[builtins.dict[builtins.str, builtins.list[builtins.int]]]
+type ComplexNested = builtins.dict[builtins.str, builtins.list[builtins.int]] | None
 type DocumentedModernAlias = builtins.int | builtins.str
 r"""
 A modern type alias with documentation
@@ -32,7 +32,7 @@ r"""
 A type statement with documentation
 """
 
-type GenericUnion = typing.Optional[builtins.int] | builtins.list[builtins.str]
+type GenericUnion = builtins.int | None | builtins.list[builtins.str]
 type MultiLineDocTypeStatement = dict[str, int]
 r"""
 A type statement with multi-line documentation.
@@ -42,7 +42,7 @@ This is useful for complex types that need detailed explanation.
 
 type NumberOrString = builtins.int | builtins.str
 type OptionalCallback = collections.abc.Callable[[str], None] | None
-type SimpleAlias = typing.Optional[builtins.int]
+type SimpleAlias = builtins.int | None
 type StrIntMap = builtins.dict[builtins.str, builtins.int]
 type TripleUnion = builtins.int | builtins.str | builtins.bool
 type UndocumentedModernAlias = builtins.list[builtins.str]

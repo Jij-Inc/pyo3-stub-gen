@@ -13,8 +13,10 @@ import ipaddress
 import os
 import pathlib
 import typing
-import typing_extensions
 from typing import TypeAlias
+
+import typing_extensions
+
 __all__ = [
     "A",
     "B",
@@ -139,7 +141,7 @@ CallbackType: TypeAlias = collections.abc.Callable[[str], None]
 ContainerList: TypeAlias = list[DataContainer]
 ContainerMap: TypeAlias = dict[str, DataContainer]
 ContainerTuple: TypeAlias = tuple[DataContainer, DataContainer]
-DocumentedAlias: TypeAlias = typing.Optional[builtins.int]
+DocumentedAlias: TypeAlias = builtins.int | None
 r"""
 This is a simple type alias with documentation
 """
@@ -161,8 +163,8 @@ r"""
 A union type with documentation
 """
 
-GenericUnion: TypeAlias = typing.Optional[builtins.int] | builtins.list[builtins.str]
-MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+GenericUnion: TypeAlias = builtins.int | None | builtins.list[builtins.str]
+MaybeDecimal: TypeAlias = DecimalHolder | None
 MultiLineDocCallback: TypeAlias = collections.abc.Callable[[str, int], bool]
 r"""
 A callback with multi-line documentation.
@@ -173,22 +175,23 @@ This callback takes a string and an integer, and returns a boolean.
 NestedContainer: TypeAlias = list[list[DataContainer]]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
-OptionalContainer: TypeAlias = DataContainer  |  None
+OptionalContainer: TypeAlias = DataContainer | None
 RuntimeNumberOrString: TypeAlias = builtins.int | builtins.str
 r"""
 Either an integer or a string, available at runtime.
 """
 
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
-SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SimpleAlias: TypeAlias = builtins.int | None
 SimpleContainer: TypeAlias = DataContainer
-SingleTypeAlias: TypeAlias = typing.Optional[builtins.int]
+SingleTypeAlias: TypeAlias = builtins.int | None
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
-StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
+StructUnion: TypeAlias = ComparableStruct | HashableStruct
 TripleUnion: TypeAlias = builtins.int | builtins.str | builtins.bool
 UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
 MY_CONSTANT1: builtins.int
 MY_CONSTANT2: builtins.int = 123
+
 class A:
     NUM: builtins.int = 2
     r"""
@@ -259,8 +262,7 @@ class A:
     def deprecated_staticmethod() -> builtins.int: ...
 
 @typing.final
-class B(A):
-    ...
+class B(A): ...
 
 @typing.final
 class Calculator:
@@ -269,7 +271,7 @@ class Calculator:
     def multiply(self, other: Calculator) -> Calculator:
         r"""
         Multiply this calculator's result by another calculator's result.
-        
+
         Using RustType marker for both input and output types.
         """
 
@@ -297,7 +299,7 @@ class CustomComplexEnum:
         @property
         def value(self) -> builtins.int: ...
         def __new__(cls, value: builtins.int) -> CustomComplexEnum.VARIANT_A: ...
-    
+
     @typing.final
     class VARIANT_B(CustomComplexEnum):
         __match_args__ = ("_0",)
@@ -306,7 +308,7 @@ class CustomComplexEnum:
         def __new__(cls, _0: builtins.str) -> CustomComplexEnum.VARIANT_B: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
-    
+
     ...
 
 @typing.final
@@ -340,15 +342,16 @@ class FloatValues:
     r"""
     A class to test f64 special values
     """
-    POSITIVE_INF: builtins.float = float('inf')
+
+    POSITIVE_INF: builtins.float = float("inf")
     r"""
     Class attribute: positive infinity
     """
-    NEGATIVE_INF: builtins.float = float('-inf')
+    NEGATIVE_INF: builtins.float = float("-inf")
     r"""
     Class attribute: negative infinity
     """
-    NAN_VALUE: builtins.float = float('nan')
+    NAN_VALUE: builtins.float = float("nan")
     r"""
     Class attribute: NaN
     """
@@ -362,7 +365,7 @@ class FloatValues:
 class GetterSetterTypeTest:
     r"""
     Test that setter stubs use `type_input` (e.g. `Sequence`) while getter stubs use `type_output` (e.g. `list`).
-    
+
     For `Vec<i32>`:
     - getter should produce `-> list[int]`
     - setter should produce `value: Sequence[int]`
@@ -370,8 +373,10 @@ class GetterSetterTypeTest:
     @property
     def values(self) -> builtins.list[builtins.int]: ...
     @values.setter
-    def values(self, value: typing.Sequence[builtins.int]) -> None: ...
-    def __new__(cls, values: typing.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
+    def values(self, value: collections.abc.Sequence[builtins.int]) -> None: ...
+    def __new__(
+        cls, values: collections.abc.Sequence[builtins.int]
+    ) -> GetterSetterTypeTest: ...
 
 @typing.final
 class HashableStruct:
@@ -418,11 +423,9 @@ class ManualSubmit:
         """
 
 @typing.final
-class MyDate(datetime.date):
-    ...
+class MyDate(datetime.date): ...
 
-class MyError(builtins.RuntimeError):
-    ...
+class MyError(builtins.RuntimeError): ...
 
 @typing.final
 class NormalClass:
@@ -439,7 +442,7 @@ class NormalClass:
 class NotIntError(builtins.TypeError):
     r"""
     A manual custom exception case
-    
+
     Based on the code reported in https://github.com/Jij-Inc/pyo3-stub-gen/issues/263
     """
     def __new__(cls, item: typing.Any) -> NotIntError: ...
@@ -459,18 +462,20 @@ class NumberComplex:
         r"""
         Float variant
         """
+
         __match_args__ = ("_0",)
         @property
         def _0(self) -> builtins.float: ...
         def __new__(cls, _0: builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
-    
+
     @typing.final
     class INTEGER(NumberComplex):
         r"""
         Integer variant
         """
+
         __match_args__ = ("int",)
         @property
         def int(self) -> builtins.int:
@@ -478,7 +483,7 @@ class NumberComplex:
             The integer value
             """
         def __new__(cls, int: builtins.int = 2) -> NumberComplex.INTEGER: ...
-    
+
     ...
 
 @typing.final
@@ -501,7 +506,9 @@ class PartialManualSubmit:
         """
     @typing.overload
     def echo_overloaded(self, obj: typing.Any) -> typing.Any: ...
-    def fn_override_type(self, cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+    def fn_override_type(
+        self, cb: collections.abc.Callable[[str], typing.Any]
+    ) -> collections.abc.Callable[[str], typing.Any]:
         r"""
         Example method with complex type annotation, skipped from #[gen_stub_pymethods]
         """
@@ -518,10 +525,19 @@ class Placeholder:
     @name.setter
     def name(self, value: builtins.str) -> None: ...
     def __new__(cls, name: builtins.str) -> Placeholder: ...
-    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None) -> Placeholder:
+    def configure(
+        self,
+        name: builtins.str,
+        *,
+        dtype: builtins.str,
+        ndim: builtins.int,
+        shape: builtins.str | None,
+        jagged: builtins.bool = False,
+        latex: builtins.str | None = None,
+    ) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
-        
+
         This demonstrates keyword-only parameters (after *) which should be
         preserved in the generated stub file.
         """
@@ -529,10 +545,12 @@ class Placeholder:
 @typing.final
 class Problem:
     def __new__(cls) -> Problem: ...
-    def evaluate(self, instance_data: builtins.dict[builtins.str, InstanceValue]) -> builtins.str:
+    def evaluate(
+        self, instance_data: builtins.dict[builtins.str, InstanceValue]
+    ) -> builtins.str:
         r"""
         Evaluate with instance data mapping string keys to InstanceValue objects.
-        
+
         This example demonstrates RustType marker usage within nested generic types
         such as dict value types. The marker should expand to the correct Python type.
         """
@@ -548,32 +566,42 @@ class Shape1:
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius: builtins.float) -> Shape1.Circle: ...
-    
+
     @typing.final
     class Rectangle(Shape1):
-        __match_args__ = ("width", "height",)
+        __match_args__ = (
+            "width",
+            "height",
+        )
         @property
         def width(self) -> builtins.float: ...
         @property
         def height(self) -> builtins.float: ...
-        def __new__(cls, width: builtins.float, height: builtins.float) -> Shape1.Rectangle: ...
-    
+        def __new__(
+            cls, width: builtins.float, height: builtins.float
+        ) -> Shape1.Rectangle: ...
+
     @typing.final
     class RegularPolygon(Shape1):
-        __match_args__ = ("_0", "_1",)
+        __match_args__ = (
+            "_0",
+            "_1",
+        )
         @property
         def _0(self) -> builtins.int: ...
         @property
         def _1(self) -> builtins.float: ...
-        def __new__(cls, _0: builtins.int, _1: builtins.float) -> Shape1.RegularPolygon: ...
+        def __new__(
+            cls, _0: builtins.int, _1: builtins.float
+        ) -> Shape1.RegularPolygon: ...
         def __len__(self) -> builtins.int: ...
         def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
-    
+
     @typing.final
     class Nothing(Shape1):
         __match_args__ = ()
         def __new__(cls) -> Shape1.Nothing: ...
-    
+
     ...
 
 class Shape2:
@@ -587,30 +615,40 @@ class Shape2:
         @property
         def radius(self) -> builtins.float: ...
         def __new__(cls, radius: builtins.float = 1.0) -> Shape2.Circle: ...
-    
+
     @typing.final
     class Rectangle(Shape2):
-        __match_args__ = ("width", "height",)
+        __match_args__ = (
+            "width",
+            "height",
+        )
         @property
         def width(self) -> builtins.float: ...
         @property
         def height(self) -> builtins.float: ...
-        def __new__(cls, *, width: builtins.float, height: builtins.float) -> Shape2.Rectangle: ...
-    
+        def __new__(
+            cls, *, width: builtins.float, height: builtins.float
+        ) -> Shape2.Rectangle: ...
+
     @typing.final
     class RegularPolygon(Shape2):
-        __match_args__ = ("side_count", "radius",)
+        __match_args__ = (
+            "side_count",
+            "radius",
+        )
         @property
         def side_count(self) -> builtins.int: ...
         @property
         def radius(self) -> builtins.float: ...
-        def __new__(cls, side_count: builtins.int, radius: builtins.float = 1.0) -> Shape2.RegularPolygon: ...
-    
+        def __new__(
+            cls, side_count: builtins.int, radius: builtins.float = 1.0
+        ) -> Shape2.RegularPolygon: ...
+
     @typing.final
     class Nothing(Shape2):
         __match_args__ = ()
         def __new__(cls) -> Shape2.Nothing: ...
-    
+
     ...
 
 @typing.final
@@ -633,6 +671,7 @@ class CustomEnum(enum.Enum):
     r"""
     Test enum with skip_stub_type
     """
+
     OPTION_A = ...
     OPTION_B = ...
 
@@ -660,7 +699,9 @@ class NumberRenameAll(enum.Enum):
     """
     INTEGER = ...
 
-def add_chrono_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+def add_chrono_duration_to_date(
+    date: datetime.date, duration: datetime.timedelta
+) -> datetime.date:
     r"""
     Add duration to a NaiveDate
     """
@@ -670,60 +711,63 @@ def add_decimals(a: decimal.Decimal, b: decimal.Decimal) -> decimal.Decimal:
     Add two decimal numbers with high precision
     """
 
-def add_duration_to_date(date: datetime.date, duration: datetime.timedelta) -> datetime.date:
+def add_duration_to_date(
+    date: datetime.date, duration: datetime.timedelta
+) -> datetime.date:
     r"""
     Add duration to a date
     """
 
 def ahash_dict() -> builtins.dict[builtins.str, builtins.int]: ...
-
 @typing.overload
-def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+def as_tuple(
+    xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]
+) -> tuple[int, ...]:
     r"""
     Convert sequence to tuple when tuple_out is True
     """
 
 @typing.overload
-def as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+def as_tuple(
+    xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]
+) -> list[int]:
     r"""
     Convert sequence to list when tuple_out is False
     """
 
 async def async_num() -> builtins.int: ...
-
 def create_a(x: builtins.int = 2) -> A: ...
-
 def create_containers(count: builtins.int) -> builtins.list[DataContainer]:
     r"""
     Create a list of DataContainer instances.
-    
+
     Demonstrates using RustType with generic types containing custom types.
     """
 
-def create_dict(n: builtins.int) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
-
+def create_dict(
+    n: builtins.int,
+) -> builtins.dict[builtins.int, builtins.list[builtins.int]]: ...
 def default_value(num: Number = Number.FLOAT) -> Number: ...
-
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
-
 def echo_a_bound(a: A) -> A: ...
-
 def echo_a_bound_ref(a: A) -> A: ...
-
 def echo_a_py(a: A) -> A: ...
-
 def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
-
-def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
-
-def fn_with_python_param(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+def fn_override_type(
+    cb: collections.abc.Callable[[str], typing.Any],
+) -> collections.abc.Callable[[str], typing.Any]: ...
+def fn_with_python_param(
+    callback: collections.abc.Callable[[str], typing.Any],
+) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example using python parameter in gen_stub_pyfunction attribute.
     This demonstrates specifying types directly in Python stub syntax.
     """
 
-def fn_with_python_stub(callback: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]:
+def fn_with_python_stub(
+    callback: collections.abc.Callable[[str], typing.Any],
+) -> collections.abc.Callable[[str], typing.Any]:
     r"""
     Example function using gen_function_from_python! macro.
     This demonstrates how to define type information using Python stub syntax.
@@ -749,17 +793,34 @@ def get_chrono_duration(seconds: builtins.int) -> datetime.timedelta:
     Returns a chrono::Duration from seconds
     """
 
-def get_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+def get_date(
+    year: builtins.int, month: builtins.int, day: builtins.int
+) -> datetime.date:
     r"""
     Returns a time::Date from year, month, day
     """
 
-def get_datetime_fixed_offset(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+def get_datetime_fixed_offset(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+    offset_hours: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a chrono::DateTime<FixedOffset> from components with offset
     """
 
-def get_datetime_utc(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+def get_datetime_utc(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a chrono::DateTime<Utc> from components
     """
@@ -774,32 +835,60 @@ def get_fixed_offset(hours: builtins.int) -> datetime.tzinfo:
     Returns a chrono::FixedOffset from hours
     """
 
-def get_naive_date(year: builtins.int, month: builtins.int, day: builtins.int) -> datetime.date:
+def get_naive_date(
+    year: builtins.int, month: builtins.int, day: builtins.int
+) -> datetime.date:
     r"""
     Returns a chrono::NaiveDate from year, month, day
     """
 
-def get_naive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+def get_naive_datetime(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a chrono::NaiveDateTime from date and time components
     """
 
-def get_naive_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+def get_naive_time(
+    hour: builtins.int, minute: builtins.int, second: builtins.int
+) -> datetime.time:
     r"""
     Returns a chrono::NaiveTime from hour, minute, second
     """
 
-def get_offset_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int, offset_hours: builtins.int) -> datetime.datetime:
+def get_offset_datetime(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+    offset_hours: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a time::OffsetDateTime from components with UTC offset
     """
 
-def get_primitive_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+def get_primitive_datetime(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a time::PrimitiveDateTime from date and time components
     """
 
-def get_time(hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.time:
+def get_time(
+    hour: builtins.int, minute: builtins.int, second: builtins.int
+) -> datetime.time:
     r"""
     Returns a time::Time from hour, minute, second
     """
@@ -809,7 +898,14 @@ def get_utc() -> datetime.tzinfo:
     Returns chrono::Utc timezone
     """
 
-def get_utc_datetime(year: builtins.int, month: builtins.int, day: builtins.int, hour: builtins.int, minute: builtins.int, second: builtins.int) -> datetime.datetime:
+def get_utc_datetime(
+    year: builtins.int,
+    month: builtins.int,
+    day: builtins.int,
+    hour: builtins.int,
+    minute: builtins.int,
+    second: builtins.int,
+) -> datetime.datetime:
     r"""
     Returns a time::UtcDateTime from components
     """
@@ -835,23 +931,25 @@ def is_loopback(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> builtins
     """
 
 @typing.overload
-def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
+def manual_overload_as_tuple(
+    xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]
+) -> tuple[int, ...]:
     r"""
     Convert sequence to tuple when tuple_out is True
     """
 
 @typing.overload
-def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]) -> list[int]:
+def manual_overload_as_tuple(
+    xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[False]
+) -> list[int]:
     r"""
     Convert sequence to list when tuple_out is False
     """
 
 @typing.overload
 def manual_overload_example_1(x: int) -> int: ...
-
 @typing.overload
 def manual_overload_example_1(x: builtins.float) -> builtins.float: ...
-
 @typing.overload
 def manual_overload_example_2(ob: int) -> int:
     r"""
@@ -864,17 +962,17 @@ def manual_overload_example_2(ob: float) -> float:
     Increments float by 1
     """
 
-def naive_time_difference(time1: datetime.time, time2: datetime.time) -> datetime.timedelta:
+def naive_time_difference(
+    time1: datetime.time, time2: datetime.time
+) -> datetime.timedelta:
     r"""
     Calculate the difference between two NaiveTimes as duration
     """
 
 @typing.overload
 def overload_example_1(x: int) -> int: ...
-
 @typing.overload
 def overload_example_1(x: builtins.float) -> builtins.float: ...
-
 @typing.overload
 def overload_example_2(ob: int) -> int:
     r"""
@@ -892,33 +990,35 @@ def parse_ip(s: builtins.str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
     Parses a string into an IpAddr (either IPv4 or IPv6).
     """
 
-def print_c(c: typing.Optional[builtins.int] = None) -> None: ...
-
+def print_c(c: builtins.int | None = None) -> None: ...
 def process_container(container: DataContainer) -> DataContainer:
     r"""
     Process a DataContainer by doubling its value.
-    
+
     This uses the RustType marker to reference the Rust type directly,
     which will expand to the correct Python stub type using PyStubType trait.
     """
 
-def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
-
+def read_dict(
+    dict: collections.abc.Mapping[
+        builtins.int, collections.abc.Mapping[builtins.int, builtins.int]
+    ],
+) -> None: ...
 def str_len(x: builtins.str) -> builtins.int:
     r"""
     Returns the length of the string.
     """
 
-def sum(v: typing.Sequence[builtins.int]) -> builtins.int:
+def sum(v: collections.abc.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
     """
 
-def sum_list(values: typing.Sequence[builtins.int]) -> builtins.int:
+def sum_list(values: collections.abc.Sequence[builtins.int]) -> builtins.int:
     r"""
     Sum a list of integers.
-    
-    RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
+
+    RustType["Vec<i32>"] will expand to the correct input type (collections.abc.Sequence[int])
     and RustType["i32"] will expand to the correct output type (int).
     """
 
@@ -933,9 +1033,7 @@ def test_type_ignore_custom() -> builtins.int:  # type: ignore[custom-rule,attr-
     """
 
 def test_type_ignore_no_comment_all() -> builtins.int: ...  # type: ignore
-
 def test_type_ignore_no_comment_specific() -> builtins.int: ...  # type: ignore[arg-type,reportIncompatibleMethodOverride]
-
 def test_type_ignore_pyright() -> builtins.int:  # type: ignore[reportGeneralTypeIssues,reportReturnType]
     r"""
     Test function with Pyright diagnostic rules
@@ -956,18 +1054,19 @@ def with_float_default(value: builtins.float = 1.5) -> builtins.float:
     Function with regular float default value
     """
 
-def with_infinity_default(threshold: builtins.float = float('inf')) -> builtins.float:
+def with_infinity_default(threshold: builtins.float = float("inf")) -> builtins.float:
     r"""
     Function with infinity as default value
     """
 
-def with_nan_default(value: builtins.float = float('nan')) -> builtins.float:
+def with_nan_default(value: builtins.float = float("nan")) -> builtins.float:
     r"""
     Function with NaN as default value
     """
 
-def with_neg_infinity_default(threshold: builtins.float = float('-inf')) -> builtins.float:
+def with_neg_infinity_default(
+    threshold: builtins.float = float("-inf"),
+) -> builtins.float:
     r"""
     Function with negative infinity as default value
     """
-

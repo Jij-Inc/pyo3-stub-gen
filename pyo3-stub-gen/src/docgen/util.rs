@@ -204,15 +204,15 @@ mod tests {
 
     #[test]
     fn test_strip_stdlib_prefixes() {
-        assert_eq!(strip_stdlib_prefixes("typing.Optional"), "Optional");
+        assert_eq!(strip_stdlib_prefixes("collections.abc.Sequence"), "Sequence");
         assert_eq!(strip_stdlib_prefixes("builtins.str"), "str");
         assert_eq!(
             strip_stdlib_prefixes("collections.abc.Callable"),
             "Callable"
         );
         assert_eq!(
-            strip_stdlib_prefixes("typing.Optional[typing.List[int]]"),
-            "Optional[List[int]]"
+            strip_stdlib_prefixes("collections.abc.Sequence[list[int]]"),
+            "Sequence[list[int]]"
         );
     }
 
@@ -224,8 +224,8 @@ mod tests {
             "DataContainer"
         );
         assert_eq!(
-            strip_package_prefixes("Optional[main_mod.ClassA]", ""),
-            "Optional[ClassA]"
+            strip_package_prefixes("Sequence[main_mod.ClassA]", ""),
+            "Sequence[ClassA]"
         );
     }
 
@@ -237,23 +237,23 @@ mod tests {
         );
         assert_eq!(strip_internal_prefixes("_internal._nested.Type"), "Type");
         assert_eq!(
-            strip_internal_prefixes("Optional[_core.Type]"),
-            "Optional[Type]"
+            strip_internal_prefixes("Sequence[_core.Type]"),
+            "Sequence[Type]"
         );
     }
 
     #[test]
     fn test_strip_type_prefixes() {
         assert_eq!(
-            strip_type_prefixes("typing.Optional[main_mod.ClassA]", "main_mod"),
-            "Optional[ClassA]"
+            strip_type_prefixes("collections.abc.Sequence[main_mod.ClassA]", "main_mod"),
+            "Sequence[ClassA]"
         );
     }
 
     #[test]
     fn test_strip_default_value_prefixes() {
         assert_eq!(strip_default_value_prefixes("_core.Foo"), "Foo");
-        assert_eq!(strip_default_value_prefixes("typing.Optional"), "Optional");
+        assert_eq!(strip_default_value_prefixes("typing.Counter"), "Counter");
         assert_eq!(strip_default_value_prefixes("builtins.None"), "None");
     }
 

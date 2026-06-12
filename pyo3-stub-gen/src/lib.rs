@@ -81,7 +81,7 @@
 //!     """
 //!     name: str
 //!     """Name docstring"""
-//!     description: Optional[str]
+//!     description: str | None
 //!     """Description docstring"""
 //! ```
 //!

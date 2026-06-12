@@ -138,14 +138,14 @@ pub struct TypeInfo {
 
     /// Python modules must be imported in the stub file.
     ///
-    /// For example, when `name` is `typing.Sequence[int]`, `import` should contain `typing`.
+    /// For example, when `name` is `collections.abc.Sequence[int]`, `import` should contain `collections.abc`.
     /// This makes it possible to use user-defined types in the stub file.
     pub import: HashSet<ImportRef>,
 
     /// Track all type identifiers referenced in the name expression.
     ///
     /// This enables context-aware qualification of identifiers within compound type expressions.
-    /// For example, in `typing.Optional[ClassA]`, we need to track that `ClassA` is from a specific module
+    /// For example, in `collections.abc.Sequence[ClassA]`, we need to track that `ClassA` is from a specific module
     /// and qualify it appropriately based on the target module context.
     ///
     /// - Key: bare identifier (e.g., "ClassA")
@@ -452,7 +452,7 @@ impl TypeInfo {
     ///
     /// This method handles compound type expressions by rewriting nested identifiers
     /// based on the type_refs tracking information. For example:
-    /// - `typing.Optional[ClassA]` becomes `typing.Optional[sub_mod.ClassA]` when ClassA
+    /// - `collections.abc.Sequence[ClassA]` becomes `collections.abc.Sequence[sub_mod.ClassA]` when ClassA
     ///   is from a different module.
     ///
     /// # Arguments
@@ -607,7 +607,7 @@ pub trait PyStubType {
     /// The type to be used in the input signature, i.e. the arguments of the Python function or methods.
     ///
     /// This defaults to the output type, but can be overridden for types that are not valid input types.
-    /// For example, `Vec::<T>::type_output` returns `list[T]` while `Vec::<T>::type_input` returns `typing.Sequence[T]`.
+    /// For example, `Vec::<T>::type_output` returns `list[T]` while `Vec::<T>::type_input` returns `collections.abc.Sequence[T]`.
     fn type_input() -> TypeInfo {
         Self::type_output()
     }
@@ -622,13 +622,13 @@ mod test {
 
     #[test_case(bool::type_input(), "builtins.bool", hashset! { "builtins".into() } ; "bool_input")]
     #[test_case(<&str>::type_input(), "builtins.str", hashset! { "builtins".into() } ; "str_input")]
-    #[test_case(Vec::<u32>::type_input(), "typing.Sequence[builtins.int]", hashset! { "typing".into(), "builtins".into() } ; "Vec_u32_input")]
+    #[test_case(Vec::<u32>::type_input(), "collections.abc.Sequence[builtins.int]", hashset! { "collections.abc".into(), "builtins".into() } ; "Vec_u32_input")]
     #[test_case(Vec::<u32>::type_output(), "builtins.list[builtins.int]", hashset! {  "builtins".into() } ; "Vec_u32_output")]
-    #[test_case(HashMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "HashMap_u32_String_input")]
+    #[test_case(HashMap::<u32, String>::type_input(), "collections.abc.Mapping[builtins.int, builtins.str]", hashset! { "collections.abc".into(), "builtins".into() } ; "HashMap_u32_String_input")]
     #[test_case(HashMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "HashMap_u32_String_output")]
-    #[test_case(indexmap::IndexMap::<u32, String>::type_input(), "typing.Mapping[builtins.int, builtins.str]", hashset! { "typing".into(), "builtins".into() } ; "IndexMap_u32_String_input")]
+    #[test_case(indexmap::IndexMap::<u32, String>::type_input(), "collections.abc.Mapping[builtins.int, builtins.str]", hashset! { "collections.abc".into(), "builtins".into() } ; "IndexMap_u32_String_input")]
     #[test_case(indexmap::IndexMap::<u32, String>::type_output(), "builtins.dict[builtins.int, builtins.str]", hashset! { "builtins".into() } ; "IndexMap_u32_String_output")]
-    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "typing.Mapping[builtins.int, typing.Sequence[builtins.int]]", hashset! { "builtins".into(), "typing".into() } ; "HashMap_u32_Vec_u32_input")]
+    #[test_case(HashMap::<u32, Vec<u32>>::type_input(), "collections.abc.Mapping[builtins.int, collections.abc.Sequence[builtins.int]]", hashset! { "builtins".into(), "collections.abc".into() } ; "HashMap_u32_Vec_u32_input")]
     #[test_case(HashMap::<u32, Vec<u32>>::type_output(), "builtins.dict[builtins.int, builtins.list[builtins.int]]", hashset! { "builtins".into() } ; "HashMap_u32_Vec_u32_output")]
     #[test_case(HashSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "HashSet_u32_input")]
     #[test_case(indexmap::IndexSet::<u32>::type_input(), "builtins.set[builtins.int]", hashset! { "builtins".into() } ; "IndexSet_u32_input")]

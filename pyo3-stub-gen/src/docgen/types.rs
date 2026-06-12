@@ -15,7 +15,7 @@ pub struct TypeAliasDef;
 enum TypeStructure {
     /// Simple type: "int", "ClassA"
     Simple(String),
-    /// Generic type: "Optional[A]", "Dict[str, int]"
+    /// Generic type: "list[A]", "dict[str, int]"
     Generic {
         base: String,
         args: Vec<TypeStructure>,
@@ -335,7 +335,7 @@ impl<'a> TypeRenderer<'a> {
 
     /// Strip module prefixes from type names
     /// Remove "typing.", "builtins.", "package.submod."
-    /// Keep only bare names: "Optional[ClassA]" not "typing.Optional[sub_mod.ClassA]"
+    /// Keep only bare names: "Sequence[ClassA]" not "collections.abc.Sequence[sub_mod.ClassA]"
     fn strip_module_prefix(&self, type_name: &str) -> String {
         prefix_stripper::strip_type_prefixes(type_name, self.current_module)
     }

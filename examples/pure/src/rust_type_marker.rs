@@ -62,7 +62,7 @@ submit! {
             """
             Sum a list of integers.
 
-            RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
+            RustType["Vec<i32>"] will expand to the correct input type (collections.abc.Sequence[int])
             and RustType["i32"] will expand to the correct output type (int).
             """
         "#
@@ -244,9 +244,9 @@ submit! {
                 *,
                 dtype: builtins.str,
                 ndim: builtins.int,
-                shape: typing.Optional[builtins.str],
+                shape: builtins.str | None,
                 jagged: builtins.bool = False,
-                latex: typing.Optional[builtins.str] = None,
+                latex: builtins.str | None = None,
             ) -> pyo3_stub_gen.RustType["Placeholder"]:
                 """
                 Configure placeholder with keyword-only parameters.

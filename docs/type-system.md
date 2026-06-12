@@ -23,7 +23,7 @@ pub trait PyStubType {
 The distinction between `type_input()` and `type_output()` exists because some types have different representations depending on usage:
 
 **Example: `Vec<T>`**
-- **Input (argument)**: `typing.Sequence[T]` (accepts any sequence-like object)
+- **Input (argument)**: `collections.abc.Sequence[T]` (accepts any sequence-like object)
 - **Output (return)**: `list[T]` (always returns a list)
 
 This follows Python's typing conventions where:
@@ -31,7 +31,7 @@ This follows Python's typing conventions where:
 - Return types should be more specific
 
 **Example: `HashMap<K, V>`**
-- **Input**: `typing.Mapping[K, V]` (accepts dict-like objects)
+- **Input**: `collections.abc.Mapping[K, V]` (accepts dict-like objects)
 - **Output**: `dict[K, V]` (returns a dict)
 
 For most types, input and output are identical:
@@ -74,13 +74,13 @@ Maps Rust collections to Python collection types.
 
 | Rust Type | Input | Output | Rationale |
 |-----------|-------|--------|-----------|
-| `Vec<T>` | `typing.Sequence[T]` | `list[T]` | Accept any sequence, return list |
-| `&[T]` | `typing.Sequence[T]` | `list[T]` | Slice → sequence |
-| `[T; N]` | `typing.Sequence[T]` | `list[T]` | Fixed-size array |
+| `Vec<T>` | `collections.abc.Sequence[T]` | `list[T]` | Accept any sequence, return list |
+| `&[T]` | `collections.abc.Sequence[T]` | `list[T]` | Slice → sequence |
+| `[T; N]` | `collections.abc.Sequence[T]` | `list[T]` | Fixed-size array |
 | `HashSet<T>` | `typing.Set[T]` | `set[T]` | Set types |
 | `BTreeSet<T>` | `typing.Set[T]` | `set[T]` | Ordered set → set |
-| `HashMap<K, V>` | `typing.Mapping[K, V]` | `dict[K, V]` | Accept any mapping, return dict |
-| `BTreeMap<K, V>` | `typing.Mapping[K, V]` | `dict[K, V]` | Ordered map → dict |
+| `HashMap<K, V>` | `collections.abc.Mapping[K, V]` | `dict[K, V]` | Accept any mapping, return dict |
+| `BTreeMap<K, V>` | `collections.abc.Mapping[K, V]` | `dict[K, V]` | Ordered map → dict |
 | `(T1, T2, ...)` | `tuple[T1, T2, ...]` | `tuple[T1, T2, ...]` | Tuples (up to 12 elements) |
 
 **Generic Type Constraints:**
@@ -90,7 +90,7 @@ All collection type parameters must themselves implement `PyStubType`:
 ```rust
 impl<T: PyStubType> PyStubType for Vec<T> {
     fn type_input() -> TypeInfo {
-        TypeInfo::with_generic("typing.Sequence", vec![T::type_input()])
+        TypeInfo::with_generic("collections.abc.Sequence", vec![T::type_input()])
     }
     fn type_output() -> TypeInfo {
         TypeInfo::with_generic("list", vec![T::type_output()])
@@ -381,7 +381,7 @@ pub fn get_callback(cb: Bound<'_, PyAny>) -> PyResult<Bound<'_, PyAny>> {
 The stub generator automatically adds necessary imports:
 
 ```python
-# If using typing.Sequence, typing.Mapping, etc.
+# If using typing.Any, etc.
 import typing
 
 # If using collections.abc types
@@ -437,7 +437,7 @@ Import format:
          │    │ 4. Recursive Type Construction     │
          │    │                                    │
          │    │ TypeInfo::with_generic(            │
-         │    │     "typing.Sequence",             │
+         │    │     "collections.abc.Sequence",    │
          │    │     vec![Option<String>::type_input()]
          │    │ )                                  │
          │    └────────────────────────────────────┘
@@ -455,7 +455,7 @@ Import format:
          │ 6. Final TypeInfo                        │
          │                                          │
          │ TypeInfo::GenericType {                  │
-         │     base: "typing.Sequence",             │
+         │     base: "collections.abc.Sequence",    │
          │     args: [TypeInfo::UnionType(          │
          │         [builtin("str"), none()]         │
          │     )]                                   │
@@ -465,7 +465,7 @@ Import format:
          ┌──────────────────────────────────────────┐
          │ 7. Python Type Syntax                    │
          │                                          │
-         │ typing.Sequence[str | None]              │
+         │ collections.abc.Sequence[str | None]     │
          └──────────────────────────────────────────┘
 ```
 
@@ -532,7 +532,7 @@ mod tests {
     fn test_vec_type_mapping() {
         assert_eq!(
             Vec::<i32>::type_input().to_string(),
-            "typing.Sequence[int]"
+            "collections.abc.Sequence[int]"
         );
         assert_eq!(
             Vec::<i32>::type_output().to_string(),
@@ -604,7 +604,7 @@ pyo3-stub-gen = { version = "...", features = ["numpy", "either"] }
 // Good: Accept sequences, return list
 impl PyStubType for MyVec {
     fn type_input() -> TypeInfo {
-        TypeInfo::with_generic("typing.Sequence", vec![/* ... */])
+        TypeInfo::with_generic("collections.abc.Sequence", vec![/* ... */])
     }
     fn type_output() -> TypeInfo {
         TypeInfo::with_generic("list", vec![/* ... */])
