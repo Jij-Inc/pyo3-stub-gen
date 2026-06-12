@@ -219,8 +219,8 @@ macro_rules! impl_map_stub_type {
             TypeInfo {
                 name: format!(
                     "collections.abc.Mapping[{}, {}]",
-                    key_info.name,
-                    value_info.name),
+                    key_info.name, value_info.name
+                ),
                 source_module: None,
                 import,
                 type_refs,
