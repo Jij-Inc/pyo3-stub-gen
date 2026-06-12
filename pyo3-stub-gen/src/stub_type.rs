@@ -452,8 +452,8 @@ impl TypeInfo {
     ///
     /// This method handles compound type expressions by rewriting nested identifiers
     /// based on the type_refs tracking information. For example:
-    /// - `collections.abc.Sequence[ClassA]` becomes `collections.abc.Sequence[sub_mod.ClassA]` when ClassA
-    ///   is from a different module.
+    /// - `collections.abc.Sequence[ClassA]` becomes `collections.abc.Sequence[sub_mod.ClassA]`
+    ///   when ClassA is from a different module.
     ///
     /// # Arguments
     /// * `target_module` - The module where this type will be used

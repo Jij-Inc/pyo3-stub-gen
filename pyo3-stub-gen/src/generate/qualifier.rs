@@ -356,7 +356,7 @@ impl TypeExpressionQualifier {
                 Token::OpenBracket(ch) => result.push(ch),
                 Token::CloseBracket(ch) => result.push(ch),
                 Token::Comma => result.push(','),
-                Token::Pipe => result.push_str(" | "),
+                Token::Pipe => result.push_str("|"),
                 Token::Ellipsis => result.push_str("..."),
                 Token::StringLiteral(s) => {
                     // String literals (forward references) - wrap in quotes
