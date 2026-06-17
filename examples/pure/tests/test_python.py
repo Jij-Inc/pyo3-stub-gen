@@ -69,9 +69,7 @@ def test_read_dict():
 
     with pytest.raises(TypeError) as e:
         read_dict({0: 1})  # type: ignore
-    assert (
-        str(e.value) == "argument 'dict': 'int' object cannot be converted to 'PyDict'"
-    )
+    assert str(e.value) == "'int' object is not an instance of 'dict'"
 
 
 def test_number_complex():

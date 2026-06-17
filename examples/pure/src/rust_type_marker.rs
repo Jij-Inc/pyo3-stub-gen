@@ -8,7 +8,7 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 
 // Define a Rust type that will be exposed to Python
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct DataContainer {
     #[pyo3(get, set)]
@@ -27,7 +27,7 @@ impl DataContainer {
 // Example 1: Function with RustType marker for both argument and return type
 #[pyfunction]
 pub fn process_container(container: Py<DataContainer>) -> PyResult<Py<DataContainer>> {
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let mut c = container.borrow_mut(py);
         c.value *= 2;
         drop(c);
@@ -71,7 +71,7 @@ submit! {
 
 // Example 3: Method with RustType marker
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Calculator {
     result: f64,
@@ -136,7 +136,7 @@ submit! {
 // This demonstrates using RustType markers within nested generic types like dict values
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct InstanceValue {
     #[pyo3(get, set)]
@@ -200,7 +200,7 @@ submit! {
 // Example 6: Keyword-only parameters (after *)
 // This demonstrates Issue with keyword-only parameters being ignored
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Placeholder {
     #[pyo3(get, set)]

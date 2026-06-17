@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::*, *};
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(
     eq,
     module = "avoid_name_collision_with_submod.sub_mod",
@@ -23,13 +23,13 @@ impl PyClassA {
 }
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 #[pyo3(module = "avoid_name_collision_with_submod")]
 pub struct ClassB {}
 
 #[derive(Debug, Clone)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct ClassAOrPyType;
 
 pyo3_stub_gen::impl_stub_type!(ClassAOrPyType = PyClassA | pyo3::types::PyType);
@@ -93,9 +93,11 @@ inventory::submit! {
 #[allow(dead_code)]
 pub struct ClassACallback(Py<PyAny>);
 
-impl FromPyObject<'_> for ClassACallback {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Ok(ClassACallback(ob.clone().unbind()))
+impl FromPyObject<'_, '_> for ClassACallback {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'_, '_, PyAny>) -> std::result::Result<Self, Self::Error> {
+        Ok(ClassACallback(ob.to_owned().unbind()))
     }
 }
 

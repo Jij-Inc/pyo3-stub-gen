@@ -4,7 +4,7 @@ use pyo3_stub_gen::{derive::*, inventory::submit};
 /// Demonstrates manual submission of class methods using the `submit!` macro
 #[gen_stub_pyclass] // Use proc-macro for submitting class info
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct ManualSubmit {}
 
 // No #[gen_stub_pymethods]
@@ -66,7 +66,7 @@ submit! {
 /// Example demonstrating manual submission mixed with proc-macro generated method info
 #[gen_stub_pyclass] // Use proc-macro for submitting class info
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[pyclass]
+#[pyclass(from_py_object)]
 pub struct PartialManualSubmit {}
 
 // Manually submit method info for the `PartialManualSubmit` class.

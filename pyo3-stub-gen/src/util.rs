@@ -181,7 +181,7 @@ mod test {
     }
     #[test]
     fn test_fmt_enum() {
-        #[pyclass(eq, eq_int)]
+        #[pyclass(eq, eq_int, from_py_object)]
         #[derive(Debug, Clone, PartialEq, Eq, Hash)]
         pub enum Number {
             Float,
