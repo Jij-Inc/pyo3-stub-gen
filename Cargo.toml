@@ -42,11 +42,11 @@ itertools = "0.14.0"
 log = "0.4.32"
 maplit = "1.0.2"
 num-complex = "0.4.6"
-numpy = ">= 0.26.0"
+numpy = ">= 0.26.0, < 0.29.0"
 ordered-float = { version = "5.3", default-features = false }
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.106"
-pyo3 = ">= 0.26.0"
+pyo3 = ">= 0.26.0, < 0.29.0"
 quote = "1.0.45"
 rust_decimal = { version = "1.42", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
