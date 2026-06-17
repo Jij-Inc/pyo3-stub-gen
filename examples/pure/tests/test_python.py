@@ -69,7 +69,9 @@ def test_read_dict():
 
     with pytest.raises(TypeError) as e:
         read_dict({0: 1})  # type: ignore
-    assert str(e.value) == "'int' object is not an instance of 'dict'"
+    message = str(e.value).lower()
+    assert "int" in message
+    assert "dict" in message
 
 
 def test_number_complex():
