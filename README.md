@@ -391,7 +391,7 @@ use pyo3_stub_gen::derive::*;
     no_default_overload = true  // Don't generate from Rust signature
 )]
 #[pyfunction]
-pub fn func(ob: Bound<PyAny>) -> PyResult<PyObject> {
+pub fn func(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
     // Runtime type checking
     todo!()
 }

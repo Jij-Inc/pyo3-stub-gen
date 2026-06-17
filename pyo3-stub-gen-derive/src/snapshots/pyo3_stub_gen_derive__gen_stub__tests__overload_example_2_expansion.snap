@@ -33,7 +33,7 @@ pyo3_stub_gen::inventory::submit! {
     file!(), line : line!(), column : column!(), index : 1usize, }
 }
 #[pyfunction]
-pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
     let py = ob.py();
     Ok(ob.into_py_any(py)?)
 }

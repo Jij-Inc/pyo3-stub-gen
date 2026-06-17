@@ -288,8 +288,10 @@ fn print_c(c: Option<C>) {
         println!("None");
     }
 }
-impl FromPyObject<'_> for C {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+impl FromPyObject<'_, '_> for C {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'_, '_, PyAny>) -> std::result::Result<Self, Self::Error> {
         Ok(C { x: ob.extract()? })
     }
 }
@@ -330,7 +332,7 @@ fn ahash_dict() -> HashMap<String, i32, RandomState> {
 }
 
 #[gen_stub_pyclass_enum]
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Number {
     #[pyo3(name = "FLOAT")]
@@ -340,7 +342,7 @@ pub enum Number {
 }
 
 #[gen_stub_pyclass_enum]
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NumberRenameAll {
@@ -350,7 +352,7 @@ pub enum NumberRenameAll {
 }
 
 #[gen_stub_pyclass_complex_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone)]
 pub enum NumberComplex {
@@ -445,7 +447,7 @@ fn deprecated_function() {
     println!("This function is deprecated");
 }
 
-// Test if non-any PyObject Target can be a default value
+// Test if non-any Py<PyAny> target can be a default value
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (num = Number::Float))]
@@ -457,7 +459,7 @@ fn default_value(num: Number) -> Number {
 
 /// Test struct for eq and ord comparison methods
 #[gen_stub_pyclass]
-#[pyclass(eq, ord)]
+#[pyclass(eq, ord, from_py_object)]
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct ComparableStruct {
     #[pyo3(get)]
@@ -475,7 +477,7 @@ impl ComparableStruct {
 
 /// Test struct for hash and str methods
 #[gen_stub_pyclass]
-#[pyclass(eq, hash, frozen, str)]
+#[pyclass(eq, hash, frozen, str, from_py_object)]
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub struct HashableStruct {
     #[pyo3(get)]

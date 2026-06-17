@@ -13,7 +13,7 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     }
     if any.is_instance_of::<PyDict>() {
         return any
-            .downcast::<PyDict>()
+            .cast::<PyDict>()
             .map(|dict| {
                 dict.into_iter()
                     .all(|(k, v)| all_builtin_types(&k) && all_builtin_types(&v))
@@ -22,13 +22,13 @@ pub fn all_builtin_types(any: &Bound<'_, PyAny>) -> bool {
     }
     if any.is_instance_of::<PyList>() {
         return any
-            .downcast::<PyList>()
+            .cast::<PyList>()
             .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
             .unwrap_or(false);
     }
     if any.is_instance_of::<PyTuple>() {
         return any
-            .downcast::<PyTuple>()
+            .cast::<PyTuple>()
             .map(|list| list.into_iter().all(|v| all_builtin_types(&v)))
             .unwrap_or(false);
     }
@@ -181,7 +181,7 @@ mod test {
     }
     #[test]
     fn test_fmt_enum() {
-        #[pyclass(eq, eq_int)]
+        #[pyclass(eq, eq_int, from_py_object)]
         #[derive(Debug, Clone, PartialEq, Eq, Hash)]
         pub enum Number {
             Float,
