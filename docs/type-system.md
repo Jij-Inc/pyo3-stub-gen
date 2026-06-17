@@ -105,7 +105,7 @@ Maps PyO3's Python object types.
 | Rust Type | Python Type | Notes |
 |-----------|-------------|-------|
 | `Py<T>` | `T` | Python object reference (unwrapped) |
-| `PyObject` | `typing.Any` | Untyped Python object |
+| `Py<PyAny>` | `typing.Any` | Untyped Python object |
 | `Bound<'py, T>` | `T` | Bound Python object |
 | `Borrowed<'a, 'py, T>` | `T` | Borrowed reference |
 | `&PyAny` | `typing.Any` | Any Python type |

@@ -20,7 +20,7 @@ members = [
 nonminimal_bool = "allow"
 
 [workspace.package]
-version = "0.22.4"
+version = "0.23.0"
 edition = "2021"
 description = "Stub file (*.pyi) generator for PyO3"
 readme = "README.md"
@@ -42,11 +42,11 @@ itertools = "0.15.0"
 log = "0.4.32"
 maplit = "1.0.2"
 num-complex = "0.4.6"
-numpy = ">= 0.26.0, < 0.29.0"
+numpy = ">= 0.27.0, < 0.30.0"
 ordered-float = { version = "5.3", default-features = false }
 prettyplease = "0.2.37"
 proc-macro2 = "1.0.106"
-pyo3 = ">= 0.26.0, < 0.29.0"
+pyo3 = ">= 0.27.0, < 0.30.0"
 quote = "1.0.45"
 rust_decimal = { version = "1.42", default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }

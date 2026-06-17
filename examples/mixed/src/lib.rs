@@ -5,7 +5,7 @@ mod module_override_tests;
 
 // Classes that can be cross-referenced between modules (from mixed_import_type)
 #[gen_stub_pyclass]
-#[pyclass(module = "mixed.main_mod")]
+#[pyclass(module = "mixed.main_mod", from_py_object)]
 #[derive(Debug, Clone)]
 struct A {
     x: usize,
@@ -27,7 +27,7 @@ fn create_a(x: usize) -> A {
 
 // Class without explicit module specification
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 struct B {
     x: usize,
