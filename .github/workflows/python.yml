@@ -29,7 +29,7 @@ jobs:
           - "3.13"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
         with:
@@ -54,7 +54,7 @@ jobs:
           - "3.13" # Only test on latest Python
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
         with:
