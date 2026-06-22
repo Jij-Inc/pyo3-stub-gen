@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: rust-lang/crates-io-auth-action@v1
         id: auth
@@ -38,7 +38,7 @@ jobs:
           private-key: ${{ secrets.TOKEN_PROVIDER_PYO3_STUB_GEN_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
