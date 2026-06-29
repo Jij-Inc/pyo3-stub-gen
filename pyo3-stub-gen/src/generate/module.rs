@@ -27,6 +27,7 @@ pub struct Module {
     pub function: BTreeMap<&'static str, Vec<FunctionDef>>,
     pub variables: BTreeMap<&'static str, VariableDef>,
     pub type_aliases: BTreeMap<&'static str, TypeAliasDef>,
+    pub type_vars: BTreeMap<&'static str, TypeVarDef>,
     pub name: String,
     pub default_module_name: String,
     /// Direct submodules of this module.
@@ -52,6 +53,7 @@ impl Module {
             && self.function.is_empty()
             && self.variables.is_empty()
             && self.type_aliases.is_empty()
+            && self.type_vars.is_empty()
             && self.submodules.is_empty()
             && self.module_re_exports.is_empty()
             && self.verbatim_all_entries.is_empty()
@@ -68,6 +70,7 @@ impl Module {
             && self.function.is_empty()
             && self.variables.is_empty()
             && self.type_aliases.is_empty()
+            && self.type_vars.is_empty()
     }
 
     /// Get the names of all declared items in this module.
@@ -138,7 +141,7 @@ impl Module {
                     let has_overload = functions.iter().any(|func| func.is_overload);
                     functions.len() > 1 && has_overload
                 });
-                if any_overloaded {
+                if any_overloaded || !self.module.type_vars.is_empty() {
                     imports.insert("typing".into());
                 }
 
@@ -228,6 +231,11 @@ impl Module {
                 for alias in self.module.type_aliases.values() {
                     alias.fmt_with_config(&self.module.name, f, self.use_type_statement)?;
                     writeln!(f)?;
+                }
+
+                // Generate type vars
+                for type_var in self.module.type_vars.values() {
+                    writeln!(f, "{type_var}")?;
                 }
 
                 // Generate variables
@@ -450,7 +458,7 @@ impl fmt::Display for Module {
             let has_overload = functions.iter().any(|f| f.is_overload);
             functions.len() > 1 && has_overload
         });
-        if any_overloaded {
+        if any_overloaded || !self.type_vars.is_empty() {
             imports.insert("typing".into());
         }
 
@@ -537,6 +545,9 @@ impl fmt::Display for Module {
         for alias in self.type_aliases.values() {
             alias.fmt_for_module(&self.name, f)?;
             writeln!(f)?;
+        }
+        for type_var in self.type_vars.values() {
+            writeln!(f, "{type_var}")?;
         }
         for var in self.variables.values() {
             var.fmt_for_module(&self.name, f)?;

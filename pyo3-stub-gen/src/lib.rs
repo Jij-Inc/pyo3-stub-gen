@@ -278,6 +278,180 @@ macro_rules! module_variable {
     };
 }
 
+/// Declare a module-level `typing.TypeVar`. Renders as `name = typing.TypeVar("name", ...)`
+/// (bare assignment, no annotation), which is what type checkers require for the name
+/// to be usable inside type expressions.
+///
+/// # Basic usage
+/// ```rust
+/// pyo3_stub_gen::module_typevar!("my_module", "T");
+/// ```
+///
+/// # With constraints
+/// ```rust
+/// pyo3_stub_gen::module_typevar!("my_module", "T", constraints = &["str", "int"]);
+/// ```
+///
+/// # With bound
+/// ```rust
+/// pyo3_stub_gen::module_typevar!("my_module", "T", bound = "BaseClass");
+/// ```
+///
+/// # Covariant or contravariant
+/// ```rust
+/// pyo3_stub_gen::module_typevar!("my_module", "T", covariant = true);
+/// pyo3_stub_gen::module_typevar!("my_module", "T", contravariant = true);
+/// ```
+///
+/// # Combined parameters
+/// ```rust
+/// pyo3_stub_gen::module_typevar!(
+///     "my_module",
+///     "T",
+///     constraints = &["str", "int"],
+///     covariant = true
+/// );
+/// ```
+#[macro_export]
+macro_rules! module_typevar {
+    // Basic form
+    ($module:expr, $name:expr) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: None,
+                covariant: false,
+                contravariant: false,
+            }
+        }
+    };
+    // Single parameter forms
+    ($module:expr, $name:expr, constraints = $constraints:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: $constraints,
+                bound: None,
+                covariant: false,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, bound = $bound:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: Some($bound),
+                covariant: false,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, covariant = $covariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: None,
+                covariant: $covariant,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, contravariant = $contravariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: None,
+                covariant: false,
+                contravariant: $contravariant,
+            }
+        }
+    };
+    // Two parameter forms
+    ($module:expr, $name:expr, constraints = $constraints:expr, bound = $bound:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: $constraints,
+                bound: Some($bound),
+                covariant: false,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, constraints = $constraints:expr, covariant = $covariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: $constraints,
+                bound: None,
+                covariant: $covariant,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, constraints = $constraints:expr, contravariant = $contravariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: $constraints,
+                bound: None,
+                covariant: false,
+                contravariant: $contravariant,
+            }
+        }
+    };
+    ($module:expr, $name:expr, bound = $bound:expr, covariant = $covariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: Some($bound),
+                covariant: $covariant,
+                contravariant: false,
+            }
+        }
+    };
+    ($module:expr, $name:expr, bound = $bound:expr, contravariant = $contravariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: &[],
+                bound: Some($bound),
+                covariant: false,
+                contravariant: $contravariant,
+            }
+        }
+    };
+    // All parameters
+    ($module:expr, $name:expr, constraints = $constraints:expr, bound = $bound:expr, covariant = $covariant:expr, contravariant = $contravariant:expr $(,)?) => {
+        $crate::inventory::submit! {
+            $crate::type_info::PyTypeVarInfo {
+                name: $name,
+                module: $module,
+                constraints: $constraints,
+                bound: Some($bound),
+                covariant: $covariant,
+                contravariant: $contravariant,
+            }
+        }
+    };
+}
+
 /// Define a module-level type alias with runtime support.
 ///
 /// This macro creates a zero-sized struct that:
