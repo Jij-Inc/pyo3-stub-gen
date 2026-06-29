@@ -7,6 +7,7 @@ readme = "README.md"
 repository.workspace = true
 license.workspace = true
 keywords.workspace = true
+build = "build.rs"
 
 [dependencies]
 anyhow.workspace = true
@@ -37,6 +38,9 @@ version = "0.23.1"
 
 [dev-dependencies]
 test-case.workspace = true
+
+[build-dependencies]
+pyo3-build-config = { version = "0.26", features = ["resolve-config"] }
 
 [lints]
 workspace = true

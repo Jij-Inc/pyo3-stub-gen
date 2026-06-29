@@ -84,6 +84,7 @@ fn try_special_float_repr(any: &Bound<'_, PyAny>) -> Option<String> {
 pub fn fmt_py_obj<T: for<'py> pyo3::IntoPyObjectExt<'py>>(obj: T) -> String {
     #[cfg(feature = "infer_signature")]
     {
+        #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| -> String {
             if let Ok(any) = obj.into_bound_py_any(py) {
@@ -114,6 +115,7 @@ mod test {
     struct A {}
     #[test]
     fn test_fmt_dict() {
+        #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| {
             let dict = PyDict::new(py);
@@ -123,10 +125,11 @@ mod test {
             // class A variable can not be formatted
             _ = dict.set_item("k3", A {});
             assert_eq!("...", fmt_py_obj(dict.as_unbound()));
-        })
+        });
     }
     #[test]
     fn test_fmt_list() {
+        #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| {
             let list = PyList::new(py, [1, 2]).unwrap();
@@ -134,10 +137,11 @@ mod test {
             // class A variable can not be formatted
             let list = PyList::new(py, [A {}, A {}]).unwrap();
             assert_eq!("...", fmt_py_obj(list.as_unbound()));
-        })
+        });
     }
     #[test]
     fn test_fmt_tuple() {
+        #[cfg(not(any(PyPy, GraalPy)))]
         pyo3::Python::initialize();
         pyo3::Python::attach(|py| {
             let tuple = PyTuple::new(py, [1, 2]).unwrap();
@@ -147,7 +151,7 @@ mod test {
             // class A variable can not be formatted
             let tuple = PyTuple::new(py, [A {}]).unwrap();
             assert_eq!("...", fmt_py_obj(tuple.as_unbound()));
-        })
+        });
     }
     #[test]
     fn test_fmt_other() {
