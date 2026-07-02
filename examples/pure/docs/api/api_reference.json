@@ -1710,11 +1710,16 @@
                     {
                       "name": "shape",
                       "type_": {
-                        "display": "Optional[str]",
+                        "display": "str | None",
                         "link_target": null,
                         "children": [
                           {
                             "display": "str",
+                            "link_target": null,
+                            "children": []
+                          },
+                          {
+                            "display": "None",
                             "link_target": null,
                             "children": []
                           }
@@ -1737,11 +1742,16 @@
                     {
                       "name": "latex",
                       "type_": {
-                        "display": "Optional[str]",
+                        "display": "str | None",
                         "link_target": null,
                         "children": [
                           {
                             "display": "str",
+                            "link_target": null,
+                            "children": []
+                          },
+                          {
+                            "display": "None",
                             "link_target": null,
                             "children": []
                           }
@@ -3986,11 +3996,16 @@
                 {
                   "name": "c",
                   "type_": {
-                    "display": "Optional[int]",
+                    "display": "int | None",
                     "link_target": null,
                     "children": [
                       {
                         "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "None",
                         "link_target": null,
                         "children": []
                       }
@@ -4161,7 +4176,7 @@
         {
           "kind": "Function",
           "name": "sum_list",
-          "doc": "Sum a list of integers.\n\nRustType[\"Vec<i32>\"] will expand to the correct input type (typing.Sequence[int])\nand RustType[\"i32\"] will expand to the correct output type (int).",
+          "doc": "Sum a list of integers.\n\nRustType[\"Vec<i32>\"] will expand to the correct input type (collections.abc.Sequence[int])\nand RustType[\"i32\"] will expand to the correct output type (int).",
           "signatures": [
             {
               "parameters": [
@@ -4539,11 +4554,16 @@
           "name": "DocumentedAlias",
           "doc": "This is a simple type alias with documentation",
           "definition": {
-            "display": "Optional[int]",
+            "display": "int | None",
             "link_target": null,
             "children": [
               {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "None",
                 "link_target": null,
                 "children": []
               }
@@ -4630,19 +4650,18 @@
           "name": "GenericUnion",
           "doc": "",
           "definition": {
-            "display": "Optional[int] | list[str]",
+            "display": "int | None | list[str]",
             "link_target": null,
             "children": [
               {
-                "display": "Optional[int]",
+                "display": "int",
                 "link_target": null,
-                "children": [
-                  {
-                    "display": "int",
-                    "link_target": null,
-                    "children": []
-                  }
-                ]
+                "children": []
+              },
+              {
+                "display": "None",
+                "link_target": null,
+                "children": []
               },
               {
                 "display": "list[str]",
@@ -4663,11 +4682,16 @@
           "name": "MaybeDecimal",
           "doc": "",
           "definition": {
-            "display": "Optional[DecimalHolder]",
+            "display": "DecimalHolder | None",
             "link_target": null,
             "children": [
               {
                 "display": "DecimalHolder",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "None",
                 "link_target": null,
                 "children": []
               }
@@ -4850,11 +4874,16 @@
           "name": "SimpleAlias",
           "doc": "",
           "definition": {
-            "display": "Optional[int]",
+            "display": "int | None",
             "link_target": null,
             "children": [
               {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "None",
                 "link_target": null,
                 "children": []
               }
@@ -4876,11 +4905,16 @@
           "name": "SingleTypeAlias",
           "doc": "",
           "definition": {
-            "display": "Optional[int]",
+            "display": "int | None",
             "link_target": null,
             "children": [
               {
                 "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              {
+                "display": "None",
                 "link_target": null,
                 "children": []
               }

@@ -139,7 +139,7 @@ CallbackType: TypeAlias = collections.abc.Callable[[str], None]
 ContainerList: TypeAlias = list[DataContainer]
 ContainerMap: TypeAlias = dict[str, DataContainer]
 ContainerTuple: TypeAlias = tuple[DataContainer, DataContainer]
-DocumentedAlias: TypeAlias = typing.Optional[builtins.int]
+DocumentedAlias: TypeAlias = builtins.int | None
 r"""
 This is a simple type alias with documentation
 """
@@ -161,8 +161,8 @@ r"""
 A union type with documentation
 """
 
-GenericUnion: TypeAlias = typing.Optional[builtins.int] | builtins.list[builtins.str]
-MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+GenericUnion: TypeAlias = builtins.int | None | builtins.list[builtins.str]
+MaybeDecimal: TypeAlias = DecimalHolder | None
 MultiLineDocCallback: TypeAlias = collections.abc.Callable[[str, int], bool]
 r"""
 A callback with multi-line documentation.
@@ -173,18 +173,18 @@ This callback takes a string and an integer, and returns a boolean.
 NestedContainer: TypeAlias = list[list[DataContainer]]
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
 OptionalCallback: TypeAlias = collections.abc.Callable[[str], None] | None
-OptionalContainer: TypeAlias = DataContainer  |  None
+OptionalContainer: TypeAlias = DataContainer | None
 RuntimeNumberOrString: TypeAlias = builtins.int | builtins.str
 r"""
 Either an integer or a string, available at runtime.
 """
 
 SequenceOfInts: TypeAlias = collections.abc.Sequence[int]
-SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SimpleAlias: TypeAlias = builtins.int | None
 SimpleContainer: TypeAlias = DataContainer
-SingleTypeAlias: TypeAlias = typing.Optional[builtins.int]
+SingleTypeAlias: TypeAlias = builtins.int | None
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
-StructUnion: TypeAlias = ComparableStruct  |  HashableStruct
+StructUnion: TypeAlias = ComparableStruct | HashableStruct
 TripleUnion: TypeAlias = builtins.int | builtins.str | builtins.bool
 UndocumentedCallback: TypeAlias = collections.abc.Callable[[int], bool]
 MY_CONSTANT1: builtins.int
@@ -370,8 +370,8 @@ class GetterSetterTypeTest:
     @property
     def values(self) -> builtins.list[builtins.int]: ...
     @values.setter
-    def values(self, value: typing.Sequence[builtins.int]) -> None: ...
-    def __new__(cls, values: typing.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
+    def values(self, value: collections.abc.Sequence[builtins.int]) -> None: ...
+    def __new__(cls, values: collections.abc.Sequence[builtins.int]) -> GetterSetterTypeTest: ...
 
 @typing.final
 class HashableStruct:
@@ -518,7 +518,7 @@ class Placeholder:
     @name.setter
     def name(self, value: builtins.str) -> None: ...
     def __new__(cls, name: builtins.str) -> Placeholder: ...
-    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: typing.Optional[builtins.str], jagged: builtins.bool = False, latex: typing.Optional[builtins.str] = None) -> Placeholder:
+    def configure(self, name: builtins.str, *, dtype: builtins.str, ndim: builtins.int, shape: builtins.str | None, jagged: builtins.bool = False, latex: builtins.str | None = None) -> Placeholder:
         r"""
         Configure placeholder with keyword-only parameters.
         
@@ -892,7 +892,7 @@ def parse_ip(s: builtins.str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
     Parses a string into an IpAddr (either IPv4 or IPv6).
     """
 
-def print_c(c: typing.Optional[builtins.int] = None) -> None: ...
+def print_c(c: builtins.int | None = None) -> None: ...
 
 def process_container(container: DataContainer) -> DataContainer:
     r"""
@@ -902,23 +902,23 @@ def process_container(container: DataContainer) -> DataContainer:
     which will expand to the correct Python stub type using PyStubType trait.
     """
 
-def read_dict(dict: typing.Mapping[builtins.int, typing.Mapping[builtins.int, builtins.int]]) -> None: ...
+def read_dict(dict: collections.abc.Mapping[builtins.int, collections.abc.Mapping[builtins.int, builtins.int]]) -> None: ...
 
 def str_len(x: builtins.str) -> builtins.int:
     r"""
     Returns the length of the string.
     """
 
-def sum(v: typing.Sequence[builtins.int]) -> builtins.int:
+def sum(v: collections.abc.Sequence[builtins.int]) -> builtins.int:
     r"""
     Returns the sum of two numbers as a string.
     """
 
-def sum_list(values: typing.Sequence[builtins.int]) -> builtins.int:
+def sum_list(values: collections.abc.Sequence[builtins.int]) -> builtins.int:
     r"""
     Sum a list of integers.
     
-    RustType["Vec<i32>"] will expand to the correct input type (typing.Sequence[int])
+    RustType["Vec<i32>"] will expand to the correct input type (collections.abc.Sequence[int])
     and RustType["i32"] will expand to the correct output type (int).
     """
 
