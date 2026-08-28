@@ -13,7 +13,7 @@ tasks:
     cmds:
       - uv run pytest
       - uv run pyright
-      - uvx ruff check
+      - uv run ruff check
       - uv run mypy --show-error-codes -p test_dash_package
       - uv run stubtest test_dash_package --ignore-missing-stub --ignore-disjoint-bases
       - uv run pyrefly check -- .

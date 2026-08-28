@@ -39,6 +39,7 @@ indexmap = ">= 2.7.0"
 insta = "1.47.2"
 inventory = "0.3.24"
 itertools = "0.15.0"
+jiff-02 = { package = "jiff", version = "0.2", default-features = false, features = ["std"] }
 log = "0.4.32"
 maplit = "1.0.2"
 num-complex = "0.4.6"

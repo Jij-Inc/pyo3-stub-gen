@@ -45,6 +45,16 @@ pure
    _items/pure.ipv4_localhost
    _items/pure.ipv6_localhost
    _items/pure.is_loopback
+   _items/pure.jiff_date_round_trip
+   _items/pure.jiff_datetime_round_trip
+   _items/pure.jiff_iso_week_date_round_trip
+   _items/pure.jiff_offset_round_trip
+   _items/pure.jiff_signed_duration_round_trip
+   _items/pure.jiff_span_to_signed_duration
+   _items/pure.jiff_time_round_trip
+   _items/pure.jiff_time_zone_round_trip
+   _items/pure.jiff_timestamp_round_trip
+   _items/pure.jiff_zoned_round_trip
    _items/pure.manual_overload_as_tuple
    _items/pure.manual_overload_example_1
    _items/pure.manual_overload_example_2

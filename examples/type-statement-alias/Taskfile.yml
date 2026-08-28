@@ -12,7 +12,7 @@ tasks:
     desc: Run tests
     cmds:
       - uv run pyright
-      - uvx ruff check
+      - uv run ruff check
       - uv run mypy --show-error-codes -p type_statement_alias
       - uv run stubtest type_statement_alias --ignore-missing-stub --ignore-disjoint-bases --allowlist .stubtest-allowlist
       - uv run pyrefly check ./type_statement_alias.pyi

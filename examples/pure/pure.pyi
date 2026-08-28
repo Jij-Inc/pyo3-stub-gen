@@ -109,6 +109,16 @@ __all__ = [
     "ipv4_localhost",
     "ipv6_localhost",
     "is_loopback",
+    "jiff_date_round_trip",
+    "jiff_datetime_round_trip",
+    "jiff_iso_week_date_round_trip",
+    "jiff_offset_round_trip",
+    "jiff_signed_duration_round_trip",
+    "jiff_span_to_signed_duration",
+    "jiff_time_round_trip",
+    "jiff_time_zone_round_trip",
+    "jiff_timestamp_round_trip",
+    "jiff_zoned_round_trip",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
@@ -832,6 +842,56 @@ def ipv6_localhost() -> ipaddress.IPv6Address:
 def is_loopback(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> builtins.bool:
     r"""
     Returns whether the given IP address is a loopback address.
+    """
+
+def jiff_date_round_trip(value: datetime.date) -> datetime.date:
+    r"""
+    Round-trips a Jiff civil date through Python.
+    """
+
+def jiff_datetime_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff civil datetime through Python.
+    """
+
+def jiff_iso_week_date_round_trip(value: datetime.date) -> datetime.date:
+    r"""
+    Round-trips a Jiff ISO week date through Python.
+    """
+
+def jiff_offset_round_trip(value: datetime.tzinfo) -> datetime.tzinfo:
+    r"""
+    Round-trips a Jiff fixed offset through Python.
+    """
+
+def jiff_signed_duration_round_trip(value: datetime.timedelta) -> datetime.timedelta:
+    r"""
+    Round-trips a Jiff signed duration through Python.
+    """
+
+def jiff_span_to_signed_duration(value: datetime.timedelta) -> datetime.timedelta:
+    r"""
+    Converts a Python duration accepted as a Jiff span into a signed duration.
+    """
+
+def jiff_time_round_trip(value: datetime.time) -> datetime.time:
+    r"""
+    Round-trips a Jiff civil time through Python.
+    """
+
+def jiff_time_zone_round_trip(value: datetime.tzinfo) -> datetime.tzinfo:
+    r"""
+    Round-trips a Jiff time zone through Python.
+    """
+
+def jiff_timestamp_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff timestamp through Python.
+    """
+
+def jiff_zoned_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff zoned datetime through Python.
     """
 
 @typing.overload

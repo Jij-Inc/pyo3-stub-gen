@@ -20,7 +20,7 @@ tasks:
       - uv sync --dev
       - uv run pytest
       - uv run pyright
-      - uvx ruff check
+      - uv run ruff check
       - uv run mypy --show-error-codes -p generate_init_py
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details
