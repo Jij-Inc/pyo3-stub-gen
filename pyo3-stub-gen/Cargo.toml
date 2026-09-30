@@ -35,7 +35,7 @@ uuid = { workspace = true, optional = true }
 
 [dependencies.pyo3-stub-gen-derive]
 path = "../pyo3-stub-gen-derive"
-version = "0.23.1"
+version = "0.23.2"
 
 [dev-dependencies]
 test-case.workspace = true
