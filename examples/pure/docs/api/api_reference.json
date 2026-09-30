@@ -2529,6 +2529,33 @@
         },
         {
           "kind": "Function",
+          "name": "echo_uuid",
+          "doc": "Return a UUID unchanged after converting it to Rust and back.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "UUID",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "UUID",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "fn_override_type",
           "doc": "",
           "signatures": [
@@ -5076,6 +5103,7 @@
     "pure.echo_a_bound_ref": "pure",
     "pure.echo_a_py": "pure",
     "pure.echo_path": "pure",
+    "pure.echo_uuid": "pure",
     "pure.fn_override_type": "pure",
     "pure.fn_with_python_param": "pure",
     "pure.fn_with_python_stub": "pure",

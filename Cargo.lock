@@ -758,6 +758,7 @@ dependencies = [
  "pyo3-stub-gen",
  "rust_decimal",
  "time",
+ "uuid",
 ]
 
 [[package]]
@@ -775,6 +776,7 @@ dependencies = [
  "pyo3-macros",
  "rust_decimal",
  "time",
+ "uuid",
 ]
 
 [[package]]
