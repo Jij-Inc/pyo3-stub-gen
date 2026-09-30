@@ -13,8 +13,8 @@ tasks:
   test:
     deps: [stub-gen]
     cmds:
-      - uv run pyright
+      - uv run --dev pyright
       - uvx ruff check
       # The following two cases should pass, as types are fully qualified to avoid namespace collision.
-      - uv run pyrefly check -c ./pyproject.toml .
-      - uv run ty check .
+      - uv run --dev pyrefly check -c ./pyproject.toml .
+      - uv run --dev ty check .

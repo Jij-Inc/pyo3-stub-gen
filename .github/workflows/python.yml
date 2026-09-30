@@ -10,6 +10,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      UV_NO_SYNC: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +29,11 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+        exclude:
+          - crate: type-statement-alias
+            python-version: "3.10"
+          - crate: type-statement-alias
+            python-version: "3.11"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -34,6 +41,8 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install example and development tools
+        run: uv pip install --group pyproject.toml:dev -e examples/${{ matrix.crate }}
       - name: Generate stub file
         run: task ${{ matrix.crate }}:stub-gen
       - name: Check if stub file is up to date
@@ -43,6 +52,8 @@ jobs:
 
   doc-test:
     runs-on: ubuntu-latest
+    env:
+      UV_NO_SYNC: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -59,6 +70,8 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install example and development tools
+        run: uv pip install --group pyproject.toml:dev -e examples/${{ matrix.crate }}
       - name: Test documentation generation
         run: task ${{ matrix.crate }}:doc-test
       - name: Check if generated API docs are up to date
