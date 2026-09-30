@@ -60,7 +60,7 @@ pub fn normalize_docstring(doc: &str) -> String {
     normalized_lines.join("\n")
 }
 
-pub fn write_docstring(f: &mut fmt::Formatter, doc: &str, indent: &str) -> fmt::Result {
+pub fn write_docstring(f: &mut impl fmt::Write, doc: &str, indent: &str) -> fmt::Result {
     // Docstrings should already be normalized, but trim again for safety
     let doc = doc.trim();
     if !doc.is_empty() {
