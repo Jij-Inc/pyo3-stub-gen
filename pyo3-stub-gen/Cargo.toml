@@ -15,6 +15,7 @@ either = { workspace = true, optional = true }
 indexmap.workspace = true
 inventory.workspace = true
 itertools.workspace = true
+jiff-02 = { workspace = true, optional = true }
 log.workspace = true
 maplit.workspace = true
 num-complex.workspace = true
@@ -46,6 +47,7 @@ workspace = true
 default = ["either", "infer_signature", "numpy", "ordered-float"]
 either = ["dep:either"]
 infer_signature = []
+jiff-02 = ["dep:jiff-02"]
 numpy = ["dep:numpy"]
 ordered-float = ["dep:ordered-float"]
 rust_decimal = ["dep:rust_decimal"]

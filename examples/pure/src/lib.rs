@@ -4,6 +4,7 @@ mod chrono_types;
 mod custom_exceptions;
 mod float_values;
 mod ip_types;
+mod jiff_types;
 mod manual_overloading;
 mod manual_submit;
 mod overloading;
@@ -16,6 +17,7 @@ use chrono_types::*;
 use custom_exceptions::*;
 use float_values::*;
 use ip_types::*;
+use jiff_types::*;
 use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
@@ -636,6 +638,18 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_utc, m)?)?;
     m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
+
+    // Test cases for Jiff types
+    m.add_function(wrap_pyfunction!(jiff_timestamp_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_zoned_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_datetime_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_date_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_time_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_iso_week_date_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_offset_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_time_zone_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_signed_duration_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_span_to_signed_duration, m)?)?;
 
     // Test cases for std::net IP address types
     m.add_function(wrap_pyfunction!(ipv4_localhost, m)?)?;

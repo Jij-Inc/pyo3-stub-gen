@@ -3647,6 +3647,276 @@
         },
         {
           "kind": "Function",
+          "name": "jiff_date_round_trip",
+          "doc": "Round-trips a Jiff civil date through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_datetime_round_trip",
+          "doc": "Round-trips a Jiff civil datetime through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_iso_week_date_round_trip",
+          "doc": "Round-trips a Jiff ISO week date through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_offset_round_trip",
+          "doc": "Round-trips a Jiff fixed offset through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "tzinfo",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_signed_duration_round_trip",
+          "doc": "Round-trips a Jiff signed duration through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_span_to_signed_duration",
+          "doc": "Converts a Python duration accepted as a Jiff span into a signed duration.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_time_round_trip",
+          "doc": "Round-trips a Jiff civil time through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "time",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_time_zone_round_trip",
+          "doc": "Round-trips a Jiff time zone through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "tzinfo",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_timestamp_round_trip",
+          "doc": "Round-trips a Jiff timestamp through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_zoned_round_trip",
+          "doc": "Round-trips a Jiff zoned datetime through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "manual_overload_as_tuple",
           "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
@@ -5128,6 +5398,16 @@
     "pure.ipv4_localhost": "pure",
     "pure.ipv6_localhost": "pure",
     "pure.is_loopback": "pure",
+    "pure.jiff_date_round_trip": "pure",
+    "pure.jiff_datetime_round_trip": "pure",
+    "pure.jiff_iso_week_date_round_trip": "pure",
+    "pure.jiff_offset_round_trip": "pure",
+    "pure.jiff_signed_duration_round_trip": "pure",
+    "pure.jiff_span_to_signed_duration": "pure",
+    "pure.jiff_time_round_trip": "pure",
+    "pure.jiff_time_zone_round_trip": "pure",
+    "pure.jiff_timestamp_round_trip": "pure",
+    "pure.jiff_zoned_round_trip": "pure",
     "pure.manual_overload_as_tuple": "pure",
     "pure.manual_overload_example_1": "pure",
     "pure.manual_overload_example_2": "pure",

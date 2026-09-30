@@ -87,6 +87,22 @@ impl_builtin!(Cow<'_, str>, "str", PyString);
 impl_builtin!(Cow<'_, OsStr>, "str", PyString);
 impl_builtin!(Cow<'_, [u8]>, "bytes", ::pyo3::types::PyBytes);
 
+#[cfg(feature = "jiff-02")]
+mod impl_jiff_02 {
+    use super::*;
+
+    impl_with_module!(jiff_02::Timestamp, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::Zoned, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::civil::DateTime, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::civil::Date, "datetime.date", "datetime");
+    impl_with_module!(jiff_02::civil::Time, "datetime.time", "datetime");
+    impl_with_module!(jiff_02::civil::ISOWeekDate, "datetime.date", "datetime");
+    impl_with_module!(jiff_02::tz::Offset, "datetime.tzinfo", "datetime");
+    impl_with_module!(jiff_02::tz::TimeZone, "datetime.tzinfo", "datetime");
+    impl_with_module!(jiff_02::SignedDuration, "datetime.timedelta", "datetime");
+    impl_with_module!(jiff_02::Span, "datetime.timedelta", "datetime");
+}
+
 #[cfg(feature = "ordered-float")]
 mod impl_ordered_float {
     use super::*;
