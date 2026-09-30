@@ -241,9 +241,9 @@ struct StubInfoBuilder {
 impl StubInfoBuilder {
     fn from_pyproject_toml(pyproject: PyProject, config: StubGenConfig) -> Self {
         let is_mixed_layout = pyproject.python_source().is_some();
-        let python_root = pyproject
-            .python_source()
-            .unwrap_or(PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()));
+        let python_root = pyproject.python_source().unwrap_or(PathBuf::from(
+            std::env::var("CARGO_MANIFEST_DIR").unwrap_or(env!("CARGO_MANIFEST_DIR").to_string()),
+        ));
 
         Self {
             modules: BTreeMap::new(),
