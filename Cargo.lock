@@ -103,7 +103,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "avoid_name_collision_with_submod"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -282,7 +282,7 @@ checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
 name = "feature_gated"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -298,7 +298,7 @@ checksum = "aedcfb3409746eddb02b9e19ebda1c3394f759a152e48ee875a0844d1b955484"
 
 [[package]]
 name = "generate_init_py"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -575,7 +575,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "mixed"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "pure"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "ahash",
  "chrono",
@@ -843,7 +843,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "anyhow",
  "chrono",
@@ -871,7 +871,7 @@ dependencies = [
 
 [[package]]
 name = "pyo3-stub-gen-derive"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "heck",
  "indexmap",
@@ -1137,7 +1137,7 @@ checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
 
 [[package]]
 name = "simple_name_collision"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -1247,7 +1247,7 @@ dependencies = [
 
 [[package]]
 name = "test-dash-package"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "pyo3",
  "pyo3-stub-gen",
@@ -1357,7 +1357,7 @@ dependencies = [
 
 [[package]]
 name = "type_statement_alias"
-version = "0.22.5"
+version = "0.22.6"
 dependencies = [
  "env_logger",
  "pyo3",
@@ -1367,7 +1367,7 @@ dependencies = [
 
 [[package]]
 name = "underscore_items"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "env_logger",
  "pyo3",
