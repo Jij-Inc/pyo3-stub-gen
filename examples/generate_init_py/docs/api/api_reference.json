@@ -3,7 +3,7 @@
   "modules": {
     "generate_init_py": {
       "name": "generate_init_py",
-      "doc": "This is the main module docstring for generate_init_py.\nThis example demonstrates the generate-init-py feature.\n\n    This must be indented by four spaces.",
+      "doc": "This is the main module docstring for generate_init_py.\nThis example demonstrates the generate-init-py feature.\n\n    This must be indented by four spaces.\n\nLiteral Python strings:\n\n    text = \"\"\"A triple-quoted string\"\"\"\n    path = r\"C:\\new\\tools\"\n    pattern = r\"\\d+\\s\"\n    continued = \\\n        \"next line\"",
       "items": [
         {
           "kind": "Class",

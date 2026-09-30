@@ -27,6 +27,12 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+        # This fixture generates PEP 695 syntax, which requires Python 3.12+.
+        exclude:
+          - crate: type-statement-alias
+            python-version: "3.10"
+          - crate: type-statement-alias
+            python-version: "3.11"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -34,6 +40,10 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check Python environment and conditional example
+        env:
+          EXPECTED_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv run --locked python scripts/check_python_environment.py
       - name: Generate stub file
         run: task ${{ matrix.crate }}:stub-gen
       - name: Check if stub file is up to date
@@ -59,6 +69,10 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check Python environment and conditional example
+        env:
+          EXPECTED_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv run --locked python scripts/check_python_environment.py
       - name: Test documentation generation
         run: task ${{ matrix.crate }}:doc-test
       - name: Check if generated API docs are up to date

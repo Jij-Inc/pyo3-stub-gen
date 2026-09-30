@@ -164,6 +164,13 @@ impl PyRuntimeType for std::net::IpAddr {
     }
 }
 
+#[cfg(feature = "uuid")]
+impl PyStubType for uuid::Uuid {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module("uuid.UUID", "uuid".into())
+    }
+}
+
 impl<T: PyStubType> PyStubType for &T {
     fn type_input() -> TypeInfo {
         T::type_input()
