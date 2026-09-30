@@ -55,15 +55,19 @@ Both inputs will be output according to the `use-type-statement` configuration.
 
 ## Running
 
-Generate stub files:
+Use uv 0.12.21 or later and Task from the repository root:
 
 ```bash
-cargo run --bin stub_gen
+UV_PYTHON=3.12 task type-statement-alias:stub-gen type-statement-alias:test
 ```
 
-Run tests:
+This example is a conditional editable path dependency in the root `tests`
+dependency group, included by `dev`. It shares the root `.venv` and `uv.lock`,
+but is excluded from the uv workspace so that its `requires-python = ">=3.12"`
+does not prevent other examples from running on Python 3.10 and 3.11.
 
-```bash
-maturin develop
-pytest
-```
+The dependency marker enables this package only on Python 3.12 and later.
+The test task skips this example on older interpreters, including when called
+through `task test`. Run uv commands for this example with `--project ../..`
+from this directory to use the shared environment instead of creating an
+independent project environment.
