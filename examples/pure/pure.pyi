@@ -14,6 +14,7 @@ import os
 import pathlib
 import typing
 import typing_extensions
+import uuid
 from typing import TypeAlias
 __all__ = [
     "A",
@@ -85,6 +86,7 @@ __all__ = [
     "echo_a_bound_ref",
     "echo_a_py",
     "echo_path",
+    "echo_uuid",
     "fn_override_type",
     "fn_with_python_param",
     "fn_with_python_stub",
@@ -714,6 +716,11 @@ def echo_a_bound_ref(a: A) -> A: ...
 def echo_a_py(a: A) -> A: ...
 
 def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def echo_uuid(value: uuid.UUID) -> uuid.UUID:
+    r"""
+    Return a UUID unchanged after converting it to Rust and back.
+    """
 
 def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
