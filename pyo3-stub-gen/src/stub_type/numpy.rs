@@ -4,8 +4,8 @@ use super::{PyStubType, TypeInfo};
 use ::pyo3::prelude::*;
 use maplit::hashset;
 use numpy::{
-    ndarray::Dimension, Element, PyArray, PyArrayDescr, PyReadonlyArray, PyReadwriteArray,
-    PyUntypedArray,
+    ndarray::Dimension, AllowTypeChange, Element, PyArray, PyArrayDescr, PyArrayLike,
+    PyReadonlyArray, PyReadwriteArray, PyUntypedArray, TypeMustMatch,
 };
 use std::collections::HashMap;
 
@@ -28,6 +28,7 @@ macro_rules! impl_numpy_scalar {
     };
 }
 
+impl_numpy_scalar!(bool, "bool_");
 impl_numpy_scalar!(i8, "int8");
 impl_numpy_scalar!(i16, "int16");
 impl_numpy_scalar!(i32, "int32");
@@ -118,6 +119,37 @@ where
         numpy.getattr("ndarray")
     }
 }
+
+macro_rules! impl_for_array_like {
+    ($coerce:ty) => {
+        impl<T, D> PyStubType for PyArrayLike<'_, T, D, $coerce>
+        where
+            T: NumPyScalar + Element,
+            D: Dimension,
+        {
+            fn type_output() -> TypeInfo {
+                TypeInfo {
+                    name: format!("numpy.typing.ArrayLike"),
+                    source_module: None,
+                    import: hashset!["numpy.typing".into()],
+                    type_refs: HashMap::new(),
+                }
+            }
+        }
+        impl<T, D> PyRuntimeType for PyArrayLike<'_, T, D, $coerce>
+        where
+            T: Element,
+            D: Dimension,
+        {
+            fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+                py.import("numpy")?.getattr("ndarray")?.getattr("ArrayLike")
+            }
+        }
+    };
+}
+
+impl_for_array_like!(TypeMustMatch);
+impl_for_array_like!(AllowTypeChange);
 
 impl PyStubType for PyArrayDescr {
     fn type_output() -> TypeInfo {
