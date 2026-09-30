@@ -10,8 +10,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      UV_NO_SYNC: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -29,7 +27,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
-        # type-statement-alias uses PEP 695 type statements, requiring Python 3.12+.
+        # This fixture generates PEP 695 syntax, which requires Python 3.12+.
         exclude:
           - crate: type-statement-alias
             python-version: "3.10"
@@ -42,8 +40,10 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install example and development tools
-        run: uv pip install --group pyproject.toml:dev -e examples/${{ matrix.crate }}
+      - name: Check Python environment and conditional example
+        env:
+          EXPECTED_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv run --locked python scripts/check_python_environment.py
       - name: Generate stub file
         run: task ${{ matrix.crate }}:stub-gen
       - name: Check if stub file is up to date
@@ -53,8 +53,6 @@ jobs:
 
   doc-test:
     runs-on: ubuntu-latest
-    env:
-      UV_NO_SYNC: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -71,8 +69,10 @@ jobs:
         uses: ./.github/actions/setup-test-environment
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install example and development tools
-        run: uv pip install --group pyproject.toml:dev -e examples/${{ matrix.crate }}
+      - name: Check Python environment and conditional example
+        env:
+          EXPECTED_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv run --locked python scripts/check_python_environment.py
       - name: Test documentation generation
         run: task ${{ matrix.crate }}:doc-test
       - name: Check if generated API docs are up to date

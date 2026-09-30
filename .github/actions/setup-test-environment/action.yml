@@ -27,13 +27,13 @@ runs:
     - name: Install uv
       uses: astral-sh/setup-uv@v10.2.0
       with:
+        version: "0.12.21"
         python-version: ${{ inputs.python-version }}
         activate-environment: true
-        no-project: true
 
     - name: Configure PyO3 interpreter
       shell: bash
       run: |
-        python_path="$(uv python find --resolve-links)"
+        python_path="$(uv python find --no-project --resolve-links '${{ inputs.python-version }}')"
         echo "PYO3_PYTHON=$python_path" >> "$GITHUB_ENV"
         echo "LD_LIBRARY_PATH=${python_path%/bin/*}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"

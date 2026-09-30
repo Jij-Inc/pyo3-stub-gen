@@ -17,11 +17,11 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - uv run --dev pytest
-      - uv run --dev pyright
-      - uv run --dev ruff check
-      - uv run --dev mypy --show-error-codes -p mixed.main_mod
+      - uv run --locked --project ../.. pytest
+      - uv run --locked --project ../.. pyright
+      - uv run --locked --project ../.. ruff check
+      - uv run --locked --project ../.. mypy --show-error-codes -p mixed.main_mod
       # stubtest is disabled for this example due to PyO3 nested submodule limitations
       # See README.md for details
-      - uv run --dev pyrefly check --ignore-missing-imports .
-      - uv run --dev ty check .
+      - uv run --locked --project ../.. pyrefly check --ignore-missing-imports .
+      - uv run --locked --project ../.. ty check .
