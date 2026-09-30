@@ -72,6 +72,13 @@ fn add_decimals(a: Decimal, b: Decimal) -> Decimal {
     a + b
 }
 
+/// Return a UUID unchanged after converting it to Rust and back.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_uuid(value: uuid::Uuid) -> uuid::Uuid {
+    value
+}
+
 #[gen_stub_pyclass]
 #[pyclass(extends=PyDate)]
 struct MyDate;
@@ -582,6 +589,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(manual_overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(manual_overload_as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_uuid, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;
     m.add_function(wrap_pyfunction!(create_containers, m)?)?;

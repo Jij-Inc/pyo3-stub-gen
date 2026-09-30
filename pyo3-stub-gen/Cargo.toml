@@ -31,6 +31,7 @@ serde.workspace = true
 serde_json.workspace = true
 time.workspace = true
 toml.workspace = true
+uuid = { workspace = true, optional = true }
 
 [dependencies.pyo3-stub-gen-derive]
 path = "../pyo3-stub-gen-derive"
@@ -50,3 +51,4 @@ jiff-02 = ["dep:jiff-02"]
 numpy = ["dep:numpy"]
 ordered-float = ["dep:ordered-float"]
 rust_decimal = ["dep:rust_decimal"]
+uuid = ["dep:uuid"]

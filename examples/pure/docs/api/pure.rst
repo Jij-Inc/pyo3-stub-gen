@@ -21,6 +21,7 @@ pure
    _items/pure.echo_a_bound_ref
    _items/pure.echo_a_py
    _items/pure.echo_path
+   _items/pure.echo_uuid
    _items/pure.fn_override_type
    _items/pure.fn_with_python_param
    _items/pure.fn_with_python_stub

@@ -9,11 +9,15 @@ tasks:
       - cargo run --bin stub_gen
 
   test:
-    desc: Run tests
+    desc: Run tests (Python 3.12+ only)
+    # Keep the root interpreter; selecting this excluded project directly would
+    # create a separate environment and raise its Python requirement to 3.12.
+    status:
+      - uv run --locked --project ../.. python -c 'import sys; sys.exit(sys.version_info >= (3, 12))'
     cmds:
-      - uv run pyright
-      - uv run ruff check
-      - uv run mypy --show-error-codes -p type_statement_alias
-      - uv run stubtest type_statement_alias --ignore-missing-stub --ignore-disjoint-bases --allowlist .stubtest-allowlist
-      - uv run pyrefly check ./type_statement_alias.pyi
-      - uv run ty check .
+      - uv run --locked --project ../.. pyright
+      - uv run --locked --project ../.. ruff check
+      - uv run --locked --project ../.. mypy --show-error-codes -p type_statement_alias
+      - uv run --locked --project ../.. stubtest type_statement_alias --ignore-missing-stub --ignore-disjoint-bases --allowlist .stubtest-allowlist
+      - uv run --locked --project ../.. pyrefly check ./type_statement_alias.pyi
+      - uv run --locked --project ../.. ty check .

@@ -11,10 +11,10 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - uv run pytest
-      - uv run pyright
-      - uv run ruff check
-      - uv run mypy --show-error-codes -p test_dash_package
-      - uv run stubtest test_dash_package --ignore-missing-stub --ignore-disjoint-bases
-      - uv run pyrefly check -- .
-      - uv run ty check .
+      - uv run --locked --project ../.. pytest
+      - uv run --locked --project ../.. pyright
+      - uv run --locked --project ../.. ruff check
+      - uv run --locked --project ../.. mypy --show-error-codes -p test_dash_package
+      - uv run --locked --project ../.. stubtest test_dash_package --ignore-missing-stub --ignore-disjoint-bases
+      - uv run --locked --project ../.. pyrefly check -- .
+      - uv run --locked --project ../.. ty check .
