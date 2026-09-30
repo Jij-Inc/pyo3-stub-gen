@@ -1,5 +1,9 @@
 [dependency-groups]
+# This example uses Python 3.12 syntax; keep it out of the workspace-wide
+# requires-python intersection while sharing the root environment and lockfile.
+tests = ["type-statement-alias; python_version >= '3.12'"]
 dev = [
+  { include-group = "tests" },
   "mypy>=1.19.1",
   "myst-parser",
   "pydantic>=2.11.9",
@@ -8,6 +12,7 @@ dev = [
   "pytest-asyncio>=1.1.0",
   "pytest-insta>=0.3.0",
   "pytest>=9.0.3",
+  "ruff==0.15.22",
   "sphinx",
   "sphinx-rtd-theme",
   "sphinxcontrib-katex>=0.9.11",
@@ -23,7 +28,14 @@ ignore = ["**/type_error_cases/*.py"]
 [tool.ty.src]
 exclude = ["**/type_error_cases/*.py"]
 
+[tool.uv]
+required-version = ">=0.12.21"
+
+[tool.uv.sources]
+type-statement-alias = { path = "examples/type-statement-alias", editable = true }
+
 [tool.uv.workspace]
+exclude = ["examples/type-statement-alias"]
 members = [
   "examples/pure",
   "examples/mixed",
@@ -33,5 +45,4 @@ members = [
   "examples/simple_name_collision",
   "examples/avoid_name_collision_with_submod",
   "examples/underscore_items",
-  "examples/type-statement-alias",
 ]

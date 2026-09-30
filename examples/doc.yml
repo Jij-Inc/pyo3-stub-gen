@@ -13,7 +13,7 @@ tasks:
     deps:
       - stub-gen
     cmds:
-      - uv run sphinx-build -W -b html docs docs/_build
+      - uv run --locked --project ../.. sphinx-build -W -b html docs docs/_build
 
   doc-test:
     desc: Test that Sphinx documentation builds and objects.inv exists
@@ -30,4 +30,4 @@ tasks:
     deps:
       - doc-build
     cmds:
-      - uv run python -m webbrowser "file://${PWD}/docs/_build/index.html"
+      - uv run --locked --project ../.. python -m webbrowser "file://${PWD}/docs/_build/index.html"
