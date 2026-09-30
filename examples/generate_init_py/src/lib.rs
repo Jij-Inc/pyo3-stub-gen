@@ -136,6 +136,14 @@ pyo3_stub_gen::module_doc!(
     This example demonstrates the generate-init-py feature.
 
         This must be indented by four spaces.
+
+    Literal Python strings:
+
+        text = """A triple-quoted string"""
+        path = r"C:\new\tools"
+        pattern = r"\d+\s"
+        continued = \
+            "next line"
     "#
 );
 
