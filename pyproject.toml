@@ -8,10 +8,11 @@ dev = [
   "pytest-asyncio>=1.1.0",
   "pytest-insta>=0.3.0",
   "pytest>=9.0.3",
+  "ruff==0.15.22",
   "sphinx",
   "sphinx-rtd-theme",
   "sphinxcontrib-katex>=0.9.11",
-  "ty>=0.0.7",
+  "ty==0.0.17",
 ]
 
 [tool.pyrefly]
@@ -20,18 +21,8 @@ project-excludes = ["**/type_error_cases/*.py"]
 [tool.pyright]
 ignore = ["**/type_error_cases/*.py"]
 
-[tool.ruff.lint]
-select = ["E4", "E7", "E9", "F"]
-
 [tool.ty.src]
 exclude = ["**/type_error_cases/*.py"]
-
-[[tool.ty.overrides]]
-include = ["examples/pure/pure.pyi"]
-
-[tool.ty.overrides.rules]
-# This fixture tests generation of otherwise unused type: ignore directives.
-unused-type-ignore-comment = "ignore"
 
 [tool.uv.workspace]
 members = [
