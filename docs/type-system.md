@@ -105,7 +105,7 @@ Maps PyO3's Python object types.
 | Rust Type | Python Type | Notes |
 |-----------|-------------|-------|
 | `Py<T>` | `T` | Python object reference (unwrapped) |
-| `PyObject` | `typing.Any` | Untyped Python object |
+| `Py<PyAny>` | `typing.Any` | Untyped Python object |
 | `Bound<'py, T>` | `T` | Bound Python object |
 | `Borrowed<'a, 'py, T>` | `T` | Borrowed reference |
 | `&PyAny` | `typing.Any` | Any Python type |
@@ -170,6 +170,23 @@ Requires `rust_decimal` feature flag.
 | Rust Type | Python Type | Notes |
 |-----------|-------------|-------|
 | `Decimal` | `decimal.Decimal` | High-precision decimal |
+
+#### `jiff` crate (`stub_type/builtins.rs`)
+
+Requires the `jiff-02` feature flag. Enable PyO3's `jiff-02` feature separately for runtime
+conversions.
+
+| Rust Type                | Python Type          | Notes                |
+| ------------------------ | -------------------- | -------------------- |
+| `Timestamp`              | `datetime.datetime`  | Absolute timestamp   |
+| `Zoned`                  | `datetime.datetime`  | Zoned datetime       |
+| `civil::DateTime`        | `datetime.datetime`  | Civil datetime       |
+| `civil::Date`            | `datetime.date`      | Civil date           |
+| `civil::Time`            | `datetime.time`      | Civil time           |
+| `civil::ISOWeekDate`     | `datetime.date`      | ISO week date        |
+| `tz::Offset`             | `datetime.tzinfo`    | Fixed offset         |
+| `tz::TimeZone`           | `datetime.tzinfo`    | Time zone            |
+| `SignedDuration`, `Span` | `datetime.timedelta` | `Span` is input-only |
 
 ## Type Representations
 
@@ -583,17 +600,19 @@ pyo3-stub-gen/src/stub_type/
 
 Type support can be conditionally enabled:
 
-| Feature | Types Enabled | Requires |
-|---------|---------------|----------|
-| `numpy` | `PyArray*` types | `numpy` crate |
-| `either` | `Either<L, R>` | `either` crate |
-| `rust_decimal` | `Decimal` | `rust_decimal` crate |
+| Feature        | Types Enabled                                                  | Requires             |
+| -------------- | -------------------------------------------------------------- | -------------------- |
+| `numpy`        | `PyArray*` types                                               | `numpy` crate        |
+| `either`       | `Either<L, R>`                                                 | `either` crate       |
+| `jiff-02`      | `Timestamp`, civil types, time zone types, and duration types  | `jiff` 0.2 crate     |
+| `rust_decimal` | `Decimal`                                                      | `rust_decimal` crate |
 
 Enable in `Cargo.toml`:
 
 ```toml
 [dependencies]
-pyo3-stub-gen = { version = "...", features = ["numpy", "either"] }
+pyo3 = { version = "...", features = ["jiff-02"] }
+pyo3-stub-gen = { version = "...", features = ["numpy", "either", "jiff-02"] }
 ```
 
 ## Best Practices

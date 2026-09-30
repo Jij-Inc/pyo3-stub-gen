@@ -11,4 +11,4 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - uv run pytest
+      - uv run --locked --project ../.. pytest

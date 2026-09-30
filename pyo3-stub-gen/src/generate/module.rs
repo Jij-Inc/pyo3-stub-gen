@@ -336,7 +336,8 @@ impl Module {
 
     /// Format module as `__init__.py` content.
     ///
-    /// This generates a Python `__init__.py` file with re-exports and `__all__` list.
+    /// This generates a Python `__init__.py` file with a module docstring,
+    /// re-exports, and an `__all__` list.
     /// Unlike `format_with_config()` which generates `.pyi` stub files, this generates
     /// actual Python code for runtime use.
     pub fn format_init_py(&self) -> String {
@@ -350,6 +351,7 @@ impl Module {
         )
         .unwrap();
         writeln!(output, "# ruff: noqa: F401").unwrap();
+        docstring::write_docstring(&mut output, &self.doc, "").unwrap();
         writeln!(output).unwrap();
 
         // Re-export imports (sorted for deterministic output)

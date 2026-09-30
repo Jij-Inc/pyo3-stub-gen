@@ -2,7 +2,6 @@ use pyo3::{
     exceptions::{PyRuntimeError, PyTypeError},
     prelude::*,
     types::*,
-    PyObject,
 };
 use pyo3_stub_gen::{create_exception, derive::*};
 
@@ -16,7 +15,7 @@ create_exception!(pure, MyError, PyRuntimeError);
 #[pyclass(frozen, extends=PyTypeError)]
 #[derive(Debug)]
 pub struct NotIntError {
-    item: PyObject,
+    item: Py<PyAny>,
 }
 
 impl<'py> IntoPyObject<'py> for NotIntError {

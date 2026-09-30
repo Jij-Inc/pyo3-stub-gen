@@ -1,6 +1,6 @@
 //! Define PyStubType for built-in types based on <https://pyo3.rs/v0.22.2/conversions/tables#argument-types>
 
-use crate::runtime::PyRuntimeType;
+use crate::runtime::{union_type, PyRuntimeType};
 use crate::stub_type::*;
 use ::pyo3::prelude::*;
 use ::pyo3::types::{PyBool, PyComplex, PyFloat, PyInt, PyString};
@@ -87,6 +87,22 @@ impl_builtin!(Cow<'_, str>, "str", PyString);
 impl_builtin!(Cow<'_, OsStr>, "str", PyString);
 impl_builtin!(Cow<'_, [u8]>, "bytes", ::pyo3::types::PyBytes);
 
+#[cfg(feature = "jiff-02")]
+mod impl_jiff_02 {
+    use super::*;
+
+    impl_with_module!(jiff_02::Timestamp, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::Zoned, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::civil::DateTime, "datetime.datetime", "datetime");
+    impl_with_module!(jiff_02::civil::Date, "datetime.date", "datetime");
+    impl_with_module!(jiff_02::civil::Time, "datetime.time", "datetime");
+    impl_with_module!(jiff_02::civil::ISOWeekDate, "datetime.date", "datetime");
+    impl_with_module!(jiff_02::tz::Offset, "datetime.tzinfo", "datetime");
+    impl_with_module!(jiff_02::tz::TimeZone, "datetime.tzinfo", "datetime");
+    impl_with_module!(jiff_02::SignedDuration, "datetime.timedelta", "datetime");
+    impl_with_module!(jiff_02::Span, "datetime.timedelta", "datetime");
+}
+
 #[cfg(feature = "ordered-float")]
 mod impl_ordered_float {
     use super::*;
@@ -141,6 +157,35 @@ impl_with_module!(time::PrimitiveDateTime, "datetime.datetime", "datetime");
 impl_with_module!(time::UtcDateTime, "datetime.datetime", "datetime");
 impl_with_module!(time::Time, "datetime.time", "datetime");
 impl_with_module!(time::UtcOffset, "datetime.tzinfo", "datetime");
+impl_with_module!(std::net::Ipv4Addr, "ipaddress.IPv4Address", "ipaddress");
+impl_with_module!(std::net::Ipv6Addr, "ipaddress.IPv6Address", "ipaddress");
+
+impl PyStubType for std::net::IpAddr {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module(
+            "ipaddress.IPv4Address",
+            ModuleRef::Named("ipaddress".to_string()),
+        ) | TypeInfo::with_module(
+            "ipaddress.IPv6Address",
+            ModuleRef::Named("ipaddress".to_string()),
+        )
+    }
+}
+impl PyRuntimeType for std::net::IpAddr {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, PyAny>> {
+        let module = py.import("ipaddress")?;
+        let type_v4 = module.getattr("IPv4Address")?;
+        let type_v6 = module.getattr("IPv6Address")?;
+        union_type(py, &[type_v4, type_v6])
+    }
+}
+
+#[cfg(feature = "uuid")]
+impl PyStubType for uuid::Uuid {
+    fn type_output() -> TypeInfo {
+        TypeInfo::with_module("uuid.UUID", "uuid".into())
+    }
+}
 
 impl<T: PyStubType> PyStubType for &T {
     fn type_input() -> TypeInfo {

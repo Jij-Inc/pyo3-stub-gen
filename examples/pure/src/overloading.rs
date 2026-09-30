@@ -1,6 +1,6 @@
 //! Test for `@overload` decorator generation
 
-use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt, PyObject};
+use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt};
 use pyo3_stub_gen::derive::*;
 
 // Example 1: Using new python_overload parameter
@@ -30,7 +30,7 @@ pub fn overload_example_1(x: f64) -> f64 {
     no_default_overload = true
 )]
 #[pyfunction]
-pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
     let py = ob.py();
     if let Ok(f) = ob.extract::<f64>() {
         (f + 1.0).into_py_any(py)
@@ -60,8 +60,8 @@ pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
 )]
 #[pyfunction]
 #[pyo3(signature = (xs, /, *, tuple_out))]
-pub fn as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<PyObject> {
-    Python::with_gil(|py| {
+pub fn as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<Py<PyAny>> {
+    Python::attach(|py| {
         if tuple_out {
             Ok(PyTuple::new(py, xs.iter())?.into_py_any(py)?)
         } else {

@@ -36,7 +36,7 @@ Write Python stub syntax directly with **Python expressions**:
         """My function."""
 "#)]
 #[pyfunction]
-fn my_function(x: PyObject, y: PyObject, z: PyObject) -> i32 {
+fn my_function(x: Py<PyAny>, y: Py<PyAny>, z: Py<PyAny>) -> i32 {
     // Implementation
 }
 ```
@@ -626,7 +626,7 @@ fn basic_defaults(x: i32, y: i32, z: f64) -> f64 {
         """Basic defaults example."""
 "#)]
 #[pyfunction]
-fn basic_defaults(x: PyObject, y: PyObject, z: PyObject) -> f64 {
+fn basic_defaults(x: Py<PyAny>, y: Py<PyAny>, z: Py<PyAny>) -> f64 {
     // Implementation
 }
 ```

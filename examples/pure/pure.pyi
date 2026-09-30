@@ -9,10 +9,12 @@ import collections.abc
 import datetime
 import decimal
 import enum
+import ipaddress
 import os
 import pathlib
 import typing
 import typing_extensions
+import uuid
 from typing import TypeAlias
 __all__ = [
     "A",
@@ -80,7 +82,11 @@ __all__ = [
     "create_dict",
     "default_value",
     "deprecated_function",
+    "echo_a_bound",
+    "echo_a_bound_ref",
+    "echo_a_py",
     "echo_path",
+    "echo_uuid",
     "fn_override_type",
     "fn_with_python_param",
     "fn_with_python_stub",
@@ -102,12 +108,26 @@ __all__ = [
     "get_utc",
     "get_utc_datetime",
     "get_utc_offset",
+    "ipv4_localhost",
+    "ipv6_localhost",
+    "is_loopback",
+    "jiff_date_round_trip",
+    "jiff_datetime_round_trip",
+    "jiff_iso_week_date_round_trip",
+    "jiff_offset_round_trip",
+    "jiff_signed_duration_round_trip",
+    "jiff_span_to_signed_duration",
+    "jiff_time_round_trip",
+    "jiff_time_zone_round_trip",
+    "jiff_timestamp_round_trip",
+    "jiff_zoned_round_trip",
     "manual_overload_as_tuple",
     "manual_overload_example_1",
     "manual_overload_example_2",
     "naive_time_difference",
     "overload_example_1",
     "overload_example_2",
+    "parse_ip",
     "print_c",
     "process_container",
     "read_dict",
@@ -234,7 +254,14 @@ class A:
     def deprecated_classmethod(cls) -> None: ...
     @classmethod
     def classmethod_test2(cls) -> None: ...
+    @classmethod
+    def classmethod_test_qualified(cls) -> None: ...
     def show_x(self) -> None: ...
+    def show_x_pyref(self) -> builtins.int: ...
+    def show_x_pyrefmut(self) -> builtins.int: ...
+    def show_x_bound(self) -> builtins.int: ...
+    def show_x_bound_ref(self) -> builtins.int: ...
+    def show_x_py(self) -> builtins.int: ...
     def ref_test(self, x: dict) -> dict: ...
     async def async_get_x(self) -> builtins.int: ...
     @typing_extensions.deprecated("[Since 1.0.0] This method is deprecated")
@@ -265,11 +292,11 @@ class ComparableStruct:
     """
     @property
     def value(self) -> builtins.int: ...
-    def __eq__(self, other: builtins.object) -> builtins.bool: ...
-    def __lt__(self, other: builtins.object) -> builtins.bool: ...
-    def __le__(self, other: builtins.object) -> builtins.bool: ...
-    def __gt__(self, other: builtins.object) -> builtins.bool: ...
-    def __ge__(self, other: builtins.object) -> builtins.bool: ...
+    def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __lt__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __le__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __gt__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __ge__(self, other: builtins.object, /) -> builtins.bool: ...
     def __new__(cls, value: builtins.int) -> ComparableStruct: ...
 
 class CustomComplexEnum:
@@ -290,7 +317,7 @@ class CustomComplexEnum:
         def _0(self) -> builtins.str: ...
         def __new__(cls, _0: builtins.str) -> CustomComplexEnum.VARIANT_B: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     ...
 
@@ -365,7 +392,7 @@ class HashableStruct:
     """
     @property
     def name(self) -> builtins.str: ...
-    def __eq__(self, other: builtins.object) -> builtins.bool: ...
+    def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
     def __hash__(self) -> builtins.int: ...
     def __str__(self) -> builtins.str: ...
     def __new__(cls, name: builtins.str) -> HashableStruct: ...
@@ -449,7 +476,7 @@ class NumberComplex:
         def _0(self) -> builtins.float: ...
         def __new__(cls, _0: builtins.float) -> NumberComplex.FLOAT: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     @typing.final
     class INTEGER(NumberComplex):
@@ -552,7 +579,7 @@ class Shape1:
         def _1(self) -> builtins.float: ...
         def __new__(cls, _0: builtins.int, _1: builtins.float) -> Shape1.RegularPolygon: ...
         def __len__(self) -> builtins.int: ...
-        def __getitem__(self, key: builtins.int) -> typing.Any: ...
+        def __getitem__(self, key: builtins.int, /) -> typing.Any: ...
     
     @typing.final
     class Nothing(Shape1):
@@ -692,7 +719,18 @@ def default_value(num: Number = Number.FLOAT) -> Number: ...
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
 
+def echo_a_bound(a: A) -> A: ...
+
+def echo_a_bound_ref(a: A) -> A: ...
+
+def echo_a_py(a: A) -> A: ...
+
 def echo_path(path: builtins.str | os.PathLike | pathlib.Path) -> pathlib.Path: ...
+
+def echo_uuid(value: uuid.UUID) -> uuid.UUID:
+    r"""
+    Return a UUID unchanged after converting it to Rust and back.
+    """
 
 def fn_override_type(cb: collections.abc.Callable[[str], typing.Any]) -> collections.abc.Callable[[str], typing.Any]: ...
 
@@ -798,6 +836,71 @@ def get_utc_offset(hours: builtins.int) -> datetime.tzinfo:
     Returns a time::UtcOffset from hours
     """
 
+def ipv4_localhost() -> ipaddress.IPv4Address:
+    r"""
+    Returns the IPv4 loopback address (127.0.0.1).
+    """
+
+def ipv6_localhost() -> ipaddress.IPv6Address:
+    r"""
+    Returns the IPv6 loopback address (::1).
+    """
+
+def is_loopback(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> builtins.bool:
+    r"""
+    Returns whether the given IP address is a loopback address.
+    """
+
+def jiff_date_round_trip(value: datetime.date) -> datetime.date:
+    r"""
+    Round-trips a Jiff civil date through Python.
+    """
+
+def jiff_datetime_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff civil datetime through Python.
+    """
+
+def jiff_iso_week_date_round_trip(value: datetime.date) -> datetime.date:
+    r"""
+    Round-trips a Jiff ISO week date through Python.
+    """
+
+def jiff_offset_round_trip(value: datetime.tzinfo) -> datetime.tzinfo:
+    r"""
+    Round-trips a Jiff fixed offset through Python.
+    """
+
+def jiff_signed_duration_round_trip(value: datetime.timedelta) -> datetime.timedelta:
+    r"""
+    Round-trips a Jiff signed duration through Python.
+    """
+
+def jiff_span_to_signed_duration(value: datetime.timedelta) -> datetime.timedelta:
+    r"""
+    Converts a Python duration accepted as a Jiff span into a signed duration.
+    """
+
+def jiff_time_round_trip(value: datetime.time) -> datetime.time:
+    r"""
+    Round-trips a Jiff civil time through Python.
+    """
+
+def jiff_time_zone_round_trip(value: datetime.tzinfo) -> datetime.tzinfo:
+    r"""
+    Round-trips a Jiff time zone through Python.
+    """
+
+def jiff_timestamp_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff timestamp through Python.
+    """
+
+def jiff_zoned_round_trip(value: datetime.datetime) -> datetime.datetime:
+    r"""
+    Round-trips a Jiff zoned datetime through Python.
+    """
+
 @typing.overload
 def manual_overload_as_tuple(xs: collections.abc.Sequence[int], /, *, tuple_out: typing.Literal[True]) -> tuple[int, ...]:
     r"""
@@ -849,6 +952,11 @@ def overload_example_2(ob: int) -> int:
 def overload_example_2(ob: float) -> float:
     r"""
     Increments float by 1
+    """
+
+def parse_ip(s: builtins.str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+    r"""
+    Parses a string into an IpAddr (either IPv4 or IPv6).
     """
 
 def print_c(c: typing.Optional[builtins.int] = None) -> None: ...

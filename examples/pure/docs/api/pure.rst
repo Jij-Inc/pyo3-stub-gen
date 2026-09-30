@@ -17,7 +17,11 @@ pure
    _items/pure.create_dict
    _items/pure.default_value
    _items/pure.deprecated_function
+   _items/pure.echo_a_bound
+   _items/pure.echo_a_bound_ref
+   _items/pure.echo_a_py
    _items/pure.echo_path
+   _items/pure.echo_uuid
    _items/pure.fn_override_type
    _items/pure.fn_with_python_param
    _items/pure.fn_with_python_stub
@@ -39,12 +43,26 @@ pure
    _items/pure.get_utc
    _items/pure.get_utc_datetime
    _items/pure.get_utc_offset
+   _items/pure.ipv4_localhost
+   _items/pure.ipv6_localhost
+   _items/pure.is_loopback
+   _items/pure.jiff_date_round_trip
+   _items/pure.jiff_datetime_round_trip
+   _items/pure.jiff_iso_week_date_round_trip
+   _items/pure.jiff_offset_round_trip
+   _items/pure.jiff_signed_duration_round_trip
+   _items/pure.jiff_span_to_signed_duration
+   _items/pure.jiff_time_round_trip
+   _items/pure.jiff_time_zone_round_trip
+   _items/pure.jiff_timestamp_round_trip
+   _items/pure.jiff_zoned_round_trip
    _items/pure.manual_overload_as_tuple
    _items/pure.manual_overload_example_1
    _items/pure.manual_overload_example_2
    _items/pure.naive_time_difference
    _items/pure.overload_example_1
    _items/pure.overload_example_2
+   _items/pure.parse_ip
    _items/pure.print_c
    _items/pure.process_container
    _items/pure.read_dict

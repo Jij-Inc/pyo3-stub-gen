@@ -3,6 +3,8 @@
 mod chrono_types;
 mod custom_exceptions;
 mod float_values;
+mod ip_types;
+mod jiff_types;
 mod manual_overloading;
 mod manual_submit;
 mod overloading;
@@ -14,6 +16,8 @@ mod time_types;
 use chrono_types::*;
 use custom_exceptions::*;
 use float_values::*;
+use ip_types::*;
+use jiff_types::*;
 use manual_overloading::*;
 use manual_submit::*;
 use overloading::*;
@@ -66,6 +70,13 @@ fn create_dict(n: usize) -> HashMap<usize, Vec<usize>> {
 #[pyfunction]
 fn add_decimals(a: Decimal, b: Decimal) -> Decimal {
     a + b
+}
+
+/// Return a UUID unchanged after converting it to Rust and back.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_uuid(value: uuid::Uuid) -> uuid::Uuid {
+    value
 }
 
 #[gen_stub_pyclass]
@@ -127,8 +138,38 @@ impl A {
     #[classmethod]
     fn classmethod_test2(_: &Bound<'_, PyType>) {}
 
+    // Qualified-path classmethod receiver: `cls` must still be detected
+    // as a receiver when the user writes `pyo3::types::PyType` instead of
+    // the unqualified `PyType`.
+    #[classmethod]
+    fn classmethod_test_qualified(cls: &Bound<'_, pyo3::types::PyType>) {
+        _ = cls;
+    }
+
     fn show_x(&self) {
         println!("x = {}", self.x);
+    }
+
+    // Test cases: every self-receiver shape `#[pymethods]` accepts
+    // should be rendered as `self` in the generated stub.
+    fn show_x_pyref(slf: PyRef<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_pyrefmut(slf: PyRefMut<'_, Self>) -> usize {
+        slf.x
+    }
+
+    fn show_x_bound(slf: Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_bound_ref(slf: &Bound<'_, Self>) -> PyResult<usize> {
+        Ok(slf.borrow().x)
+    }
+
+    fn show_x_py(slf: Py<Self>, py: Python<'_>) -> PyResult<usize> {
+        Ok(slf.borrow(py).x)
     }
 
     fn ref_test<'a>(&self, x: Bound<'a, PyDict>) -> Bound<'a, PyDict> {
@@ -216,6 +257,27 @@ fn create_a(x: usize) -> A {
     A { x, y: 10 }
 }
 
+// Negative regression tests: free `#[pyfunction]`s whose first argument
+// is `Bound<'_, A>` / `&Bound<'_, A>` / `Py<A>` must NOT be mistaken for
+// self receivers — only the literal `Self` spelling is a receiver.
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound_ref<'py>(a: &Bound<'py, A>) -> Bound<'py, A> {
+    a.clone()
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_bound(a: Bound<'_, A>) -> Bound<'_, A> {
+    a
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+fn echo_a_py(a: Py<A>) -> Py<A> {
+    a
+}
+
 #[gen_stub_pyclass]
 #[pyclass(extends=A)]
 #[derive(Debug)]
@@ -235,8 +297,10 @@ fn print_c(c: Option<C>) {
         println!("None");
     }
 }
-impl FromPyObject<'_> for C {
-    fn extract_bound(ob: &Bound<'_, PyAny>) -> PyResult<Self> {
+impl FromPyObject<'_, '_> for C {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'_, '_, PyAny>) -> std::result::Result<Self, Self::Error> {
         Ok(C { x: ob.extract()? })
     }
 }
@@ -277,7 +341,7 @@ fn ahash_dict() -> HashMap<String, i32, RandomState> {
 }
 
 #[gen_stub_pyclass_enum]
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Number {
     #[pyo3(name = "FLOAT")]
@@ -287,7 +351,7 @@ pub enum Number {
 }
 
 #[gen_stub_pyclass_enum]
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NumberRenameAll {
@@ -297,7 +361,7 @@ pub enum NumberRenameAll {
 }
 
 #[gen_stub_pyclass_complex_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone)]
 pub enum NumberComplex {
@@ -392,7 +456,7 @@ fn deprecated_function() {
     println!("This function is deprecated");
 }
 
-// Test if non-any PyObject Target can be a default value
+// Test if non-any Py<PyAny> target can be a default value
 #[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (num = Number::Float))]
@@ -404,7 +468,7 @@ fn default_value(num: Number) -> Number {
 
 /// Test struct for eq and ord comparison methods
 #[gen_stub_pyclass]
-#[pyclass(eq, ord)]
+#[pyclass(eq, ord, from_py_object)]
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct ComparableStruct {
     #[pyo3(get)]
@@ -422,7 +486,7 @@ impl ComparableStruct {
 
 /// Test struct for hash and str methods
 #[gen_stub_pyclass]
-#[pyclass(eq, hash, frozen, str)]
+#[pyclass(eq, hash, frozen, str, from_py_object)]
 #[derive(Debug, Clone, Hash, PartialEq)]
 pub struct HashableStruct {
     #[pyo3(get)]
@@ -505,6 +569,9 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_dict, m)?)?;
     m.add_function(wrap_pyfunction!(read_dict, m)?)?;
     m.add_function(wrap_pyfunction!(create_a, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound_ref, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_bound, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_a_py, m)?)?;
     m.add_function(wrap_pyfunction!(print_c, m)?)?;
     m.add_function(wrap_pyfunction!(str_len, m)?)?;
     m.add_function(wrap_pyfunction!(echo_path, m)?)?;
@@ -522,6 +589,7 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(manual_overload_example_2, m)?)?;
     m.add_function(wrap_pyfunction!(manual_overload_as_tuple, m)?)?;
     m.add_function(wrap_pyfunction!(add_decimals, m)?)?;
+    m.add_function(wrap_pyfunction!(echo_uuid, m)?)?;
     m.add_function(wrap_pyfunction!(process_container, m)?)?;
     m.add_function(wrap_pyfunction!(sum_list, m)?)?;
     m.add_function(wrap_pyfunction!(create_containers, m)?)?;
@@ -570,6 +638,24 @@ fn pure(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_utc, m)?)?;
     m.add_function(wrap_pyfunction!(add_chrono_duration_to_date, m)?)?;
     m.add_function(wrap_pyfunction!(naive_time_difference, m)?)?;
+
+    // Test cases for Jiff types
+    m.add_function(wrap_pyfunction!(jiff_timestamp_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_zoned_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_datetime_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_date_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_time_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_iso_week_date_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_offset_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_time_zone_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_signed_duration_round_trip, m)?)?;
+    m.add_function(wrap_pyfunction!(jiff_span_to_signed_duration, m)?)?;
+
+    // Test cases for std::net IP address types
+    m.add_function(wrap_pyfunction!(ipv4_localhost, m)?)?;
+    m.add_function(wrap_pyfunction!(ipv6_localhost, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_ip, m)?)?;
+    m.add_function(wrap_pyfunction!(is_loopback, m)?)?;
 
     // Test cases for f64 special values (INFINITY, NEG_INFINITY, NAN)
     m.add_class::<FloatValues>()?;

@@ -121,7 +121,7 @@ Define **only** overload signatures without generating from the Rust signature.
     no_default_overload = true  // Don't generate from Rust signature
 )]
 #[pyfunction]
-pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
     // Runtime type checking
     let py = ob.py();
     if let Ok(f) = ob.extract::<f64>() {
@@ -172,8 +172,8 @@ Use `typing.Literal` to define return types based on literal parameter values:
 )]
 #[pyfunction]
 #[pyo3(signature = (xs, /, *, tuple_out))]
-pub fn as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<PyObject> {
-    Python::with_gil(|py| {
+pub fn as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<Py<PyAny>> {
+    Python::attach(|py| {
         if tuple_out {
             Ok(PyTuple::new(py, xs.iter())?.into_py_any(py)?)
         } else {

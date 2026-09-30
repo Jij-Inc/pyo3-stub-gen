@@ -189,9 +189,9 @@ impl ClassDef {
         let method = MethodDef {
             name: "__eq__",
             parameters: Parameters {
-                positional_or_keyword: vec![Parameter {
+                positional_only: vec![Parameter {
                     name: "other",
-                    kind: ParameterKind::PositionalOrKeyword,
+                    kind: ParameterKind::PositionalOnly,
                     type_info: TypeInfo::builtin("object"),
                     default: ParameterDefault::None,
                 }],
@@ -218,9 +218,9 @@ impl ClassDef {
             let method = MethodDef {
                 name,
                 parameters: Parameters {
-                    positional_or_keyword: vec![Parameter {
+                    positional_only: vec![Parameter {
                         name: "other",
-                        kind: ParameterKind::PositionalOrKeyword,
+                        kind: ParameterKind::PositionalOnly,
                         type_info: TypeInfo::builtin("object"),
                         default: ParameterDefault::None,
                     }],

@@ -5,7 +5,7 @@ use ::pyo3::{
     pybacked::{PyBackedBytes, PyBackedStr},
     pyclass::boolean_struct::False,
     types::*,
-    Bound, Py, PyClass, PyRef, PyRefMut, PyResult, Python,
+    Bound, Py, PyClass, PyClassInitializer, PyRef, PyRefMut, PyResult, Python,
 };
 use maplit::hashset;
 use std::collections::HashMap;
@@ -78,6 +78,20 @@ impl<T: PyStubType> PyStubType for Bound<'_, T> {
     }
 }
 impl<T: PyRuntimeType> PyRuntimeType for Bound<'_, T> {
+    fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
+        T::runtime_type_object(py)
+    }
+}
+
+impl<T: PyClass + PyStubType> PyStubType for PyClassInitializer<T> {
+    fn type_output() -> TypeInfo {
+        T::type_output()
+    }
+    fn type_input() -> TypeInfo {
+        T::type_input()
+    }
+}
+impl<T: PyClass + PyRuntimeType> PyRuntimeType for PyClassInitializer<T> {
     fn runtime_type_object(py: Python<'_>) -> PyResult<Bound<'_, ::pyo3::PyAny>> {
         T::runtime_type_object(py)
     }

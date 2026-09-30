@@ -86,6 +86,22 @@
               "deprecated": null
             },
             {
+              "name": "classmethod_test_qualified",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
               "name": "deprecated_classmethod",
               "doc": "",
               "signatures": [
@@ -176,6 +192,86 @@
                   "parameters": [],
                   "return_type": {
                     "display": "None",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x_bound",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x_bound_ref",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x_py",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x_pyref",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "show_x_pyrefmut",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
                     "link_target": null,
                     "children": []
                   }
@@ -2279,6 +2375,117 @@
         },
         {
           "kind": "Function",
+          "name": "echo_a_bound",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "echo_a_bound_ref",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "echo_a_py",
+          "doc": "",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "a",
+                  "type_": {
+                    "display": "A",
+                    "link_target": {
+                      "fqn": "pure.A",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "A",
+                "link_target": {
+                  "fqn": "pure.A",
+                  "doc_module": "pure",
+                  "kind": "Class",
+                  "attribute": null
+                },
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "echo_path",
           "doc": "",
           "signatures": [
@@ -2312,6 +2519,33 @@
               ],
               "return_type": {
                 "display": "Path",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "echo_uuid",
+          "doc": "Return a UUID unchanged after converting it to Rust and back.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "UUID",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "UUID",
                 "link_target": null,
                 "children": []
               }
@@ -3341,6 +3575,348 @@
         },
         {
           "kind": "Function",
+          "name": "ipv4_localhost",
+          "doc": "Returns the IPv4 loopback address (127.0.0.1).",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "IPv4Address",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "ipv6_localhost",
+          "doc": "Returns the IPv6 loopback address (::1).",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "IPv6Address",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "is_loopback",
+          "doc": "Returns whether the given IP address is a loopback address.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "addr",
+                  "type_": {
+                    "display": "IPv4Address | IPv6Address",
+                    "link_target": null,
+                    "children": [
+                      {
+                        "display": "IPv4Address",
+                        "link_target": null,
+                        "children": []
+                      },
+                      {
+                        "display": "IPv6Address",
+                        "link_target": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "bool",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_date_round_trip",
+          "doc": "Round-trips a Jiff civil date through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_datetime_round_trip",
+          "doc": "Round-trips a Jiff civil datetime through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_iso_week_date_round_trip",
+          "doc": "Round-trips a Jiff ISO week date through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "date",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "date",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_offset_round_trip",
+          "doc": "Round-trips a Jiff fixed offset through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "tzinfo",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_signed_duration_round_trip",
+          "doc": "Round-trips a Jiff signed duration through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_span_to_signed_duration",
+          "doc": "Converts a Python duration accepted as a Jiff span into a signed duration.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "timedelta",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "timedelta",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_time_round_trip",
+          "doc": "Round-trips a Jiff civil time through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "time",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "time",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_time_zone_round_trip",
+          "doc": "Round-trips a Jiff time zone through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "tzinfo",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "tzinfo",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_timestamp_round_trip",
+          "doc": "Round-trips a Jiff timestamp through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "jiff_zoned_round_trip",
+          "doc": "Round-trips a Jiff zoned datetime through Python.",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "value",
+                  "type_": {
+                    "display": "datetime",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "datetime",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
           "name": "manual_overload_as_tuple",
           "doc": "Convert sequence to tuple when tuple_out is True",
           "signatures": [
@@ -3653,6 +4229,44 @@
                 "display": "float",
                 "link_target": null,
                 "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
+        },
+        {
+          "kind": "Function",
+          "name": "parse_ip",
+          "doc": "Parses a string into an IpAddr (either IPv4 or IPv6).",
+          "signatures": [
+            {
+              "parameters": [
+                {
+                  "name": "s",
+                  "type_": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  },
+                  "default": null
+                }
+              ],
+              "return_type": {
+                "display": "IPv4Address | IPv6Address",
+                "link_target": null,
+                "children": [
+                  {
+                    "display": "IPv4Address",
+                    "link_target": null,
+                    "children": []
+                  },
+                  {
+                    "display": "IPv6Address",
+                    "link_target": null,
+                    "children": []
+                  }
+                ]
               }
             }
           ],
@@ -4755,7 +5369,11 @@
     "pure.create_dict": "pure",
     "pure.default_value": "pure",
     "pure.deprecated_function": "pure",
+    "pure.echo_a_bound": "pure",
+    "pure.echo_a_bound_ref": "pure",
+    "pure.echo_a_py": "pure",
     "pure.echo_path": "pure",
+    "pure.echo_uuid": "pure",
     "pure.fn_override_type": "pure",
     "pure.fn_with_python_param": "pure",
     "pure.fn_with_python_stub": "pure",
@@ -4777,12 +5395,26 @@
     "pure.get_utc": "pure",
     "pure.get_utc_datetime": "pure",
     "pure.get_utc_offset": "pure",
+    "pure.ipv4_localhost": "pure",
+    "pure.ipv6_localhost": "pure",
+    "pure.is_loopback": "pure",
+    "pure.jiff_date_round_trip": "pure",
+    "pure.jiff_datetime_round_trip": "pure",
+    "pure.jiff_iso_week_date_round_trip": "pure",
+    "pure.jiff_offset_round_trip": "pure",
+    "pure.jiff_signed_duration_round_trip": "pure",
+    "pure.jiff_span_to_signed_duration": "pure",
+    "pure.jiff_time_round_trip": "pure",
+    "pure.jiff_time_zone_round_trip": "pure",
+    "pure.jiff_timestamp_round_trip": "pure",
+    "pure.jiff_zoned_round_trip": "pure",
     "pure.manual_overload_as_tuple": "pure",
     "pure.manual_overload_example_1": "pure",
     "pure.manual_overload_example_2": "pure",
     "pure.naive_time_difference": "pure",
     "pure.overload_example_1": "pure",
     "pure.overload_example_2": "pure",
+    "pure.parse_ip": "pure",
     "pure.print_c": "pure",
     "pure.process_container": "pure",
     "pure.read_dict": "pure",

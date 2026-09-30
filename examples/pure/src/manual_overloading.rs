@@ -2,7 +2,7 @@
 //! This demonstrates the backward-compatible approach using submit! + gen_function_from_python!
 //! and gen_methods_from_python! for class methods
 
-use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt, PyObject};
+use pyo3::{exceptions::PyTypeError, prelude::*, types::PyTuple, IntoPyObjectExt};
 use pyo3_stub_gen::{derive::*, inventory::submit};
 
 // First example: One manually submitted via `submit!` macro, followed by one generated with `#[gen_stub_pyfunction]`.
@@ -26,7 +26,7 @@ pub fn manual_overload_example_1(x: f64) -> f64 {
 /// Second example: all hints manually `submit!`ed via macro.
 /// Note: More specific type (int) should come first for Python overload rules
 #[pyfunction]
-pub fn manual_overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+pub fn manual_overload_example_2(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
     let py = ob.py();
     if let Ok(f) = ob.extract::<f64>() {
         (f + 1.0).into_py_any(py)
@@ -61,8 +61,8 @@ submit! {
 /// This is a common pattern for functions that return different types based on a boolean flag.
 #[pyfunction]
 #[pyo3(signature = (xs, /, *, tuple_out))]
-pub fn manual_overload_as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<PyObject> {
-    Python::with_gil(|py| {
+pub fn manual_overload_as_tuple(xs: Vec<i32>, tuple_out: bool) -> PyResult<Py<PyAny>> {
+    Python::attach(|py| {
         if tuple_out {
             Ok(PyTuple::new(py, xs.iter())?.into_py_any(py)?)
         } else {

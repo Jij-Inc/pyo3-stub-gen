@@ -296,7 +296,7 @@ mod tests {
 
         let item = quote! {
             #[pyfunction]
-            pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<PyObject> {
+            pub fn overload_example_2(ob: Bound<PyAny>) -> PyResult<Py<PyAny>> {
                 let py = ob.py();
                 Ok(ob.into_py_any(py)?)
             }
