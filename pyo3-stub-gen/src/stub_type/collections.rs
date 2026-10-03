@@ -54,13 +54,12 @@ impl<T: PyStubType> PyStubType for Option<T> {
     fn type_input() -> TypeInfo {
         let inner = T::type_input();
         let name = inner.name.clone();
-        let mut import = inner.import.clone();
-        import.insert("typing".into());
+        let import = inner.import.clone();
 
         let type_refs = build_type_refs_from_inner(&inner);
 
         TypeInfo {
-            name: format!("typing.Optional[{name}]"),
+            name: format!("{name} | None"),
             source_module: None,
             import,
             type_refs,
@@ -69,13 +68,12 @@ impl<T: PyStubType> PyStubType for Option<T> {
     fn type_output() -> TypeInfo {
         let inner = T::type_output();
         let name = inner.name.clone();
-        let mut import = inner.import.clone();
-        import.insert("typing".into());
+        let import = inner.import.clone();
 
         let type_refs = build_type_refs_from_inner(&inner);
 
         TypeInfo {
-            name: format!("typing.Optional[{name}]"),
+            name: format!("{name} | None"),
             source_module: None,
             import,
             type_refs,
@@ -124,12 +122,12 @@ impl<T: PyStubType> PyStubType for Vec<T> {
         let inner = T::type_input();
         let name = inner.name.clone();
         let mut import = inner.import.clone();
-        import.insert("typing".into());
+        import.insert("collections.abc".into());
 
         let type_refs = build_type_refs_from_inner(&inner);
 
         TypeInfo {
-            name: format!("typing.Sequence[{name}]"),
+            name: format!("collections.abc.Sequence[{name}]"),
             source_module: None,
             import,
             type_refs,
@@ -151,12 +149,12 @@ impl<T: PyStubType, const N: usize> PyStubType for [T; N] {
         let inner = T::type_input();
         let name = inner.name.clone();
         let mut import = inner.import.clone();
-        import.insert("typing".into());
+        import.insert("collections.abc".into());
 
         let type_refs = build_type_refs_from_inner(&inner);
 
         TypeInfo {
-            name: format!("typing.Sequence[{name}]"),
+            name: format!("collections.abc.Sequence[{name}]"),
             source_module: None,
             import,
             type_refs,
@@ -213,13 +211,16 @@ macro_rules! impl_map_stub_type {
 
             let mut import = key_info.import.clone();
             import.extend(value_info.import.clone());
-            import.insert("typing".into());
+            import.insert("collections.abc".into());
 
             let mut type_refs = build_type_refs_from_inner(&key_info);
             type_refs.extend(build_type_refs_from_inner(&value_info));
 
             TypeInfo {
-                name: format!("typing.Mapping[{}, {}]", key_info.name, value_info.name),
+                name: format!(
+                    "collections.abc.Mapping[{}, {}]",
+                    key_info.name, value_info.name
+                ),
                 source_module: None,
                 import,
                 type_refs,

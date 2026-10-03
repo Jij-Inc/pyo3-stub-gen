@@ -78,9 +78,11 @@ inventory::submit! {
 inventory::submit! {
     derive::gen_methods_from_python! {
         r#"
+        import collections.abc
+
         class ClassB:
             @property
-            def classes_b_manual(self, other: typing.Generator[pyo3_stub_gen.RustType["PyClassA"], None, None]) -> pyo3_stub_gen.RustType["Vec<PyClassA>"]:
+            def classes_b_manual(self, other: collections.abc.Generator[pyo3_stub_gen.RustType["PyClassA"], None, None]) -> pyo3_stub_gen.RustType["Vec<PyClassA>"]:
                 ...
 
             def who_am_i(self, other: pyo3_stub_gen.RustType["Vec<ClassB>"]) -> pyo3_stub_gen.RustType["Vec<ClassB>"]:

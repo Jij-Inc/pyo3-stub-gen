@@ -348,7 +348,7 @@ mod test {
             import typing
             from collections.abc import Callable
 
-            def process(func: Callable[[str], int]) -> typing.Optional[int]:
+            def process(func: Callable[[str], int]) -> int | None:
                 """Process a callback function"""
             "#
         })?;
@@ -374,7 +374,7 @@ mod test {
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
-                name: "typing.Optional[int]".to_string(),
+                name: "int | None".to_string(),
                 source_module: None,
                 import: ::std::collections::HashSet::from([
                     "typing".into(),
@@ -459,7 +459,7 @@ mod test {
             r#"
             import typing
 
-            def add(a: int, b: int, c: typing.Optional[int]) -> int: ...
+            def add(a: int, b: int, c: int | None) -> int: ...
             "#
         })?;
         let info = parse_python_function_stub(stub_str)?;
@@ -494,7 +494,7 @@ mod test {
                     name: "c",
                     kind: ::pyo3_stub_gen::type_info::ParameterKind::PositionalOrKeyword,
                     type_info: || ::pyo3_stub_gen::TypeInfo {
-                        name: "typing.Optional[int]".to_string(),
+                        name: "int | None".to_string(),
                         source_module: None,
                         import: ::std::collections::HashSet::from(["typing".into()]),
                         type_refs: ::std::collections::HashMap::new(),

@@ -98,7 +98,7 @@ A key design decision is the separation of **display text** and **link targets**
 
 ```
 DocTypeExpr
-├── display: String                 # What to show: "Optional[MyClass]"
+├── display: String                 # What to show: "list[MyClass]"
 ├── link_target: Option<LinkTarget> # Where to link: module.MyClass
 └── children: Vec<DocTypeExpr>      # Generic parameters (recursive)
 
@@ -117,7 +117,7 @@ This separation enables:
 Example:
 ```json
 {
-  "display": "Optional[MyClass]",
+  "display": "list[MyClass]",
   "link_target": null,
   "children": [
     {
@@ -314,7 +314,6 @@ Display text is simplified by stripping common prefixes:
 
 | Original | Display |
 |----------|---------|
-| `typing.Optional[T]` | `Optional[T]` |
 | `builtins.str` | `str` |
 | `collections.abc.Callable` | `Callable` |
 | `mypackage.submodule.MyClass` | `MyClass` |

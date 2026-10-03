@@ -1,8 +1,8 @@
 //! Context-aware type name qualification for Python stub files.
 //!
 //! This module provides utilities to qualify type identifiers within compound type expressions
-//! based on the target module context. For example, `typing.Optional[ClassA]` should become
-//! `typing.Optional[sub_mod.ClassA]` when ClassA is from a different module.
+//! based on the target module context. For example, `collections.abc.Sequence[ClassA]` should become
+//! `collections.abc.Sequence[sub_mod.ClassA]` when ClassA is from a different module.
 
 use crate::stub_type::{ImportKind, TypeIdentifierRef};
 use std::collections::HashMap;
@@ -356,7 +356,7 @@ impl TypeExpressionQualifier {
                 Token::OpenBracket(ch) => result.push(ch),
                 Token::CloseBracket(ch) => result.push(ch),
                 Token::Comma => result.push(','),
-                Token::Pipe => result.push_str(" | "),
+                Token::Pipe => result.push('|'),
                 Token::Ellipsis => result.push_str("..."),
                 Token::StringLiteral(s) => {
                     // String literals (forward references) - wrap in quotes
@@ -405,11 +405,15 @@ mod tests {
 
     #[test]
     fn test_tokenize_optional() {
-        let tokens = tokenize("typing.Optional[ClassA]");
+        let tokens = tokenize("collections.abc.Sequence[ClassA]");
         assert_eq!(
             tokens,
             vec![
-                Token::DottedPath(vec!["typing".to_string(), "Optional".to_string()]),
+                Token::DottedPath(vec![
+                    "collections".to_string(),
+                    "abc".to_string(),
+                    "Sequence".to_string()
+                ]),
                 Token::OpenBracket('['),
                 Token::Identifier("ClassA".to_string()),
                 Token::CloseBracket(']'),
@@ -470,6 +474,7 @@ mod tests {
         assert_eq!(result, "sub_mod.ClassA");
     }
 
+    // I am leaving this test because this seems like useful behavior to validate even though typing.Optional is deprecated
     #[test]
     fn test_qualify_optional() {
         let mut type_refs = HashMap::new();
@@ -501,11 +506,11 @@ mod tests {
         );
 
         let result = TypeExpressionQualifier::qualify_expression(
-            "typing.Optional[ClassA]",
+            "collections.abc.Sequence[ClassA]",
             &type_refs,
             "test_package.sub_mod",
         );
-        assert_eq!(result, "typing.Optional[ClassA]");
+        assert_eq!(result, "collections.abc.Sequence[ClassA]");
     }
 
     #[test]

@@ -17,7 +17,7 @@ __all__ = [
     "wrap_opt_a",
 ]
 
-AorB: TypeAlias = A  |  B
+AorB: TypeAlias = A | B
 r"""
 A union type of A or B, available at runtime.
 """
@@ -83,5 +83,5 @@ def greet_main() -> None:
     Another math test $\int_{-\infty}^\infty e^{-x^2} \mathrm{d}x$.
     """
 
-def wrap_opt_a(x: typing.Optional[A]) -> typing.Optional[A]: ...
+def wrap_opt_a(x: A | None) -> A | None: ...
 
