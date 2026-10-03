@@ -1,5 +1,6 @@
 mod builtins;
 mod collections;
+mod functions;
 mod pyo3;
 
 #[cfg(feature = "numpy")]
@@ -17,6 +18,8 @@ use std::{
     collections::{HashMap, HashSet},
     fmt, ops,
 };
+
+use crate::stub_type::collections::build_type_refs_from_inner;
 
 /// Indicates what to import.
 /// Module: The purpose is to import the entire module(eg import builtins).
@@ -298,6 +301,20 @@ impl TypeInfo {
         }
     }
 
+    pub fn callable_anyarg<R: PyStubType>() -> Self {
+        let info_result = R::type_output();
+        let type_refs = build_type_refs_from_inner(&info_result);
+        let mut import = info_result.import;
+        import.insert("typing".into());
+        let name_result = info_result.name;
+        TypeInfo {
+            name: format!("typing.Callable[..., {name_result}]"),
+            source_module: None,
+            import,
+            type_refs,
+        }
+    }
+
     /// A type annotation of a built-in type provided from `builtins` module, such as `int`, `str`, or `float`. Generic builtin types are also possible, such as `dict[str, str]`.
     pub fn builtin(name: &str) -> Self {
         Self {
@@ -561,6 +578,18 @@ impl ops::BitOr for TypeInfo {
 /// ```
 #[macro_export]
 macro_rules! impl_stub_type {
+    ($ty:ty = fn(...) -> $ret:ty) => {
+        impl ::pyo3_stub_gen::PyStubType for $ty {
+            fn type_output() -> ::pyo3_stub_gen::TypeInfo {
+                ::pyo3_stub_gen::TypeInfo::callable_anyarg::<$ret>()
+            }
+        }
+        impl ::pyo3_stub_gen::runtime::PyRuntimeType for $ty {
+            fn runtime_type_object(py: ::pyo3::Python<'_>) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                Ok(py.get_type::<::pyo3::types::PyAny>().into_any())
+            }
+        }
+    };
     ($ty: ty = $($base:ty)|+) => {
         impl ::pyo3_stub_gen::PyStubType for $ty {
             fn type_output() -> ::pyo3_stub_gen::TypeInfo {
