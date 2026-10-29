@@ -17,6 +17,7 @@ pure
    _items/pure.create_dict
    _items/pure.default_value
    _items/pure.deprecated_function
+   _items/pure.documented_answer
    _items/pure.echo_a_bound
    _items/pure.echo_a_bound_ref
    _items/pure.echo_a_py
@@ -112,6 +113,8 @@ pure
    _items/pure.CustomStubType
    _items/pure.DataContainer
    _items/pure.DecimalHolder
+   _items/pure.DocumentedClass
+   _items/pure.DocumentedComplexEnum
    _items/pure.FloatValues
    _items/pure.GetterSetterTypeTest
    _items/pure.HashableStruct

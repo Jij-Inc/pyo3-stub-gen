@@ -2,6 +2,7 @@
 
 mod chrono_types;
 mod custom_exceptions;
+mod doc_attributes;
 mod float_values;
 mod ip_types;
 mod jiff_types;
@@ -15,6 +16,7 @@ mod time_types;
 
 use chrono_types::*;
 use custom_exceptions::*;
+use doc_attributes::*;
 use float_values::*;
 use ip_types::*;
 use jiff_types::*;
@@ -354,8 +356,9 @@ pub enum Number {
 #[pyclass(eq, eq_int, from_py_object)]
 #[pyo3(rename_all = "UPPERCASE")]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[doc = include_str!("docs/external.md")]
 pub enum NumberRenameAll {
-    /// Float variant
+    #[doc = concat!("Float ", "variant")]
     Float,
     Integer,
 }
@@ -539,6 +542,9 @@ module_doc!("pure", "Document for {} ...", env!("CARGO_PKG_NAME"));
 /// Initializes the Python module
 #[pymodule]
 fn pure(m: &Bound<PyModule>) -> PyResult<()> {
+    m.add_class::<DocumentedClass>()?;
+    m.add_class::<DocumentedComplexEnum>()?;
+    m.add_function(wrap_pyfunction!(documented_answer, m)?)?;
     m.add("MY_CONSTANT1", 19937)?;
     m.add("MY_CONSTANT2", 123)?;
     m.add_class::<A>()?;

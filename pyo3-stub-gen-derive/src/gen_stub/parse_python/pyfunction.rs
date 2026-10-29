@@ -83,7 +83,7 @@ impl TryFrom<PythonFunctionStub> for PyFunctionInfo {
             name: func_name,
             parameters, // Use pre-built Parameters from Python AST
             r#return: return_type,
-            doc,
+            doc: quote::quote! { #doc },
             module: None,
             is_async: stub.is_async,
             deprecated,

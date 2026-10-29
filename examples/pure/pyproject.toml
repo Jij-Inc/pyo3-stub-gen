@@ -28,4 +28,4 @@ enabled-ignores = ["type", "pyrefly"]
 ignore = ["**/type_error_cases/*.py", "docs/api/**"]
 
 [tool.uv]
-cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/*.rs" }, { file = "src/docs/*.md" }]

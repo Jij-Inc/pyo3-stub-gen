@@ -9,7 +9,7 @@ pub struct PyComplexEnumInfo {
     enum_type: Type,
     module: Option<String>,
     variants: Vec<VariantInfo>,
-    doc: String,
+    doc: TokenStream2,
 }
 
 impl From<&PyComplexEnumInfo> for StubType {
@@ -38,7 +38,7 @@ impl PyComplexEnumInfo {
             ..
         } = item;
 
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         let mut pyclass_name = None;
         let mut pyo3_module = None;
         let mut gen_stub_standalone_module = None;

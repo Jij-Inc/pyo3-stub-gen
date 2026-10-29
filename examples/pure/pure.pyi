@@ -32,6 +32,8 @@ __all__ = [
     "DecimalHolder",
     "DocumentedAlias",
     "DocumentedCallback",
+    "DocumentedClass",
+    "DocumentedComplexEnum",
     "DocumentedMap",
     "DocumentedUnion",
     "FloatValues",
@@ -82,6 +84,7 @@ __all__ = [
     "create_dict",
     "default_value",
     "deprecated_function",
+    "documented_answer",
     "echo_a_bound",
     "echo_a_bound_ref",
     "echo_a_py",
@@ -346,6 +349,160 @@ class DecimalHolder:
     @property
     def value(self) -> decimal.Decimal: ...
     def __new__(cls, value: decimal.Decimal) -> DecimalHolder: ...
+
+@typing.final
+class DocumentedClass:
+    r"""
+    Inline comment.
+    Literal attribute.
+    External Markdown documentation.
+    
+    | Input | Output |
+    | --- | --- |
+    | 6 * 7 | 42 |
+    
+    Example:
+    
+    ```python
+        >>> from pure import DocumentedClass
+        >>> DocumentedClass(42).answer()
+        42
+    
+    ```
+    
+    Concatenated text.
+    Final comment.
+    """
+    LIMIT: builtins.int = 42
+    r"""
+    Constant docs.
+    """
+    description: builtins.str
+    r"""
+    External Markdown documentation.
+    
+    | Input | Output |
+    | --- | --- |
+    | 6 * 7 | 42 |
+    
+    Example:
+    
+    ```python
+        >>> from pure import DocumentedClass
+        >>> DocumentedClass(42).answer()
+        42
+    
+    ```
+    """
+    @property
+    def value(self) -> builtins.int:
+        r"""
+        External Markdown documentation.
+        
+        | Input | Output |
+        | --- | --- |
+        | 6 * 7 | 42 |
+        
+        Example:
+        
+        ```python
+            >>> from pure import DocumentedClass
+            >>> DocumentedClass(42).answer()
+            42
+        
+        ```
+        """
+    @value.setter
+    def value(self, value: builtins.int) -> None:
+        r"""
+        External Markdown documentation.
+        
+        | Input | Output |
+        | --- | --- |
+        | 6 * 7 | 42 |
+        
+        Example:
+        
+        ```python
+            >>> from pure import DocumentedClass
+            >>> DocumentedClass(42).answer()
+            42
+        
+        ```
+        """
+    @property
+    def computed(self) -> builtins.int:
+        r"""
+        Getter docs.
+        """
+    @computed.setter
+    def computed(self, value: builtins.int) -> None:
+        r"""
+        Setter docs.
+        """
+    def __new__(cls, value: builtins.int) -> DocumentedClass: ...
+    def answer(self) -> builtins.int:
+        r"""
+        External Markdown documentation.
+        
+        | Input | Output |
+        | --- | --- |
+        | 6 * 7 | 42 |
+        
+        Example:
+        
+        ```python
+            >>> from pure import DocumentedClass
+            >>> DocumentedClass(42).answer()
+            42
+        
+        ```
+        """
+
+class DocumentedComplexEnum:
+    r"""
+    External Markdown documentation.
+    
+    | Input | Output |
+    | --- | --- |
+    | 6 * 7 | 42 |
+    
+    Example:
+    
+    ```python
+        >>> from pure import DocumentedClass
+        >>> DocumentedClass(42).answer()
+        42
+    
+    ```
+    """
+    @typing.final
+    class Value(DocumentedComplexEnum):
+        r"""
+        Structured variant docs.
+        """
+        __match_args__ = ("value",)
+        @property
+        def value(self) -> builtins.int:
+            r"""
+            External Markdown documentation.
+            
+            | Input | Output |
+            | --- | --- |
+            | 6 * 7 | 42 |
+            
+            Example:
+            
+            ```python
+                >>> from pure import DocumentedClass
+                >>> DocumentedClass(42).answer()
+                42
+            
+            ```
+            """
+        def __new__(cls, value: builtins.int) -> DocumentedComplexEnum.Value: ...
+    
+    ...
 
 @typing.final
 class FloatValues:
@@ -666,6 +823,22 @@ class Number(enum.Enum):
 
 @typing.final
 class NumberRenameAll(enum.Enum):
+    r"""
+    External Markdown documentation.
+    
+    | Input | Output |
+    | --- | --- |
+    | 6 * 7 | 42 |
+    
+    Example:
+    
+    ```python
+        >>> from pure import DocumentedClass
+        >>> DocumentedClass(42).answer()
+        42
+    
+    ```
+    """
     FLOAT = ...
     r"""
     Float variant
@@ -718,6 +891,29 @@ def default_value(num: Number = Number.FLOAT) -> Number: ...
 
 @typing_extensions.deprecated("[Since 1.0.0] This function is deprecated")
 def deprecated_function() -> None: ...
+
+def documented_answer() -> builtins.int:
+    r"""
+    Free function docs.
+    
+    External Markdown documentation.
+    
+    | Input | Output |
+    | --- | --- |
+    | 6 * 7 | 42 |
+    
+    Example:
+    
+    ```python
+        >>> from pure import DocumentedClass
+        >>> DocumentedClass(42).answer()
+        42
+    
+    ```
+    
+        assert_eq!(6 * 7, 42);
+    Last macro.
+    """
 
 def echo_a_bound(a: A) -> A: ...
 
