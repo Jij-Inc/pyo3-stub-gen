@@ -795,6 +795,10 @@ See the following directories for complete setups:
 - [examples/pure/docs/](./examples/pure/docs/) — single-module project
 - [examples/generate_init_py/docs/](./examples/generate_init_py/docs/) — mixed layout with `reexport_module_members!`
 
+For external Markdown and mixed doc attributes, see
+[examples/pure/src/doc_attributes.rs](./examples/pure/src/doc_attributes.rs) and
+its [shared Markdown source](./examples/pure/src/docs/external.md).
+
 ### Limitation: Mixed Layout with User-written `__init__.py`
 
 Docgen works well with **pure** layout and **mixed layout using `reexport_module_members!`** (e.g., `generate_init_py` example). However, it has limitations with mixed layout projects where users write their own `__init__.py` with custom re-exports.

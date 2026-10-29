@@ -6,5 +6,9 @@ External Markdown documentation.
 
 Example:
 
-    >>> 6 * 7
+```python
+    >>> from pure import DocumentedClass
+    >>> DocumentedClass(42).answer()
     42
+
+```
