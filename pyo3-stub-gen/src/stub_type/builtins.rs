@@ -78,6 +78,19 @@ impl_builtin!(f64, "float", PyFloat);
 impl_builtin!(num_complex::Complex32, "complex", PyComplex);
 impl_builtin!(num_complex::Complex64, "complex", PyComplex);
 
+impl_builtin!(std::num::NonZeroU8, "int", PyInt);
+impl_builtin!(std::num::NonZeroU16, "int", PyInt);
+impl_builtin!(std::num::NonZeroU32, "int", PyInt);
+impl_builtin!(std::num::NonZeroU64, "int", PyInt);
+impl_builtin!(std::num::NonZeroU128, "int", PyInt);
+impl_builtin!(std::num::NonZeroUsize, "int", PyInt);
+impl_builtin!(std::num::NonZeroI8, "int", PyInt);
+impl_builtin!(std::num::NonZeroI16, "int", PyInt);
+impl_builtin!(std::num::NonZeroI32, "int", PyInt);
+impl_builtin!(std::num::NonZeroI64, "int", PyInt);
+impl_builtin!(std::num::NonZeroI128, "int", PyInt);
+impl_builtin!(std::num::NonZeroIsize, "int", PyInt);
+
 impl_builtin!(char, "str", PyString);
 impl_builtin!(&str, "str", PyString);
 impl_builtin!(OsStr, "str", PyString);
