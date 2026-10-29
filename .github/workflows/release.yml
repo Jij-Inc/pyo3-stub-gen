@@ -43,13 +43,10 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-test-environment
 
-      - name: Install cargo-edit
-        run: cargo install cargo-edit
-
       - name: Bump version
         run: |
-          cargo set-version --bump patch
-          echo "NEW_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')" >> $GITHUB_ENV
+          new_version="$(uv run --script scripts/bump_version.py)"
+          echo "NEW_VERSION=$new_version" >> "$GITHUB_ENV"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
