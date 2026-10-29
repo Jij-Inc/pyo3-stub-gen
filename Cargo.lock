@@ -860,7 +860,6 @@ dependencies = [
  "pyo3",
  "pyo3-stub-gen-derive",
  "rust_decimal",
- "rustpython-parser",
  "serde",
  "serde_json",
  "test-case",
