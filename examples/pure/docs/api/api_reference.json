@@ -842,6 +842,111 @@
         },
         {
           "kind": "Class",
+          "name": "DocumentedClass",
+          "doc": "Inline comment.\nLiteral attribute.\nExternal Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```\n\nConcatenated text.\nFinal comment.",
+          "bases": [],
+          "methods": [
+            {
+              "name": "__new__",
+              "doc": "",
+              "signatures": [
+                {
+                  "parameters": [
+                    {
+                      "name": "value",
+                      "type_": {
+                        "display": "int",
+                        "link_target": null,
+                        "children": []
+                      },
+                      "default": null
+                    }
+                  ],
+                  "return_type": {
+                    "display": "DocumentedClass",
+                    "link_target": {
+                      "fqn": "pure.DocumentedClass",
+                      "doc_module": "pure",
+                      "kind": "Class",
+                      "attribute": null
+                    },
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            },
+            {
+              "name": "answer",
+              "doc": "External Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "int",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
+          "attributes": [
+            {
+              "name": "LIMIT",
+              "doc": "Constant docs.",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "computed",
+              "doc": "Getter docs.",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            },
+            {
+              "name": "description",
+              "doc": "External Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```\n",
+              "type_": {
+                "display": "str",
+                "link_target": null,
+                "children": []
+              }
+            },
+            {
+              "name": "value",
+              "doc": "External Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              },
+              "is_property": true
+            }
+          ],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
+          "name": "DocumentedComplexEnum",
+          "doc": "External Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```",
+          "bases": [],
+          "methods": [],
+          "attributes": [],
+          "deprecated": null
+        },
+        {
+          "kind": "Class",
           "name": "FloatValues",
           "doc": "A class to test f64 special values",
           "bases": [],
@@ -1432,7 +1537,7 @@
         {
           "kind": "Class",
           "name": "NumberRenameAll",
-          "doc": "",
+          "doc": "External Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```",
           "bases": [],
           "methods": [],
           "attributes": [
@@ -2372,6 +2477,23 @@
             "since": "1.0.0",
             "note": "This function is deprecated"
           }
+        },
+        {
+          "kind": "Function",
+          "name": "documented_answer",
+          "doc": "Free function docs.\n\nExternal Markdown documentation.\n\n| Input | Output |\n| --- | --- |\n| 6 * 7 | 42 |\n\nExample:\n\n```python\n    >>> from pure import DocumentedClass\n    >>> DocumentedClass(42).answer()\n    42\n\n```\n\n    assert_eq!(6 * 7, 42);\nLast macro.",
+          "signatures": [
+            {
+              "parameters": [],
+              "return_type": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            }
+          ],
+          "is_async": false,
+          "deprecated": null
         },
         {
           "kind": "Function",
@@ -5319,6 +5441,8 @@
     "pure.DecimalHolder": "pure",
     "pure.DocumentedAlias": "pure",
     "pure.DocumentedCallback": "pure",
+    "pure.DocumentedClass": "pure",
+    "pure.DocumentedComplexEnum": "pure",
     "pure.DocumentedMap": "pure",
     "pure.DocumentedUnion": "pure",
     "pure.FloatValues": "pure",
@@ -5369,6 +5493,7 @@
     "pure.create_dict": "pure",
     "pure.default_value": "pure",
     "pure.deprecated_function": "pure",
+    "pure.documented_answer": "pure",
     "pure.echo_a_bound": "pure",
     "pure.echo_a_bound_ref": "pure",
     "pure.echo_a_py": "pure",

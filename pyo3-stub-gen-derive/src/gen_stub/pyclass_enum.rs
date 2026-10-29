@@ -8,8 +8,8 @@ pub struct PyEnumInfo {
     pyclass_name: String,
     enum_type: Type,
     module: Option<String>,
-    variants: Vec<(String, String)>,
-    doc: String,
+    variants: Vec<(String, TokenStream2)>,
+    doc: TokenStream2,
 }
 
 impl From<&PyEnumInfo> for StubType {
@@ -39,7 +39,7 @@ impl PyEnumInfo {
         }: ItemEnum,
         attr: &PyClassAttr,
     ) -> Result<Self> {
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         let mut pyclass_name = None;
         let mut pyo3_module = None;
         let mut gen_stub_standalone_module = None;
@@ -83,7 +83,7 @@ impl PyEnumInfo {
         let pyclass_name = pyclass_name.unwrap_or_else(|| ident.to_string());
         let variants = variants
             .into_iter()
-            .map(|var| -> Result<(String, String)> {
+            .map(|var| -> Result<(String, TokenStream2)> {
                 let mut var_name = None;
                 for attr in parse_pyo3_attrs(&var.attrs)? {
                     if let Attr::Name(name) = attr {
@@ -94,10 +94,10 @@ impl PyEnumInfo {
                 if let Some(renaming_rule) = renaming_rule {
                     var_name = renaming_rule.apply(&var_name);
                 }
-                let var_doc = extract_documents(&var.attrs).join("\n");
+                let var_doc = extract_documents(&var.attrs);
                 Ok((var_name, var_doc))
             })
-            .collect::<Result<Vec<(String, String)>>>()?;
+            .collect::<Result<Vec<(String, TokenStream2)>>>()?;
         Ok(Self {
             doc,
             enum_type: struct_type,

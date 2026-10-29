@@ -33,7 +33,7 @@ pub struct VariantInfo {
     pyclass_name: String,
     module: Option<String>,
     fields: Vec<MemberInfo>,
-    doc: String,
+    doc: TokenStream2,
     form: VariantForm,
     constr_args: Vec<ArgInfo>,
     constr_sig: Option<Signature>,
@@ -91,7 +91,7 @@ impl VariantInfo {
 
         let constr_args = members.iter().map(|f| f.clone().into()).collect();
 
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         Ok(Self {
             pyclass_name,
             fields: members,

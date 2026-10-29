@@ -12,7 +12,7 @@ pub struct PyClassInfo {
     module: Option<String>,
     getters: Vec<MemberInfo>,
     setters: Vec<MemberInfo>,
-    doc: String,
+    doc: TokenStream2,
     bases: Vec<Type>,
     has_eq: bool,
     has_ord: bool,
@@ -117,7 +117,7 @@ impl PyClassInfo {
                 setters.push(MemberInfo::from_field(field, MemberKind::Setter)?)
             }
         }
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         Ok(Self {
             struct_type,
             pyclass_name,
