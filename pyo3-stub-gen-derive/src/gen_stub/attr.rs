@@ -19,35 +19,43 @@ pub enum IgnoreTarget {
     SpecifiedLits(Vec<LitStr>),
 }
 
-pub fn extract_documents(attrs: &[Attribute]) -> Vec<String> {
-    let mut docs = Vec::new();
+/// Build a static string expression, leaving doc macros for Rust to expand.
+pub fn extract_documents(attrs: &[Attribute]) -> TokenStream2 {
+    let mut parts = Vec::new();
+    let mut literal = String::new();
+    let mut first = true;
     for attr in attrs {
-        // `#[doc = "..."]` case
         if attr.path().is_ident("doc") {
-            if let Meta::NameValue(syn::MetaNameValue {
-                value:
-                    Expr::Lit(ExprLit {
-                        lit: Lit::Str(doc), ..
-                    }),
-                ..
-            }) = &attr.meta
-            {
-                let doc = doc.value();
-                // Remove head space
-                //
-                // ```
-                // /// This is special document!
-                //    ^ This space is trimmed here
-                // ```
-                docs.push(if !doc.is_empty() && doc.starts_with(' ') {
-                    doc[1..].to_string()
+            if let Meta::NameValue(syn::MetaNameValue { value, .. }) = &attr.meta {
+                if !first {
+                    literal.push('\n');
+                }
+                first = false;
+                if let Expr::Lit(ExprLit {
+                    lit: Lit::Str(doc), ..
+                }) = value
+                {
+                    // Match PyO3: strip one leading space from literal doc attributes
+                    // (including `///` comments), but preserve macro output verbatim.
+                    let doc = doc.value();
+                    literal.push_str(doc.strip_prefix(' ').unwrap_or(&doc));
                 } else {
-                    doc
-                });
+                    parts.push(quote! { #literal });
+                    literal.clear();
+                    // Keep the original spans so include_str! paths remain source-relative.
+                    parts.push(value.to_token_stream());
+                }
             }
         }
     }
-    docs
+    if parts.is_empty() {
+        quote! { #literal }
+    } else {
+        if !literal.is_empty() {
+            parts.push(quote! { #literal });
+        }
+        quote! { ::core::concat!(#(#parts),*) }
+    }
 }
 
 /// Extract `#[deprecated(...)]` attribute

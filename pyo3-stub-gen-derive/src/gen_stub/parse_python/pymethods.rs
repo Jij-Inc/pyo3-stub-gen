@@ -46,7 +46,7 @@ impl TryFrom<PythonMethodStub> for MethodInfo {
             name: func_name,
             parameters,
             r#return: return_type,
-            doc,
+            doc: quote::quote! { #doc },
             r#type: stub.method_type,
             is_async: stub.func_stub.is_async,
             deprecated,
