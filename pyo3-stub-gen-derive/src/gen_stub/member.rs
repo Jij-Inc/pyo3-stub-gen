@@ -28,7 +28,7 @@ impl MemberKind {
 
 #[derive(Debug, Clone)]
 pub struct MemberInfo {
-    doc: String,
+    doc: TokenStream2,
     name: String,
     r#type: TypeOrOverride,
     default: Option<Expr>,
@@ -78,7 +78,7 @@ impl MemberInfo {
         assert!(Self::is_getter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
-        let doc = extract_documents(attrs).join("\n");
+        let doc = extract_documents(attrs);
         let pyo3_attrs = parse_pyo3_attrs(attrs)?;
 
         // First, get the name from #[getter] or #[getter(name)]
@@ -128,7 +128,7 @@ impl MemberInfo {
         assert!(Self::is_setter(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
-        let doc = extract_documents(attrs).join("\n");
+        let doc = extract_documents(attrs);
         let pyo3_attrs = parse_pyo3_attrs(attrs)?;
 
         // First, get the name from #[setter] or #[setter(name)]
@@ -193,7 +193,7 @@ impl MemberInfo {
         assert!(Self::is_classattr(&item.attrs)?);
         let ImplItemFn { attrs, sig, .. } = &item;
         let default = parse_gen_stub_default(attrs)?;
-        let doc = extract_documents(attrs).join("\n");
+        let doc = extract_documents(attrs);
         let mut name = sig.ident.to_string();
         for attr in parse_pyo3_attrs(attrs)? {
             if let Attr::Name(_name) = attr {
@@ -218,7 +218,7 @@ impl MemberInfo {
             expr,
             ..
         } = item;
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         let mut name = ident.to_string();
         for attr in parse_pyo3_attrs(&attrs)? {
             if let Attr::Name(_name) = attr {
@@ -247,7 +247,7 @@ impl MemberInfo {
                 field_name = Some(name);
             }
         }
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         let default = parse_gen_stub_default(&attrs)?;
         let deprecated = crate::gen_stub::attr::extract_deprecated(&attrs);
         Ok(Self {

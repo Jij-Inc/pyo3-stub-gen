@@ -17,7 +17,7 @@ pub struct PyFunctionInfo {
     pub(crate) name: String,
     pub(crate) parameters: Parameters,
     pub(crate) r#return: Option<TypeOrOverride>,
-    pub(crate) doc: String,
+    pub(crate) doc: TokenStream2,
     pub(crate) module: Option<String>,
     pub(crate) is_async: bool,
     pub(crate) deprecated: Option<DeprecatedInfo>,
@@ -111,7 +111,7 @@ impl Parse for PyFunctionAttr {
 impl TryFrom<ItemFn> for PyFunctionInfo {
     type Error = Error;
     fn try_from(item: ItemFn) -> Result<Self> {
-        let doc = extract_documents(&item.attrs).join("\n");
+        let doc = extract_documents(&item.attrs);
         let deprecated = extract_deprecated(&item.attrs);
         let type_ignored = parse_gen_stub_type_ignore(&item.attrs)?;
         let args = parse_args(item.sig.inputs)?;

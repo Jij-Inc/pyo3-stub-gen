@@ -25,7 +25,7 @@ pub struct MethodInfo {
     pub(super) name: String,
     pub(super) parameters: Parameters,
     pub(super) r#return: Option<TypeOrOverride>,
-    pub(super) doc: String,
+    pub(super) doc: TokenStream2,
     pub(super) r#type: MethodType,
     pub(super) is_async: bool,
     pub(super) deprecated: Option<DeprecatedInfo>,
@@ -90,7 +90,7 @@ impl TryFrom<ImplItemFn> for MethodInfo {
     type Error = Error;
     fn try_from(item: ImplItemFn) -> Result<Self> {
         let ImplItemFn { attrs, sig, .. } = item;
-        let doc = extract_documents(&attrs).join("\n");
+        let doc = extract_documents(&attrs);
         let deprecated = extract_deprecated(&attrs);
         let type_ignored = parse_gen_stub_type_ignore(&attrs)?;
         let pyo3_attrs = parse_pyo3_attrs(&attrs)?;

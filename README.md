@@ -770,11 +770,34 @@ The generated `pyo3_stub_gen_ext.py` extension provides two RST directives:
 
 Rust doc comments (`/// ...`) are rendered as [MyST Markdown](https://myst-parser.readthedocs.io/) in the generated documentation. This supports cross-references (`` :class:`ClassName` ``), code blocks, admonitions, and other Sphinx/MyST features. The `myst-parser` extension is required for this.
 
+The `gen_stub_*` attributes also support `#[doc = include_str!("...")]` and
+`#[doc = concat!(...)]`, so external Markdown can be shared between PyO3 runtime
+docstrings, generated stubs, and the API reference:
+
+```rust
+# use pyo3::prelude::*;
+# use pyo3_stub_gen::derive::gen_stub_pyclass;
+#[gen_stub_pyclass]
+#[pyclass]
+#[doc = include_str!("../README.md")]
+struct Example;
+```
+
+Include paths are relative to the Rust source file. Doc comments, literal doc
+attributes, and doc macros are joined in declaration order with a newline
+between attributes. As in PyO3, one leading space is removed from literal doc
+attributes; macro output is preserved verbatim before the usual stub and API
+reference docstring normalization.
+
 ### Working Examples
 
 See the following directories for complete setups:
 - [examples/pure/docs/](./examples/pure/docs/) — single-module project
 - [examples/generate_init_py/docs/](./examples/generate_init_py/docs/) — mixed layout with `reexport_module_members!`
+
+For external Markdown and mixed doc attributes, see
+[examples/pure/src/doc_attributes.rs](./examples/pure/src/doc_attributes.rs) and
+its [shared Markdown source](./examples/pure/src/docs/external.md).
 
 ### Limitation: Mixed Layout with User-written `__init__.py`
 
