@@ -22,3 +22,10 @@ pure.StrIntMap
 pure.StructUnion
 pure.TripleUnion
 pure.UndocumentedCallback
+# TypeVars
+pure.BOUNDED
+pure.CONTRAVARIANT_T
+pure.COVARIANT_T
+pure.STR_OR_INT
+pure.T
+pure.U
