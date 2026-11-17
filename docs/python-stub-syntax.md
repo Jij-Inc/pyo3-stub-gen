@@ -384,7 +384,7 @@ The stub generator deduplicates imports across all functions/classes:
 
 Common imports are added automatically when needed:
 
-- `import typing` - When using `typing.Any`, `typing.Sequence`, etc.
+- `import typing` - When using `typing.Any`, etc.
 - `import collections.abc` - When using `collections.abc.Callable`, etc.
 - `import numpy` - When using NumPy types (with `numpy` feature)
 
@@ -441,8 +441,8 @@ The marker is expanded according to the context:
 ```rust
 RustType["Vec<i32>"]
 → Vec::<i32>::type_input()
-→ TypeInfo::with_generic("typing.Sequence", vec![TypeInfo::builtin("int")])
-→ typing.Sequence[int]
+→ TypeInfo::with_generic("collections.abc.Sequence", vec![TypeInfo::builtin("int")])
+→ collections.abc.Sequence[int]
 ```
 
 **For return types (output types):**
@@ -706,7 +706,7 @@ from typing import overload
 def convert(x: float) -> float: ...
 
 @overload
-def convert(x: typing.Sequence[float]) -> list[float]:
+def convert(x: collections.abc.Sequence[float]) -> list[float]:
     """Convert list of floats"""
 ```
 

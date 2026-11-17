@@ -458,7 +458,7 @@ mod test {
             from collections.abc import Callable
 
             class MyClass:
-                def process(self, func: Callable[[str], int]) -> typing.Optional[int]:
+                def process(self, func: Callable[[str], int]) -> int | None:
                     """Process a callback"""
             "#
         })?;
@@ -486,7 +486,7 @@ mod test {
                 },
             ],
             r#return: || ::pyo3_stub_gen::TypeInfo {
-                name: "typing.Optional[int]".to_string(),
+                name: "int | None".to_string(),
                 source_module: None,
                 import: ::std::collections::HashSet::from([
                     "typing".into(),
@@ -601,10 +601,10 @@ mod test {
                     *,
                     dtype: builtins.str,
                     ndim: builtins.int,
-                    shape: typing.Optional[builtins.str],
+                    shape: builtins.str | None,
                     jagged: builtins.bool = False,
-                    latex: typing.Optional[builtins.str] = None,
-                    description: typing.Optional[builtins.str] = None,
+                    latex: builtins.str | None = None,
+                    description: builtins.str | None = None,
                 ) -> pyo3_stub_gen.RustType["Placeholder"]:
                     """
                     Configure placeholder with keyword-only parameters.
@@ -674,7 +674,7 @@ mod test {
                             name: "shape",
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
-                                name: "typing.Optional[builtins.str]".to_string(),
+                                name: "builtins.str | None".to_string(),
                                 source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
@@ -710,7 +710,7 @@ mod test {
                             name: "latex",
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
-                                name: "typing.Optional[builtins.str]".to_string(),
+                                name: "builtins.str | None".to_string(),
                                 source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),
@@ -732,7 +732,7 @@ mod test {
                             name: "description",
                             kind: ::pyo3_stub_gen::type_info::ParameterKind::KeywordOnly,
                             type_info: || ::pyo3_stub_gen::TypeInfo {
-                                name: "typing.Optional[builtins.str]".to_string(),
+                                name: "builtins.str | None".to_string(),
                                 source_module: None,
                                 import: ::std::collections::HashSet::from([
                                     "builtins".into(),

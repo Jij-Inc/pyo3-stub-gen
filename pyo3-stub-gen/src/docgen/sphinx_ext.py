@@ -563,7 +563,7 @@ def _build_callable_signatures(signatures, name, module_name, fullname, env):
 def _parse_and_link_type_cached(type_str):
     """Cached version of _parse_and_link_type
 
-    Many types repeat across signatures (int, str, Optional[...])
+    Many types repeat across signatures (int, str, list[...])
     Cache avoids re-parsing regex and building node trees.
 
     Note: Returns a node object which is mutable, but since we don't
