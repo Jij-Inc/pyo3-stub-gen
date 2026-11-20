@@ -1488,8 +1488,34 @@
           "name": "Number",
           "doc": "",
           "bases": [],
-          "methods": [],
+          "methods": [
+            {
+              "name": "python_type_name",
+              "doc": "Name of the Python type corresponding to the number.",
+              "signatures": [
+                {
+                  "parameters": [],
+                  "return_type": {
+                    "display": "str",
+                    "link_target": null,
+                    "children": []
+                  }
+                }
+              ],
+              "is_async": false,
+              "deprecated": null
+            }
+          ],
           "attributes": [
+            {
+              "name": "BITS",
+              "doc": "Number of bits used to represent a number.",
+              "type_": {
+                "display": "int",
+                "link_target": null,
+                "children": []
+              }
+            },
             {
               "name": "FLOAT",
               "doc": "",
