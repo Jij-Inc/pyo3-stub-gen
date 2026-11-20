@@ -401,6 +401,12 @@ impl StubInfoBuilder {
             .insert(info.name, VariableDef::from(info));
     }
 
+    fn add_type_var(&mut self, info: &PyTypeVarInfo) {
+        self.get_module(Some(info.module))
+            .type_vars
+            .insert(info.name, TypeVarDef::from(info));
+    }
+
     fn add_type_alias(&mut self, info: &TypeAliasInfo) {
         self.get_module(Some(info.module))
             .type_aliases
@@ -648,6 +654,9 @@ impl StubInfoBuilder {
         }
         for info in inventory::iter::<PyVariableInfo> {
             self.add_variable(info);
+        }
+        for info in inventory::iter::<PyTypeVarInfo> {
+            self.add_type_var(info);
         }
         for info in inventory::iter::<TypeAliasInfo> {
             self.add_type_alias(info);
