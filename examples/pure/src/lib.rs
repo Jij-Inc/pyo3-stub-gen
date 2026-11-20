@@ -414,6 +414,13 @@ enum Shape2 {
 #[gen_stub_pymethods]
 #[pymethods]
 impl Number {
+    /// Number of bits used to represent a number.
+    #[classattr]
+    #[pyo3(name = "BITS")]
+    fn bits() -> usize {
+        64
+    }
+
     #[getter]
     /// Whether the number is a float.
     fn is_float(&self) -> bool {
@@ -424,6 +431,14 @@ impl Number {
     /// Whether the number is an integer.
     fn is_integer(&self) -> bool {
         matches!(self, Self::Integer)
+    }
+
+    /// Name of the Python type corresponding to the number.
+    fn python_type_name(&self) -> &'static str {
+        match self {
+            Self::Float => "float",
+            Self::Integer => "int",
+        }
     }
 }
 

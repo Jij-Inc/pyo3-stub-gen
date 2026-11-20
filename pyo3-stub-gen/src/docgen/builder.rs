@@ -9,8 +9,9 @@ use crate::docgen::{
     types::TypeRenderer,
     util::{is_hidden_module, prefix_stripper},
 };
-use crate::generate::StubInfo;
+use crate::generate::{MemberDef, MethodDef, StubInfo};
 use crate::Result;
+use indexmap::IndexMap;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
@@ -327,50 +328,20 @@ impl<'a> DocPackageBuilder<'a> {
             .map(|base| type_renderer.render_type(base))
             .collect();
 
-        let mut methods = Vec::new();
-        for (method_name, method_overloads) in &class.methods {
-            let signatures: Vec<DocSignature> = method_overloads
-                .iter()
-                .map(|method| self.build_signature_from_method(module, method))
-                .collect::<Result<_>>()?;
-
-            let deprecated = method_overloads.first().and_then(|d| {
-                d.deprecated.as_ref().map(|dep| DeprecatedInfo {
-                    since: dep.since.map(|s| s.to_string()),
-                    note: dep.note.map(|s| s.to_string()),
-                })
-            });
-
-            methods.push(DocFunction {
-                name: method_name.to_string(),
-                doc: method_overloads
-                    .first()
-                    .map(|m| m.doc.to_string())
-                    .unwrap_or_default(),
-                signatures,
-                is_async: method_overloads
-                    .first()
-                    .map(|m| m.is_async)
-                    .unwrap_or(false),
-                deprecated,
-            });
-        }
+        let methods: Vec<DocFunction> = class
+            .methods
+            .iter()
+            .map(|(method_name, method_overloads)| {
+                let overloads: Vec<_> = method_overloads.iter().collect();
+                self.build_method(module, method_name, &overloads)
+            })
+            .collect::<Result<_>>()?;
 
         // Convert plain #[pyo3(get, set)] field attributes
         let mut attributes: Vec<DocAttribute> = class
             .attrs
             .iter()
-            .map(|attr| DocAttribute {
-                name: attr.name.to_string(),
-                doc: attr.doc.to_string(),
-                type_: Some(type_renderer.render_type(&attr.r#type)),
-                is_property: false,
-                is_readonly: false,
-                deprecated: attr.deprecated.as_ref().map(|dep| DeprecatedInfo {
-                    since: dep.since.map(|s| s.to_string()),
-                    note: dep.note.map(|s| s.to_string()),
-                }),
-            })
+            .map(|attr| Self::build_attribute(&type_renderer, attr))
             .collect();
 
         // Convert #[getter]/#[setter] method properties
@@ -429,6 +400,14 @@ impl<'a> DocPackageBuilder<'a> {
             })
             .collect();
 
+        // Convert #[classattr] members, which are class attributes but not variants
+        attributes.extend(
+            enum_def
+                .attrs
+                .iter()
+                .map(|attr| Self::build_attribute(&type_renderer, attr)),
+        );
+
         // Collect setter names for determining readonly status
         let setter_names: std::collections::HashSet<&str> =
             enum_def.setters.iter().map(|s| s.name).collect();
@@ -448,14 +427,69 @@ impl<'a> DocPackageBuilder<'a> {
             });
         }
 
+        // EnumDef keeps overloads in a flat list, so group them by method name
+        let mut overloads_by_name: IndexMap<&str, Vec<&MethodDef>> = IndexMap::new();
+        for method in &enum_def.methods {
+            overloads_by_name
+                .entry(method.name)
+                .or_default()
+                .push(method);
+        }
+        let methods: Vec<DocFunction> = overloads_by_name
+            .iter()
+            .map(|(method_name, overloads)| self.build_method(module, method_name, overloads))
+            .collect::<Result<_>>()?;
+
         Ok(DocItem::Class(DocClass {
             name: enum_def.name.to_string(),
             doc: enum_def.doc.to_string(),
             bases: Vec::new(), // Enums don't have bases in our structure
-            methods: Vec::new(),
+            methods,
             attributes,
             deprecated: None,
         }))
+    }
+
+    /// Build a method of a class or an enum from all of its overloads
+    fn build_method(
+        &self,
+        module: &str,
+        name: &str,
+        overloads: &[&MethodDef],
+    ) -> Result<DocFunction> {
+        let signatures: Vec<DocSignature> = overloads
+            .iter()
+            .map(|method| self.build_signature_from_method(module, method))
+            .collect::<Result<_>>()?;
+        let first = overloads.first();
+
+        Ok(DocFunction {
+            name: name.to_string(),
+            doc: first.map(|m| m.doc.to_string()).unwrap_or_default(),
+            signatures,
+            is_async: first.map(|m| m.is_async).unwrap_or(false),
+            deprecated: first.and_then(|m| {
+                m.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                    since: dep.since.map(|s| s.to_string()),
+                    note: dep.note.map(|s| s.to_string()),
+                })
+            }),
+        })
+    }
+
+    /// Build a non-property attribute of a class or an enum
+    fn build_attribute(type_renderer: &TypeRenderer<'_>, attr: &MemberDef) -> DocAttribute {
+        DocAttribute {
+            name: attr.name.to_string(),
+            doc: attr.doc.to_string(),
+            type_: Some(type_renderer.render_type(&attr.r#type)),
+            is_property: false,
+            is_readonly: false,
+            deprecated: attr.deprecated.as_ref().map(|dep| DeprecatedInfo {
+                since: dep.since.map(|s| s.to_string()),
+                note: dep.note.map(|s| s.to_string()),
+            }),
+        }
     }
 
     fn build_variable(&self, module: &str, var: &crate::generate::VariableDef) -> Result<DocItem> {
