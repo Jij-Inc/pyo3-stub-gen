@@ -207,7 +207,9 @@ macro_rules! define_stub_info_gatherer {
     ($function_name:ident) => {
         /// Auto-generated function to gather information to generate stub files
         pub fn $function_name() -> $crate::Result<$crate::StubInfo> {
-            let manifest_dir: &::std::path::Path = env!("CARGO_MANIFEST_DIR").as_ref();
+            let manifest_dir: ::std::path::PathBuf = std::env::var("CARGO_MANIFEST_DIR")
+                .unwrap_or(env!("CARGO_MANIFEST_DIR").to_string())
+                .into();
             $crate::StubInfo::from_pyproject_toml(manifest_dir.join("pyproject.toml"))
         }
     };
