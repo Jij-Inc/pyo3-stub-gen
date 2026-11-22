@@ -381,7 +381,8 @@ impl fmt::Display for ClassDef {
                     "{}",
                     SetterDisplay {
                         member: setter,
-                        target_module: self.module.unwrap_or(self.name)
+                        target_module: self.module.unwrap_or(self.name),
+                        has_getter: getter.is_some(),
                     }
                 )?;
             }
@@ -472,7 +473,8 @@ impl ClassDef {
                     "{}",
                     SetterDisplay {
                         member: setter,
-                        target_module
+                        target_module,
+                        has_getter: getter.is_some(),
                     }
                 )?;
             }

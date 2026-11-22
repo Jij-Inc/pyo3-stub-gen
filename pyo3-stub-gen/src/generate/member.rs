@@ -106,6 +106,8 @@ pub struct GetterDisplay<'a> {
 pub struct SetterDisplay<'a> {
     pub member: &'a MemberDef,
     pub target_module: &'a str,
+    /// Whether a getter with the same name is emitted before this setter.
+    pub has_getter: bool,
 }
 
 impl fmt::Display for GetterDisplay<'_> {
@@ -147,6 +149,15 @@ impl fmt::Display for SetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         let qualified_type = self.member.r#type.qualified_for_module(self.target_module);
+        // `@x.setter` needs an existing property `x`, so a setter-only member gets a dummy getter.
+        if !self.has_getter {
+            writeln!(f, "{indent}@property")?;
+            writeln!(
+                f,
+                "{indent}def {}(self) -> {}: ...",
+                self.member.name, qualified_type
+            )?;
+        }
         // Write setter decorator first, then deprecated decorator
         writeln!(f, "{indent}@{}.setter", self.member.name)?;
         if let Some(deprecated) = &self.member.deprecated {
@@ -176,5 +187,37 @@ impl fmt::Display for SetterDisplay<'_> {
         } else {
             writeln!(f, " ...")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn setter_only_emits_dummy_getter() {
+        let member = MemberDef {
+            name: "x",
+            r#type: TypeInfo::builtin("int"),
+            doc: "",
+            default: None,
+            deprecated: None,
+        };
+        let out = |has_getter| {
+            SetterDisplay {
+                member: &member,
+                target_module: "m",
+                has_getter,
+            }
+            .to_string()
+        };
+        assert_eq!(
+            out(false),
+            "    @property\n    def x(self) -> builtins.int: ...\n    @x.setter\n    def x(self, value: builtins.int) -> None: ...\n"
+        );
+        assert_eq!(
+            out(true),
+            "    @x.setter\n    def x(self, value: builtins.int) -> None: ...\n"
+        );
     }
 }
