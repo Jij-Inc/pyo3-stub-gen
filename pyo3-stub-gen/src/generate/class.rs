@@ -5,7 +5,7 @@ use crate::generate::variant_methods::get_variant_methods;
 use crate::{
     generate::{
         docstring, indent, GetterDisplay, Import, MemberDef, MethodDef, Parameter,
-        ParameterDefault, Parameters, SetterDisplay,
+        ParameterDefault, Parameters, SetterStubDisplay,
     },
     stub_type::ImportRef,
     type_info::*,
@@ -379,7 +379,7 @@ impl fmt::Display for ClassDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
                         target_module: self.module.unwrap_or(self.name),
                         has_getter: getter.is_some(),
@@ -471,7 +471,7 @@ impl ClassDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
                         target_module,
                         has_getter: getter.is_some(),

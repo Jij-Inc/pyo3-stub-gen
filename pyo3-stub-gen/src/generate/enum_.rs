@@ -108,7 +108,7 @@ impl fmt::Display for EnumDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
                         target_module: self.module.unwrap_or(self.name),
                         has_getter: self.getters.iter().any(|g| g.name == setter.name),
@@ -163,7 +163,7 @@ impl EnumDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
                         target_module,
                         has_getter: self.getters.iter().any(|g| g.name == setter.name),

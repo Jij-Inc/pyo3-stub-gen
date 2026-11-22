@@ -106,8 +106,35 @@ pub struct GetterDisplay<'a> {
 pub struct SetterDisplay<'a> {
     pub member: &'a MemberDef,
     pub target_module: &'a str,
+}
+
+/// Internal wrapper around [`SetterDisplay`], kept private so the public struct's fields stay unchanged.
+pub(crate) struct SetterStubDisplay<'a> {
+    pub(crate) member: &'a MemberDef,
+    pub(crate) target_module: &'a str,
     /// Whether a getter with the same name is emitted before this setter.
-    pub has_getter: bool,
+    pub(crate) has_getter: bool,
+}
+
+impl fmt::Display for SetterStubDisplay<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let indent = indent();
+        // `@x.setter` needs an existing property `x`, so a setter-only member gets a dummy getter.
+        if !self.has_getter {
+            let qualified_type = self.member.r#type.qualified_for_module(self.target_module);
+            writeln!(f, "{indent}@property")?;
+            writeln!(
+                f,
+                "{indent}def {}(self) -> {}: ...",
+                self.member.name, qualified_type
+            )?;
+        }
+        SetterDisplay {
+            member: self.member,
+            target_module: self.target_module,
+        }
+        .fmt(f)
+    }
 }
 
 impl fmt::Display for GetterDisplay<'_> {
@@ -149,15 +176,6 @@ impl fmt::Display for SetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
         let qualified_type = self.member.r#type.qualified_for_module(self.target_module);
-        // `@x.setter` needs an existing property `x`, so a setter-only member gets a dummy getter.
-        if !self.has_getter {
-            writeln!(f, "{indent}@property")?;
-            writeln!(
-                f,
-                "{indent}def {}(self) -> {}: ...",
-                self.member.name, qualified_type
-            )?;
-        }
         // Write setter decorator first, then deprecated decorator
         writeln!(f, "{indent}@{}.setter", self.member.name)?;
         if let Some(deprecated) = &self.member.deprecated {
@@ -204,7 +222,7 @@ mod tests {
             deprecated: None,
         };
         let out = |has_getter| {
-            SetterDisplay {
+            SetterStubDisplay {
                 member: &member,
                 target_module: "m",
                 has_getter,
