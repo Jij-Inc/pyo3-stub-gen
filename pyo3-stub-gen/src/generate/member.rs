@@ -108,6 +108,35 @@ pub struct SetterDisplay<'a> {
     pub target_module: &'a str,
 }
 
+/// Internal wrapper around [`SetterDisplay`], kept private so the public struct's fields stay unchanged.
+pub(crate) struct SetterStubDisplay<'a> {
+    pub(crate) member: &'a MemberDef,
+    pub(crate) target_module: &'a str,
+    /// Whether a getter with the same name is emitted before this setter.
+    pub(crate) has_getter: bool,
+}
+
+impl fmt::Display for SetterStubDisplay<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let indent = indent();
+        // `@x.setter` needs an existing property `x`, so a setter-only member gets a dummy getter.
+        if !self.has_getter {
+            let qualified_type = self.member.r#type.qualified_for_module(self.target_module);
+            writeln!(f, "{indent}@property")?;
+            writeln!(
+                f,
+                "{indent}def {}(self) -> {}: ...",
+                self.member.name, qualified_type
+            )?;
+        }
+        SetterDisplay {
+            member: self.member,
+            target_module: self.target_module,
+        }
+        .fmt(f)
+    }
+}
+
 impl fmt::Display for GetterDisplay<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let indent = indent();
@@ -176,5 +205,37 @@ impl fmt::Display for SetterDisplay<'_> {
         } else {
             writeln!(f, " ...")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn setter_only_emits_dummy_getter() {
+        let member = MemberDef {
+            name: "x",
+            r#type: TypeInfo::builtin("int"),
+            doc: "",
+            default: None,
+            deprecated: None,
+        };
+        let out = |has_getter| {
+            SetterStubDisplay {
+                member: &member,
+                target_module: "m",
+                has_getter,
+            }
+            .to_string()
+        };
+        assert_eq!(
+            out(false),
+            "    @property\n    def x(self) -> builtins.int: ...\n    @x.setter\n    def x(self, value: builtins.int) -> None: ...\n"
+        );
+        assert_eq!(
+            out(true),
+            "    @x.setter\n    def x(self, value: builtins.int) -> None: ...\n"
+        );
     }
 }

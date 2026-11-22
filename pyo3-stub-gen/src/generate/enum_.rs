@@ -108,9 +108,10 @@ impl fmt::Display for EnumDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
-                        target_module: self.module.unwrap_or(self.name)
+                        target_module: self.module.unwrap_or(self.name),
+                        has_getter: self.getters.iter().any(|g| g.name == setter.name),
                     }
                 )?;
             }
@@ -162,9 +163,10 @@ impl EnumDef {
                 write!(
                     f,
                     "{}",
-                    SetterDisplay {
+                    SetterStubDisplay {
                         member: setter,
-                        target_module
+                        target_module,
+                        has_getter: self.getters.iter().any(|g| g.name == setter.name),
                     }
                 )?;
             }
@@ -174,5 +176,42 @@ impl EnumDef {
         }
         writeln!(f)?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::TypeInfo;
+
+    struct ForModule<'a>(&'a EnumDef);
+    impl fmt::Display for ForModule<'_> {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            self.0.fmt_for_module("E", f)
+        }
+    }
+
+    #[test]
+    fn setter_only_property_defines_getter_first() {
+        let def = EnumDef {
+            name: "E",
+            module: None,
+            doc: "",
+            variants: &[("A", "")],
+            methods: vec![],
+            attrs: vec![],
+            getters: vec![],
+            setters: vec![MemberDef {
+                name: "x",
+                r#type: TypeInfo::builtin("int"),
+                doc: "",
+                default: None,
+                deprecated: None,
+            }],
+        };
+        for out in [def.to_string(), ForModule(&def).to_string()] {
+            let getter = out.find("@property").expect(&out);
+            assert!(getter < out.find("@x.setter").unwrap(), "{out}");
+        }
     }
 }
