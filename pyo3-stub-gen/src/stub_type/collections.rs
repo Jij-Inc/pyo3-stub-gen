@@ -25,7 +25,7 @@ fn extract_type_identifier(type_name: &str) -> Option<&str> {
 /// Build type_refs HashMap from inner TypeInfo for compound types
 ///
 /// If the inner type is locally-defined and qualified, track it for context-aware rendering.
-fn build_type_refs_from_inner(inner: &TypeInfo) -> HashMap<String, TypeIdentifierRef> {
+pub(crate) fn build_type_refs_from_inner(inner: &TypeInfo) -> HashMap<String, TypeIdentifierRef> {
     let mut type_refs = HashMap::new();
 
     // If inner type is locally defined with a module, track it
