@@ -225,7 +225,7 @@
                 {
                   "name": "x",
                   "type_": {
-                    "display": "Optional[_core.A]",
+                    "display": "_core.A | None",
                     "link_target": null,
                     "children": [
                       {
@@ -237,6 +237,11 @@
                           "attribute": null
                         },
                         "children": []
+                      },
+                      {
+                        "display": "None",
+                        "link_target": null,
+                        "children": []
                       }
                     ]
                   },
@@ -244,7 +249,7 @@
                 }
               ],
               "return_type": {
-                "display": "Optional[_core.A]",
+                "display": "_core.A | None",
                 "link_target": null,
                 "children": [
                   {
@@ -255,6 +260,11 @@
                       "kind": "Class",
                       "attribute": null
                     },
+                    "children": []
+                  },
+                  {
+                    "display": "None",
+                    "link_target": null,
                     "children": []
                   }
                 ]

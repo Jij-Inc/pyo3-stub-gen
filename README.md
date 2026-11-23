@@ -466,7 +466,7 @@ submit! {
 ```
 
 The `RustType` marker automatically expands to the appropriate Python type:
-- `RustType["Vec<i32>"]` → `typing.Sequence[int]` (for arguments)
+- `RustType["Vec<i32>"]` → `collections.abc.Sequence[int]` (for arguments)
 - `RustType["i32"]` → `int` (for return values)
 
 This is particularly useful for:
@@ -564,9 +564,9 @@ __all__ = [
     "StructUnion",
 ]
 
-MaybeDecimal: TypeAlias = typing.Optional[DecimalHolder]
+MaybeDecimal: TypeAlias = DecimalHolder | None
 NumberOrStringAlias: TypeAlias = builtins.int | builtins.str
-SimpleAlias: TypeAlias = typing.Optional[builtins.int]
+SimpleAlias: TypeAlias = builtins.int | None
 StrIntMap: TypeAlias = builtins.dict[builtins.str, builtins.int]
 StructUnion: TypeAlias = ComparableStruct | HashableStruct
 ```
