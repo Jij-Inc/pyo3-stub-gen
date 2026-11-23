@@ -210,6 +210,11 @@ mod test {
                 #[pyo3(get)]
                 pub description: Option<String>,
                 pub custom_latex: Option<String>,
+
+                #[pyo3(get,set)]
+                pub r#type: String,
+                #[pyo3(get,set)]
+                pub r#pub: String,
             }
             "#,
         )?;
@@ -240,8 +245,37 @@ mod test {
                     default: None,
                     deprecated: None,
                 },
+                ::pyo3_stub_gen::type_info::MemberInfo {
+                    name: "type",
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
+                    default: None,
+                    deprecated: None,
+                },
+                ::pyo3_stub_gen::type_info::MemberInfo {
+                    name: "pub",
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_output,
+                    doc: "",
+                    default: None,
+                    deprecated: None,
+                },
             ],
-            setters: &[],
+            setters: &[
+                ::pyo3_stub_gen::type_info::MemberInfo {
+                    name: "type",
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
+                    doc: "",
+                    default: None,
+                    deprecated: None,
+                },
+                ::pyo3_stub_gen::type_info::MemberInfo {
+                    name: "pub",
+                    r#type: <String as ::pyo3_stub_gen::PyStubType>::type_input,
+                    doc: "",
+                    default: None,
+                    deprecated: None,
+                },
+            ],
             module: Some("my_module"),
             doc: "",
             bases: &[],
