@@ -307,6 +307,10 @@ macro_rules! module_variable {
 ///
 /// // Define a single type alias
 /// type_alias!("my_module", OptionalInt = Option<i32>);
+///
+/// // Define self-recursive type alias
+/// type_alias!("my_module", TreeItem = Tree | String);
+/// type_alias!("my_module", Tree = std::collections::HashMap<String, TreeItem>);
 /// ```
 ///
 /// # Runtime Registration
@@ -334,10 +338,7 @@ macro_rules! type_alias {
 
         impl $crate::PyStubType for $name {
             fn type_output() -> $crate::TypeInfo {
-                $(<$base as $crate::PyStubType>::type_output()) | *
-            }
-            fn type_input() -> $crate::TypeInfo {
-                $(<$base as $crate::PyStubType>::type_input()) | *
+                $crate::TypeInfo::locally_defined(stringify!($name), $module.into())
             }
         }
 
@@ -353,11 +354,21 @@ macro_rules! type_alias {
             }
         }
 
+        impl $crate::runtime::PyRuntimeType for $name {
+            fn runtime_type_object(
+                py: ::pyo3::Python<'_>,
+            ) -> ::pyo3::PyResult<::pyo3::Bound<'_, ::pyo3::PyAny>> {
+                <$name as $crate::runtime::PyTypeAlias>::create_type_object(py)
+            }
+        }
+
         $crate::inventory::submit! {
             $crate::type_info::TypeAliasInfo {
                 name: stringify!($name),
                 module: $module,
-                r#type: <$name as $crate::PyStubType>::type_output,
+                r#type: || {
+                    $(<$base as $crate::PyStubType>::type_output()) | *
+                },
                 doc: $doc,
             }
         }
