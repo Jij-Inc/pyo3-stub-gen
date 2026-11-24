@@ -810,6 +810,10 @@ class Number(enum.Enum):
     FLOAT = ...
     INTEGER = ...
 
+    BITS: builtins.int
+    r"""
+    Number of bits used to represent a number.
+    """
     @property
     def is_float(self) -> builtins.bool:
         r"""
@@ -819,6 +823,10 @@ class Number(enum.Enum):
     def is_integer(self) -> builtins.bool:
         r"""
         Whether the number is an integer.
+        """
+    def python_type_name(self) -> builtins.str:
+        r"""
+        Name of the Python type corresponding to the number.
         """
 
 @typing.final

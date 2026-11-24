@@ -7,6 +7,7 @@ from pure import (
     echo_path,
     ahash_dict,
     async_num,
+    Number,
     NumberComplex,
     Shape1,
     Shape2,
@@ -72,6 +73,12 @@ def test_read_dict():
     message = str(e.value).lower()
     assert "int" in message
     assert "dict" in message
+
+
+def test_number_class_attribute_and_method():
+    assert Number.BITS == 64
+    assert Number.FLOAT.python_type_name() == "float"
+    assert Number.INTEGER.python_type_name() == "int"
 
 
 def test_number_complex():
